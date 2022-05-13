@@ -1,0 +1,196 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{57445610-0892-47C3-BE16-453172104123}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Alexandria</RootNamespace>
+    <AssemblyName>Alexandria</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>D:\SteamLibrary\steamapps\common\Enter the Gungeon\EtG_Data\Managed\ModBackup\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp.Base.mm">
+      <HintPath>D:\SteamLibrary\steamapps\common\Enter the Gungeon\EtG_Data\Managed\Assembly-CSharp.Base.mm.dll</HintPath>
+    </Reference>
+    <Reference Include="Ionic.Zip, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Dependancies\Ionic.Zip.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour">
+      <HintPath>..\..\..\Desktop\MonoMod\MonoMod.RuntimeDetour.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.Utils">
+      <HintPath>..\..\..\Desktop\MonoMod\MonoMod.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="PlayMaker">
+      <HintPath>..\..\..\Dependancies\PlayMaker.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\Dependancies\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>D:\SteamLibrary\steamapps\common\Enter the Gungeon\EtG_Data\Managed\ModBackup\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule.Base.mm">
+      <HintPath>D:\SteamLibrary\steamapps\common\Enter the Gungeon\EtG_Data\Managed\UnityEngine.CoreModule.Base.mm.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Dependancies\UnityEngine.ImageConversionModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.JSONSerializeModule">
+      <HintPath>..\..\..\Dependancies\UnityEngine.JSONSerializeModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ChamberGunCompatibility\ChamberGunCompatibility.cs" />
+    <Compile Include="EnemyAPI\BossBuilder.cs" />
+    <Compile Include="EnemyAPI\EnemyBuilder.cs" />
+    <Compile Include="EnemyAPI\EnemyTools.cs" />
+    <Compile Include="EnemyAPI\Hooks.cs" />
+    <Compile Include="EnemyAPI\OverrideBehavior.cs" />
+    <Compile Include="GungeonAPI\DungeonHandler.cs" />
+    <Compile Include="GungeonAPI\DungeonHooks.cs" />
+    <Compile Include="GungeonAPI\FoolproofedChallengeShrineController.cs" />
+    <Compile Include="GungeonAPI\OfficialFlows.cs" />
+    <Compile Include="GungeonAPI\RoomFactory.cs" />
+    <Compile Include="GungeonAPI\SampleFlow.cs" />
+    <Compile Include="GungeonAPI\ShrineTools.cs" />
+    <Compile Include="GungeonAPI\StaticReferences.cs" />
+    <Compile Include="ItemAPI\AdvancedClasses\AdvancedGunBehaviour.cs" />
+    <Compile Include="ItemAPI\AdvancedClasses\AdvancedPlayerOrbital.cs" />
+    <Compile Include="ItemAPI\ApplyOffset.cs" />
+    <Compile Include="ItemAPI\CompanionBuilder.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\AssetBundleBuilder.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\AssetBundleTools.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\BinaryWriterExtensions.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\CommonString.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\CRC.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\EditorAssetBundle.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\EditorBuildTarget.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\EditorClassIDType.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\EditorComponent.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\EditorExtension.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\EditorGameObject.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\EditorNamedObject.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\EditorObject.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\EditorPPtr.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\EditorTextAsset.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\EditorTransform.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\EndianBinaryWriter.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\ICoder.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\IMatchFinder.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\LZ4Codec.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\LZ4CodecPartial.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\LZ4\ILZ4Service.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\LZ4\LZ4Codec.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\LZ4\LZ4Codec.Safe.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\LZ4\LZ4Codec.Safe32.Dirty.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\LZ4\LZ4Codec.Safe32HC.Dirty.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\LZ4\LZ4Codec.Safe64.Dirty.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\LZ4\LZ4Codec.Safe64HC.Dirty.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\LzBinTree.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\LzInWindow.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\LzmaBase.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\LzmaDecoder.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\LzmaEncoder.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\LzOutWindow.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\PPtr.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\PrefabBuilder.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\RangeCoder.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\RangeCoderBit.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\RangeCoderBitTree.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\Safe32LZ4Service.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\Safe64LZ4Service.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\SerializedType.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\SerializedTypeStorage.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\SevenZipHelper.cs" />
+    <Compile Include="ItemAPI\PrefabAPI\TypeTreeNode.cs" />
+    <Compile Include="ItemAPI\ProjectileToolboxes\ProjSpawnHelper.cs" />
+    <Compile Include="ItemAPI\SpriteTools\CustomClipAmmoTypeToolbox.cs" />
+    <Compile Include="ItemAPI\SynergyHelpers\AdvancedFireOnReloadSynergyProcessor.cs" />
+    <Compile Include="ItemAPI\SynergyHelpers\CustomSynergies.cs" />
+    <Compile Include="ItemAPI\SynergyHelpers\DualWieldSynergyProcessor.cs" />
+    <Compile Include="ItemAPI\FakePrefab.cs" />
+    <Compile Include="ItemAPI\FakePrefabHooks.cs" />
+    <Compile Include="ItemAPI\GunTools.cs" />
+    <Compile Include="ItemAPI\ItemBuilder.cs" />
+    <Compile Include="ItemAPI\SpriteTools\ResourceExtractor.cs" />
+    <Compile Include="ItemAPI\SpriteTools\SpriteBuilder.cs" />
+    <Compile Include="ItemAPI\ThrowableAPI.cs" />
+    <Compile Include="ItemAPI\TranslationTools\CustomStringDBTable.cs" />
+    <Compile Include="ItemAPI\TranslationTools\StringTableType.cs" />
+    <Compile Include="ItemAPI\TranslationTools\Translation.cs" />
+    <Compile Include="ItemAPI\TranslationTools\TranslationManager.cs" />
+    <Compile Include="Miscellaneous Helpers\AudioUtility.cs" />
+    <Compile Include="Miscellaneous Helpers\EnumUtility.cs" />
+    <Compile Include="Miscellaneous Helpers\DebugUtility.cs" />
+    <Compile Include="Miscellaneous Helpers\LootUtility.cs" />
+    <Compile Include="Miscellaneous Helpers\MathAndLogicHelper.cs" />
+    <Compile Include="Module.cs" />
+    <Compile Include="NPCAPI\CustomShopController.cs" />
+    <Compile Include="NPCAPI\CustomShopItemController.cs" />
+    <Compile Include="NPCAPI\NPCHooks.cs" />
+    <Compile Include="NPCAPI\NPCTools.cs" />
+    <Compile Include="NPCAPI\ShopAPI.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SaveAPI\AdvancedGameStats.cs" />
+    <Compile Include="SaveAPI\AdvancedGameStatsManager.cs" />
+    <Compile Include="SaveAPI\AdvancedMidGameSaveData.cs" />
+    <Compile Include="SaveAPI\BreachShopTool.cs" />
+    <Compile Include="SaveAPI\CustomDungeonPrerequisite.cs" />
+    <Compile Include="SaveAPI\CustomHuntQuest.cs" />
+    <Compile Include="SaveAPI\CustomHuntQuests.cs" />
+    <Compile Include="SaveAPI\Enums\Comparers\CustomDungeonFlagsComparer.cs" />
+    <Compile Include="SaveAPI\Enums\Comparers\CustomTrackedMaximumsComparer.cs" />
+    <Compile Include="SaveAPI\Enums\Comparers\CustomTrackedStatsComparer.cs" />
+    <Compile Include="SaveAPI\Enums\CustomCharacterSpecificGungeonFlags.cs" />
+    <Compile Include="SaveAPI\Enums\CustomDungeonFlags.cs" />
+    <Compile Include="SaveAPI\Enums\CustomTrackedMaximums.cs" />
+    <Compile Include="SaveAPI\Enums\CustomTrackedStats.cs" />
+    <Compile Include="SaveAPI\JammedEnemyState.cs" />
+    <Compile Include="SaveAPI\SaveAPIManager.cs" />
+    <Compile Include="SaveAPI\SaveTools.cs" />
+    <Compile Include="SaveAPI\SpecialAIActor.cs" />
+    <Compile Include="SaveAPI\SpecialPickupObject.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>COPY "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\Mods\AlexandriaApi"
+COPY "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\EtG_Data\Managed"</PostBuildEvent>
+  </PropertyGroup>
+</Project>

@@ -9,7 +9,6 @@ using MonoMod.RuntimeDetour;
 using Brave.BulletScript;
 using DirectionType = DirectionalAnimation.DirectionType;
 using FlipType = DirectionalAnimation.FlipType;
-using ItemAPI;
 
 namespace EnemyAPI
 {

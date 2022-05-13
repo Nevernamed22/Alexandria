@@ -94,6 +94,7 @@
     <Compile Include="ItemAPI\AdvancedClasses\AdvancedGunBehaviour.cs" />
     <Compile Include="ItemAPI\AdvancedClasses\AdvancedPlayerOrbital.cs" />
     <Compile Include="ItemAPI\ApplyOffset.cs" />
+    <Compile Include="ItemAPI\BeamAPI.cs" />
     <Compile Include="ItemAPI\CompanionBuilder.cs" />
     <Compile Include="ItemAPI\PrefabAPI\AssetBundleBuilder.cs" />
     <Compile Include="ItemAPI\PrefabAPI\AssetBundleTools.cs" />
@@ -152,6 +153,7 @@
     <Compile Include="ItemAPI\SpriteTools\ResourceExtractor.cs" />
     <Compile Include="ItemAPI\SpriteTools\SpriteBuilder.cs" />
     <Compile Include="ItemAPI\ThrowableAPI.cs" />
+    <Compile Include="ItemAPI\TrailAPI.cs" />
     <Compile Include="ItemAPI\TranslationTools\CustomStringDBTable.cs" />
     <Compile Include="ItemAPI\TranslationTools\StringTableType.cs" />
     <Compile Include="ItemAPI\TranslationTools\Translation.cs" />

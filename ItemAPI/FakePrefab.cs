@@ -110,5 +110,19 @@ namespace ItemAPI
 
             return new_o;
         }
+        public static GameObject InstantiateAndFakeprefab( GameObject target)
+        {
+            GameObject instantiatedTarget = UnityEngine.Object.Instantiate<GameObject>(target);
+            instantiatedTarget.SetActive(false);
+            FakePrefab.MarkAsFakePrefab(instantiatedTarget);
+            UnityEngine.Object.DontDestroyOnLoad(instantiatedTarget);
+            return instantiatedTarget;
+        }
+        public static void MakeFakePrefab( GameObject target)
+        {
+            target.SetActive(false);
+            FakePrefab.MarkAsFakePrefab(target);
+            UnityEngine.Object.DontDestroyOnLoad(target);
+        }
     }
 }

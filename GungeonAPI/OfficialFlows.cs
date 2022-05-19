@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Misc;
+using Alexandria.Helpers.Misc;
 using Dungeonator;
 using ItemAPI;
 

@@ -7,7 +7,7 @@ using UnityEngine;
 using Dungeonator;
 using Random = UnityEngine.Random;
 using ItemAPI;
-using Misc;
+using Alexandria.Helpers.Misc;
 
 namespace GungeonAPI
 {

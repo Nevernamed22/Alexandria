@@ -4,53 +4,12 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Misc
+namespace Alexandria.Helpers.Misc
 {
     public static class LootUtility
     {
 
-        public static Dictionary<string, List<int>> tags = new Dictionary<string, List<int>>(); 
 
-        public static void SetTag(this PickupObject item, string tag)
-        {
-            if (!tags.ContainsKey(tag))
-            {
-                tags.Add(tag, new List<int>());
-            }
-            tags[tag].Add(item.PickupObjectId);
-        }
-
-
-        public static bool HasTag(this PickupObject item, string tag)
-        {
-            if (!tags.ContainsKey(tag))
-            {
-                return false;
-            }
-            return (tags[tag].Contains(item.PickupObjectId));
-            
-        }
-
-        public static List<int> GetAllItemsIdsWithTag(string tag)
-        {
-            if (!tags.ContainsKey(tag))
-            {
-                return new List<int>();
-            }
-            return tags[tag];
-        }
-
-        public static List<PickupObject> GetAllItemsWithTag(string tag)
-        {
-            if (!tags.ContainsKey(tag))
-            {
-                return new List<PickupObject>();
-            }
-            List<PickupObject> pickupObjects = new List<PickupObject>();
-            foreach (var id in tags[tag]) { if (PickupObjectDatabase.GetById(id) != null) pickupObjects.Add(PickupObjectDatabase.GetById(id)); }
-
-            return pickupObjects;
-        }
 
 
         /// <summary>

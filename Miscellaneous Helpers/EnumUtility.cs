@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Alexandria.Miscellaneous_Helpers
+namespace Alexandria.Helpers.Misc
 {
     class EnumUtility
     {

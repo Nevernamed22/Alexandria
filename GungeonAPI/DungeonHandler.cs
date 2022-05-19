@@ -12,7 +12,7 @@ using RoomCategory = PrototypeDungeonRoom.RoomCategory;
 using RoomNormalSubCategory = PrototypeDungeonRoom.RoomNormalSubCategory;
 using RoomBossSubCategory = PrototypeDungeonRoom.RoomBossSubCategory;
 using RoomSpecialSubCategory = PrototypeDungeonRoom.RoomSpecialSubCategory;
-using Misc;
+using Alexandria.Helpers.Misc;
 
 namespace GungeonAPI
 {

@@ -158,6 +158,7 @@
     <Compile Include="ItemAPI\TranslationTools\Translation.cs" />
     <Compile Include="ItemAPI\TranslationTools\TranslationManager.cs" />
     <Compile Include="Miscellaneous Helpers\AudioUtility.cs" />
+    <Compile Include="Miscellaneous Helpers\AlexandriaTags.cs" />
     <Compile Include="Miscellaneous Helpers\DebuffUtility.cs" />
     <Compile Include="Miscellaneous Helpers\EnumUtility.cs" />
     <Compile Include="Miscellaneous Helpers\DebugUtility.cs" />

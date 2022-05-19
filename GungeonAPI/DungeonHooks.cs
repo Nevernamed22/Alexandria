@@ -7,7 +7,7 @@ using UnityEngine;
 using Dungeonator;
 using MonoMod.RuntimeDetour;
 using ItemAPI;
-using Misc;
+using Alexandria.Helpers.Misc;
 
 namespace GungeonAPI
 {

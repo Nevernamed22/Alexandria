@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 
-namespace Misc
+namespace Alexandria.Helpers.Misc
 {
     public static class DebugUtility
     {

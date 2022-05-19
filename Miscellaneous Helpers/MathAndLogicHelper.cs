@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Alexandria.Misc
+namespace Alexandria.Helpers.Misc
 {
    public static class MathsAndLogicHelper
     {

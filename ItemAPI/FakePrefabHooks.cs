@@ -8,7 +8,7 @@ using UnityEngine;
 using MonoMod.RuntimeDetour;
 using Object = UnityEngine.Object;
 
-namespace ItemAPI
+namespace Alexandria.ItemAPI
 {
     public static class FakePrefabHooks
     {

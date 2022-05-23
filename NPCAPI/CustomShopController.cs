@@ -5,7 +5,7 @@ using HutongGames.PlayMaker;
 using UnityEngine;
 
 
-namespace NpcApi
+namespace Alexandria.NPCAPI
 {
 	public class CustomShopController : BaseShopController
 	{

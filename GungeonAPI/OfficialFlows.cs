@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Alexandria.Helpers.Misc;
+using Alexandria.Misc;
 using Dungeonator;
-using ItemAPI;
+using Alexandria.ItemAPI;
 
-namespace GungeonAPI
+namespace Alexandria.DungeonAPI
 {
     class OfficialFlows
     {

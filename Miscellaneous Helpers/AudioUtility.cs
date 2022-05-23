@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Alexandria.Helpers.Audio
+namespace Alexandria.Misc
 {
     public static class AudioUtility
     {

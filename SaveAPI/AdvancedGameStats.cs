@@ -5,7 +5,7 @@ using System.Text;
 using FullSerializer;
 using UnityEngine;
 
-namespace SaveAPI
+namespace Alexandria.SaveAPI
 {
     /// <summary>
     /// Class for storing game stats like tracked stats, tracked maximums and character-specific flags

@@ -6,7 +6,7 @@ using Gungeon;
 using MonoMod.RuntimeDetour;
 using UnityEngine;
 
-namespace ItemAPI
+namespace Alexandria.ItemAPI
 {
     // Token: 0x02000016 RID: 22
     public static class CompanionBuilder

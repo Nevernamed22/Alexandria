@@ -6,9 +6,9 @@ using UnityEngine;
 using Dungeonator;
 using System.Reflection;
 using MonoMod.RuntimeDetour;
-using ItemAPI;
+using Alexandria.ItemAPI;
 
-namespace GungeonAPI
+namespace Alexandria.DungeonAPI
 {
     public static class StaticReferences
     {
@@ -187,7 +187,7 @@ namespace GungeonAPI
                     var table = DungeonDatabase.GetOrLoadByName($"base_{entry.Key}").PatternSettings.flows[0].fallbackRoomTable;
                     if (entry.Key.Contains("resourcefulrat"))
                     {
-                        table = GungeonAPI.OfficialFlows.GetDungeonPrefab("base_resourcefulrat").PatternSettings.flows[0].AllNodes[18].overrideRoomTable; 
+                        table = DungeonAPI.OfficialFlows.GetDungeonPrefab("base_resourcefulrat").PatternSettings.flows[0].AllNodes[18].overrideRoomTable; 
                     }
                     RoomTables.Add(entry.Key, table);
                 }

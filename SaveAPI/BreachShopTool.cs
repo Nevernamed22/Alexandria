@@ -6,7 +6,7 @@ using MonoMod.RuntimeDetour;
 using UnityEngine;
 using System.Reflection;
 
-namespace SaveAPI
+namespace Alexandria.SaveAPI
 {
     /// <summary>
     /// Class that handles custom item blueprints in breach shops and allows adding custom items to breach shops.

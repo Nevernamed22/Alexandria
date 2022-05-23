@@ -1,13 +1,14 @@
-﻿using Alexandria.Helpers;
-using EnemyAPI;
-using GungeonAPI;
-using ItemAPI;
-using SaveAPI;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Alexandria.SaveAPI;
+using Alexandria.NPCAPI;
+using Alexandria.EnemyAPI;
+using Alexandria.DungeonAPI;
+using Alexandria.ItemAPI;
 
 namespace Alexandria
 {
@@ -30,7 +31,7 @@ namespace Alexandria
                 EnemyTools.Init();
                 EnemyBuilder.Init();
                 BossBuilder.Init();
-                NpcApi.NPCHooks.Init();
+                NPCAPI.NPCHooks.Init();
                 EnemyAPI.Hooks.Init();
 
                 // ETGModConsole.Log($"pre Trying to create thingo bot.alexandria - TEST", true);

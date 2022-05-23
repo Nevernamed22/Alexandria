@@ -9,7 +9,7 @@ using UnityEngine;
 using Dungeonator;
 using MonoMod.RuntimeDetour;
 
-namespace GungeonAPI
+namespace Alexandria.DungeonAPI
 {
     //Utility methods
     public static class ShrineTools

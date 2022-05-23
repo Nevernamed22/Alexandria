@@ -6,10 +6,10 @@ using System.Reflection;
 using UnityEngine;
 using Dungeonator;
 using MonoMod.RuntimeDetour;
-using ItemAPI;
-using Alexandria.Helpers.Misc;
+using Alexandria.ItemAPI;
+using Alexandria.Misc;
 
-namespace GungeonAPI
+namespace Alexandria.DungeonAPI
 {
     public static class DungeonHooks
     {

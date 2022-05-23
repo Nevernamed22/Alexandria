@@ -8,7 +8,7 @@ using UnityEngine;
 using System.Reflection;
 
 
-namespace GungeonAPI
+namespace Alexandria.DungeonAPI
 {
 	public class FoolproofedChallengeShrineController : DungeonPlaceableBehaviour, IPlayerInteractable, IPlaceConfigurable
 	{

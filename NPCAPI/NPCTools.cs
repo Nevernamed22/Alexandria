@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 
-namespace NpcApi
+namespace Alexandria.NPCAPI
 {
     static class NpcTools
     {

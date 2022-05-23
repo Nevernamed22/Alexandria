@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 
-namespace Alexandria.Miscellaneous_Helpers
+namespace Alexandria.Misc
 {
     public static class DebuffUtility
     {

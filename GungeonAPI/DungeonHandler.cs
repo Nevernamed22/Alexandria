@@ -7,14 +7,14 @@ using UnityEngine;
 using Dungeonator;
 using Random = UnityEngine.Random;
 //using CustomShrineData = GungeonAPI.ShrineFactory.CustomShrineController;
-using RoomData = GungeonAPI.RoomFactory.RoomData;
+using RoomData = Alexandria.DungeonAPI.RoomFactory.RoomData;
 using RoomCategory = PrototypeDungeonRoom.RoomCategory;
 using RoomNormalSubCategory = PrototypeDungeonRoom.RoomNormalSubCategory;
 using RoomBossSubCategory = PrototypeDungeonRoom.RoomBossSubCategory;
 using RoomSpecialSubCategory = PrototypeDungeonRoom.RoomSpecialSubCategory;
-using Alexandria.Helpers.Misc;
+using Alexandria.Misc;
 
-namespace GungeonAPI
+namespace Alexandria.DungeonAPI
 {
 
     public static class DungeonHandler

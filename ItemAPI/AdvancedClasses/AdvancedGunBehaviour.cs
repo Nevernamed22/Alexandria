@@ -6,7 +6,7 @@ using System.Text;
 using UnityEngine;
 using System.Collections;
 
-namespace ItemAPI
+namespace Alexandria.ItemAPI
 {
     /// <summary>
     /// Advanced version of a GunBehaviour. Still has all methods of a GunBehaviour, but also has some new ones.

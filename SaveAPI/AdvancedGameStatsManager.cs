@@ -6,7 +6,7 @@ using FullSerializer;
 using UnityEngine;
 using System.Collections;
 
-namespace SaveAPI
+namespace Alexandria.SaveAPI
 {
     /// <summary>
     /// The class that stores all your custom information

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace EnemyAPI
+namespace Alexandria.EnemyAPI
 {
     public static class Hooks
     {

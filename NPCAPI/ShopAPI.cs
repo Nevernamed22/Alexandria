@@ -1,17 +1,16 @@
 ﻿using Dungeonator;
-using GungeonAPI;
+using Alexandria.DungeonAPI;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using ItemAPI;
+using Alexandria.ItemAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
-using ItemAPI;
 
-namespace NpcApi
+namespace Alexandria.NPCAPI
 {
     public static class ShopAPI
     {

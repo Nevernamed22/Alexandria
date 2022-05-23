@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace SaveAPI
+namespace Alexandria.SaveAPI
 {
 	[Serializable]
 	public class CustomHuntQuest : MonsterHuntQuest

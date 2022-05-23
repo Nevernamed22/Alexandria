@@ -7,9 +7,9 @@ using SGUI;
 using UnityEngine;
 using System.Reflection;
 using System.Diagnostics;
-using ItemAPI;
+using Alexandria.ItemAPI;
 
-namespace ItemAPI
+namespace Alexandria.ItemAPI
 {
     public static class ResourceExtractor
     {

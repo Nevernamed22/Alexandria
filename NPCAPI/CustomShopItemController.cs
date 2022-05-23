@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace NpcApi
+namespace Alexandria.NPCAPI
 {
 	public class CustomShopItemController : ShopItemController, IPlayerInteractable
 	{

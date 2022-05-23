@@ -1,7 +1,6 @@
-﻿using ItemAPI;
+﻿using Alexandria.ItemAPI;
 using Dungeonator;
 using Ionic.Zip;
-using ItemAPI;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +9,7 @@ using UnityEngine;
 using FloorType = Dungeonator.CellVisualData.CellFloorType;
 using Random = UnityEngine.Random;
 
-namespace GungeonAPI
+namespace Alexandria.DungeonAPI
 {
     public static class RoomFactory
     {

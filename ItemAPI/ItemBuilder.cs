@@ -8,10 +8,11 @@ using System.Reflection;
 using System.IO;
 using System.Collections;
 using MonoMod.RuntimeDetour;
-using ItemAPI;
+using Alexandria.ItemAPI;
+using Alexandria.Misc;
 using Gungeon;
 
-namespace ItemAPI
+namespace Alexandria.ItemAPI
 {
     public static class ItemBuilder
     {

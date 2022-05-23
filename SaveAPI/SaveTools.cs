@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 using UnityEngine;
 
-namespace SaveAPI
+namespace Alexandria.SaveAPI
 {
     /// <summary>
     /// Misc tool methods for SaveAPI

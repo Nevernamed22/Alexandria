@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using ItemAPI;
+using Alexandria.ItemAPI;
 using UnityEngine;
 
-namespace ItemAPI
+namespace Alexandria.ItemAPI
 {
     public class AdvancedPlayerOrbitalItem : PassiveItem
     {

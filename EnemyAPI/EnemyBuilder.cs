@@ -3,15 +3,14 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using ItemAPI;
+using Alexandria.ItemAPI;
 using UnityEngine;
 using MonoMod.RuntimeDetour;
 using Brave.BulletScript;
 using DirectionType = DirectionalAnimation.DirectionType;
 using FlipType = DirectionalAnimation.FlipType;
-using ItemAPI;
 
-namespace EnemyAPI
+namespace Alexandria.EnemyAPI
 {
     public static class EnemyBuilder
     {

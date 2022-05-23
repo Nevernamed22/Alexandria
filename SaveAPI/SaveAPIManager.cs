@@ -8,9 +8,9 @@ using System.IO;
 using Dungeonator;
 using System.Reflection;
 using System.Collections;
-using Alexandria.Helpers.Misc;
+using Alexandria.Misc;
 
-namespace SaveAPI
+namespace Alexandria.SaveAPI
 {
     /// <summary>
     /// The core class in SaveAPI

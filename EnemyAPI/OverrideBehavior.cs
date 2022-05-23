@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace EnemyAPI
+namespace Alexandria.EnemyAPI
 {
     public abstract class OverrideBehavior
     {

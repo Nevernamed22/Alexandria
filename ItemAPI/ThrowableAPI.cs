@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace ItemAPI
+namespace Alexandria.ItemAPI
 {
     public class CustomThrowableEffectDoer : MonoBehaviour
     {

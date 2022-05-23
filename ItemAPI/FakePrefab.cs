@@ -1,11 +1,11 @@
-﻿using NpcApi;
+﻿using Alexandria.NPCAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 using UnityEngine;
-namespace ItemAPI
+namespace Alexandria.ItemAPI
 {
     public class FakePrefab : Component
     {

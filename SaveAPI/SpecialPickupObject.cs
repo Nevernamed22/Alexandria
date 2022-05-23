@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace SaveAPI
+namespace Alexandria.SaveAPI
 {
     /// <summary>
     /// A custom component that allows <see cref="PickupObject"/>s to set custom SaveAPI flags when acquired. Mostly used for custom breach shop blueprints

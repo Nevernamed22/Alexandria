@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace ItemAPI
+namespace Alexandria.ItemAPI
 {
 
     public static class GunTools

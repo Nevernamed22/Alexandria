@@ -6,7 +6,7 @@ using MonoMod.RuntimeDetour;
 using UnityEngine;
 using System.Reflection;
 
-namespace SaveAPI
+namespace Alexandria.SaveAPI
 {
     public static class CustomHuntQuests
     {

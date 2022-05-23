@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace NpcApi
+namespace Alexandria.NPCAPI
 {
     //im so fucking sorry to anyone looking at this code
     class NPCHooks

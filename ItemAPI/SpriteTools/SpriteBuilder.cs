@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using GungeonAPI;
+using Alexandria.DungeonAPI;
 using UnityEngine;
 
-namespace ItemAPI
+namespace Alexandria.ItemAPI
 {
 	public static class SpriteBuilder
 	{

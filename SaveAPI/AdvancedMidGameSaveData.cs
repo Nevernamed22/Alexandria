@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using FullSerializer;
 
-namespace SaveAPI
+namespace Alexandria.SaveAPI
 {
 	/// <summary>
 	/// Class to store prior session stats from <see cref="AdvancedGameStatsManager"/> when the game is saved

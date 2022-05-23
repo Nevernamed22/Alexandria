@@ -9,6 +9,7 @@ using Alexandria.NPCAPI;
 using Alexandria.EnemyAPI;
 using Alexandria.DungeonAPI;
 using Alexandria.ItemAPI;
+using Alexandria.Misc;
 
 namespace Alexandria
 {
@@ -33,6 +34,7 @@ namespace Alexandria
                 BossBuilder.Init();
                 NPCAPI.NPCHooks.Init();
                 EnemyAPI.Hooks.Init();
+                CustomActions.InitHooks();
 
                 // ETGModConsole.Log($"pre Trying to create thingo bot.alexandria - TEST", true);
 

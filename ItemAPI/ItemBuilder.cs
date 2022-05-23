@@ -281,7 +281,7 @@ namespace Alexandria.ItemAPI
         {
             try
             {
-                Projectile projectile = ProjSpawnHelper.SetupProjectile(baseProj);
+                Projectile projectile = ProjectileUtility.SetupProjectile(baseProj);
 
                 projectile.baseData.damage = damage;
                 projectile.baseData.speed = speed;
@@ -305,7 +305,7 @@ namespace Alexandria.ItemAPI
         {
             try
             {
-                Projectile projectile = ProjSpawnHelper.SetupProjectile(baseProj);
+                Projectile projectile = ProjectileUtility.SetupProjectile(baseProj);
 
                 projectile.baseData.damage = damage;
                 projectile.baseData.speed = speed;

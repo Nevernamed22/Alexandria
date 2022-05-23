@@ -76,25 +76,26 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Miscellaneous Helpers\ChamberGunCompatibility.cs" />
+    <Compile Include="Misc\ChamberGunCompatibility.cs" />
     <Compile Include="EnemyAPI\BossBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyTools.cs" />
     <Compile Include="EnemyAPI\Hooks.cs" />
     <Compile Include="EnemyAPI\OverrideBehavior.cs" />
-    <Compile Include="GungeonAPI\DungeonHandler.cs" />
-    <Compile Include="GungeonAPI\DungeonHooks.cs" />
-    <Compile Include="GungeonAPI\FoolproofedChallengeShrineController.cs" />
-    <Compile Include="GungeonAPI\OfficialFlows.cs" />
-    <Compile Include="GungeonAPI\RoomFactory.cs" />
-    <Compile Include="GungeonAPI\SampleFlow.cs" />
-    <Compile Include="GungeonAPI\ShrineTools.cs" />
-    <Compile Include="GungeonAPI\StaticReferences.cs" />
+    <Compile Include="DungeonAPI\DungeonHandler.cs" />
+    <Compile Include="DungeonAPI\DungeonHooks.cs" />
+    <Compile Include="DungeonAPI\FoolproofedChallengeShrineController.cs" />
+    <Compile Include="DungeonAPI\OfficialFlows.cs" />
+    <Compile Include="DungeonAPI\RoomFactory.cs" />
+    <Compile Include="DungeonAPI\SampleFlow.cs" />
+    <Compile Include="DungeonAPI\ShrineTools.cs" />
+    <Compile Include="DungeonAPI\StaticReferences.cs" />
     <Compile Include="ItemAPI\AdvancedClasses\AdvancedGunBehaviour.cs" />
     <Compile Include="ItemAPI\AdvancedClasses\AdvancedPlayerOrbital.cs" />
     <Compile Include="ItemAPI\ApplyOffset.cs" />
     <Compile Include="ItemAPI\BeamAPI.cs" />
     <Compile Include="ItemAPI\CompanionBuilder.cs" />
+    <Compile Include="Misc\CustomActions.cs" />
     <Compile Include="PrefabAPI\AssetBundleBuilder.cs" />
     <Compile Include="PrefabAPI\AssetBundleTools.cs" />
     <Compile Include="PrefabAPI\BinaryWriterExtensions.cs" />
@@ -140,7 +141,7 @@
     <Compile Include="PrefabAPI\SerializedTypeStorage.cs" />
     <Compile Include="PrefabAPI\SevenZipHelper.cs" />
     <Compile Include="PrefabAPI\TypeTreeNode.cs" />
-    <Compile Include="Miscellaneous Helpers\ProjectileTools\ProjSpawnHelper.cs" />
+    <Compile Include="Misc\ProjectileUtility.cs" />
     <Compile Include="ItemAPI\SpriteTools\CustomClipAmmoTypeToolbox.cs" />
     <Compile Include="ItemAPI\SynergyTools\AdvancedFireOnReloadSynergyProcessor.cs" />
     <Compile Include="ItemAPI\SynergyTools\CustomSynergies.cs" />
@@ -157,14 +158,14 @@
     <Compile Include="TranslationAPI\StringTableType.cs" />
     <Compile Include="TranslationAPI\Translation.cs" />
     <Compile Include="TranslationAPI\TranslationManager.cs" />
-    <Compile Include="Miscellaneous Helpers\AudioUtility.cs" />
-    <Compile Include="Miscellaneous Helpers\AlexandriaTags.cs" />
-    <Compile Include="Miscellaneous Helpers\DebuffUtility.cs" />
-    <Compile Include="Miscellaneous Helpers\EnumUtility.cs" />
-    <Compile Include="Miscellaneous Helpers\DebugUtility.cs" />
-    <Compile Include="Miscellaneous Helpers\LootUtility.cs" />
-    <Compile Include="Miscellaneous Helpers\MathAndLogicHelper.cs" />
-    <Compile Include="Miscellaneous Helpers\ReflectionUtility.cs" />
+    <Compile Include="Misc\AudioUtility.cs" />
+    <Compile Include="Misc\AlexandriaTags.cs" />
+    <Compile Include="Misc\DebuffUtility.cs" />
+    <Compile Include="Misc\EnumUtility.cs" />
+    <Compile Include="Misc\DebugUtility.cs" />
+    <Compile Include="Misc\LootUtility.cs" />
+    <Compile Include="Misc\MathAndLogicHelper.cs" />
+    <Compile Include="Misc\ReflectionUtility.cs" />
     <Compile Include="Module.cs" />
     <Compile Include="NPCAPI\CustomShopController.cs" />
     <Compile Include="NPCAPI\CustomShopItemController.cs" />

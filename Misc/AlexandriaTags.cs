@@ -7,6 +7,21 @@ namespace Alexandria.Misc
 {
     public static class AlexandriaTags
     {
+        public static void InitGenericTags()
+        {
+            List<int> bulletModifierIDs = new List<int>() { 579, 627, 298, 640, 111, 113, 172, 277, 278, 284, 286, 288, 323, 352, 373, 374, 375, 410, 521, 523, 528, 530, 531, 532, 533, 538, 568, 569, 630, 655, 661, 822, 298, 304, 527, 638, 636, 241, 204, 295, 241, 524, 287 };
+            List<int> kalashnikovWeapons = new List<int>() { 15, 29, 95, 221, 510, 611, 726 };
+            List<int> guonStone = new List<int>() { 565, 260, 262, 263, 264, 269, 270 };
+            List<int> tableTechs = new List<int>() { 396, 397, 398, 399, 400, 465, 633, 666 };
+            List<int> ammolet = new List<int>() { 321, 322, 325, 342, 343, 344 };
+
+            foreach (int id in bulletModifierIDs) SetTag(id, "bullet_modifier");
+            foreach (int id in kalashnikovWeapons) SetTag(id, "kalashnikov");
+            foreach (int id in guonStone) SetTag(id, "guon_stone");
+            foreach (int id in tableTechs) SetTag(id, "table_tech");
+            foreach (int id in ammolet) SetTag(id, "ammolet");
+
+        }
         //item tagging
 
         static Dictionary<string, List<int>> itemTags = new Dictionary<string, List<int>>();

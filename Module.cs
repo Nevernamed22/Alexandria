@@ -36,6 +36,8 @@ namespace Alexandria
                 EnemyAPI.Hooks.Init();
                 CustomActions.InitHooks();
 
+                AlexandriaTags.InitGenericTags();
+
                 // ETGModConsole.Log($"pre Trying to create thingo bot.alexandria - TEST", true);
 
                 //EnumUtility.GetEnumValue<CustomDungeonFlags>("alexandria", "TEST");

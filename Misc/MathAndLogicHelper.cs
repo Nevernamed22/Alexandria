@@ -45,6 +45,85 @@ namespace Alexandria.Misc
             if (closestToPosition) return closestToPosition;
             else return null;
         }
-        
+        public static Vector2 GetCenteredLookingPosForObj(this Vector2 originalValue, SpeculativeRigidbody rigidBody, bool centerX = true, bool centerY = false)
+        {
+            float UnitX = rigidBody.UnitDimensions.x;
+            float ReturnX = originalValue.x;
+            if (centerX) ReturnX -= (UnitX * 0.5f);
+
+            float UnitY = rigidBody.UnitDimensions.y;
+            float ReturnY = originalValue.y;
+            if (centerY) ReturnY -= (UnitY * 0.5f);
+
+            return new Vector2(ReturnX, ReturnY);
+        }
+        public static bool isEven(this float number)
+        {
+            if (number % 2 == 0) return true;
+            else return false;
+        }
+        public static bool isEven(this int number)
+        {
+            if (number % 2 == 0) return true;
+            else return false;
+        }
+        public static bool IsBetweenRange(this float numberToCheck, float bottom, float top)
+        {
+            return (numberToCheck >= bottom && numberToCheck <= top);
+        }
+        public static T KeyByValue<T, W>(this Dictionary<T, W> dict, W val)
+        {
+            T key = default;
+            foreach (KeyValuePair<T, W> pair in dict)
+            {
+                if (EqualityComparer<W>.Default.Equals(pair.Value, val))
+                {
+                    key = pair.Key;
+                    break;
+                }
+            }
+            return key;
+        }
+        public static class RandomEnum<T>
+        {
+            static T[] m_Values;
+            static RandomEnum()
+            {
+                var values = System.Enum.GetValues(typeof(T));
+                m_Values = new T[values.Length];
+                for (int i = 0; i < m_Values.Length; i++)
+                    m_Values[i] = (T)values.GetValue(i);
+            }
+            public static T Get()
+            {
+                return m_Values[UnityEngine.Random.Range(0, m_Values.Length)];
+            }
+        }
+        public static bool PositionBetweenRelativeValidAngles(this Vector2 positionToCheck, Vector2 startPosition, float centerAngle, float range, float validAngleVariation)
+        {
+            if (Vector2.Distance(positionToCheck, startPosition) < range)
+            {
+                float num7 = BraveMathCollege.Atan2Degrees(positionToCheck - startPosition);
+                float minRawAngle = Math.Min(validAngleVariation, -validAngleVariation);
+                float maxRawAngle = Math.Max(validAngleVariation, -validAngleVariation);
+                bool isInRange = false;
+                float actualMaxAngle = centerAngle + maxRawAngle;
+                float actualMinAngle = centerAngle + minRawAngle;
+
+                if (num7.IsBetweenRange(actualMinAngle, actualMaxAngle)) isInRange = true;
+                if (actualMaxAngle > 180)
+                {
+                    float Overflow = actualMaxAngle - 180;
+                    if (num7.IsBetweenRange(-180, (-180 + Overflow))) isInRange = true;
+                }
+                if (actualMinAngle < -180)
+                {
+                    float Underflow = actualMinAngle + 180;
+                    if (num7.IsBetweenRange((180 + Underflow), 180)) isInRange = true;
+                }
+                return isInRange;
+            }
+            return false;
+        }
     }
 }

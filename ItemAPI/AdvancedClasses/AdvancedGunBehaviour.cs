@@ -406,6 +406,17 @@ namespace Alexandria.ItemAPI
         public virtual void OnBurstContinuedSafe(PlayerController player, Gun gun)
         {
         }
+     
+        /// <summary>
+        /// This method is called when the player attempts to interact with an ammo box. If true is returned, the original code to attempt to collect the box will run. If false is returned, the original code for collecting the ammo box will not run (ideal if you want to do something different on ammo pickup, and remove the box manually).
+        /// </summary>
+        /// <param name="player">The player. Can't be null.</param>
+        /// <param name="self">The gun.</param>
+        /// <param name="pickup">The ammo pickup being interacted with.</param>
+        public virtual bool CollectedAmmoPickup(PlayerController player, Gun self, AmmoPickup pickup)
+        {
+            return true;
+        }
 
         /// <summary>
         /// OnPreFireProjectileModifier() is called before the gun shoots a projectile. If the method returns something that's not the projectile argument, the projectile the gun will shoot will be replaced with the returned projectile.
@@ -609,6 +620,7 @@ namespace Alexandria.ItemAPI
         public string overrideNormalReloadAudio;
         public bool usesOverrideHeroSwordCooldown;
         public float overrideHeroSwordCooldown;
+        public bool canCollectAmmoAtMaxAmmo = false;
         private static FieldInfo heroSwordCooldown = typeof(Gun).GetField("HeroSwordCooldown", BindingFlags.NonPublic | BindingFlags.Instance);
     }
 }

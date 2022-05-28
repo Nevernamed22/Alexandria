@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
 
 namespace Alexandria.ItemAPI
 {
@@ -110,7 +111,6 @@ namespace Alexandria.ItemAPI
             result.colliderVertices = colliderVertices.ToArray();
             return result;
         }
-
         public static tk2dSpriteDefinition SetupDefinitionForProjectileSprite(string name, int id, int pixelWidth, int pixelHeight, bool lightened = true, int? overrideColliderPixelWidth = null, int? overrideColliderPixelHeight = null,
             int? overrideColliderOffsetX = null, int? overrideColliderOffsetY = null, Projectile overrideProjectileToCopyFrom = null)
         {
@@ -156,7 +156,6 @@ namespace Alexandria.ItemAPI
             ETGMod.Databases.Items.ProjectileCollection.inst.spriteDefinitions[id] = def;
             return def;
         }
-
         public static tk2dSpriteDefinition SetProjectileSpriteRight(this Projectile proj, string name, int pixelWidth, int pixelHeight, bool lightened = true, tk2dBaseSprite.Anchor anchor = tk2dBaseSprite.Anchor.LowerLeft, int? overrideColliderPixelWidth = null, int? overrideColliderPixelHeight = null, bool anchorChangesCollider = true,
             bool fixesScale = false, int? overrideColliderOffsetX = null, int? overrideColliderOffsetY = null, Projectile overrideProjectileToCopyFrom = null)
         {
@@ -179,7 +178,6 @@ namespace Alexandria.ItemAPI
                 return null;
             }
         }
-
         public static void MakeOffset(this tk2dSpriteDefinition def, Vector2 offset, bool changesCollider = false)
         {
             float xOffset = offset.x;
@@ -197,7 +195,6 @@ namespace Alexandria.ItemAPI
                 def.colliderVertices[0] += new Vector3(xOffset, yOffset, 0);
             }
         }
-
         public static void ConstructOffsetsFromAnchor(this tk2dSpriteDefinition def, tk2dBaseSprite.Anchor anchor, Vector2? scale = null, bool fixesScale = false, bool changesCollider = true)
         {
             if (!scale.HasValue)
@@ -292,6 +289,87 @@ namespace Alexandria.ItemAPI
                     }
                 }
             }
+        }
+        public static bool IsCurrentGun(this Gun gun)
+        {
+            if (gun && gun.CurrentOwner)
+            {
+                if (gun.CurrentOwner.CurrentGun == gun) return true;
+                else return false;
+            }
+            else return false;
+        }
+        public static PlayerController GunPlayerOwner(this Gun bullet)
+        {
+            if (bullet && bullet.CurrentOwner && bullet.CurrentOwner is PlayerController) return bullet.CurrentOwner as PlayerController;
+            else return null;
+        }
+        public static ProjectileModule AddProjectileModuleToRawVolley(this Gun gun, ProjectileModule projectile)
+        {
+            gun.RawSourceVolley.projectiles.Add(projectile);
+            return projectile;
+        }
+        public static ProjectileModule AddProjectileModuleToRawVolleyFrom(this Gun gun, Gun other, bool cloned = true, bool clonedProjectiles = true)
+        {
+            ProjectileModule defaultModule = other.DefaultModule;
+            if (!cloned)
+            {
+                return gun.AddProjectileModuleToRawVolley(defaultModule);
+            }
+            ProjectileModule projectileModule = ProjectileModule.CreateClone(defaultModule, false, -1);
+            projectileModule.projectiles = new List<Projectile>(defaultModule.projectiles.Capacity);
+            for (int i = 0; i < defaultModule.projectiles.Count; i++)
+            {
+                projectileModule.projectiles.Add((!clonedProjectiles) ? defaultModule.projectiles[i] : defaultModule.projectiles[i].ClonedPrefab());
+            }
+            return gun.AddProjectileModuleToRawVolley(projectileModule);
+        }
+        public static ProjectileModule RawDefaultModule(this Gun self)
+        {
+            if (self.RawSourceVolley)
+            {
+                if (self.RawSourceVolley.ModulesAreTiers)
+                {
+                    for (int i = 0; i < self.RawSourceVolley.projectiles.Count; i++)
+                    {
+                        ProjectileModule projectileModule = self.RawSourceVolley.projectiles[i];
+                        if (projectileModule != null)
+                        {
+                            int num = (projectileModule.CloneSourceIndex < 0) ? i : projectileModule.CloneSourceIndex;
+                            if (num == self.CurrentStrengthTier)
+                            {
+                                return projectileModule;
+                            }
+                        }
+                    }
+                }
+                return self.RawSourceVolley.projectiles[0];
+            }
+            return self.singleModule;
+        }
+        public static void AddStatToGun(this Gun item, PlayerStats.StatType statType, float amount, StatModifier.ModifyMethod method = StatModifier.ModifyMethod.ADDITIVE)
+        {
+            StatModifier modifier = new StatModifier
+            {
+                amount = amount,
+                statToBoost = statType,
+                modifyType = method
+            };
+
+            if (item.passiveStatModifiers == null)
+                item.passiveStatModifiers = new StatModifier[] { modifier };
+            else
+                item.passiveStatModifiers = item.passiveStatModifiers.Concat(new StatModifier[] { modifier }).ToArray();
+        }
+        public static void RemoveStatFromGun(this Gun item, PlayerStats.StatType statType)
+        {
+            var newModifiers = new List<StatModifier>();
+            for (int i = 0; i < item.passiveStatModifiers.Length; i++)
+            {
+                if (item.passiveStatModifiers[i].statToBoost != statType)
+                    newModifiers.Add(item.passiveStatModifiers[i]);
+            }
+            item.passiveStatModifiers = newModifiers.ToArray();
         }
     }  
 }

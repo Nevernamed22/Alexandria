@@ -76,6 +76,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DungeonAPI\RoomUtility.cs" />
+    <Compile Include="EnemyAPI\AIActorUtility.cs" />
+    <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
     <Compile Include="Misc\ChamberGunCompatibility.cs" />
     <Compile Include="EnemyAPI\BossBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyBuilder.cs" />
@@ -96,6 +99,8 @@
     <Compile Include="ItemAPI\BeamAPI.cs" />
     <Compile Include="ItemAPI\CompanionBuilder.cs" />
     <Compile Include="Misc\CustomActions.cs" />
+    <Compile Include="Misc\PickupUtility.cs" />
+    <Compile Include="Misc\PlayerUtility.cs" />
     <Compile Include="PrefabAPI\AssetBundleBuilder.cs" />
     <Compile Include="PrefabAPI\AssetBundleTools.cs" />
     <Compile Include="PrefabAPI\BinaryWriterExtensions.cs" />

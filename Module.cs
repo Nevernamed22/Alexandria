@@ -3,6 +3,7 @@ using EnemyAPI;
 using GungeonAPI;
 using ItemAPI;
 using SaveAPI;
+using ChestApi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,12 +34,9 @@ namespace Alexandria
                 NpcApi.NPCHooks.Init();
                 EnemyAPI.Hooks.Init();
 
-                // ETGModConsole.Log($"pre Trying to create thingo bot.alexandria - TEST", true);
+                MiscHooks.Init();
+                ChestSpawnHelper.Init();
 
-                //EnumUtility.GetEnumValue<CustomDungeonFlags>("alexandria", "TEST");
-
-                SaveAPIManager.CreateNewDungeonFlag("alexandria", "TEST2");
-                SaveAPIManager.CreateNewDungeonFlag("alexandria", "TEST");
 
                 ETGModConsole.Log("started!!");
                 //ETGModConsole.Log("started!!", true);

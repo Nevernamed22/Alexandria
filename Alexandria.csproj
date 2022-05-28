@@ -78,6 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChamberGunCompatibility\ChamberGunCompatibility.cs" />
+    <Compile Include="ChestApi\ChestSpawnHelper.cs" />
     <Compile Include="EnemyAPI\BossBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyTools.cs" />
@@ -157,6 +158,8 @@
     <Compile Include="ItemAPI\TranslationTools\Translation.cs" />
     <Compile Include="ItemAPI\TranslationTools\TranslationManager.cs" />
     <Compile Include="Miscellaneous Helpers\AudioUtility.cs" />
+	  <Compile Include="Miscellaneous Helpers\AlexandriaTags.cs" />
+	  <Compile Include="Miscellaneous Helpers\MiscHooks.cs" />
     <Compile Include="Miscellaneous Helpers\EnumUtility.cs" />
     <Compile Include="Miscellaneous Helpers\DebugUtility.cs" />
     <Compile Include="Miscellaneous Helpers\LootUtility.cs" />

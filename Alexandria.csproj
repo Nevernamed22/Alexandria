@@ -76,10 +76,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DungeonAPI\RoomUtility.cs" />
-    <Compile Include="EnemyAPI\AIActorUtility.cs" />
-    <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
-    <Compile Include="Misc\ChamberGunCompatibility.cs" />
+      <Compile Include="DungeonAPI\RoomUtility.cs" />
+	  <Compile Include="EnemyAPI\AIActorUtility.cs" />
+	  <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
+	  <Compile Include="Misc\ChamberGunCompatibility.cs" />
+	  <Compile Include="ChestApi\ChestSpawnHelper.cs" />
+	  <Compile Include="ChamberGunCompatibility\ChamberGunCompatibility.cs" />
     <Compile Include="EnemyAPI\BossBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyTools.cs" />
@@ -158,19 +160,19 @@
     <Compile Include="ItemAPI\SpriteTools\ResourceExtractor.cs" />
     <Compile Include="ItemAPI\SpriteTools\SpriteBuilder.cs" />
     <Compile Include="ItemAPI\ThrowableAPI.cs" />
-    <Compile Include="ItemAPI\TrailAPI.cs" />
-    <Compile Include="TranslationAPI\CustomStringDBTable.cs" />
-    <Compile Include="TranslationAPI\StringTableType.cs" />
-    <Compile Include="TranslationAPI\Translation.cs" />
-    <Compile Include="TranslationAPI\TranslationManager.cs" />
-    <Compile Include="Misc\AudioUtility.cs" />
-    <Compile Include="Misc\AlexandriaTags.cs" />
-    <Compile Include="Misc\DebuffUtility.cs" />
-    <Compile Include="Misc\EnumUtility.cs" />
-    <Compile Include="Misc\DebugUtility.cs" />
-    <Compile Include="Misc\LootUtility.cs" />
-    <Compile Include="Misc\MathAndLogicHelper.cs" />
-    <Compile Include="Misc\ReflectionUtility.cs" />
+	<Compile Include="ItemAPI\TrailAPI.cs" />
+	<Compile Include="ItemAPI\TranslationTools\CustomStringDBTable.cs" />
+    <Compile Include="ItemAPI\TranslationTools\StringTableType.cs" />
+    <Compile Include="ItemAPI\TranslationTools\Translation.cs" />
+    <Compile Include="ItemAPI\TranslationTools\TranslationManager.cs" />
+    <Compile Include="Miscellaneous Helpers\AudioUtility.cs" />
+	<Compile Include="Miscellaneous Helpers\AlexandriaTags.cs" />
+	<Compile Include="Miscellaneous Helpers\MiscHooks.cs" />
+    <Compile Include="Miscellaneous Helpers\EnumUtility.cs" />
+    <Compile Include="Miscellaneous Helpers\DebugUtility.cs" />
+    <Compile Include="Miscellaneous Helpers\LootUtility.cs" />
+    <Compile Include="Miscellaneous Helpers\MathAndLogicHelper.cs" />
+	<Compile Include="Misc\ReflectionUtility.cs" />
     <Compile Include="Module.cs" />
     <Compile Include="NPCAPI\CustomShopController.cs" />
     <Compile Include="NPCAPI\CustomShopItemController.cs" />

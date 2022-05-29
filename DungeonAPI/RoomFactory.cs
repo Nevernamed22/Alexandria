@@ -458,8 +458,7 @@ namespace Alexandria.DungeonAPI
                             nonDatabasePlaceable = ShrineTools.GetRoomFromBundles("ChallengeShrine_Gungeon_002").placedObjects[0].nonenemyBehaviour.gameObject,
                             prerequisites = array,
                             materialRequirements = new DungeonPlaceableRoomMaterialRequirement[0]
-                        }
-                    };
+                        }};
                         room.placedObjects.Add(new PrototypePlacedObjectData
                         {
                             contentsBasePosition = location,

@@ -167,7 +167,7 @@ namespace Alexandria.EnemyAPI
             return BuildAnimation(aiAnimator, name, spriteDirectory, fps, Assembly.GetCallingAssembly());
         }
 
-        public static void AddAnimation(this GameObject obj, string enemyName, string name, string spriteDirectory, int fps, AnimationType type, DirectionType directionType = DirectionType.None, FlipType flipType = FlipType.None,
+        public static tk2dSpriteAnimationClip[] AddAnimation(this GameObject obj, string enemyName, string name, string spriteDirectory, int fps, AnimationType type, DirectionType directionType = DirectionType.None, FlipType flipType = FlipType.None,
     tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Once)
         {
             AIAnimator aiAnimator = obj.GetOrAddComponent<AIAnimator>();
@@ -185,11 +185,11 @@ namespace Alexandria.EnemyAPI
 
             animation.AnimNames = animation.AnimNames.Concat(new string[] { name }).ToArray();
             aiAnimator.AssignDirectionalAnimation(name, animation, type);
-            BuildAnimations(aiAnimator, name, enemyName, directionType, spriteDirectory, fps, wrapMode, Assembly.GetCallingAssembly());
+            return BuildAnimations(aiAnimator, name, enemyName, directionType, spriteDirectory, fps, wrapMode, Assembly.GetCallingAssembly());
 
         }
 
-        public static void BuildAnimations(AIAnimator aiAnimator, string name, string enemyName, DirectionType directionType, string spriteDirectory, int fps, tk2dSpriteAnimationClip.WrapMode wrapMode, Assembly assembly = null)
+        public static tk2dSpriteAnimationClip[] BuildAnimations(AIAnimator aiAnimator, string name, string enemyName, DirectionType directionType, string spriteDirectory, int fps, tk2dSpriteAnimationClip.WrapMode wrapMode, Assembly assembly = null)
         {
             tk2dSpriteCollectionData collection = aiAnimator.GetComponent<tk2dSpriteCollectionData>();
             if (!collection)
@@ -198,6 +198,7 @@ namespace Alexandria.EnemyAPI
             string[] resources = ResourceExtractor.GetResourceNames(assembly ?? Assembly.GetCallingAssembly());
 
             List<string> anims = new List<string>();
+            var animList = new List<tk2dSpriteAnimationClip>();
             foreach (var a in DirectionalAnimation.m_combined[(int)directionType])
             {
                 List<int> indices = new List<int>();
@@ -215,17 +216,21 @@ namespace Alexandria.EnemyAPI
 
                     }
                 }
+                
                 //ETGModConsole.Log(indices.Count.ToString());
                 if (indices.Count > 0)
                 {
                     //ETGModConsole.Log(a.suffix);
                     tk2dSpriteAnimationClip clip = SpriteBuilder.AddAnimation(aiAnimator.spriteAnimator, collection, indices, $"{name.ToLower()}_{a.suffix}", wrapMode);
                     clip.fps = fps;
+                    animList.Add(clip);
 
-                    
+
+
                 }
 
             }
+            return animList.ToArray();
         }
 
         public static tk2dSpriteAnimationClip BuildAnimation(AIAnimator aiAnimator, string name, string spriteDirectory, int fps, Assembly assembly = null)

@@ -38,12 +38,9 @@ namespace Alexandria
 
                 AlexandriaTags.InitGenericTags();
 
-                // ETGModConsole.Log($"pre Trying to create thingo bot.alexandria - TEST", true);
+                MiscHooks.Init();
+                ChestSpawnHelper.Init();
 
-                //EnumUtility.GetEnumValue<CustomDungeonFlags>("alexandria", "TEST");
-
-                SaveAPIManager.CreateNewDungeonFlag("alexandria", "TEST2");
-                SaveAPIManager.CreateNewDungeonFlag("alexandria", "TEST");
 
                 ETGModConsole.Log("started!!");
                 //ETGModConsole.Log("started!!", true);

@@ -79,6 +79,8 @@
     <Compile Include="DungeonAPI\RoomUtility.cs" />
     <Compile Include="EnemyAPI\AIActorUtility.cs" />
     <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
+    <Compile Include="ItemAPI\AnimationUtility.cs" />
+    <Compile Include="ItemAPI\OrbitalUtility.cs" />
     <Compile Include="Misc\ChamberGunCompatibility.cs" />
     <Compile Include="EnemyAPI\BossBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyBuilder.cs" />

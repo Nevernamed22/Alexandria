@@ -9,6 +9,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+<<<<<<< Updated upstream
+=======
+using Alexandria.SaveAPI;
+using Alexandria.NPCAPI;
+using Alexandria.EnemyAPI;
+using Alexandria.DungeonAPI;
+using Alexandria.ItemAPI;
+using Alexandria.Misc;
+using Alexandria.ChestApi;
+>>>>>>> Stashed changes
 
 namespace Alexandria
 {
@@ -37,6 +47,18 @@ namespace Alexandria
                 MiscHooks.Init();
                 ChestSpawnHelper.Init();
 
+<<<<<<< Updated upstream
+=======
+                AlexandriaHooks.Init();
+                ChestSpawnHelper.Init();
+
+                // ETGModConsole.Log($"pre Trying to create thingo bot.alexandria - TEST", true);
+
+                //EnumUtility.GetEnumValue<CustomDungeonFlags>("alexandria", "TEST");
+
+                SaveAPIManager.CreateNewDungeonFlag("alexandria", "TEST2");
+                SaveAPIManager.CreateNewDungeonFlag("alexandria", "TEST");
+>>>>>>> Stashed changes
 
                 ETGModConsole.Log("started!!");
                 //ETGModConsole.Log("started!!", true);

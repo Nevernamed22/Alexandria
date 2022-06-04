@@ -169,7 +169,11 @@ namespace EnemyAPI
         }
 
         public static tk2dSpriteAnimationClip[] AddAnimation(this GameObject obj, string enemyName, string name, string spriteDirectory, int fps, AnimationType type, DirectionType directionType = DirectionType.None, FlipType flipType = FlipType.None,
+<<<<<<< Updated upstream
     tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Once)
+=======
+           tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Once)
+>>>>>>> Stashed changes
         {
             AIAnimator aiAnimator = obj.GetOrAddComponent<AIAnimator>();
             DirectionalAnimation animation = aiAnimator.GetDirectionalAnimation(name, directionType, type);
@@ -183,11 +187,13 @@ namespace EnemyAPI
                     Prefix = name
                 };
             }
-
             animation.AnimNames = animation.AnimNames.Concat(new string[] { name }).ToArray();
             aiAnimator.AssignDirectionalAnimation(name, animation, type);
             return BuildAnimations(aiAnimator, name, enemyName, directionType, spriteDirectory, fps, wrapMode, Assembly.GetCallingAssembly());
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
         }
 
         public static tk2dSpriteAnimationClip[] BuildAnimations(AIAnimator aiAnimator, string name, string enemyName, DirectionType directionType, string spriteDirectory, int fps, tk2dSpriteAnimationClip.WrapMode wrapMode, Assembly assembly = null)
@@ -197,7 +203,6 @@ namespace EnemyAPI
                 collection = SpriteBuilder.ConstructCollection(aiAnimator.gameObject, $"{aiAnimator.name}_collection");
 
             string[] resources = ResourceExtractor.GetResourceNames(assembly ?? Assembly.GetCallingAssembly());
-
             List<string> anims = new List<string>();
             var animList = new List<tk2dSpriteAnimationClip>();
             foreach (var a in DirectionalAnimation.m_combined[(int)directionType])
@@ -205,31 +210,31 @@ namespace EnemyAPI
                 List<int> indices = new List<int>();
                 for (int i = 0; i < resources.Length; i++)
                 {
-
                     if (resources[i].Contains(spriteDirectory.Replace('/', '.'), false))
                     {
-
                         if (resources[i].Contains(spriteDirectory.Replace('/', '.') + $".{enemyName}_{name.ToLower()}_{a.suffix}_0", false))
                         {
-                            //ETGModConsole.Log($"{spriteDirectory.Replace('/', '.') + $".{enemyName}_{name.ToLower()}_{a.suffix}_0"} - {resources[i]}");
                             indices.Add(SpriteBuilder.AddSpriteToCollection(resources[i], collection, assembly ?? Assembly.GetCallingAssembly()));
                         }
-
                     }
                 }
+<<<<<<< Updated upstream
                 
                 //ETGModConsole.Log(indices.Count.ToString());
+=======
+>>>>>>> Stashed changes
                 if (indices.Count > 0)
                 {
-                    //ETGModConsole.Log(a.suffix);
                     tk2dSpriteAnimationClip clip = SpriteBuilder.AddAnimation(aiAnimator.spriteAnimator, collection, indices, $"{name.ToLower()}_{a.suffix}", wrapMode);
                     clip.fps = fps;
                     animList.Add(clip);
+<<<<<<< Updated upstream
 
 
 
+=======
+>>>>>>> Stashed changes
                 }
-
             }
             return animList.ToArray();
         }

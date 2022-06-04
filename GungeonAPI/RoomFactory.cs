@@ -723,7 +723,7 @@ namespace GungeonAPI
                 room.exitData.exits = new List<PrototypeRoomExit>();
 
             PrototypeRoomExit exit = new PrototypeRoomExit(direction, location);
-            exit.exitType = PrototypeRoomExit.ExitType.NO_RESTRICTION;
+            exit.exitType = PrototypeRoomExit.ExitType.NO_RESTRICTION; //add support for other types of exits
             Vector2 margin = (direction == DungeonData.Direction.EAST || direction == DungeonData.Direction.WEST) ? new Vector2(0, 1) : new Vector2(1, 0);
             exit.containedCells.Add(location + margin);
             room.exitData.exits.Add(exit);

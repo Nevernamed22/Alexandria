@@ -35,16 +35,24 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
+<<<<<<< Updated upstream
       <HintPath>$(EtgManagedDirectoryPath)ModBackup\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp.Base.mm">
       <HintPath>$(EtgManagedDirectoryPath)Assembly-CSharp.Base.mm.dll</HintPath>
+=======
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\EtG_Data\Managed\ModBackup\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp.Base.mm">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\EtG_Data\Managed\Assembly-CSharp.Base.mm.dll</HintPath>
+>>>>>>> Stashed changes
     </Reference>
     <Reference Include="Ionic.Zip, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EtgManagedDirectoryPath)Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="MonoMod.RuntimeDetour">
+<<<<<<< Updated upstream
       <HintPath>..\..\..\Desktop\MonoMod\MonoMod.RuntimeDetour.dll</HintPath>
     </Reference>
     <Reference Include="MonoMod.Utils">
@@ -52,6 +60,15 @@
     </Reference>
     <Reference Include="PlayMaker">
       <HintPath>$(EtgManagedDirectoryPath)PlayMaker.dll</HintPath>
+=======
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\Mods\BotsMod\MonoMod.RuntimeDetour.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.Utils">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\Mods\BotsMod\MonoMod.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="PlayMaker">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\EtG_Data\Managed\PlayMaker.dll</HintPath>
+>>>>>>> Stashed changes
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -60,16 +77,24 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
+<<<<<<< Updated upstream
       <HintPath>$(EtgManagedDirectoryPath)UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>$(EtgManagedDirectoryPath)ModBackup\UnityEngine.CoreModule.dll</HintPath>
+=======
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\EtG_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\EtG_Data\Managed\ModBackup\UnityEngine.CoreModule.dll</HintPath>
+>>>>>>> Stashed changes
     </Reference>
     <Reference Include="UnityEngine.CoreModule.Base.mm">
       <HintPath>$(EtgManagedDirectoryPath)UnityEngine.CoreModule.Base.mm.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
+<<<<<<< Updated upstream
       <HintPath>$(EtgManagedDirectoryPath)UnityEngine.ImageConversionModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.JSONSerializeModule">
@@ -79,6 +104,23 @@
   <ItemGroup>
     <Compile Include="ChamberGunCompatibility\ChamberGunCompatibility.cs" />
     <Compile Include="ChestApi\ChestSpawnHelper.cs" />
+=======
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\EtG_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.JSONSerializeModule">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\EtG_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\EtG_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ChestApi\ChestSpawnHelper.cs" />
+    <Compile Include="DungeonAPI\RoomUtility.cs" />
+    <Compile Include="EnemyAPI\AIActorUtility.cs" />
+    <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
+    <Compile Include="Misc\ChamberGunCompatibility.cs" />
+>>>>>>> Stashed changes
     <Compile Include="EnemyAPI\BossBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyTools.cs" />
@@ -96,6 +138,7 @@
     <Compile Include="ItemAPI\AdvancedClasses\AdvancedPlayerOrbital.cs" />
     <Compile Include="ItemAPI\ApplyOffset.cs" />
     <Compile Include="ItemAPI\CompanionBuilder.cs" />
+<<<<<<< Updated upstream
     <Compile Include="ItemAPI\PrefabAPI\AssetBundleBuilder.cs" />
     <Compile Include="ItemAPI\PrefabAPI\AssetBundleTools.cs" />
     <Compile Include="ItemAPI\PrefabAPI\BinaryWriterExtensions.cs" />
@@ -142,6 +185,58 @@
     <Compile Include="ItemAPI\PrefabAPI\SevenZipHelper.cs" />
     <Compile Include="ItemAPI\PrefabAPI\TypeTreeNode.cs" />
     <Compile Include="ItemAPI\ProjectileToolboxes\ProjSpawnHelper.cs" />
+=======
+    <Compile Include="AlexandriaHooks.cs" />
+    <Compile Include="Misc\CustomActions.cs" />
+    <Compile Include="Misc\PickupUtility.cs" />
+    <Compile Include="Misc\PlayerUtility.cs" />
+    <Compile Include="PrefabAPI\AssetBundleBuilder.cs" />
+    <Compile Include="PrefabAPI\AssetBundleTools.cs" />
+    <Compile Include="PrefabAPI\BinaryWriterExtensions.cs" />
+    <Compile Include="PrefabAPI\CommonString.cs" />
+    <Compile Include="PrefabAPI\CRC.cs" />
+    <Compile Include="PrefabAPI\EditorAssetBundle.cs" />
+    <Compile Include="PrefabAPI\EditorBuildTarget.cs" />
+    <Compile Include="PrefabAPI\EditorClassIDType.cs" />
+    <Compile Include="PrefabAPI\EditorComponent.cs" />
+    <Compile Include="PrefabAPI\EditorExtension.cs" />
+    <Compile Include="PrefabAPI\EditorGameObject.cs" />
+    <Compile Include="PrefabAPI\EditorNamedObject.cs" />
+    <Compile Include="PrefabAPI\EditorObject.cs" />
+    <Compile Include="PrefabAPI\EditorPPtr.cs" />
+    <Compile Include="PrefabAPI\EditorTextAsset.cs" />
+    <Compile Include="PrefabAPI\EditorTransform.cs" />
+    <Compile Include="PrefabAPI\EndianBinaryWriter.cs" />
+    <Compile Include="PrefabAPI\ICoder.cs" />
+    <Compile Include="PrefabAPI\IMatchFinder.cs" />
+    <Compile Include="PrefabAPI\LZ4Codec.cs" />
+    <Compile Include="PrefabAPI\LZ4CodecPartial.cs" />
+    <Compile Include="PrefabAPI\LZ4\ILZ4Service.cs" />
+    <Compile Include="PrefabAPI\LZ4\LZ4Codec.cs" />
+    <Compile Include="PrefabAPI\LZ4\LZ4Codec.Safe.cs" />
+    <Compile Include="PrefabAPI\LZ4\LZ4Codec.Safe32.Dirty.cs" />
+    <Compile Include="PrefabAPI\LZ4\LZ4Codec.Safe32HC.Dirty.cs" />
+    <Compile Include="PrefabAPI\LZ4\LZ4Codec.Safe64.Dirty.cs" />
+    <Compile Include="PrefabAPI\LZ4\LZ4Codec.Safe64HC.Dirty.cs" />
+    <Compile Include="PrefabAPI\LzBinTree.cs" />
+    <Compile Include="PrefabAPI\LzInWindow.cs" />
+    <Compile Include="PrefabAPI\LzmaBase.cs" />
+    <Compile Include="PrefabAPI\LzmaDecoder.cs" />
+    <Compile Include="PrefabAPI\LzmaEncoder.cs" />
+    <Compile Include="PrefabAPI\LzOutWindow.cs" />
+    <Compile Include="PrefabAPI\PPtr.cs" />
+    <Compile Include="PrefabAPI\PrefabBuilder.cs" />
+    <Compile Include="PrefabAPI\RangeCoder.cs" />
+    <Compile Include="PrefabAPI\RangeCoderBit.cs" />
+    <Compile Include="PrefabAPI\RangeCoderBitTree.cs" />
+    <Compile Include="PrefabAPI\Safe32LZ4Service.cs" />
+    <Compile Include="PrefabAPI\Safe64LZ4Service.cs" />
+    <Compile Include="PrefabAPI\SerializedType.cs" />
+    <Compile Include="PrefabAPI\SerializedTypeStorage.cs" />
+    <Compile Include="PrefabAPI\SevenZipHelper.cs" />
+    <Compile Include="PrefabAPI\TypeTreeNode.cs" />
+    <Compile Include="Misc\ProjectileUtility.cs" />
+>>>>>>> Stashed changes
     <Compile Include="ItemAPI\SpriteTools\CustomClipAmmoTypeToolbox.cs" />
     <Compile Include="ItemAPI\SynergyHelpers\AdvancedFireOnReloadSynergyProcessor.cs" />
     <Compile Include="ItemAPI\SynergyHelpers\CustomSynergies.cs" />
@@ -153,6 +248,7 @@
     <Compile Include="ItemAPI\SpriteTools\ResourceExtractor.cs" />
     <Compile Include="ItemAPI\SpriteTools\SpriteBuilder.cs" />
     <Compile Include="ItemAPI\ThrowableAPI.cs" />
+<<<<<<< Updated upstream
     <Compile Include="ItemAPI\TranslationTools\CustomStringDBTable.cs" />
     <Compile Include="ItemAPI\TranslationTools\StringTableType.cs" />
     <Compile Include="ItemAPI\TranslationTools\Translation.cs" />
@@ -163,6 +259,21 @@
     <Compile Include="Miscellaneous Helpers\DebugUtility.cs" />
     <Compile Include="Miscellaneous Helpers\LootUtility.cs" />
     <Compile Include="Miscellaneous Helpers\MathAndLogicHelper.cs" />
+=======
+    <Compile Include="ItemAPI\TrailAPI.cs" />
+    <Compile Include="TranslationAPI\CustomStringDBTable.cs" />
+    <Compile Include="TranslationAPI\StringTableType.cs" />
+    <Compile Include="TranslationAPI\Translation.cs" />
+    <Compile Include="TranslationAPI\TranslationManager.cs" />
+    <Compile Include="Misc\AudioUtility.cs" />
+    <Compile Include="ItemAPI\TaggingTools\AlexandriaTags.cs" />
+    <Compile Include="Misc\DebuffUtility.cs" />
+    <Compile Include="Misc\EnumUtility.cs" />
+    <Compile Include="Misc\DebugUtility.cs" />
+    <Compile Include="Misc\LootUtility.cs" />
+    <Compile Include="Misc\MathAndLogicHelper.cs" />
+    <Compile Include="Misc\ReflectionUtility.cs" />
+>>>>>>> Stashed changes
     <Compile Include="Module.cs" />
     <Compile Include="NPCAPI\CustomShopController.cs" />
     <Compile Include="NPCAPI\CustomShopItemController.cs" />

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
+<<<<<<< Updated upstream
 namespace ChestApi
 {
     public static class ChestSpawnHelper
@@ -19,6 +20,21 @@ namespace ChestApi
 
 		public static void RegisterCustomChest(Chest chest, float weight = 1)
         {
+=======
+namespace Alexandria.ChestApi
+{
+	public static class ChestSpawnHelper
+	{
+		public static void Init()
+		{
+			var ConfigureOnPlacementHook = new Hook(
+					typeof(FloorChestPlacer).GetMethod("ConfigureOnPlacement", BindingFlags.Instance | BindingFlags.Public),
+					typeof(ChestSpawnHelper).GetMethod("ConfigureOnPlacementHook", BindingFlags.Static | BindingFlags.Public));
+		}
+
+		public static void RegisterCustomChest(Chest chest, float weight = 1)
+		{
+>>>>>>> Stashed changes
 
 		}
 
@@ -31,7 +47,11 @@ namespace ChestApi
 		public static void ConfigureOnPlacementHook(Action<FloorChestPlacer, RoomHandler> orig, FloorChestPlacer self, RoomHandler room)
 		{
 
+<<<<<<< Updated upstream
 			
+=======
+
+>>>>>>> Stashed changes
 			var chest = GetTargetCustomChest(UnityEngine.Random.value);
 			if (chest)
 			{
@@ -41,6 +61,10 @@ namespace ChestApi
 				dungeonPrerequisite.requireTileset = true;
 				dungeonPrerequisite.requiredTileset = GlobalDungeonData.ValidTilesets.CASTLEGEON;
 				dungeonPrerequisite.prerequisiteType = DungeonPrerequisite.PrerequisiteType.TILESET;
+<<<<<<< Updated upstream
+=======
+				self.OverrideChestPrereq = dungeonPrerequisite;
+>>>>>>> Stashed changes
 			}
 			orig(self, room);
 		}
@@ -50,8 +74,13 @@ namespace ChestApi
 			//float currentMagnificence = GameManager.Instance.RewardManager.CurrentRewardData.DetermineCurrentMagnificence(isGenerationForMagnificence);
 
 			float dumbFuckingChestNumber = 0;
+<<<<<<< Updated upstream
 			foreach(var chest in customChests)
             {
+=======
+			foreach (var chest in customChests)
+			{
+>>>>>>> Stashed changes
 				dumbFuckingChestNumber += chest.Value.Second;
 				if (fran < dumbFuckingChestNumber)
 				{
@@ -65,4 +94,8 @@ namespace ChestApi
 		public static Dictionary<string, Tuple<Chest, float>> customChests = new Dictionary<string, Tuple<Chest, float>>();
 
 	}
+<<<<<<< Updated upstream
 }
+=======
+}
+>>>>>>> Stashed changes

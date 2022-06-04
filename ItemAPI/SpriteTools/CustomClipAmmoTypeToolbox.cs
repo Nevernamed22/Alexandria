@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace ItemAPI
 {
-    static class CustomClipAmmoTypeToolbox
+    public static class CustomClipAmmoTypeToolbox
     {
         public static void Init()
         {

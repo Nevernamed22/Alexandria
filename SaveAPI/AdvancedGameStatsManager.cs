@@ -663,6 +663,18 @@ namespace SaveAPI
             {
                 foreach(var save in SaveAPIManager.AdvancedGameSaves)
                 {
+                    m_instances[save.Key].m_flagsForSave = new HashSet<string>();
+                    foreach (var flag in m_instances[save.Key].m_flags)
+                    {
+                        m_instances[save.Key].m_flagsForSave.Add(flag.ToString());
+                    }
+
+                    m_instances[save.Key].m_characterStatsForSave = new Dictionary<string, AdvancedGameStats>();
+                    foreach (var flag in m_instances[save.Key].m_characterStats)
+                    {
+                        m_instances[save.Key].m_characterStatsForSave.Add(flag.Key.ToString(), flag.Value);
+                    }
+
                     SaveManager.Save<AdvancedGameStatsManager>(m_instances[save.Key], save.Value, GameStatsManager.Instance.PlaytimeMin, 0u, null);
                 }
             }
@@ -745,11 +757,26 @@ namespace SaveAPI
         public static Dictionary<string, AdvancedGameStatsManager> m_instances = new Dictionary<string, AdvancedGameStatsManager>();
 
         [fsProperty]
+        public HashSet<string> m_flagsForSave;
+
+
         public HashSet<CustomDungeonFlags> m_flags;
+
+
+
         [fsProperty]
         public string midGameSaveGuid;
-        [fsProperty]
+
+
+
+
         public Dictionary<PlayableCharacters, AdvancedGameStats> m_characterStats;
+
+        [fsProperty]
+        public Dictionary<string, AdvancedGameStats> m_characterStatsForSave;
+
+
+
         //public Dictionary<CustomCharacters.CustomPlayableCharacters, GameStats> m_customCharacterStats;
         private AdvancedGameStats m_sessionStats;
         private AdvancedGameStats m_savedSessionStats;

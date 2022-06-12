@@ -1,15 +1,15 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Alexandria.SaveAPI;
+//using Alexandria.SaveAPI;
 using Alexandria.NPCAPI;
 using Alexandria.EnemyAPI;
 using Alexandria.DungeonAPI;
 using Alexandria.ItemAPI;
 using Alexandria.Misc;
+using Alexandria.ChestApi;
 
 namespace Alexandria
 {
@@ -38,12 +38,12 @@ namespace Alexandria
 
                 AlexandriaTags.InitGenericTags();
 
-                // ETGModConsole.Log($"pre Trying to create thingo bot.alexandria - TEST", true);
+                AlexandriaHooks.Init();
+                ChestSpawnHelper.Init();
 
-                //EnumUtility.GetEnumValue<CustomDungeonFlags>("alexandria", "TEST");
+                Commands.Init();
 
-                SaveAPIManager.CreateNewDungeonFlag("alexandria", "TEST2");
-                SaveAPIManager.CreateNewDungeonFlag("alexandria", "TEST");
+                BreachShopTools.Init();
 
                 ETGModConsole.Log("started!!");
                 //ETGModConsole.Log("started!!", true);
@@ -60,7 +60,7 @@ namespace Alexandria
             try
             {
                 //SaveAPIManager.Setup("aTEST");
-                SaveAPIManager.Init();
+                //SaveAPIManager.Init();
             }
             catch (Exception e)
             {

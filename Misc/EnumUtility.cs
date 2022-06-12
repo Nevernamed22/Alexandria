@@ -56,7 +56,6 @@ namespace Alexandria.Misc
             string saveKey = $"{typeof(T).Name}_{guid}_{value}";
 
             int enumValue = EnumSaveData.Instance.GetValueAsInt(ModGUID, saveKey);
-			Debug.LogException(new NotSupportedException($"FUCK YOU"));
 			if (enumValue == default)
             {
                 lock (lockObject)
@@ -67,7 +66,6 @@ namespace Alexandria.Misc
 
 					EnumSaveData.Instance.SetValue(ModGUID, MAX_DATA, enumValue + 1);
 					EnumSaveData.Instance.SetValue(ModGUID, saveKey, enumValue);
-					Debug.LogException(new NotSupportedException($"FUCK YOU!"));
 					//save savedata
 					EnumSaveData.Save();
 
@@ -75,10 +73,6 @@ namespace Alexandria.Misc
             }
 
             reverseMapper[enumValue] = typeof(T);
-			Debug.LogException(new NotSupportedException($"FUCK YOU!!"));
-
-
-			//return *(T*)&enumValue;
 			return (T)(object)enumValue;
 
 		}

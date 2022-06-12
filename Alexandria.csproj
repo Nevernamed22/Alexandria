@@ -76,6 +76,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChestAPI\ChestSpawnHelper.cs" />
+    <Compile Include="AlexandriaHooks.cs" />
     <Compile Include="DungeonAPI\RoomUtility.cs" />
     <Compile Include="EnemyAPI\AIActorUtility.cs" />
     <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
@@ -100,9 +102,11 @@
     <Compile Include="ItemAPI\ApplyOffset.cs" />
     <Compile Include="ItemAPI\BeamAPI.cs" />
     <Compile Include="ItemAPI\CompanionBuilder.cs" />
+    <Compile Include="Misc\Commands.cs" />
     <Compile Include="Misc\CustomActions.cs" />
     <Compile Include="Misc\PickupUtility.cs" />
     <Compile Include="Misc\PlayerUtility.cs" />
+    <Compile Include="NPCAPI\BreachShopTools.cs" />
     <Compile Include="PrefabAPI\AssetBundleBuilder.cs" />
     <Compile Include="PrefabAPI\AssetBundleTools.cs" />
     <Compile Include="PrefabAPI\BinaryWriterExtensions.cs" />
@@ -166,7 +170,7 @@
     <Compile Include="TranslationAPI\Translation.cs" />
     <Compile Include="TranslationAPI\TranslationManager.cs" />
     <Compile Include="Misc\AudioUtility.cs" />
-    <Compile Include="Misc\AlexandriaTags.cs" />
+    <Compile Include="ItemAPI\AlexandriaTags.cs" />
     <Compile Include="Misc\DebuffUtility.cs" />
     <Compile Include="Misc\EnumUtility.cs" />
     <Compile Include="Misc\DebugUtility.cs" />
@@ -180,25 +184,6 @@
     <Compile Include="NPCAPI\NPCTools.cs" />
     <Compile Include="NPCAPI\ShopAPI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SaveAPI\AdvancedGameStats.cs" />
-    <Compile Include="SaveAPI\AdvancedGameStatsManager.cs" />
-    <Compile Include="SaveAPI\AdvancedMidGameSaveData.cs" />
-    <Compile Include="SaveAPI\BreachShopTool.cs" />
-    <Compile Include="SaveAPI\CustomDungeonPrerequisite.cs" />
-    <Compile Include="SaveAPI\CustomHuntQuest.cs" />
-    <Compile Include="SaveAPI\CustomHuntQuests.cs" />
-    <Compile Include="SaveAPI\Enums\Comparers\CustomDungeonFlagsComparer.cs" />
-    <Compile Include="SaveAPI\Enums\Comparers\CustomTrackedMaximumsComparer.cs" />
-    <Compile Include="SaveAPI\Enums\Comparers\CustomTrackedStatsComparer.cs" />
-    <Compile Include="SaveAPI\Enums\CustomCharacterSpecificGungeonFlags.cs" />
-    <Compile Include="SaveAPI\Enums\CustomDungeonFlags.cs" />
-    <Compile Include="SaveAPI\Enums\CustomTrackedMaximums.cs" />
-    <Compile Include="SaveAPI\Enums\CustomTrackedStats.cs" />
-    <Compile Include="SaveAPI\JammedEnemyState.cs" />
-    <Compile Include="SaveAPI\SaveAPIManager.cs" />
-    <Compile Include="SaveAPI\SaveTools.cs" />
-    <Compile Include="SaveAPI\SpecialAIActor.cs" />
-    <Compile Include="SaveAPI\SpecialPickupObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -10,7 +10,46 @@ namespace Alexandria.Misc
     {
 
 
+        public static GameObject SelectByWeightNoExclusions(this GenericLootTable table, bool useSeedRandom = false)
+        {
+            int outIndex = -1;
+            List<WeightedGameObject> list = new List<WeightedGameObject>();
+            float num = 0f;
+            for (int i = 0; i < table.defaultItemDrops.elements.Count; i++)
+            {
+                WeightedGameObject weightedGameObject = table.defaultItemDrops.elements[i];
+                bool flag = true;
+                if (weightedGameObject.additionalPrerequisites != null)
+                {
+                    for (int j = 0; j < weightedGameObject.additionalPrerequisites.Length; j++)
+                    {
 
+                    }
+                }
+                if (weightedGameObject.gameObject != null)
+                {
+
+                }
+                if (flag)
+                {
+                    list.Add(weightedGameObject);
+                    num += weightedGameObject.weight;
+                }
+            }
+            float num2 = ((!useSeedRandom) ? UnityEngine.Random.value : BraveRandom.GenerationRandomValue()) * num;
+            float num3 = 0f;
+            for (int k = 0; k < list.Count; k++)
+            {
+                num3 += list[k].weight;
+                if (num3 > num2)
+                {
+                    outIndex = table.defaultItemDrops.elements.IndexOf(list[k]);
+                    return list[k].gameObject;
+                }
+            }
+            outIndex = table.defaultItemDrops.elements.IndexOf(list[list.Count - 1]);
+            return list[list.Count - 1].gameObject;
+        }
 
         /// <summary>
         /// Creates a new blank loot table

@@ -288,10 +288,10 @@ namespace Alexandria.ItemAPI
 		}
 
 		// Token: 0x0600000A RID: 10 RVA: 0x000026EC File Offset: 0x000008EC
-		public static tk2dSpriteCollectionData ConstructCollection(GameObject obj, string name)
+		public static tk2dSpriteCollectionData ConstructCollection(GameObject obj, string name, bool destroyOnLoad = false)
 		{
 			tk2dSpriteCollectionData tk2dSpriteCollectionData = obj.AddComponent<tk2dSpriteCollectionData>();
-			UnityEngine.Object.DontDestroyOnLoad(tk2dSpriteCollectionData);
+			if (!destroyOnLoad) UnityEngine.Object.DontDestroyOnLoad(tk2dSpriteCollectionData);
 			tk2dSpriteCollectionData.assetName = name;
 			tk2dSpriteCollectionData.spriteCollectionGUID = name;
 			tk2dSpriteCollectionData.spriteCollectionName = name;

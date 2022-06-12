@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using HutongGames.PlayMaker.Actions;
 
 namespace Alexandria.NPCAPI
 {
@@ -43,9 +44,20 @@ namespace Alexandria.NPCAPI
                     typeof(BaseShopController).GetMethod("LockItems", BindingFlags.Instance | BindingFlags.NonPublic),
                     typeof(NPCHooks).GetMethod("LockItemsHook", BindingFlags.Static | BindingFlags.NonPublic));
 
+
+            var OnUpdateHook = new Hook(
+                typeof(DialogueBox).GetMethod("OnUpdate", BindingFlags.Instance | BindingFlags.Public),
+                typeof(NPCHooks).GetMethod("OnUpdateHook", BindingFlags.Static | BindingFlags.Public));
+
             /*var LockItemsHook = new Hook(
                 typeof(BaseShopController).GetMethod("LockItems", BindingFlags.Instance | BindingFlags.NonPublic),
                 typeof(Hooks).GetMethod("LockItemsHook", BindingFlags.Static | BindingFlags.NonPublic));*/
+        }
+
+        public static void OnUpdateHook(Action<DialogueBox> orig, DialogueBox self)
+        {
+            ETGModConsole.Log($"[{self.Name}]: {self.SuppressDefaultAnims} - {self.OverrideTalkAnim}");
+            orig(self);
         }
 
         private static void LockItemsHook(Action<BaseShopController> orig, BaseShopController self)

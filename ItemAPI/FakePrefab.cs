@@ -57,16 +57,8 @@ namespace Alexandria.ItemAPI
             if (was_active)
                 obj.SetActive(true);
 
-            DontDestroyOnLoad(fakeprefab);
             ExistingFakePrefabs.Add(fakeprefab);
-            if (already_fake)
-            {
-                //Tools.Print($"Fake prefab '{obj}' cloned as new fake prefab");
-            }
-            else
-            {
-                //Tools.Print($"Fake prefab '{obj}' cloned as new fake prefab");
-            }
+            DontDestroyOnLoad(fakeprefab);         
             return fakeprefab;
         }
 

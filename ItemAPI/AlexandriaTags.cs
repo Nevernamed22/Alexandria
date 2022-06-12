@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Alexandria.Misc
+namespace Alexandria.ItemAPI
 {
     public static class AlexandriaTags
     {

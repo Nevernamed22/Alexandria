@@ -104,14 +104,14 @@ namespace Alexandria.ItemAPI
         }
 
 
-        public static T BuildItem<T>(string name, string prefix, string spritePath, string shortDesc, string longDesc, PickupObject.ItemQuality quality) where T : PickupObject
+        public static T BuildItem<T>(string name, string prefix, string spritePath, string shortDesc, string longDesc, PickupObject.ItemQuality quality, Assembly assembly = null) where T : PickupObject
         {
             try
             {
                 GameObject obj = new GameObject(name);
                 var item = obj.AddComponent<T>();
 
-                ItemBuilder.AddSpriteToObject(name, spritePath, obj, Assembly.GetCallingAssembly());
+                ItemBuilder.AddSpriteToObject(name, spritePath, obj, assembly ?? Assembly.GetCallingAssembly());
 
                 ItemBuilder.SetupItem(item, shortDesc, longDesc, prefix);
 
@@ -128,14 +128,14 @@ namespace Alexandria.ItemAPI
             }
         }
 
-        public static T BuildItem<T>(string name, string prefix, string spritePath, string shortDesc, string longDesc, ItemBuilder.CooldownType cooldownType, float rechargeTime, bool consumable, PickupObject.ItemQuality quality) where T : PlayerItem
+        public static T BuildItem<T>(string name, string prefix, string spritePath, string shortDesc, string longDesc, ItemBuilder.CooldownType cooldownType, float rechargeTime, bool consumable, PickupObject.ItemQuality quality, Assembly assembly = null) where T : PlayerItem
         {
             try
             {
                 GameObject obj = new GameObject(name);
                 var item = obj.AddComponent<T>();
 
-                ItemBuilder.AddSpriteToObject(name, spritePath, obj, Assembly.GetCallingAssembly());
+                ItemBuilder.AddSpriteToObject(name, spritePath, obj, assembly ?? Assembly.GetCallingAssembly());
 
                 ItemBuilder.SetupItem(item, shortDesc, longDesc, prefix);
 

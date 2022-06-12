@@ -497,8 +497,24 @@ namespace Alexandria.NPCAPI
 					else if (this.CurrencyType == CustomShopItemController.ShopCurrencyType.META_CURRENCY)
 					{
 						int num2 = Mathf.RoundToInt(GameStatsManager.Instance.GetPlayerStatValue(TrackedStats.META_CURRENCY));
+						if (num2 < this.ModifiedPrice)
+						{
+							AkSoundEngine.PostEvent("Play_OBJ_purchase_unable_01", base.gameObject);
+							if (this.m_parentShop != null)
+							{
+								this.m_parentShop.NotifyFailedPurchase(this);
+							}
+							if (this.m_baseParentShop != null)
+							{
+								this.m_baseParentShop.NotifyFailedPurchase(this);
+							}
+							return;
+						}
 						GameStatsManager.Instance.ClearStatValueGlobal(TrackedStats.META_CURRENCY);
 						GameStatsManager.Instance.SetStat(TrackedStats.META_CURRENCY, (float)(num2 - this.ModifiedPrice));
+						GameStatsManager.Instance.RegisterStatChange(TrackedStats.META_CURRENCY_SPENT_AT_META_SHOP, (float)this.ModifiedPrice);
+						//LootEngine.GivePrefabToPlayer(this.item.gameObject, player);
+						AkSoundEngine.PostEvent("Play_OBJ_item_purchase_01", base.gameObject);
 					}
 					else if (this.CurrencyType == CustomShopItemController.ShopCurrencyType.CUSTOM)
 					{

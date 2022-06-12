@@ -202,9 +202,6 @@ namespace Alexandria.SaveAPI
 
         public static CustomDungeonFlags CreateNewDungeonFlag(string guid, string name)
         {
-            //ETGModConsole.Log($"Trying to create thingo {guid} - {name}", true);
-
-
             return EnumUtility.GetEnumValue<CustomDungeonFlags>(guid, name);
         }
 

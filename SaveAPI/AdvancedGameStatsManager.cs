@@ -5,6 +5,7 @@ using System.Text;
 using FullSerializer;
 using UnityEngine;
 using System.Collections;
+using Alexandria.Misc;
 
 namespace Alexandria.SaveAPI
 {
@@ -515,6 +516,7 @@ namespace Alexandria.SaveAPI
         public static void Load()
         {
             SaveManager.Init();
+
             
 
             foreach (var save in SaveAPIManager.AdvancedGameSaves)
@@ -546,6 +548,22 @@ namespace Alexandria.SaveAPI
                 {
                     m_instances[save.Key] = ins;
                 }
+
+                m_instances[save.Key].m_flags = new HashSet<CustomDungeonFlags>();
+                foreach (var flag in m_instances[save.Key].m_flagsForSave)
+                {
+                    //m_instances[save.Key].m_flags.Add(EnumUtility.GetEnumValue<CustomDungeonFlags>(save.Key, flag));
+                    m_instances[save.Key].m_flags.Add((CustomDungeonFlags)int.Parse(flag));
+                }
+
+                m_instances[save.Key].m_characterStats = new Dictionary<PlayableCharacters, AdvancedGameStats>();
+                foreach (var flag in m_instances[save.Key].m_characterStatsForSave)
+                {
+                    
+                    //m_instances[save.Key].m_characterStats.Add(flag.Key.ToString(), flag.Value);
+                }
+
+
 
                 m_instances[save.Key].cachedSaveSlot = SaveManager.CurrentSaveSlot;
                 if (hasPrevInstance && prevInstanceSaveSlot != null && m_instances[save.Key].cachedSaveSlot == prevInstanceSaveSlot.Value)
@@ -661,8 +679,22 @@ namespace Alexandria.SaveAPI
         {
             try
             {
-                foreach(var save in SaveAPIManager.AdvancedGameSaves)
+                foreach (var save in SaveAPIManager.AdvancedGameSaves)
                 {
+                    m_instances[save.Key].m_flagsForSave = new HashSet<string>();
+                    foreach (var flag in m_instances[save.Key].m_flags)
+                    {
+                        m_instances[save.Key].m_flagsForSave.Add(flag.ToString());
+                    }
+                    //m_instances[save.Key].m_flags.Clear();
+
+                    m_instances[save.Key].m_characterStatsForSave = new Dictionary<string, AdvancedGameStats>();
+                    foreach (var flag in m_instances[save.Key].m_characterStats)
+                    {
+                        m_instances[save.Key].m_characterStatsForSave.Add(flag.Key.ToString(), flag.Value);
+                    }
+                    //m_instances[save.Key].m_characterStats.Clear();
+
                     SaveManager.Save<AdvancedGameStatsManager>(m_instances[save.Key], save.Value, GameStatsManager.Instance.PlaytimeMin, 0u, null);
                 }
             }
@@ -684,7 +716,22 @@ namespace Alexandria.SaveAPI
             bool result = false;
             try
             {
-                result = SaveManager.Save<AdvancedGameStatsManager>(m_instances[guid], SaveAPIManager.AdvancedGameSaves[guid], GameStatsManager.Instance.PlaytimeMin, 0u, null);                
+
+                m_instances[guid].m_flagsForSave = new HashSet<string>();
+                foreach (var flag in m_instances[guid].m_flags)
+                {
+                    m_instances[guid].m_flagsForSave.Add(flag.ToString());
+                }
+                //m_instances[guid].m_flags.Clear();
+
+                m_instances[guid].m_characterStatsForSave = new Dictionary<string, AdvancedGameStats>();
+                foreach (var flag in m_instances[guid].m_characterStats)
+                {
+                    m_instances[guid].m_characterStatsForSave.Add(flag.Key.ToString(), flag.Value);
+                }
+                //m_instances[guid].m_characterStats.Clear();
+
+                result = SaveManager.Save<AdvancedGameStatsManager>(m_instances[guid], SaveAPIManager.AdvancedGameSaves[guid], GameStatsManager.Instance.PlaytimeMin, 0u, null);
             }
             catch (Exception ex)
             {
@@ -745,11 +792,26 @@ namespace Alexandria.SaveAPI
         public static Dictionary<string, AdvancedGameStatsManager> m_instances = new Dictionary<string, AdvancedGameStatsManager>();
 
         [fsProperty]
+        public HashSet<string> m_flagsForSave;
+
+
         public HashSet<CustomDungeonFlags> m_flags;
+
+
+
         [fsProperty]
         public string midGameSaveGuid;
-        [fsProperty]
+
+
+
+
         public Dictionary<PlayableCharacters, AdvancedGameStats> m_characterStats;
+
+        [fsProperty]
+        public Dictionary<string, AdvancedGameStats> m_characterStatsForSave;
+
+
+
         //public Dictionary<CustomCharacters.CustomPlayableCharacters, GameStats> m_customCharacterStats;
         private AdvancedGameStats m_sessionStats;
         private AdvancedGameStats m_savedSessionStats;

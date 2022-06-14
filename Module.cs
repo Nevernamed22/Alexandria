@@ -10,6 +10,7 @@ using Alexandria.DungeonAPI;
 using Alexandria.ItemAPI;
 using Alexandria.Misc;
 using Alexandria.ChestApi;
+using Alexandria.BindingAPI;
 
 namespace Alexandria
 {
@@ -45,6 +46,7 @@ namespace Alexandria
 
                 BreachShopTools.Init();
 
+                BindingBuilder.Init();
                 ETGModConsole.Log("started!!");
                 //ETGModConsole.Log("started!!", true);
             }

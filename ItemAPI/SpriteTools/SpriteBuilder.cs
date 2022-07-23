@@ -115,12 +115,44 @@ namespace Alexandria.ItemAPI
 			return AddSpriteToCollection(definition, collection);
 		}
 
-		public static int AddSpriteToCollection(string resourcePath, tk2dSpriteCollectionData collection, string name)
+		public static int AddSpriteToCollection(string resourcePath, tk2dSpriteCollectionData collection, string name, Assembly assembly = null)
 		{
 			string extension = !resourcePath.EndsWith(".png") ? ".png" : "";
 			resourcePath += extension;
-			var texture = ResourceExtractor.GetTextureFromResource(resourcePath, Assembly.GetCallingAssembly()); //Get Texture
+			var texture = ResourceExtractor.GetTextureFromResource(resourcePath, assembly ?? Assembly.GetCallingAssembly()); //Get Texture
 			var definition = ConstructDefinition(texture); //Generate definition
+			if (string.IsNullOrEmpty(name))
+			{
+				definition.name = texture.name; //naming the definition is actually extremely important 
+			}
+			else
+			{
+				definition.name = name; //naming the definition is actually extremely important 
+			}
+			return AddSpriteToCollection(definition, collection);
+		}
+
+		public static int AddSpriteToCollection2(Texture2D texture, tk2dSpriteCollectionData collection, string name = "")
+		{
+			var definition = ConstructDefinition2(texture, collection); //Generate definition
+			if (string.IsNullOrEmpty(name))
+			{
+				definition.name = texture.name; //naming the definition is actually extremely important 
+			}
+			else
+			{
+				definition.name = name; //naming the definition is actually extremely important 
+			}
+			return AddSpriteToCollection(definition, collection);
+		}
+
+
+		public static int AddSpriteToCollection2(string resourcePath, tk2dSpriteCollectionData collection, string name = "", Assembly assembly = null)
+		{
+			string extension = !resourcePath.EndsWith(".png") ? ".png" : "";
+			resourcePath += extension;
+			var texture = ResourceExtractor.GetTextureFromResource(resourcePath, assembly ?? Assembly.GetCallingAssembly()); //Get Texture
+			var definition = ConstructDefinition2(texture, collection); //Generate definition
 			if (string.IsNullOrEmpty(name))
 			{
 				definition.name = texture.name; //naming the definition is actually extremely important 
@@ -274,6 +306,76 @@ namespace Alexandria.ItemAPI
 				position1 = new Vector3(num + num3, num2, 0f),
 				position2 = new Vector3(num, num2 + num4, 0f),
 				position3 = new Vector3(num + num3, num2 + num4, 0f),
+				material = material,
+				materialInst = material,
+				materialId = 0,
+				uvs = runtimeAtlasSegment.uvs,
+				boundsDataCenter = new Vector3(num3 / 2f, num4 / 2f, 0f),
+				boundsDataExtents = new Vector3(num3, num4, 0f),
+				untrimmedBoundsDataCenter = new Vector3(num3 / 2f, num4 / 2f, 0f),
+				untrimmedBoundsDataExtents = new Vector3(num3, num4, 0f)
+			};
+			tk2dSpriteDefinition.name = texture.name;
+			return tk2dSpriteDefinition;
+		}
+
+		public static tk2dSpriteDefinition ConstructDefinition2(Texture2D texture, tk2dSpriteCollectionData collection)
+		{
+			RuntimeAtlasSegment runtimeAtlasSegment = ETGMod.Assets.Packer.Pack(texture, false);
+			Material material = new Material(ShaderCache.Acquire(PlayerController.DefaultShaderName));
+			material.mainTexture = runtimeAtlasSegment.texture;
+			float width = texture.width;
+			float height = texture.height;
+			float num3 = width / 16;
+			float num4 = height / 16f;
+
+
+			Vector2 anchor = tk2dSpriteGeomGen.GetAnchorOffset(tk2dBaseSprite.Anchor.LowerLeft, num3, num4);
+
+			float scale = 1;
+
+			Vector3 pos0 = new Vector3(0, -height * scale, 0.0f);
+			Vector3 pos1 = pos0 + new Vector3(num3 * scale, height * scale, 0.0f);
+
+			Rect trimRect = new Rect(0, 0, 0, 0);
+			trimRect.Set(0, 0, num3, num4);
+
+			Vector2 offset = new Vector2(trimRect.x - anchor.x, -trimRect.y + anchor.y);
+
+
+			tk2dSpriteDefinition tk2dSpriteDefinition = new tk2dSpriteDefinition
+			{
+				normals = new Vector3[]
+				{
+					new Vector3(0f, 0f, -1f),
+					new Vector3(0f, 0f, -1f),
+					new Vector3(0f, 0f, -1f),
+					new Vector3(0f, 0f, -1f)
+				},
+				tangents = new Vector4[]
+				{
+					new Vector4(1f, 0f, 0f, 1f),
+					new Vector4(1f, 0f, 0f, 1f),
+					new Vector4(1f, 0f, 0f, 1f),
+					new Vector4(1f, 0f, 0f, 1f)
+				},
+				texelSize = new Vector2(0.0625f, 0.0625f),
+				extractRegion = false,
+				regionX = 0,
+				regionY = 0,
+				regionW = 0,
+				regionH = 0,
+				flipped = tk2dSpriteDefinition.FlipMode.None,
+				complexGeometry = false,
+				physicsEngine = tk2dSpriteDefinition.PhysicsEngine.Physics3D,
+				colliderType = tk2dSpriteDefinition.ColliderType.None,
+				collisionLayer = CollisionLayer.HighObstacle,
+
+				position0 = new Vector3(pos0.x + offset.x, pos0.y + offset.y, 0),
+				position1 = new Vector3(pos1.x + offset.x, pos0.y + offset.y, 0),
+				position2 = new Vector3(pos0.x + offset.x, pos1.y + offset.y, 0),
+				position3 = new Vector3(pos1.x + offset.x, pos1.y + offset.y, 0),
+
 				material = material,
 				materialInst = material,
 				materialId = 0,

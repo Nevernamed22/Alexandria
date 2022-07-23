@@ -318,13 +318,11 @@ namespace Alexandria.NPCAPI
 					}
 					else
 					{
-						ETGModConsole.Log("a");
+						
 						List<WeightedGameObject> compiledRawItems2 = this.shopItems.GetCompiledRawItems();
 						GameObject gameObject3 = null;
-						ETGModConsole.Log("b");
 						for (int l = 0; l < compiledRawItems2.Count; l++)
 						{
-							ETGModConsole.Log("c");
 							GameObject gameObject4 = compiledRawItems2[l].gameObject;
 							PickupObject component3 = gameObject4.GetComponent<PickupObject>();
 							if (component3 == null) { continue; }
@@ -337,15 +335,12 @@ namespace Alexandria.NPCAPI
 									break;
 								}
 							}
-							ETGModConsole.Log("d");
 						}
-						ETGModConsole.Log("e");
 						this.m_shopItems.Add(gameObject3);
 						if (gameObject3 == null)
 						{
 							list.Add(1);
 						}
-						ETGModConsole.Log("f");
 					}
 				}
 				else

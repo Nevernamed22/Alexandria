@@ -10,13 +10,31 @@ using Alexandria.DungeonAPI;
 using Alexandria.ItemAPI;
 using Alexandria.Misc;
 using Alexandria.ChestApi;
+using BepInEx;
 
 namespace Alexandria
 {
-    public class Alexandria : ETGModule
+
+
+    [BepInDependency("etgmodding.etg.mtgapi")]
+    [BepInPlugin(GUID, NAME, VERSION)]
+    public class Alexandria : BaseUnityPlugin
     {
-        public override void Start()
+
+
+        public const string GUID = "alexandria.etgmod.alexandria";
+        public const string NAME = "Alexandria";
+        public const string VERSION = "0.1.0";
+
+
+        public void Start()
         {
+            ETGModMainBehaviour.WaitForGameManagerStart(GMStart);
+        }
+
+        public void GMStart(GameManager g)
+        {
+
             try
             {
                 StaticReferences.Init();
@@ -47,20 +65,6 @@ namespace Alexandria
 
                 ETGModConsole.Log("started!!");
                 //ETGModConsole.Log("started!!", true);
-            }
-            catch (Exception e)
-            {
-                ETGModConsole.Log(e.ToString());
-            }
-            
-        }
-        public override void Exit() { }
-        public override void Init()
-        {
-            try
-            {
-                //SaveAPIManager.Setup("aTEST");
-                //SaveAPIManager.Init();
             }
             catch (Exception e)
             {

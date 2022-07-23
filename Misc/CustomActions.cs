@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using Alexandria.ItemAPI;
 using UnityEngine;
+using System.Collections;
 
 namespace Alexandria.Misc
 {
@@ -21,6 +22,9 @@ namespace Alexandria.Misc
         public static Action<AdvancedShrineController, PlayerController> OnShrineUsed;
         public static Action<Vector3, ExplosionData, Vector2, Action, bool, CoreDamageTypes, bool> OnExplosionComplex;
         public static Action<AmmoPickup, PlayerController> OnAmmoCollected;
+        public static Action<PlayerController> OnRunStart;
+        public static Action<Dungeon> PostDungeonTrueStart;
+        //public static Action<Projectile, bool, bool, bool, bool> OnProjectileDieInAir;
 
         public static void InitHooks()
         {
@@ -59,6 +63,14 @@ namespace Alexandria.Misc
             ammoInteractHook = new Hook(
                 typeof(AmmoPickup).GetMethod("Interact", BindingFlags.Instance | BindingFlags.Public),
                 typeof(CustomActions).GetMethod("ammoInteractHookMethod")
+            );
+            new Hook(
+                typeof(PlayerController).GetMethod("HandleSpinfallSpawn", BindingFlags.Instance | BindingFlags.NonPublic),
+                typeof(CustomActions).GetMethod("HandleSpinfallSpawnHook")
+            );
+            new Hook(
+                typeof(Dungeon).GetMethod("Start", BindingFlags.Instance | BindingFlags.NonPublic),
+                typeof(CustomActions).GetMethod("StartHook", BindingFlags.Static | BindingFlags.Public)             
             );
         }
         private static Hook pedestalSpawnHook;
@@ -129,6 +141,41 @@ namespace Alexandria.Misc
             }
         }
 
+        public static IEnumerator StartHook(Func<Dungeon, IEnumerator> orig, Dungeon self)
+        {
+            IEnumerator origEnum = orig(self);
+            while (origEnum.MoveNext())
+            {
+                object obj = origEnum.Current;
+                yield return obj;
+            }
+
+            if (PostDungeonTrueStart != null)
+            {
+                PostDungeonTrueStart(self);
+            }
+            yield break;
+        }
+
+        public static IEnumerator HandleSpinfallSpawnHook(Func<PlayerController, float, IEnumerator> orig, PlayerController self, float invisibleDelay)
+        {
+            IEnumerator origEnum = orig(self, invisibleDelay);
+            while (origEnum.MoveNext())
+            {
+                object obj = origEnum.Current;
+                yield return obj;
+            }
+            if (GameStatsManager.Instance.GetSessionStatValue(TrackedStats.TIME_PLAYED) <= 0.33f)
+            {
+                if (OnRunStart != null)
+                {
+                    OnRunStart(self);
+                }
+            }
+            yield break;
+        }
+
         public delegate void Action<T1, T2, T3, T4, T5, T6, T7>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7);
+        public delegate void Action<T1, T2, T3, T4, T5>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
     }
 }

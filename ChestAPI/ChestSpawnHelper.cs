@@ -12,9 +12,9 @@ namespace Alexandria.ChestApi
 	{
 		public static void Init()
 		{
-			var ConfigureOnPlacementHook = new Hook(
-					typeof(FloorChestPlacer).GetMethod("ConfigureOnPlacement", BindingFlags.Instance | BindingFlags.Public),
-					typeof(ChestSpawnHelper).GetMethod("ConfigureOnPlacementHook", BindingFlags.Static | BindingFlags.Public));
+			//var ConfigureOnPlacementHook = new Hook(
+			//		typeof(FloorChestPlacer).GetMethod("ConfigureOnPlacement", BindingFlags.Instance | BindingFlags.Public),
+			//		typeof(ChestSpawnHelper).GetMethod("ConfigureOnPlacementHook", BindingFlags.Static | BindingFlags.Public));
 		}
 
 		public static void RegisterCustomChest(Chest chest, float weight = 1)
@@ -28,8 +28,13 @@ namespace Alexandria.ChestApi
 		//a 0.09
 		//s 0.04
 
+
 		public static void ConfigureOnPlacementHook(Action<FloorChestPlacer, RoomHandler> orig, FloorChestPlacer self, RoomHandler room)
 		{
+
+
+			FloorRewardData rewardDataForFloor = GameManager.Instance.RewardManager.GetRewardDataForFloor2(GameManager.Instance.BestGenerationDungeonPrefab.tileIndices.tilesetId);
+			bool forceDChanceZero = StaticReferenceManager.DChestsSpawnedInTotal >= 2;
 
 			var chest = GetTargetCustomChest(UnityEngine.Random.value);
 			if (chest)
@@ -59,6 +64,23 @@ namespace Alexandria.ChestApi
 				}
 			}
 			return null;
+		}
+
+		public static FloorRewardData GetRewardDataForFloor2(this RewardManager rewardManager, GlobalDungeonData.ValidTilesets targetTileset)
+		{
+			FloorRewardData floorRewardData = null;
+			for (int i = 0; i < rewardManager.FloorRewardData.Count; i++)
+			{
+				if ((rewardManager.FloorRewardData[i].AssociatedTilesets | targetTileset) == rewardManager.FloorRewardData[i].AssociatedTilesets)
+				{
+					floorRewardData = rewardManager.FloorRewardData[i];
+				}
+			}
+			if (floorRewardData == null)
+			{
+				floorRewardData = rewardManager.FloorRewardData[0];
+			}
+			return floorRewardData;
 		}
 
 

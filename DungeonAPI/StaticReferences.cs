@@ -170,6 +170,7 @@ namespace Alexandria.DungeonAPI
                     //Tools.PrintError($"Loaded assetbundle: {name}");
 
                     AssetBundles.Add(name, ResourceManager.LoadAssetBundle(name));
+                    Debug.Log($"loaded {name}");
                 }
                 catch (Exception e)
                 {

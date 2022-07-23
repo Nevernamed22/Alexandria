@@ -201,15 +201,16 @@ namespace Alexandria.EnemyAPI
             foreach (var a in DirectionalAnimation.m_combined[(int)directionType])
             {
                 List<int> indices = new List<int>();
-                for (int i = 0; i < resources.Length; i++)
+                var sortedList = resources.OrderBy(x => x).ToList();
+                for (int i = 0; i < sortedList.Count; i++)
                 {
 
-                    if (resources[i].Contains(spriteDirectory.Replace('/', '.'), false))
+                    if (sortedList[i].Contains(spriteDirectory.Replace('/', '.'), false))
                     {
 
-                        if (resources[i].Contains(spriteDirectory.Replace('/', '.') + $".{enemyName}_{name.ToLower()}_{a.suffix}_0", false))
+                        if (sortedList[i].Contains(spriteDirectory.Replace('/', '.') + $".{enemyName}_{name.ToLower()}_{a.suffix}_0", false))
                         {
-                            indices.Add(SpriteBuilder.AddSpriteToCollection(resources[i], collection, assembly ?? Assembly.GetCallingAssembly()));
+                            indices.Add(SpriteBuilder.AddSpriteToCollection(sortedList[i], collection, assembly ?? Assembly.GetCallingAssembly()));
                         }
 
                     }
@@ -232,11 +233,16 @@ namespace Alexandria.EnemyAPI
 
             string[] resources = ResourceExtractor.GetResourceNames(assembly ?? Assembly.GetCallingAssembly());
             List<int> indices = new List<int>();
-            for (int i = 0; i < resources.Length; i++)
+
+
+            var sortedList = resources.OrderBy(x => x).ToList();
+
+            for (int i = 0; i < sortedList.Count; i++)
             {
-                if (resources[i].StartsWith(spriteDirectory.Replace('/', '.'), StringComparison.OrdinalIgnoreCase))
+               
+                if (sortedList[i].StartsWith(spriteDirectory.Replace('/', '.'), StringComparison.OrdinalIgnoreCase))
                 {
-                    indices.Add(SpriteBuilder.AddSpriteToCollection(resources[i], collection, assembly ?? Assembly.GetCallingAssembly()));
+                    indices.Add(SpriteBuilder.AddSpriteToCollection(sortedList[i], collection, assembly ?? Assembly.GetCallingAssembly()));
                 }
             }
             tk2dSpriteAnimationClip clip = SpriteBuilder.AddAnimation(aiAnimator.spriteAnimator, collection, indices, name, tk2dSpriteAnimationClip.WrapMode.Once);

@@ -176,7 +176,7 @@ namespace Alexandria.ItemAPI
 
                 for (int i = 0; i < moduleCount; i++)
                 {
-                    var module = gun.AddProjectileModuleFrom(PickupObjectDatabase.GetById(gunIdToCopyModuleFrom) as Gun, true, false);
+                    var module = gun.AddProjectileModuleFrom(PickupObjectDatabase.GetById(gunIdToCopyModuleFrom) as Gun);
                     module.shootStyle = shootStyle;
                     module.cooldownTime = coolDown;
                     module.numberOfShotsInClip = clipSize;
@@ -239,7 +239,7 @@ namespace Alexandria.ItemAPI
 
                 gun.barrelOffset.position = barrelOffset;
                 
-                gun.AddProjectileModuleFrom(PickupObjectDatabase.GetById(gunIdToCopyModuleFrom) as Gun, true, false);
+                gun.AddProjectileModuleFrom(PickupObjectDatabase.GetById(gunIdToCopyModuleFrom) as Gun);
                 gun.DefaultModule.shootStyle = shootStyle;
                 gun.DefaultModule.cooldownTime = coolDown;
                 gun.DefaultModule.numberOfShotsInClip = clipSize;

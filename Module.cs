@@ -11,6 +11,7 @@ using Alexandria.ItemAPI;
 using Alexandria.Misc;
 using Alexandria.ChestApi;
 using BepInEx;
+using CustomCharacters;
 
 namespace Alexandria
 {
@@ -62,6 +63,9 @@ namespace Alexandria
                 Commands.Init();
 
                 BreachShopTools.Init();
+
+                CustomCharacters.Hooks.Init();
+                ToolsCharApi.Init();
 
                 ETGModConsole.Log("started!!");
                 //ETGModConsole.Log("started!!", true);

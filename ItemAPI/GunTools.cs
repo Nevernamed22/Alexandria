@@ -359,9 +359,12 @@ namespace Alexandria.ItemAPI
             def.colliderVertices[0] = new Vector3(colliderOffsetX, colliderOffsetY, 0f);
             def.colliderVertices[1] = new Vector3(colliderWidth / 2, colliderHeight / 2);
             def.name = name;
+
             def.materialInst.mainTexture = ETGMod.Databases.Items.ProjectileCollection.inst.spriteDefinitions[id].materialInst.mainTexture;
             def.uvs = ETGMod.Databases.Items.ProjectileCollection.inst.spriteDefinitions[id].uvs.ToArray();
+
             ETGMod.Databases.Items.ProjectileCollection.inst.spriteDefinitions[id] = def;
+
             return def;
         }
         public static tk2dSpriteDefinition SetProjectileSpriteRight(this Projectile proj, string name, int pixelWidth, int pixelHeight, bool lightened = true, tk2dBaseSprite.Anchor anchor = tk2dBaseSprite.Anchor.LowerLeft, int? overrideColliderPixelWidth = null, int? overrideColliderPixelHeight = null, bool anchorChangesCollider = true,
@@ -369,7 +372,7 @@ namespace Alexandria.ItemAPI
         {
             try
             {
-                proj.GetAnySprite().spriteId = ETGMod.Databases.Items.ProjectileCollection.inst.GetSpriteIdByName(name);
+                proj.GetAnySprite().SetSprite(ETGMod.Databases.Items.ProjectileCollection.inst, ETGMod.Databases.Items.ProjectileCollection.inst.GetSpriteIdByName(name));
                 tk2dSpriteDefinition def = SetupDefinitionForProjectileSprite(name, proj.GetAnySprite().spriteId, pixelWidth, pixelHeight, lightened, overrideColliderPixelWidth, overrideColliderPixelHeight, overrideColliderOffsetX,
                     overrideColliderOffsetY, overrideProjectileToCopyFrom);
                 def.ConstructOffsetsFromAnchor(anchor, def.position3, fixesScale, anchorChangesCollider);
@@ -517,7 +520,8 @@ namespace Alexandria.ItemAPI
             gun.RawSourceVolley.projectiles.Add(projectile);
             return projectile;
         }
-        public static ProjectileModule AddProjectileModuleToRawVolleyFrom(this Gun gun, Gun other, bool cloned = true, bool clonedProjectiles = true)
+
+        /*public static ProjectileModule AddProjectileModuleToRawVolleyFrom(this Gun gun, Gun other, bool cloned = true, bool clonedProjectiles = true)
         {
             ProjectileModule defaultModule = other.DefaultModule;
             if (!cloned)
@@ -531,7 +535,8 @@ namespace Alexandria.ItemAPI
                 projectileModule.projectiles.Add((!clonedProjectiles) ? defaultModule.projectiles[i] : defaultModule.projectiles[i].ClonedPrefab());
             }
             return gun.AddProjectileModuleToRawVolley(projectileModule);
-        }
+        }*/
+
         public static ProjectileModule RawDefaultModule(this Gun self)
         {
             if (self.RawSourceVolley)

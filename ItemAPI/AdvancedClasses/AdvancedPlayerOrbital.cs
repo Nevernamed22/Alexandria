@@ -129,7 +129,7 @@ namespace Alexandria.ItemAPI
         }
 
         // Token: 0x060000FB RID: 251 RVA: 0x0000B7DC File Offset: 0x000099DC
-        protected override void Update()
+        public override void Update()
         {
             base.Update();
             bool hasAdvancedUpgradeSynergy = this.HasAdvancedUpgradeSynergy;
@@ -252,7 +252,7 @@ namespace Alexandria.ItemAPI
         }
 
         // Token: 0x060000FF RID: 255 RVA: 0x0000BBEC File Offset: 0x00009DEC
-        protected override void OnDestroy()
+        public override void OnDestroy()
         {
             bool flag = this.m_owner != null;
             if (flag)

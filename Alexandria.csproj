@@ -34,14 +34,16 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
+    <Reference Include="0Harmony, Version=2.9.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\BepInEx\core\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\EtG_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\Documents\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="BepInEx">
+    <Reference Include="BepInEx, Version=5.4.19.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\BepInEx\core\BepInEx.dll</HintPath>
     </Reference>
     <Reference Include="Ionic.Zip, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
@@ -52,14 +54,18 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\BepInEx\plugins\MtGAPI\ModTheGungeonAPI.dll</HintPath>
     </Reference>
-    <Reference Include="Mono.Cecil">
+    <Reference Include="Mono.Cecil, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\BepInEx\core\Mono.Cecil.dll</HintPath>
     </Reference>
-    <Reference Include="MonoMod.RuntimeDetour, Version=18.9.0.42435, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MonoMod">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\BepInEx\core\MonoMod.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour, Version=22.1.29.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
     </Reference>
-    <Reference Include="MonoMod.Utils, Version=18.9.0.42433, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MonoMod.Utils, Version=22.1.29.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\BepInEx\core\MonoMod.Utils.dll</HintPath>
     </Reference>
@@ -106,6 +112,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CharApi\CharacterBuilding\CharacterBuilder.cs" />
+    <Compile Include="CharApi\CharacterBuilding\CustomCharacter.cs" />
+    <Compile Include="CharApi\CharacterBuilding\FoyerCharacterHandler.cs" />
+    <Compile Include="CharApi\CharacterBuilding\Loader.cs" />
+    <Compile Include="CharApi\CharacterBuilding\SpriteHandler.cs" />
+    <Compile Include="CharApi\CharacterBuilding\StringHandler.cs" />
+    <Compile Include="CharApi\CharacterSwitcher.cs" />
+    <Compile Include="CharApi\CollectionDumper.cs" />
+    <Compile Include="CharApi\Tools\CharApiHooks.cs" />
+    <Compile Include="CharApi\Tools\HooksToMakeDodgeRollsCodeForRobotGood.cs" />
+    <Compile Include="CharApi\Tools\TexturePacker.cs" />
+    <Compile Include="CharApi\Tools\TextureStitcher.cs" />
+    <Compile Include="CharApi\Tools\Tools.cs" />
     <Compile Include="ChestAPI\ChestSpawnHelper.cs" />
     <Compile Include="AlexandriaHooks.cs" />
     <Compile Include="DungeonAPI\RoomUtility.cs" />
@@ -220,6 +239,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>COPY "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\BepInEx\plugins"</PostBuildEvent>
+    <PostBuildEvent>COPY "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\BepInEx\plugins\Alexandria"</PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -185,7 +185,7 @@ namespace Alexandria.DungeonAPI
 			return string.Empty;
 		}
 
-		protected override void OnDestroy()
+		public override void OnDestroy()
 		{
 			base.OnDestroy();
 		}

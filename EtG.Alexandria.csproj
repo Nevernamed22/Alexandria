@@ -1,0 +1,430 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <Import Condition="Exists('local.props')" Project="local.props" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{57445610-0892-47C3-BE16-453172104123}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>EtG.Alexandria</RootNamespace>
+    <AssemblyName>EtG.Alexandria</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Debug\EtG.Alexandria.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Release\EtG.Alexandria.xml</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="CharApi\CharacterBuilding\CharacterBuilder.cs" />
+    <Compile Include="CharApi\CharacterBuilding\CustomCharacter.cs" />
+    <Compile Include="CharApi\CharacterBuilding\FoyerCharacterHandler.cs" />
+    <Compile Include="CharApi\CharacterBuilding\Loader.cs" />
+    <Compile Include="CharApi\CharacterBuilding\SpriteHandler.cs" />
+    <Compile Include="CharApi\CharacterBuilding\StringHandler.cs" />
+    <Compile Include="CharApi\CharacterSwitcher.cs" />
+    <Compile Include="CharApi\CollectionDumper.cs" />
+    <Compile Include="CharApi\Tools\CharApiHooks.cs" />
+    <Compile Include="CharApi\Tools\HooksToMakeDodgeRollsCodeForRobotGood.cs" />
+    <Compile Include="CharApi\Tools\TexturePacker.cs" />
+    <Compile Include="CharApi\Tools\TextureStitcher.cs" />
+    <Compile Include="CharApi\Tools\Tools.cs" />
+    <Compile Include="ChestAPI\ChestSpawnHelper.cs" />
+    <Compile Include="AlexandriaHooks.cs" />
+    <Compile Include="DungeonAPI\RoomUtility.cs" />
+    <Compile Include="EnemyAPI\AIActorUtility.cs" />
+    <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
+    <Compile Include="ItemAPI\AnimationUtility.cs" />
+    <Compile Include="ItemAPI\OrbitalUtility.cs" />
+    <Compile Include="Misc\ChamberGunCompatibility.cs" />
+    <Compile Include="EnemyAPI\BossBuilder.cs" />
+    <Compile Include="EnemyAPI\EnemyBuilder.cs" />
+    <Compile Include="EnemyAPI\EnemyTools.cs" />
+    <Compile Include="EnemyAPI\Hooks.cs" />
+    <Compile Include="EnemyAPI\OverrideBehavior.cs" />
+    <Compile Include="DungeonAPI\DungeonHandler.cs" />
+    <Compile Include="DungeonAPI\DungeonHooks.cs" />
+    <Compile Include="DungeonAPI\FoolproofedChallengeShrineController.cs" />
+    <Compile Include="DungeonAPI\OfficialFlows.cs" />
+    <Compile Include="DungeonAPI\RoomFactory.cs" />
+    <Compile Include="DungeonAPI\SampleFlow.cs" />
+    <Compile Include="DungeonAPI\ShrineTools.cs" />
+    <Compile Include="DungeonAPI\StaticReferences.cs" />
+    <Compile Include="ItemAPI\AdvancedClasses\AdvancedGunBehaviour.cs" />
+    <Compile Include="ItemAPI\AdvancedClasses\AdvancedPlayerOrbital.cs" />
+    <Compile Include="ItemAPI\ApplyOffset.cs" />
+    <Compile Include="ItemAPI\BeamAPI.cs" />
+    <Compile Include="ItemAPI\CompanionBuilder.cs" />
+    <Compile Include="Misc\Commands.cs" />
+    <Compile Include="Misc\CustomActions.cs" />
+    <Compile Include="Misc\PickupUtility.cs" />
+    <Compile Include="Misc\PlayerUtility.cs" />
+    <Compile Include="NPCAPI\BreachShopTools.cs" />
+    <Compile Include="PrefabAPI\AssetBundleBuilder.cs" />
+    <Compile Include="PrefabAPI\AssetBundleTools.cs" />
+    <Compile Include="PrefabAPI\BinaryWriterExtensions.cs" />
+    <Compile Include="PrefabAPI\CommonString.cs" />
+    <Compile Include="PrefabAPI\CRC.cs" />
+    <Compile Include="PrefabAPI\EditorAssetBundle.cs" />
+    <Compile Include="PrefabAPI\EditorBuildTarget.cs" />
+    <Compile Include="PrefabAPI\EditorClassIDType.cs" />
+    <Compile Include="PrefabAPI\EditorComponent.cs" />
+    <Compile Include="PrefabAPI\EditorExtension.cs" />
+    <Compile Include="PrefabAPI\EditorGameObject.cs" />
+    <Compile Include="PrefabAPI\EditorNamedObject.cs" />
+    <Compile Include="PrefabAPI\EditorObject.cs" />
+    <Compile Include="PrefabAPI\EditorPPtr.cs" />
+    <Compile Include="PrefabAPI\EditorTextAsset.cs" />
+    <Compile Include="PrefabAPI\EditorTransform.cs" />
+    <Compile Include="PrefabAPI\EndianBinaryWriter.cs" />
+    <Compile Include="PrefabAPI\ICoder.cs" />
+    <Compile Include="PrefabAPI\IMatchFinder.cs" />
+    <Compile Include="PrefabAPI\LZ4Codec.cs" />
+    <Compile Include="PrefabAPI\LZ4CodecPartial.cs" />
+    <Compile Include="PrefabAPI\LZ4\ILZ4Service.cs" />
+    <Compile Include="PrefabAPI\LZ4\LZ4Codec.cs" />
+    <Compile Include="PrefabAPI\LZ4\LZ4Codec.Safe.cs" />
+    <Compile Include="PrefabAPI\LZ4\LZ4Codec.Safe32.Dirty.cs" />
+    <Compile Include="PrefabAPI\LZ4\LZ4Codec.Safe32HC.Dirty.cs" />
+    <Compile Include="PrefabAPI\LZ4\LZ4Codec.Safe64.Dirty.cs" />
+    <Compile Include="PrefabAPI\LZ4\LZ4Codec.Safe64HC.Dirty.cs" />
+    <Compile Include="PrefabAPI\LzBinTree.cs" />
+    <Compile Include="PrefabAPI\LzInWindow.cs" />
+    <Compile Include="PrefabAPI\LzmaBase.cs" />
+    <Compile Include="PrefabAPI\LzmaDecoder.cs" />
+    <Compile Include="PrefabAPI\LzmaEncoder.cs" />
+    <Compile Include="PrefabAPI\LzOutWindow.cs" />
+    <Compile Include="PrefabAPI\PPtr.cs" />
+    <Compile Include="PrefabAPI\PrefabBuilder.cs" />
+    <Compile Include="PrefabAPI\RangeCoder.cs" />
+    <Compile Include="PrefabAPI\RangeCoderBit.cs" />
+    <Compile Include="PrefabAPI\RangeCoderBitTree.cs" />
+    <Compile Include="PrefabAPI\Safe32LZ4Service.cs" />
+    <Compile Include="PrefabAPI\Safe64LZ4Service.cs" />
+    <Compile Include="PrefabAPI\SerializedType.cs" />
+    <Compile Include="PrefabAPI\SerializedTypeStorage.cs" />
+    <Compile Include="PrefabAPI\SevenZipHelper.cs" />
+    <Compile Include="PrefabAPI\TypeTreeNode.cs" />
+    <Compile Include="Misc\ProjectileUtility.cs" />
+    <Compile Include="ItemAPI\SpriteTools\CustomClipAmmoTypeToolbox.cs" />
+    <Compile Include="ItemAPI\SynergyTools\AdvancedFireOnReloadSynergyProcessor.cs" />
+    <Compile Include="ItemAPI\SynergyTools\CustomSynergies.cs" />
+    <Compile Include="ItemAPI\SynergyTools\DualWieldSynergyProcessor.cs" />
+    <Compile Include="ItemAPI\FakePrefab.cs" />
+    <Compile Include="ItemAPI\FakePrefabHooks.cs" />
+    <Compile Include="ItemAPI\GunTools.cs" />
+    <Compile Include="ItemAPI\ItemBuilder.cs" />
+    <Compile Include="ItemAPI\SpriteTools\ResourceExtractor.cs" />
+    <Compile Include="ItemAPI\SpriteTools\SpriteBuilder.cs" />
+    <Compile Include="ItemAPI\ThrowableAPI.cs" />
+    <Compile Include="ItemAPI\TrailAPI.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="TranslationAPI\CustomStringDBTable.cs" />
+    <Compile Include="TranslationAPI\StringTableType.cs" />
+    <Compile Include="TranslationAPI\Translation.cs" />
+    <Compile Include="TranslationAPI\TranslationManager.cs" />
+    <Compile Include="Misc\AudioUtility.cs" />
+    <Compile Include="ItemAPI\AlexandriaTags.cs" />
+    <Compile Include="Misc\DebuffUtility.cs" />
+    <Compile Include="Misc\EnumUtility.cs" />
+    <Compile Include="Misc\DebugUtility.cs" />
+    <Compile Include="Misc\LootUtility.cs" />
+    <Compile Include="Misc\MathAndLogicHelper.cs" />
+    <Compile Include="Misc\ReflectionUtility.cs" />
+    <Compile Include="Module.cs" />
+    <Compile Include="NPCAPI\CustomShopController.cs" />
+    <Compile Include="NPCAPI\CustomShopItemController.cs" />
+    <Compile Include="NPCAPI\NPCHooks.cs" />
+    <Compile Include="NPCAPI\NPCTools.cs" />
+    <Compile Include="NPCAPI\ShopAPI.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".editorconfig" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony, Version=2.9.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="0Harmony20, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\0Harmony20.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx, Version=5.4.21.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="HarmonyXInterop, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\HarmonyXInterop.dll</HintPath>
+    </Reference>
+    <Reference Include="ModTheGungeonAPI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\ModTheGungeonAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Mono.Cecil.Mdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Pdb, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod, Version=20.5.21.5, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\MonoMod.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour, Version=22.1.29.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\MonoMod.RuntimeDetour.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.Utils, Version=22.1.29.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\MonoMod.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PlayMaker, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\PlayMaker.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AccessibilityModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.AccessibilityModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.AIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.AnimationModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ARModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.ARModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.AssetBundleModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.AudioModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ClothModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.ClothModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ClusterInputModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.ClusterInputModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ClusterRendererModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.ClusterRendererModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CrashReportingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.CrashReportingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.DirectorModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.DirectorModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.GameCenterModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.GameCenterModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.GridModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.GridModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.ImageConversionModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.InputModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.JSONSerializeModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.JSONSerializeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ParticlesLegacyModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.ParticlesLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.ParticleSystemModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PerformanceReportingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.PerformanceReportingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Physics2DModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.Physics2DModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ScreenCaptureModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.ScreenCaptureModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SharedInternalsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.SharedInternalsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SpriteMaskModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.SpriteMaskModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SpriteShapeModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.SpriteShapeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.StyleSheetsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.StyleSheetsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TerrainModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.TerrainModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TerrainPhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.TerrainPhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TilemapModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.TilemapModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.UIElementsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UNETModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.UNETModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityAnalyticsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.UnityAnalyticsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityConnectModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.UnityConnectModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestAudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.UnityWebRequestModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestTextureModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestWWWModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VehiclesModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.VehiclesModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VideoModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.VideoModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VRModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.VRModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.WebModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.WebModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.WindModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UnityEngine.WindModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="icon.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>COPY "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\BepInEx\plugins\Alexandria"</PostBuildEvent>
+  </PropertyGroup>
+</Project>

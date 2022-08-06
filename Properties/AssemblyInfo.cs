@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Mod")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("EtG.Alexandria")]
+[assembly: AssemblyDescription("A library of useful API's and tools for modding Enter The Gungeon")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Mod")]
-[assembly: AssemblyCopyright("Copyright ©  2020")]
+[assembly: AssemblyCompany("Alexandria")]
+[assembly: AssemblyProduct("EtG.Alexandria")]
+[assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

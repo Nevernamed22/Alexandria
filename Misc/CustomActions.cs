@@ -11,7 +11,7 @@ using System.Collections;
 
 namespace Alexandria.Misc
 {
-    class CustomActions
+    public class CustomActions
     {
         public static Action<RewardPedestal> OnRewardPedestalSpawned;
         public static Action<Chest> OnChestPostSpawn;

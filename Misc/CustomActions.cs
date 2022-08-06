@@ -11,7 +11,7 @@ using System.Collections;
 
 namespace Alexandria.Misc
 {
-    public class CustomActions
+    class CustomActions
     {
         public static Action<RewardPedestal> OnRewardPedestalSpawned;
         public static Action<Chest> OnChestPostSpawn;
@@ -24,6 +24,7 @@ namespace Alexandria.Misc
         public static Action<AmmoPickup, PlayerController> OnAmmoCollected;
         public static Action<PlayerController> OnRunStart;
         public static Action<Dungeon> PostDungeonTrueStart;
+        public static Action<List<DebrisObject>, Chest> SpawnChestContents;
         //public static Action<Projectile, bool, bool, bool, bool> OnProjectileDieInAir;
 
         public static void InitHooks()
@@ -64,13 +65,16 @@ namespace Alexandria.Misc
                 typeof(AmmoPickup).GetMethod("Interact", BindingFlags.Instance | BindingFlags.Public),
                 typeof(CustomActions).GetMethod("ammoInteractHookMethod")
             );
+            chestSpawnItemsHook = new Hook(
+                typeof(Chest).GetMethod("SpewContentsOntoGround", BindingFlags.NonPublic | BindingFlags.Instance),
+                typeof(CustomActions).GetMethod("OnPostOpenBullshit"));
             new Hook(
                 typeof(PlayerController).GetMethod("HandleSpinfallSpawn", BindingFlags.Instance | BindingFlags.NonPublic),
                 typeof(CustomActions).GetMethod("HandleSpinfallSpawnHook")
             );
             new Hook(
                 typeof(Dungeon).GetMethod("Start", BindingFlags.Instance | BindingFlags.NonPublic),
-                typeof(CustomActions).GetMethod("StartHook", BindingFlags.Static | BindingFlags.Public)             
+                typeof(CustomActions).GetMethod("StartHook", BindingFlags.Static | BindingFlags.Public)
             );
         }
         private static Hook pedestalSpawnHook;
@@ -80,6 +84,7 @@ namespace Alexandria.Misc
         private static Hook healthhaverDieHook;
         private static Hook explosionHook;
         private static Hook ShrineUseHook;
+        private static Hook chestSpawnItemsHook;
         public static Hook ammoPickupHook;
         public static Hook ammoInteractHook;
         public static void PostProcessPedestal(Action<RewardPedestal> orig, RewardPedestal self) { orig(self); if (OnRewardPedestalSpawned != null) { OnRewardPedestalSpawned(self); } }
@@ -173,6 +178,68 @@ namespace Alexandria.Misc
                 }
             }
             yield break;
+        }
+        public static void OnPostOpenBullshit(Action<Chest, List<Transform>> orig, Chest self, List<Transform> transforms)
+        {
+            List<DebrisObject> list = new List<DebrisObject>();
+            bool isRainbowRun = GameStatsManager.Instance.IsRainbowRun;
+            Type chesttype = typeof(Chest);
+            FieldInfo _forceDropOkayForRainbowRun = chesttype.GetField("m_forceDropOkayForRainbowRun", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (isRainbowRun && !self.IsRainbowChest && !(bool)_forceDropOkayForRainbowRun.GetValue(self))
+            {
+                Vector2 a;
+                if (self.spawnTransform != null)
+                {
+                    a = self.spawnTransform.position;
+                }
+                else
+                {
+                    Bounds bounds = self.sprite.GetBounds();
+                    a = self.transform.position + bounds.extents;
+                }
+                FieldInfo _room = chesttype.GetField("m_room", BindingFlags.NonPublic | BindingFlags.Instance);
+                LootEngine.SpawnBowlerNote(GameManager.Instance.RewardManager.BowlerNoteChest, a + new Vector2(-0.5f, -2.25f), (RoomHandler)_room.GetValue(self), true);
+            }
+            else
+            {
+                for (int i = 0; i < self.contents.Count; i++)
+                {
+                    List<DebrisObject> list2 = LootEngine.SpewLoot(new List<GameObject>
+                {
+                    self.contents[i].gameObject
+                }, transforms[i].position);
+                    list.AddRange(list2);
+                    for (int j = 0; j < list2.Count; j++)
+                    {
+                        if (list2[j])
+                        {
+                            list2[j].PreventFallingInPits = true;
+                        }
+                        if (!(list2[j].GetComponent<Gun>() != null))
+                        {
+                            if (!(list2[j].GetComponent<CurrencyPickup>() != null))
+                            {
+                                if (list2[j].specRigidbody != null)
+                                {
+                                    list2[j].specRigidbody.CollideWithOthers = false;
+                                    DebrisObject debrisObject = list2[j];
+                                    MethodInfo _BecomeViableItem = chesttype.GetMethod("BecomeViableItem", BindingFlags.NonPublic | BindingFlags.Instance);
+                                    debrisObject.OnTouchedGround += (Action<DebrisObject>)_BecomeViableItem.Invoke(self, new object[] { debrisObject });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (SpawnChestContents != null)
+            {
+                SpawnChestContents(list, self);
+            }
+            if (self.IsRainbowChest && isRainbowRun && self.transform.position.GetAbsoluteRoom() == GameManager.Instance.Dungeon.data.Entrance)
+            {
+                MethodInfo _HandleRainbowRunLootProcessing = chesttype.GetMethod("HandleRainbowRunLootProcessing", BindingFlags.NonPublic | BindingFlags.Instance);
+                GameManager.Instance.Dungeon.StartCoroutine((IEnumerator)_HandleRainbowRunLootProcessing.Invoke(self, new object[] { list }));
+            }
         }
 
         public delegate void Action<T1, T2, T3, T4, T5, T6, T7>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7);

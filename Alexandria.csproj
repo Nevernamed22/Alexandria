@@ -13,6 +13,8 @@
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -179,250 +181,202 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="0Harmony, Version=2.9.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="0Harmony20, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\0Harmony20.dll</HintPath>
+    <Reference Include="0Harmony, Version=2.7.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\HarmonyX.2.7.0\lib\net35\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\Assembly-CSharp.dll</HintPath>
+      <HintPath>packages\EtG.GameLibs.2.1.9-r.0\lib\net35\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\EtG.GameLibs.2.1.9-r.0\lib\net35\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx, Version=5.4.21.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\BepInEx.dll</HintPath>
-    </Reference>
-    <Reference Include="HarmonyXInterop, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\HarmonyXInterop.dll</HintPath>
+      <HintPath>packages\BepInEx.BaseLib.5.4.21\lib\net35\BepInEx.dll</HintPath>
     </Reference>
     <Reference Include="ModTheGungeonAPI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\ModTheGungeonAPI.dll</HintPath>
+      <HintPath>packages\EtG.ModTheGungeonAPI.1.5.3\lib\net35\ModTheGungeonAPI.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\Mono.Cecil.dll</HintPath>
+      <HintPath>packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil.Mdb, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\Mono.Cecil.Mdb.dll</HintPath>
+      <HintPath>packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.Mdb.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil.Pdb, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\Mono.Cecil.Pdb.dll</HintPath>
+      <HintPath>packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.Pdb.dll</HintPath>
     </Reference>
-    <Reference Include="MonoMod, Version=20.5.21.5, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\MonoMod.dll</HintPath>
+    <Reference Include="Mono.Cecil.Rocks, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.Rocks.dll</HintPath>
     </Reference>
-    <Reference Include="MonoMod.RuntimeDetour, Version=22.1.29.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\MonoMod.RuntimeDetour.dll</HintPath>
+    <Reference Include="MonoMod.RuntimeDetour, Version=21.12.13.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\MonoMod.RuntimeDetour.21.12.13.1\lib\net35\MonoMod.RuntimeDetour.dll</HintPath>
     </Reference>
-    <Reference Include="MonoMod.Utils, Version=22.1.29.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\MonoMod.Utils.dll</HintPath>
+    <Reference Include="MonoMod.Utils, Version=21.12.13.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\MonoMod.Utils.21.12.13.1\lib\net35\MonoMod.Utils.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Debug\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PlayMaker, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\PlayMaker.dll</HintPath>
+      <HintPath>packages\EtG.GameLibs.2.1.9-r.0\lib\net35\PlayMaker.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AccessibilityModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.AccessibilityModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.AccessibilityModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.AIModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.AIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ARModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.ARModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.ARModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ClothModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.ClothModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.ClothModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ClusterInputModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.ClusterInputModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.ClusterInputModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ClusterRendererModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.ClusterRendererModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.ClusterRendererModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CrashReportingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.CrashReportingModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.CrashReportingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.DirectorModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.DirectorModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.DirectorModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.GameCenterModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.GameCenterModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.GameCenterModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.GridModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.GridModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.GridModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.ImageConversionModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.ImageConversionModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.InputModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.InputModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.JSONSerializeModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.JSONSerializeModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.JSONSerializeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Networking, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.Networking.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticlesLegacyModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.ParticlesLegacyModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.ParticlesLegacyModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PerformanceReportingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.PerformanceReportingModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.PerformanceReportingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.Physics2DModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.Physics2DModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.Physics2DModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ScreenCaptureModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.ScreenCaptureModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.ScreenCaptureModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SharedInternalsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.SharedInternalsModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.SharedInternalsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SpatialTracking, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.SpatialTracking.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SpriteMaskModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.SpriteMaskModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.SpriteMaskModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SpriteShapeModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.SpriteShapeModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.SpriteShapeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.StandardEvents, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.StandardEvents.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.StyleSheetsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.StyleSheetsModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.StyleSheetsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TerrainModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.TerrainModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.TerrainModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TerrainPhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.TerrainPhysicsModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.TerrainPhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TilemapModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.TilemapModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.TilemapModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Timeline, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.Timeline.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UIElementsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.UIElementsModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.UIElementsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.UIModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.UIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UNETModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.UNETModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.UNETModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityAnalyticsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.UnityAnalyticsModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.UnityAnalyticsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityConnectModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.UnityConnectModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.UnityConnectModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestAudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.UnityWebRequestModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.UnityWebRequestModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestTextureModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestWWWModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VehiclesModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.VehiclesModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.VehiclesModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VideoModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.VideoModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.VideoModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VRModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.VRModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.VRModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.WebModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.WebModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.WebModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.WindModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\UnityEngine.WindModule.dll</HintPath>
+      <HintPath>packages\EtG.UnityEngine.1.0.0\lib\UnityEngine.WindModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -433,6 +387,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>COPY "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\BepInEx\plugins\Alexandria"</PostBuildEvent>
+ 
   </PropertyGroup>
+  <Import Project="packages\BepInEx.Core.5.4.21\build\BepInEx.Core.targets" Condition="Exists('packages\BepInEx.Core.5.4.21\build\BepInEx.Core.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\BepInEx.Core.5.4.21\build\BepInEx.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\BepInEx.Core.5.4.21\build\BepInEx.Core.targets'))" />
+  </Target>
 </Project>

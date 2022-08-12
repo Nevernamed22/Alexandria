@@ -12,7 +12,7 @@ using InputDevice = InControl.InputDevice;
 
 
 
-namespace CustomCharacters
+namespace Alexandria.CharacterAPI
 {
     //Handles character switching just like the character command
 

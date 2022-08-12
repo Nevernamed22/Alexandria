@@ -9,7 +9,7 @@ using System;
 using Alexandria.ItemAPI;
 using System.IO;
 
-namespace CustomCharacters
+namespace Alexandria.CharacterAPI
 {
     /*
      * Handles adding sprites to the appropriate collections,

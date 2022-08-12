@@ -14,7 +14,7 @@ using Dungeonator;
 using UnityEngine.SceneManagement;
 //using PrefabAPI;
 
-namespace CustomCharacters
+namespace Alexandria.CharacterAPI
 
 {
     public static class FoyerCharacterHandler
@@ -123,7 +123,7 @@ namespace CustomCharacters
 
             selectFlag.prerequisites = customCharacter.First.prerequisites;
 
-            Alexandria.ItemAPI.FakePrefab.MarkAsFakePrefab(selectFlag.gameObject);
+            ItemAPI.FakePrefab.MarkAsFakePrefab(selectFlag.gameObject);
             SceneManager.MoveGameObjectToScene(selectFlag.gameObject, SceneManager.GetActiveScene());
 
             selectFlag.transform.position = customCharacter.First.foyerPos;
@@ -241,8 +241,8 @@ namespace CustomCharacters
 
         static void MakeSkinSwapper(CustomCharacterData data)
         {
-            var baseSwapper = Alexandria.ItemAPI.FakePrefab.Clone(Foyer.Instance.transform.Find("Livery xform").Find("costume_guide").gameObject);
-            var altSwapper = Alexandria.ItemAPI.FakePrefab.Clone(Foyer.Instance.transform.Find("Livery xform").Find("costume_guide_alt").gameObject);
+            var baseSwapper = ItemAPI.FakePrefab.Clone(Foyer.Instance.transform.Find("Livery xform").Find("costume_guide").gameObject);
+            var altSwapper = ItemAPI.FakePrefab.Clone(Foyer.Instance.transform.Find("Livery xform").Find("costume_guide_alt").gameObject);
 
             var sprite = baseSwapper.GetComponent<tk2dSprite>();
             var altSprite = altSwapper.GetComponent<tk2dSprite>();
@@ -332,8 +332,8 @@ namespace CustomCharacters
 
                 //Create new card instance
                 selectCharacter.ClearOverheadElement();
-                var theCauseOfMySuffering = Alexandria.ItemAPI.FakePrefab.Clone(selectCharacter.OverheadElement.GetComponentInChildren<CharacterSelectFacecardIdleDoer>().gameObject);
-                selectCharacter.OverheadElement = Alexandria.PrefabAPI.PrefabBuilder.Clone(selectCharacter.OverheadElement);
+                var theCauseOfMySuffering = ItemAPI.FakePrefab.Clone(selectCharacter.OverheadElement.GetComponentInChildren<CharacterSelectFacecardIdleDoer>().gameObject);
+                selectCharacter.OverheadElement = PrefabAPI.PrefabBuilder.Clone(selectCharacter.OverheadElement);
                 //selectCharacter.OverheadElement.SetActive(true);
                 selectCharacter.OverheadElement.name = $"CHR_{data.nameShort}Panel";
                 selectCharacter.OverheadElement.GetComponent<FoyerInfoPanelController>().followTransform = selectCharacter.transform;
@@ -390,7 +390,7 @@ namespace CustomCharacters
                 infoPanel.itemsPanel.enabled = true;
 
 
-                var spriteObject = Alexandria.ItemAPI.FakePrefab.Clone(infoPanel.itemsPanel.GetComponentInChildren<dfSprite>().gameObject);
+                var spriteObject = ItemAPI.FakePrefab.Clone(infoPanel.itemsPanel.GetComponentInChildren<dfSprite>().gameObject);
 
                 //spriteObject.SetActive(false);
                 var posList = new List<Vector3>();
@@ -410,7 +410,7 @@ namespace CustomCharacters
                 for (int i = 0; i < data.loadoutSpriteNames.Count; i++)
                 {
 
-                    var sprite = Alexandria.ItemAPI.FakePrefab.Clone(spriteObject).GetComponent<dfSprite>();
+                    var sprite = ItemAPI.FakePrefab.Clone(spriteObject).GetComponent<dfSprite>();
                     sprite.gameObject.SetActive(true);
 
                     sprite.SpriteName = data.loadoutSpriteNames[i];
@@ -567,8 +567,8 @@ namespace CustomCharacters
                     facecard.gameObject.SetActive(true);
                     facecard.spriteAnimator = facecard.gameObject.GetComponent<tk2dSpriteAnimator>();
 
-                    Alexandria.ItemAPI.SpriteBuilder.AddAnimation(facecard.spriteAnimator, orig, idleAnimIds, idleAnimName, tk2dSpriteAnimationClip.WrapMode.Loop).fps = 4;
-                    var name = Alexandria.ItemAPI.SpriteBuilder.AddAnimation(facecard.spriteAnimator, orig, appearAnimIds, appearAnimName, tk2dSpriteAnimationClip.WrapMode.Once);
+                    ItemAPI.SpriteBuilder.AddAnimation(facecard.spriteAnimator, orig, idleAnimIds, idleAnimName, tk2dSpriteAnimationClip.WrapMode.Loop).fps = 4;
+                    var name = ItemAPI.SpriteBuilder.AddAnimation(facecard.spriteAnimator, orig, appearAnimIds, appearAnimName, tk2dSpriteAnimationClip.WrapMode.Once);
                     ETGModConsole.Log($"anims added");
                     name.fps = 17;
                     facecard.spriteAnimator.DefaultClipId = facecard.spriteAnimator.Library.GetClipIdByName(appearAnimName);

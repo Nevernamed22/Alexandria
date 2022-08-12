@@ -268,5 +268,15 @@ namespace Alexandria.Misc
             position = BraveMathCollege.ClampToBounds(position, GameManager.Instance.MainCameraController.MinVisiblePoint, GameManager.Instance.MainCameraController.MaxVisiblePoint);
             return position;
         }
+        public static ExtendedPlayerComponent GetExtComp(this PlayerController owner)
+        {
+            if (owner.GetComponent<ExtendedPlayerComponent>() != null) return owner.GetComponent<ExtendedPlayerComponent>();
+            else return null;
+        }
+        public static bool IsModdedCharacter(this PlayerController player, string characterGuid)
+        {
+            if (player.characterIdentity == (PlayableCharacters)Enum.Parse(typeof(PlayableCharacters), characterGuid)) return true;
+            return false;
+        }
     }
 }

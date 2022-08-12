@@ -6,7 +6,7 @@ using System.Text;
 using UnityEngine;
 
 
-namespace CustomCharacters
+namespace Alexandria.CharacterAPI
 {
     [Serializable]
     public class CustomCharacterData

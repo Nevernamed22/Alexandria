@@ -62,7 +62,9 @@
     <Compile Include="EnemyAPI\AIActorUtility.cs" />
     <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
     <Compile Include="ItemAPI\AnimationUtility.cs" />
+    <Compile Include="ItemAPI\BasicProjectileComponents\ProjectileSlashingBehaviour.cs" />
     <Compile Include="ItemAPI\OrbitalUtility.cs" />
+    <Compile Include="ItemAPI\SlashDoer.cs" />
     <Compile Include="Misc\ChamberGunCompatibility.cs" />
     <Compile Include="EnemyAPI\BossBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyBuilder.cs" />
@@ -84,6 +86,7 @@
     <Compile Include="ItemAPI\CompanionBuilder.cs" />
     <Compile Include="Misc\Commands.cs" />
     <Compile Include="Misc\CustomActions.cs" />
+    <Compile Include="Misc\ExtendedPlayerComponent.cs" />
     <Compile Include="Misc\PickupUtility.cs" />
     <Compile Include="Misc\PlayerUtility.cs" />
     <Compile Include="NPCAPI\BreachShopTools.cs" />

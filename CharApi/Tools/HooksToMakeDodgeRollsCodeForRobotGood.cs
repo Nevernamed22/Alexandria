@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 
-namespace CustomCharacters
+namespace Alexandria.CharacterAPI
 {
     public static class HooksToMakeDodgeRollsCodeForRobotGood
     {

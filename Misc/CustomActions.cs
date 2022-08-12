@@ -24,6 +24,7 @@ namespace Alexandria.Misc
         public static Action<AmmoPickup, PlayerController> OnAmmoCollected;
         public static Action<PlayerController> OnRunStart;
         public static Action<Dungeon> PostDungeonTrueStart;
+        public static Action<PlayerController> OnNewPlayercontrollerSpawned;
         //public static Action<Projectile, bool, bool, bool, bool> OnProjectileDieInAir;
 
         public static void InitHooks()

@@ -4,7 +4,7 @@ using System;
 
 
 
-namespace CustomCharacters
+namespace Alexandria.CharacterAPI
 {
     public static class CollectionDumper
     {

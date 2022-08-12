@@ -14,7 +14,7 @@ using Alexandria.ItemAPI;
 using Dungeonator;
 using HarmonyLib;
 
-namespace CustomCharacters
+namespace Alexandria.CharacterAPI
 {
     public static class Hooks
     {
@@ -1020,7 +1020,7 @@ namespace CustomCharacters
 		{
 			FieldInfo _extantOverheadUIElement = typeof(FoyerCharacterSelectFlag).GetField("m_extantOverheadUIElement", BindingFlags.NonPublic | BindingFlags.Instance);
 
-			if ((_extantOverheadUIElement.GetValue(self) as dfControl) != null && Alexandria.ItemAPI.FakePrefab.IsFakePrefab((_extantOverheadUIElement.GetValue(self) as dfControl).gameObject))
+			if ((_extantOverheadUIElement.GetValue(self) as dfControl) != null && ItemAPI.FakePrefab.IsFakePrefab((_extantOverheadUIElement.GetValue(self) as dfControl).gameObject))
 			{
 				(_extantOverheadUIElement.GetValue(self) as dfControl).gameObject.SetActive(false);
 				//UnityEngine.Object.Destroy((_extantOverheadUIElement.GetValue(self) as dfControl).gameObject);

@@ -5,7 +5,7 @@ using System.Text;
 using System.Reflection;
 
 using UnityEngine;
-namespace CustomCharacters
+namespace Alexandria.CharacterAPI
 {
     //This basically does nothing
 

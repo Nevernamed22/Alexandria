@@ -7,7 +7,7 @@ using UnityEngine;
 
 
 
-namespace CustomCharacters
+namespace Alexandria.CharacterAPI
 {
     public static class TextureStitcher
     {

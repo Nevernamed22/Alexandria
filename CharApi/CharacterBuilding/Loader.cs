@@ -10,7 +10,7 @@ using UnityEngine;
 using System.Reflection;
 using Alexandria.ItemAPI;
 
-namespace CustomCharacters
+namespace Alexandria.CharacterAPI
 {
     /*
      * Loads all the character data from the characterdata.txt

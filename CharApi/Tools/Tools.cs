@@ -10,7 +10,7 @@ using UnityEngine;
 using Dungeonator;
 using MonoMod.RuntimeDetour;
 
-namespace CustomCharacters
+namespace Alexandria.CharacterAPI
 {
     //Utility methods
     public static class ToolsCharApi

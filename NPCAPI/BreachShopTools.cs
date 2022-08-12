@@ -9,7 +9,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
-using Alexandria.Misc;
 
 namespace Alexandria.NPCAPI
 {

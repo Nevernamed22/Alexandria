@@ -9,7 +9,7 @@ using Alexandria.ItemAPI;
 using System.Collections;
 using System.Reflection;
 
-namespace CustomCharacters
+namespace Alexandria.CharacterAPI
 {
     /*
      * Creates a prefab for the custom character and applies 
@@ -118,7 +118,7 @@ namespace CustomCharacters
 
            
             gameObject.SetActive(false);
-            Alexandria.ItemAPI.FakePrefab.MarkAsFakePrefab(gameObject);
+            ItemAPI.FakePrefab.MarkAsFakePrefab(gameObject);
         }
 
 

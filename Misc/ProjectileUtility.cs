@@ -147,8 +147,17 @@ namespace Alexandria.Misc
             p.Owner = newOwner;
             p.SetNewShooter(newOwner.specRigidbody);
             p.allowSelfShooting = false;
-            p.collidesWithPlayer = false;
-            p.collidesWithEnemies = true;
+            if (newOwner is AIActor)
+            {
+                p.collidesWithPlayer = true;
+                p.collidesWithEnemies = false;
+            }
+            else if (newOwner is PlayerController)
+            {
+                p.collidesWithPlayer = false;
+                p.collidesWithEnemies = true;
+            }
+
             if (scaleModifier != 1f)
             {
                 SpawnManager.PoolManager.Remove(p.transform);
@@ -157,20 +166,40 @@ namespace Alexandria.Misc
             if (p.Speed < minReflectedBulletSpeed) p.Speed = minReflectedBulletSpeed;
             p.baseData.damage = baseDamage;
             if (doPostProcessing)
-            {
-                PlayerController player = (newOwner as PlayerController);
-                if (player != null)
+                if (doPostProcessing && newOwner is PlayerController)
                 {
-                    p.baseData.damage *= player.stats.GetStatValue(PlayerStats.StatType.Damage);
-                    p.baseData.speed *= player.stats.GetStatValue(PlayerStats.StatType.ProjectileSpeed);
-                    p.UpdateSpeed();
-                    p.baseData.force *= player.stats.GetStatValue(PlayerStats.StatType.KnockbackMultiplier);
-                    p.baseData.range *= player.stats.GetStatValue(PlayerStats.StatType.RangeMultiplier);
-                    p.BossDamageMultiplier *= player.stats.GetStatValue(PlayerStats.StatType.DamageToBosses);
-                    p.RuntimeUpdateScale(player.stats.GetStatValue(PlayerStats.StatType.PlayerBulletScale));
-                    player.DoPostProcessProjectile(p);
+                    PlayerController player = (newOwner as PlayerController);
+                    if (player != null)
+                    {
+                        p.baseData.damage *= player.stats.GetStatValue(PlayerStats.StatType.Damage);
+                        p.baseData.speed *= player.stats.GetStatValue(PlayerStats.StatType.ProjectileSpeed);
+                        p.UpdateSpeed();
+                        p.baseData.force *= player.stats.GetStatValue(PlayerStats.StatType.KnockbackMultiplier);
+                        p.baseData.range *= player.stats.GetStatValue(PlayerStats.StatType.RangeMultiplier);
+                        p.BossDamageMultiplier *= player.stats.GetStatValue(PlayerStats.StatType.DamageToBosses);
+                        p.RuntimeUpdateScale(player.stats.GetStatValue(PlayerStats.StatType.PlayerBulletScale));
+                        player.DoPostProcessProjectile(p);
+                    }
+                }
+            if (newOwner is AIActor)
+            {
+                p.baseData.damage = 0.5f;
+                p.baseData.SetAll((newOwner as AIActor).bulletBank.GetBullet("default").ProjectileData);
+                p.specRigidbody.CollideWithTileMap = false;
+                p.ResetDistance();
+                p.collidesWithEnemies = (newOwner as AIActor).CanTargetEnemies;
+                p.collidesWithPlayer = true;
+                p.UpdateCollisionMask();
+                p.sprite.color = new Color(1f, 0.1f, 0.1f);
+                p.MakeLookLikeEnemyBullet(true);
+                p.RemovePlayerOnlyModifiers();
+                if ((newOwner as AIActor).IsBlackPhantom)
+                {
+                    p.baseData.damage = 1;
+                    p.BecomeBlackBullet();
                 }
             }
+
             p.UpdateCollisionMask();
             p.Reflected();
             p.SendInDirection(p.Direction, true, true);

@@ -14,12 +14,22 @@ namespace Alexandria.ItemAPI
             List<int> guonStone = new List<int>() { 565, 260, 262, 263, 264, 269, 270 };
             List<int> tableTechs = new List<int>() { 396, 397, 398, 399, 400, 465, 633, 666 };
             List<int> ammolet = new List<int>() { 321, 322, 325, 342, 343, 344 };
+            List<int> arrowbolt = new List<int>() { 8, 200, 12, 4, 126, 52, 210, 227, 381, 535, 693, 749, 482 };
+            List<int> companion = new List<int>() {491,492,300,249,301,318,442,232 ,451,461,572,580 ,664,632,818,645,607 };
+            List<int> flora = new List<int>() { 197, 674, 516, 339, 478, 124, 485, 71, 438, 258, 253, 289 };
+            List<int> noncompanionalive = new List<int>() { 234, 201, 338, 599, 563, 176 };
+            List<int> guonstones = new List<int>() { 260, 262, 263, 264, 269, 270, 466, 565 };
 
             foreach (int id in bulletModifierIDs) SetTag(id, "bullet_modifier");
             foreach (int id in kalashnikovWeapons) SetTag(id, "kalashnikov");
             foreach (int id in guonStone) SetTag(id, "guon_stone");
             foreach (int id in tableTechs) SetTag(id, "table_tech");
             foreach (int id in ammolet) SetTag(id, "ammolet");
+            foreach (int id in arrowbolt) SetTag(id, "arrow_bolt_weapon");
+            foreach (int id in flora) SetTag(id, "flora");
+            foreach (int id in guonstones) SetTag(id, "guon_stone");
+            foreach (int id in noncompanionalive) SetTag(id, "non_companion_living_item");
+            foreach (int id in companion) SetTag(id, "companion");
 
         }
         //item tagging

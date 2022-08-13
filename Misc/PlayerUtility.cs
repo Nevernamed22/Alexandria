@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Alexandria.Misc
 {
-   public static class PlayerUtility
+    public static class PlayerUtility
     {
         public enum EasyBlankType
         {
@@ -273,9 +273,9 @@ namespace Alexandria.Misc
             if (owner.GetComponent<ExtendedPlayerComponent>() != null) return owner.GetComponent<ExtendedPlayerComponent>();
             else return null;
         }
-        public static bool IsModdedCharacter(this PlayerController player, string characterGuid)
+        public static bool IsModdedCharacter(this PlayerController player, string modguid, string charactershortname)
         {
-            if (player.characterIdentity == (PlayableCharacters)Enum.Parse(typeof(PlayableCharacters), characterGuid)) return true;
+            if (player.characterIdentity == ETGModCompatibility.ExtendEnum<PlayableCharacters>(modguid, charactershortname)) return true;
             return false;
         }
     }

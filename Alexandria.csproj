@@ -65,7 +65,7 @@
     <Compile Include="ItemAPI\BasicProjectileComponents\ProjectileSlashingBehaviour.cs" />
     <Compile Include="ItemAPI\OrbitalUtility.cs" />
     <Compile Include="ItemAPI\SlashDoer.cs" />
-    <Compile Include="Misc\ChamberGunCompatibility.cs" />
+    <Compile Include="Misc\ChamberGunAPI.cs" />
     <Compile Include="EnemyAPI\BossBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyTools.cs" />

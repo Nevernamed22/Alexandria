@@ -12,7 +12,6 @@ using Alexandria.Misc;
 using Alexandria.ChestApi;
 using BepInEx;
 using Alexandria.CharacterAPI;
-using System.Collections;
 
 namespace Alexandria
 {
@@ -55,8 +54,6 @@ namespace Alexandria
                 NPCAPI.NPCHooks.Init();
                 EnemyAPI.Hooks.Init();
                 CustomActions.InitHooks();
-                ChamberGunAPI.Init();
-                ExtendedPlayerComponent.Init();
 
                 AlexandriaTags.InitGenericTags();
 
@@ -70,22 +67,14 @@ namespace Alexandria
                 CharacterAPI.Hooks.Init();
                 ToolsCharApi.Init();
 
-                ETGMod.StartGlobalCoroutine(this.delayedstarthandler());
-
-
-                ETGModConsole.Log("AlexandriaLib started correctly.");
+                ETGModConsole.Log("started!!");
+                //ETGModConsole.Log("started!!", true);
             }
             catch (Exception e)
             {
                 ETGModConsole.Log(e.ToString());
             }
             
-        }
-        public IEnumerator delayedstarthandler()
-        {
-            yield return null;
-            ChamberGunAPI.DelayedInit();
-            yield break;
         }
     }
 }

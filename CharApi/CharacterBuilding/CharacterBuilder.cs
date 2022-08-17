@@ -118,7 +118,7 @@ namespace Alexandria.CharacterAPI
 
            
             gameObject.SetActive(false);
-            ItemAPI.FakePrefab.MarkAsFakePrefab(gameObject);
+            FakePrefab.MarkAsFakePrefab(gameObject);
         }
 
 

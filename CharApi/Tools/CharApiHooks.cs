@@ -333,12 +333,6 @@ namespace Alexandria.CharacterAPI
 					}
 					self.sprite.renderer.material = self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial;
 				}
-
-				//var v = (((Vector2)typeof(PlayerController).GetMethod("DetermineAimPointInWorld", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, null)) - self.specRigidbody.GetUnitCenter(ColliderType.HitBox)).ToAngle();
-				//self.GetBaseAnimationName(v, 0, false, false);
-				//var anim = (string)typeof(PlayerController).GetMethod("GetBaseAnimationName", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { v, 0, false, false });
-
-				//self.sprite.SetSprite(self.spriteAnimator.Library.GetClipByName(anim).frames[0].spriteId);
 			}
 
 			orig(self, overrideTargetLibrary);
@@ -1020,7 +1014,7 @@ namespace Alexandria.CharacterAPI
 		{
 			FieldInfo _extantOverheadUIElement = typeof(FoyerCharacterSelectFlag).GetField("m_extantOverheadUIElement", BindingFlags.NonPublic | BindingFlags.Instance);
 
-			if ((_extantOverheadUIElement.GetValue(self) as dfControl) != null && ItemAPI.FakePrefab.IsFakePrefab((_extantOverheadUIElement.GetValue(self) as dfControl).gameObject))
+			if ((_extantOverheadUIElement.GetValue(self) as dfControl) != null && FakePrefab.IsFakePrefab((_extantOverheadUIElement.GetValue(self) as dfControl).gameObject))
 			{
 				(_extantOverheadUIElement.GetValue(self) as dfControl).gameObject.SetActive(false);
 				//UnityEngine.Object.Destroy((_extantOverheadUIElement.GetValue(self) as dfControl).gameObject);

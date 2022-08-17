@@ -24,100 +24,23 @@ namespace Alexandria.DungeonAPI
 
             var loadedRooms = new Dictionary<string, RoomData>();
 
-            if (File.Exists(roomDirectory))
+            Directory.CreateDirectory(unzippedDirectory);
+            foreach (string g in Directory.GetFiles(unzippedDirectory, "*", SearchOption.AllDirectories))
             {
-
-                /*
-                 * no zips in Thunderstore
-                 */
-
-                //using (ZipFile zip = ZipFile.Read(roomDirectory))
-
-                //    foreach (ZipEntry f in zip.Entries)
-                //    {
-                //        if (f.FileName.Contains("rooms") && !FailSafeCheck)
-                //        {
-                //            FailSafeCheck = true;
-                //            //ItemAPI.Tools.PrintNoID("this is being read");
-                //            var roomData = BuildFromZipFile(roomDirectory);
-                //            foreach (var roomsData in roomData)
-                //            {
-                //                string name = roomsData.room.name;
-                //                //OtherTools.PrintNoID($"Found room: \"{name}\"");
-                //                DungeonHandler.Register(roomsData);
-                //                rooms.Add(roomsData.room.name, roomsData);
-                //                loadedRooms.Add(modPrefix + ":" + roomsData.room.name, roomsData);
-
-                //            }
-                //        }
-                //    }
-            }
-            else
-            {
-                Directory.CreateDirectory(unzippedDirectory);
-                foreach (string g in Directory.GetFiles(unzippedDirectory, "*", SearchOption.AllDirectories))
+                if (g.EndsWith(".room", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (g.EndsWith(".room", StringComparison.OrdinalIgnoreCase))
-                    {
-                        string name = Path.GetFullPath(g).RemovePrefix(unzippedDirectory).RemoveSuffix(".room");
-                        //Tools.PrintNoID($"Found room: \"{name}\"");
-                        var roomData = BuildFromRoomFile(g);
-                        DungeonHandler.Register(roomData);
-                        rooms.Add(modPrefix + ":" + name, roomData);
-                        loadedRooms.Add(name, roomData);
-                    }
+                    string name = Path.GetFullPath(g).RemovePrefix(unzippedDirectory).RemoveSuffix(".room");
+                    //Tools.PrintNoID($"Found room: \"{name}\"");
+                    var roomData = BuildFromRoomFile(g);
+                    DungeonHandler.Register(roomData);
+                    rooms.Add(modPrefix + ":" + name, roomData);
+                    loadedRooms.Add(name, roomData);
                 }
             }
 
             return loadedRooms;
         }
-
-
-        //no zips in thunderstore 
-
-        //public static IEnumerable<RoomData> BuildFromZipFile(string zipFilePath)
-        //{
-        //    if (!ZipFile.IsZipFile(zipFilePath))
-        //    {
-        //       Debug.LogError($"(Alexandria) Not a valid zip file!");
-        //        yield break;
-        //    }
-        //    using (var zipFile = ZipFile.Read(zipFilePath))
-        //    {
-        //        //Tools.PrintNoID("did it work?");
-        //        foreach (var entry in zipFile.Entries)
-        //        {
-        //            var fileName = Path.GetFileNameWithoutExtension(entry.FileName);
-        //            var extension = Path.GetExtension(entry.FileName);
-        //            if (!string.Equals(extension, ".room", StringComparison.OrdinalIgnoreCase))
-        //                continue;
-
-        //            byte[] zipData;
-        //            int capacity = (int)entry.UncompressedSize;
-        //            if (capacity < 0)
-        //                continue;
-
-        //            using (var ms = new MemoryStream(capacity))
-        //            {
-        //                entry.Extract(ms);
-        //                zipData = ms.ToArray();
-        //            }
-
-        //            var texture = ResourceExtractor.BytesToTexture(zipData, fileName);
-        //            var roomData = ExtractRoomDataFromBytes(zipData);
-
-        //            if (roomData.waveTriggers == null)
-        //            {
-        //                roomData.waveTriggers = new string[0];
-        //            }
-
-        //            roomData.room = Build(texture, roomData);
-
-        //            yield return roomData;
-        //        }
-        //    }
-        //}
-
+      
         public static RoomData BuildFromRoomFile(string roomPath)
         {
             var texture = ResourceExtractor.GetTextureFromFile(roomPath, ".room");

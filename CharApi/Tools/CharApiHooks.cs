@@ -1432,260 +1432,31 @@ namespace Alexandria.CharacterAPI
 		public static Hook getOrLoadByName_Hook;
 		public static Hook setWinPicHook;
 
-		
+
 		private static void SetWinPicHook(Action<AmmonomiconDeathPageController> orig, AmmonomiconDeathPageController self)
 		{
 			orig(self);
 			GlobalDungeonData.ValidTilesets tilesetId = GameManager.Instance.Dungeon.tileIndices.tilesetId;
-			if (GameManager.Instance.CurrentGameMode != GameManager.GameMode.BOSSRUSH && GameManager.Instance.Dungeon.tileIndices.tilesetId != GlobalDungeonData.ValidTilesets.FINALGEON && GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>()
-				&& (bool)typeof(AmmonomiconDeathPageController).GetMethod("ShouldUseJunkPic", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, null))
+			if (GameManager.Instance.CurrentGameMode != GameManager.GameMode.BOSSRUSH && GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>() && GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data != null)
             {
-				if (GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data == null || GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data.junkanWinPic == null)
-                {
-					self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Gun_Get_001", ".png") as Texture);
-				}
-				else
-                {
-					self.photoSprite.Texture = GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data.junkanWinPic;
-				}
-				
-			}
-			else if (tilesetId != GlobalDungeonData.ValidTilesets.FINALGEON)
-			{
-				self.photoSprite.Texture = GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data.pastWinPic;
-			}
-			else
-			{
-				self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Gun_Get_001", ".png") as Texture);
-			}
-			/*
-			if ((bool)typeof(AmmonomiconDeathPageController).GetMethod("ShouldUseJunkPic", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, null) && GameManager.Instance.Dungeon.tileIndices.tilesetId != GlobalDungeonData.ValidTilesets.FINALGEON)
-			{
-				switch (GameManager.Instance.PrimaryPlayer.characterIdentity)
+				if (GameManager.Instance.Dungeon.tileIndices.tilesetId != GlobalDungeonData.ValidTilesets.FINALGEON && (bool)typeof(AmmonomiconDeathPageController).GetMethod("ShouldUseJunkPic", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, null))
 				{
-					case PlayableCharacters.Pilot:
-						self.photoSprite.Texture = (BraveResources.Load("win_pic_junkan_pilot_001", ".png") as Texture);
-						goto IL_1B4;
-					case PlayableCharacters.Convict:
-						self.photoSprite.Texture = (BraveResources.Load("win_pic_junkan_convict_001", ".png") as Texture);
-						goto IL_1B4;
-					case PlayableCharacters.Robot:
-						self.photoSprite.Texture = (BraveResources.Load("win_pic_junkan_robot_001", ".png") as Texture);
-						goto IL_1B4;
-					case PlayableCharacters.Soldier:
-						self.photoSprite.Texture = (BraveResources.Load("win_pic_junkan_marine_001", ".png") as Texture);
-						goto IL_1B4;
-					case PlayableCharacters.Guide:
-						self.photoSprite.Texture = (BraveResources.Load("win_pic_junkan_hunter_001", ".png") as Texture);
-						goto IL_1B4;
-					case PlayableCharacters.Bullet:
-						self.photoSprite.Texture = (BraveResources.Load("win_pic_junkan_bullet_001", ".png") as Texture);
-						goto IL_1B4;
-					case PlayableCharacters.Eevee:
-						self.photoSprite.Texture = (BraveResources.Load("win_pic_junkan_eevee_001", ".png") as Texture);
-						goto IL_1B4;
-					case PlayableCharacters.Gunslinger:
-						self.photoSprite.Texture = (BraveResources.Load("win_pic_junkan_slinger_001", ".png") as Texture);
-						goto IL_1B4;
-				}
-				self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Gun_Get_001", ".png") as Texture);
-				IL_1B4:;
-			}
-			else if (GameManager.Instance.CurrentGameMode == GameManager.GameMode.BOSSRUSH)
-			{
-				self.photoSprite.Texture = (BraveResources.Load("Win_Pic_BossRush_001", ".png") as Texture);
-			}
-			else
-			{
-				
-				if (tilesetId != GlobalDungeonData.ValidTilesets.FORGEGEON)
-				{
-					if (tilesetId != GlobalDungeonData.ValidTilesets.HELLGEON)
+					if (GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data.junkanWinPic == null)
 					{
-						if (tilesetId != GlobalDungeonData.ValidTilesets.FINALGEON)
-						{
-							self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Gun_Get_001", ".png") as Texture);
-						}
-						else
-						{
-							switch (GameManager.Instance.PrimaryPlayer.characterIdentity)
-							{
-								case PlayableCharacters.Pilot:
-									self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Pilot_001", ".png") as Texture);
-									goto IL_384;
-								case PlayableCharacters.Convict:
-									self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Convict_001", ".png") as Texture);
-									goto IL_384;
-								case PlayableCharacters.Robot:
-									self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Robot_001", ".png") as Texture);
-									goto IL_384;
-								case PlayableCharacters.Soldier:
-									self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Marine_001", ".png") as Texture);
-									goto IL_384;
-								case PlayableCharacters.Guide:
-									self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Hunter_001", ".png") as Texture);
-									goto IL_384;
-								case PlayableCharacters.Bullet:
-									self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Bullet_001", ".png") as Texture);
-									goto IL_384;
-							}
-							self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Gun_Get_001", ".png") as Texture);
-							IL_384:;
-						}
-					}
-					else if (GameManager.IsGunslingerPast)
-					{
-						self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Slinger_001", ".png") as Texture);
+						self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Gun_Get_001", ".png") as Texture);
 					}
 					else
 					{
-						self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Lich_Kill_001", ".png") as Texture);
+						self.photoSprite.Texture = GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data.junkanWinPic;
 					}
+
 				}
-				else
+				else if (tilesetId == GlobalDungeonData.ValidTilesets.FINALGEON && GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data.pastWinPic)
 				{
-					self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Gun_Get_001", ".png") as Texture);
+					self.photoSprite.Texture = GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data.pastWinPic;
 				}
-			}*/
+			}		
 		}
-		/*
-		private static void SetWinPicHook(Action<AmmonomiconDeathPageController> orig, AmmonomiconDeathPageController self)
-		{
-
-			//BotsModule.Log("setWinPicHook: 1", BotsModule.LOCKED_CHARACTOR_COLOR);
-
-			if (ShouldUseJunkPic() && GameManager.Instance.Dungeon.tileIndices.tilesetId != GlobalDungeonData.ValidTilesets.FINALGEON)
-			{
-				switch (GameManager.Instance.PrimaryPlayer.characterIdentity)
-				{
-					case PlayableCharacters.Pilot:
-						self.photoSprite.Texture = (BraveResources.Load("win_pic_junkan_pilot_001", ".png") as Texture);
-						goto IL_1B4;
-					case PlayableCharacters.Convict:
-						self.photoSprite.Texture = (BraveResources.Load("win_pic_junkan_convict_001", ".png") as Texture);
-						goto IL_1B4;
-					case PlayableCharacters.Robot:
-						self.photoSprite.Texture = (BraveResources.Load("win_pic_junkan_robot_001", ".png") as Texture);
-						goto IL_1B4;
-					case PlayableCharacters.Soldier:
-						self.photoSprite.Texture = (BraveResources.Load("win_pic_junkan_marine_001", ".png") as Texture);
-						goto IL_1B4;
-					case PlayableCharacters.Guide:
-						self.photoSprite.Texture = (BraveResources.Load("win_pic_junkan_hunter_001", ".png") as Texture);
-						goto IL_1B4;
-					case PlayableCharacters.Bullet:
-						self.photoSprite.Texture = (BraveResources.Load("win_pic_junkan_bullet_001", ".png") as Texture);
-						goto IL_1B4;
-					case PlayableCharacters.Eevee:
-						self.photoSprite.Texture = (BraveResources.Load("win_pic_junkan_eevee_001", ".png") as Texture);
-						goto IL_1B4;
-					case PlayableCharacters.Gunslinger:
-						self.photoSprite.Texture = (BraveResources.Load("win_pic_junkan_slinger_001", ".png") as Texture);
-						goto IL_1B4;
-
-					default:
-                        if (GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>() != null)
-                        {
-                            self.photoSprite.Texture = GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data.pastWinPic;
-                            goto IL_1B4;
-                        }
-                        break;
-
-				}
-				self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Gun_Get_001", ".png") as Texture);
-			IL_1B4:;
-			}
-			else if (GameManager.Instance.CurrentGameMode == GameManager.GameMode.BOSSRUSH)
-			{
-				self.photoSprite.Texture = (BraveResources.Load("Win_Pic_BossRush_001", ".png") as Texture);
-			}
-			else
-			{
-
-				//BotsModule.Log("setWinPicHook: 2", BotsModule.LOCKED_CHARACTOR_COLOR);
-
-				GlobalDungeonData.ValidTilesets tilesetId = GameManager.Instance.Dungeon.tileIndices.tilesetId;
-				if (tilesetId != GlobalDungeonData.ValidTilesets.FORGEGEON)
-				{
-					if (tilesetId != GlobalDungeonData.ValidTilesets.HELLGEON)
-					{
-						if (tilesetId != GlobalDungeonData.ValidTilesets.FINALGEON)
-						{
-							self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Gun_Get_001", ".png") as Texture);
-						}
-						else
-						{
-							switch (GameManager.Instance.PrimaryPlayer.characterIdentity)
-							{
-								case PlayableCharacters.Pilot:
-									self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Pilot_001", ".png") as Texture);
-									goto IL_384;
-								case PlayableCharacters.Convict:
-									self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Convict_001", ".png") as Texture);
-									goto IL_384;
-								case PlayableCharacters.Robot:
-									self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Robot_001", ".png") as Texture);
-									goto IL_384;
-								case PlayableCharacters.Soldier:
-									self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Marine_001", ".png") as Texture);
-									goto IL_384;
-								case PlayableCharacters.Guide:
-									self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Hunter_001", ".png") as Texture);
-									goto IL_384;
-								case PlayableCharacters.Bullet:
-									self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Bullet_001", ".png") as Texture);
-									goto IL_384;
-								default:
-                                    if (GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>() != null)
-                                    {
-                                        self.photoSprite.Texture = GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data.junkanWinPic;
-                                        goto IL_384;
-                                    }
-                                    break;
-							}
-							self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Gun_Get_001", ".png") as Texture);
-						IL_384:;
-						}
-					}
-					else if (GameManager.IsGunslingerPast)
-					{
-						self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Slinger_001", ".png") as Texture);
-					}
-					else
-					{
-						self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Lich_Kill_001", ".png") as Texture);
-					}
-				}
-				else
-				{
-					self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Gun_Get_001", ".png") as Texture);
-				}
-			}
-		}
-
-
-		private static bool ShouldUseJunkPic()
-		{
-			for (int i = 0; i < GameManager.Instance.AllPlayers.Length; i++)
-			{
-				PlayerController playerController = GameManager.Instance.AllPlayers[i];
-				if (playerController)
-				{
-					for (int j = 0; j < playerController.passiveItems.Count; j++)
-					{
-						if (playerController.passiveItems[j] is CompanionItem)
-						{
-							CompanionItem companionItem = playerController.passiveItems[j] as CompanionItem;
-							if (companionItem.ExtantCompanion && companionItem.ExtantCompanion.GetComponent<SackKnightController>() && companionItem.ExtantCompanion.GetComponent<SackKnightController>().CurrentForm == SackKnightController.SackKnightPhase.ANGELIC_KNIGHT)
-							{
-								return true;
-							}
-						}
-					}
-				}
-			}
-			return false;
-		}*/
 
 
 

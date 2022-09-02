@@ -21,6 +21,144 @@ namespace Alexandria.NPCAPI
         public static Vector3[] defaultItemPositions = new Vector3[] { new Vector3(1.125f, 2.125f, 1), new Vector3(2.625f, 1f, 1), new Vector3(4.125f, 2.125f, 1) };
         public static Vector3 defaultTalkPointOffset = new Vector3(0.8125f, 2.1875f, -1.31f);
         public static Vector3 defaultNpcPosition = new Vector3(1.9375f, 3.4375f, 5.9375f);
+
+
+
+        public static GameObject SetUpNPC(string name, string prefix, List<string> idleSpritePaths, int idleFps, List<string> talkSpritePaths, int talkFps, Vector3 talkPointOffset, Vector3 npcPosition, VoiceBoxes voiceBox = VoiceBoxes.OLD_MAN, float fortunesFavorRadius = 2,
+            IntVector2? hitboxSize = null, IntVector2? hitboxOffset = null)
+        {
+
+            try
+            {
+
+                var shared_auto_001 = ResourceManager.LoadAssetBundle("shared_auto_001");
+                var shared_auto_002 = ResourceManager.LoadAssetBundle("shared_auto_002");
+                var SpeechPoint = PrefabAPI.PrefabBuilder.BuildObject("SpeechPoint");
+                SpeechPoint.transform.position = talkPointOffset;
+
+
+
+                var npcObj = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], PrefabAPI.PrefabBuilder.BuildObject(prefix + ":" + name), Assembly.GetCallingAssembly());
+
+                npcObj.layer = 22;
+
+                var collection = npcObj.GetComponent<tk2dSprite>().Collection;
+                SpeechPoint.transform.parent = npcObj.transform;
+
+                FakePrefab.MarkAsFakePrefab(SpeechPoint);
+                UnityEngine.Object.DontDestroyOnLoad(SpeechPoint);
+                SpeechPoint.SetActive(true);
+
+
+                var idleIdsList = new List<int>();
+                var talkIdsList = new List<int>();
+
+                foreach (string sprite in idleSpritePaths)
+                {
+                    idleIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, Assembly.GetCallingAssembly()));
+                }
+
+                foreach (string sprite in talkSpritePaths)
+                {
+                    talkIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, Assembly.GetCallingAssembly()));
+                }
+
+                tk2dSpriteAnimator spriteAnimator = npcObj.AddComponent<tk2dSpriteAnimator>();
+
+                SpriteBuilder.AddAnimation(spriteAnimator, collection, idleIdsList, "idle", tk2dSpriteAnimationClip.WrapMode.Loop, idleFps);
+                SpriteBuilder.AddAnimation(spriteAnimator, collection, talkIdsList, "talk", tk2dSpriteAnimationClip.WrapMode.Loop, talkFps);
+
+
+                if (hitboxSize == null) hitboxSize = new IntVector2(20, 18);
+                if (hitboxOffset == null) new IntVector2(5, 0);
+
+                SpeculativeRigidbody rigidbody = GenerateOrAddToRigidBody(npcObj, CollisionLayer.BulletBlocker, PixelCollider.PixelColliderGeneration.Manual, true, true, true, false, false, false, false, true, hitboxSize, hitboxOffset);
+
+
+                //SpeculativeRigidbody rigidbody = GenerateOrAddToRigidBody(npcObj, CollisionLayer.BulletBlocker, PixelCollider.PixelColliderGeneration.Manual, true, true, true, false, false, false, false, true, new IntVector2(20, 18), new IntVector2(5, 0));
+
+                TalkDoerLite talkDoer = npcObj.AddComponent<TalkDoerLite>();
+
+                talkDoer.placeableWidth = 4;
+                talkDoer.placeableHeight = 3;
+                talkDoer.difficulty = 0;
+                talkDoer.isPassable = true;
+                talkDoer.usesOverrideInteractionRegion = false;
+                talkDoer.overrideRegionOffset = Vector2.zero;
+                talkDoer.overrideRegionDimensions = Vector2.zero;
+                talkDoer.overrideInteractionRadius = -1;
+                talkDoer.PreventInteraction = false;
+                talkDoer.AllowPlayerToPassEventually = true;
+                talkDoer.speakPoint = SpeechPoint.transform;
+                talkDoer.SpeaksGleepGlorpenese = false;
+                talkDoer.audioCharacterSpeechTag = ReturnVoiceBox(voiceBox);
+                talkDoer.playerApproachRadius = 5;
+                talkDoer.conversationBreakRadius = 5;
+                talkDoer.echo1 = null;
+                talkDoer.echo2 = null;
+                talkDoer.PreventCoopInteraction = false;
+                talkDoer.IsPaletteSwapped = false;
+                talkDoer.PaletteTexture = null;
+                talkDoer.OutlineDepth = 0.5f;
+                talkDoer.OutlineLuminanceCutoff = 0.05f;
+                talkDoer.MovementSpeed = 3;
+                talkDoer.PathableTiles = CellTypes.FLOOR;
+
+
+                UltraFortunesFavor dreamLuck = npcObj.AddComponent<UltraFortunesFavor>();
+
+                dreamLuck.goopRadius = fortunesFavorRadius;
+                dreamLuck.beamRadius = fortunesFavorRadius;
+                dreamLuck.bulletRadius = fortunesFavorRadius;
+                dreamLuck.bulletSpeedModifier = 0.8f;
+
+                dreamLuck.vfxOffset = 0.625f;
+                dreamLuck.sparkOctantVFX = shared_auto_001.LoadAsset<GameObject>("FortuneFavor_VFX_Spark");
+
+
+                AIAnimator aIAnimator = GenerateBlankAIAnimator(npcObj);
+                aIAnimator.spriteAnimator = spriteAnimator;
+                aIAnimator.IdleAnimation = new DirectionalAnimation
+                {
+                    Type = DirectionalAnimation.DirectionType.Single,
+                    Prefix = "idle",
+                    AnimNames = new string[]
+                    {
+                        ""
+                    },
+                    Flipped = new DirectionalAnimation.FlipType[]
+                    {
+                        DirectionalAnimation.FlipType.None
+                    }
+
+                };
+
+                aIAnimator.TalkAnimation = new DirectionalAnimation
+                {
+                    Type = DirectionalAnimation.DirectionType.Single,
+                    Prefix = "talk",
+                    AnimNames = new string[]
+                    {
+                        ""
+                    },
+                    Flipped = new DirectionalAnimation.FlipType[]
+                    {
+                        DirectionalAnimation.FlipType.None
+                    }
+                };
+
+                PlayMakerFSM iHaveNoFuckingClueWhatThisIs = npcObj.AddComponent<PlayMakerFSM>();
+
+                npcObj.name = prefix + ":" + name;
+                return npcObj;
+            }
+            catch (Exception message)
+            {
+                ETGModConsole.Log(message.ToString());
+                return null;
+            }
+        }
+
         /*
         /// <summary>
         /// Creates a shop object along with an npc

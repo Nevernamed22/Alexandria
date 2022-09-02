@@ -24,7 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DocumentationFile>bin\Debug\Alexandria.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -91,6 +91,8 @@
     <Compile Include="Misc\PickupUtility.cs" />
     <Compile Include="Misc\PlayerUtility.cs" />
     <Compile Include="NPCAPI\BreachShopTools.cs" />
+    <Compile Include="NPCAPI\PlayMakerExtensions.cs" />
+    <Compile Include="NPCAPI\NpcAPI.cs" />
     <Compile Include="PrefabAPI\AssetBundleBuilder.cs" />
     <Compile Include="PrefabAPI\AssetBundleTools.cs" />
     <Compile Include="PrefabAPI\BinaryWriterExtensions.cs" />
@@ -398,4 +400,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('packages\BepInEx.Core.5.4.21\build\BepInEx.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\BepInEx.Core.5.4.21\build\BepInEx.Core.targets'))" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>COPY "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\BepInEx\plugins\Alexandria\plugins"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

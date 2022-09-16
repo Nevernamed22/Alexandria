@@ -33,10 +33,14 @@ namespace Alexandria.Misc
                 if (CustomActions.OnNewPlayercontrollerSpawned != null) CustomActions.OnNewPlayercontrollerSpawned(attachedPlayer);
             }
         }
-
+        #region Actions
+        //Slash Related
         public Action<PlayerController, Vector2, SlashData> PreProcessSlash;
         public Action<PlayerController, Vector2, SlashData> PostProcessSlash;
         public Action<PlayerController, Vector2, SlashData, AIActor> OnSlashHitEnemy;
+        //Other
+        public Action<PlayerController> OnBlessedGunChanged;
+        #endregion
         public void Enrage(float dur)
         {
             if (remainingRageTime > 0) { remainingRageTime += dur; }

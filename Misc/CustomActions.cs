@@ -73,6 +73,9 @@ namespace Alexandria.Misc
                 typeof(Dungeon).GetMethod("Start", BindingFlags.Instance | BindingFlags.NonPublic),
                 typeof(CustomActions).GetMethod("StartHook", BindingFlags.Static | BindingFlags.Public)             
             );
+            new Hook(
+                    typeof(PlayerController).GetMethod("ChangeToRandomGun", BindingFlags.Instance | BindingFlags.Public),
+                    typeof(CustomActions).GetMethod("ChangeToRandomGunHook", BindingFlags.Static | BindingFlags.Public));
         }
         private static Hook pedestalSpawnHook;
         private static Hook chestPostProcessHook;
@@ -141,7 +144,6 @@ namespace Alexandria.Misc
                 orig(self, player);
             }
         }
-
         public static IEnumerator StartHook(Func<Dungeon, IEnumerator> orig, Dungeon self)
         {
             IEnumerator origEnum = orig(self);
@@ -157,7 +159,6 @@ namespace Alexandria.Misc
             }
             yield break;
         }
-
         public static IEnumerator HandleSpinfallSpawnHook(Func<PlayerController, float, IEnumerator> orig, PlayerController self, float invisibleDelay)
         {
             IEnumerator origEnum = orig(self, invisibleDelay);
@@ -174,6 +175,22 @@ namespace Alexandria.Misc
                 }
             }
             yield break;
+        }
+        public static void ChangeToRandomGunHook(Action<PlayerController> orig, PlayerController self)
+        {
+            orig(self);
+            if (GameManager.Instance.CurrentLevelOverrideState == GameManager.LevelOverrideState.END_TIMES || GameManager.Instance.CurrentLevelOverrideState == GameManager.LevelOverrideState.CHARACTER_PAST || GameManager.Instance.CurrentLevelOverrideState == GameManager.LevelOverrideState.TUTORIAL)
+            {
+                return;
+            }
+
+            var currentGun = self.CurrentGun;
+
+            if (currentGun && currentGun.HasTag("exclude_blessed"))
+            {
+                self.ChangeToRandomGun();
+            }
+            else { if (self && self.GetExtComp() != null) self.GetExtComp().OnBlessedGunChanged(self); }
         }
 
         public delegate void Action<T1, T2, T3, T4, T5, T6, T7>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7);

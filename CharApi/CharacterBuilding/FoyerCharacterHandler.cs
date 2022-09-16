@@ -260,7 +260,7 @@ namespace Alexandria.CharacterAPI
 
             var characterCostumeSwapper = baseSwapper.GetComponent<CharacterCostumeSwapper>();
 
-            characterCostumeSwapper.TargetCharacter = (PlayableCharacters)data.identity;
+            characterCostumeSwapper.TargetCharacter = data.identity;
 
             characterCostumeSwapper.AlternateCostumeSprite = altSprite;
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Alexandria.Misc;
 using Dungeonator;
 using Alexandria.ItemAPI;
 
@@ -104,7 +103,7 @@ namespace Alexandria.DungeonAPI
             var rooms = GetRoomsFromRoomTables(floor);
             foreach (var room in rooms)
             {
-                DebugUtility.Log(room.name, "roomnames.txt");
+                ShrineTools.Log(room.name, "roomnames.txt");
                 if (room.name.ToLower().Equals(roomName))
                 {
                     return room;
@@ -117,7 +116,7 @@ namespace Alexandria.DungeonAPI
                 var overrideRoom = node.overrideExactRoom;
 
                 if(overrideRoom != null)
-                    DebugUtility.Log(overrideRoom.name, "roomnames.txt");
+                    ShrineTools.Log(overrideRoom.name, "roomnames.txt");
                 if (overrideRoom != null && overrideRoom.name.ToLower().Equals(roomName))
                 {
                     return overrideRoom;

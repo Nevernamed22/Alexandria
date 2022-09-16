@@ -7,8 +7,6 @@ using UnityEngine;
 using Dungeonator;
 using Random = UnityEngine.Random;
 using Alexandria.ItemAPI;
-using Alexandria.Misc;
-
 namespace Alexandria.DungeonAPI
 {
     public static class SampleFlow
@@ -24,7 +22,7 @@ namespace Alexandria.DungeonAPI
             flow.AddNodeToFlow(hub, flow.FirstNode);
             foreach (var room in RoomFactory.rooms.Values)
             {
-                DebugUtility.Log("Adding room to flow: " + room.room);
+                ShrineTools.Log("Adding room to flow: " + room.room);
                 customRoom = new DungeonFlowNode(flow) { overrideExactRoom = room.room };
                 flow.AddNodeToFlow(customRoom, lastNode);
                 hub = new DungeonFlowNode(flow) { overrideExactRoom = RoomFactory.CreateEmptyRoom() };
@@ -46,7 +44,7 @@ namespace Alexandria.DungeonAPI
 
             //one room for each visual definition
             DungeonFlowNode lastNode = flow.FirstNode;
-            DebugUtility.Print(dungeon.roomMaterialDefinitions?.Length);
+            ShrineTools.Print(dungeon.roomMaterialDefinitions?.Length);
             for (int i = 0; i < dungeon.roomMaterialDefinitions.Length; i++)
             {
                 if (dungeon.name == OfficialFlows.dungeonPrefabNames[3] && i == 5) continue;
@@ -117,7 +115,7 @@ namespace Alexandria.DungeonAPI
             var room = RoomFromAssetName(name);
             if (room == null)
             {
-                DebugUtility.Print("Error loading room " + name, "FF0000");
+                ShrineTools.Print("Error loading room " + name, "FF0000");
             };
             node.overrideExactRoom = room;
             return node;
@@ -137,12 +135,12 @@ namespace Alexandria.DungeonAPI
 
         public static void ListNodes(this DungeonFlow flow)
         {
-            DebugUtility.Print(flow.name + " node:");
-            DebugUtility.Print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            ShrineTools.Print(flow.name + " node:");
+            ShrineTools.Print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             foreach (var node in flow.AllNodes)
             {
                 if (node != null && node.overrideExactRoom)
-                    DebugUtility.Print(node.overrideExactRoom);
+                    ShrineTools.Print(node.overrideExactRoom);
             }
         }
     }

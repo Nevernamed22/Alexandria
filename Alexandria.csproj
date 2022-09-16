@@ -59,6 +59,7 @@
     <Compile Include="ChestAPI\ChestSpawnHelper.cs" />
     <Compile Include="AlexandriaHooks.cs" />
     <Compile Include="DungeonAPI\RoomUtility.cs" />
+    <Compile Include="DungeonAPI\SetupExoticObjects.cs" />
     <Compile Include="EnemyAPI\AIActorUtility.cs" />
     <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
     <Compile Include="ItemAPI\AnimationUtility.cs" />

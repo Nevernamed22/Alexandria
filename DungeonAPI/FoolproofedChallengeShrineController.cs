@@ -8,7 +8,7 @@ using UnityEngine;
 using System.Reflection;
 
 
-namespace Alexandria.DungeonAPI
+namespace Planetside
 {
 	public class FoolproofedChallengeShrineController : DungeonPlaceableBehaviour, IPlayerInteractable, IPlaceConfigurable
 	{

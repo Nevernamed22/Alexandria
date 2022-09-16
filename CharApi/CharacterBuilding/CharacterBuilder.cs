@@ -97,7 +97,7 @@ namespace Alexandria.CharacterAPI
                 material.SetColor("_EmissiveColor", altGlowVars.emissiveColor);
                 material.SetFloat("_EmissiveColorPower", altGlowVars.emissiveColorPower);
                 material.SetFloat("_EmissivePower", altGlowVars.emissivePower);
-                material.SetFloat("_EmissiveThresholdSensitivity", glowVars.emissiveThresholdSensitivity);
+                material.SetFloat("_EmissiveThresholdSensitivity", altGlowVars.emissiveThresholdSensitivity);
 
                 data.altGlowMaterial = material;
             }

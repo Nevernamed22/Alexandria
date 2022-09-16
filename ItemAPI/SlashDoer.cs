@@ -15,7 +15,7 @@ namespace Alexandria.ItemAPI
     {
         public static SlashData CloneSlashData(SlashData original)
         {
-            SlashData newData = new SlashData();
+            SlashData newData = ScriptableObject.CreateInstance<SlashData>();
             newData.doVFX = original.doVFX;
             newData.VFX = original.VFX;
             newData.doHitVFX = original.doHitVFX;

@@ -1,4 +1,5 @@
 ﻿//using Alexandria.SaveAPI;
+using Alexandria.DungeonAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,15 @@ namespace Alexandria.Misc
                     }
                 }
                 ETGModConsole.Log($"--=== END ===---");*/
+            });
+
+            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("checkStaticObjects", delegate (string[] args)
+            {
+                foreach (var thing in StaticReferences.customObjects)
+                {
+                    ETGModConsole.Log($"{thing.Key} - {thing.Value.name}");
+                }
+                
             });
         }
     }

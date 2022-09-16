@@ -162,13 +162,13 @@ namespace Alexandria.Misc
                     modName = modName,
                     floorTilesetID = targetFloorTilesetID,
                     indexValue = index,
-                    correspondingFormeID = 647,
+                    correspondingFormeID = gun.PickupObjectId,
                     viableMasterRounds = viableMasterRounds
                 });
             }
             else Debug.LogWarning($"Alexandria - ChamberGunAPI: {modName} attempted to add a chamber gun form with an invalid id.");
         }
-        private static List<MidInitChGunMastery> masteryFormsForDelayedLoad;
+        private static List<MidInitChGunMastery> masteryFormsForDelayedLoad = new List<MidInitChGunMastery>();
         public class MidInitChGunMastery
         {
             public string modName = "Unset";

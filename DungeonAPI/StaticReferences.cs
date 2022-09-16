@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using Dungeonator;
+using Alexandria.ItemAPI;
+using Planetside;
 using System.Reflection;
 using MonoMod.RuntimeDetour;
-using Alexandria.ItemAPI;
+
 
 namespace Alexandria.DungeonAPI
 {
@@ -16,61 +18,7 @@ namespace Alexandria.DungeonAPI
         public static Dictionary<string, GenericRoomTable> RoomTables;
         public static SharedInjectionData subShopTable;
 
-        public static T LoadAssetFromAnywhere<T>(string path) where T : UnityEngine.Object
-        {
-            T t = default(T);
-            foreach (string text in StaticReferences.BundlePrereqs)
-            {
-                try
-                {
-                    t = ResourceManager.LoadAssetBundle(text).LoadAsset<T>(path);
-                }
-                catch
-                {
-                }
-                bool flag = t != null;
-                if (flag)
-                {
-                    break;
-                }
-            }
-            return t;
-        }
-
-
-        private static string[] BundlePrereqs = new string[]
-{
-            "brave_resources_001",
-            "dungeon_scene_001",
-            "encounters_base_001",
-            "enemies_base_001",
-            "flows_base_001",
-            "foyer_001",
-            "foyer_002",
-            "foyer_003",
-            "shared_auto_001",
-            "shared_auto_002",
-            "shared_base_001",
-            "dungeons/base_bullethell",
-            "dungeons/base_castle",
-            "dungeons/base_catacombs",
-            "dungeons/base_cathedral",
-            "dungeons/base_forge",
-            "dungeons/base_foyer",
-            "dungeons/base_gungeon",
-            "dungeons/base_mines",
-            "dungeons/base_nakatomi",
-            "dungeons/base_resourcefulrat",
-            "dungeons/base_sewer",
-            "dungeons/base_tutorial",
-            "dungeons/finalscenario_bullet",
-            "dungeons/finalscenario_convict",
-            "dungeons/finalscenario_coop",
-            "dungeons/finalscenario_guide",
-            "dungeons/finalscenario_pilot",
-            "dungeons/finalscenario_robot",
-            "dungeons/finalscenario_soldier"
-        };
+        public static Dictionary<string, GameObject> customObjects = new Dictionary<string, GameObject>();
 
         public static Dictionary<string, string> roomTableMap = new Dictionary<string, string>()
         {
@@ -96,7 +44,7 @@ namespace Alexandria.DungeonAPI
 
 
         //=================== LIST OF BOSS ROOM POOLS 
-        public static Dictionary<string, string> BossRoomGrabage = new Dictionary<string, string>()
+        public static Dictionary<string, string> BossRoomTableMap = new Dictionary<string, string>()
         {
             //Floor 1
             { "gull", "bosstable_01_gatlinggull"},
@@ -123,7 +71,7 @@ namespace Alexandria.DungeonAPI
             { "doorlord", "bosstable_xx_bossdoormimic"}
         };
 
-        public static Dictionary<string, string> MiniBossRoomPools = new Dictionary<string, string>()
+        public static Dictionary<string, string> MiniBossRoomTableMap = new Dictionary<string, string>()
         {
             {"blockner", "BlocknerMiniboss_Table_01" },
             {"shadeagunim","PhantomAgunim_Table_01" },
@@ -164,22 +112,21 @@ namespace Alexandria.DungeonAPI
                     var bundle = ResourceManager.LoadAssetBundle(name);
                     if(bundle == null)
                     {
-                        Debug.LogError($"[Alexandria] Failed to load asset bundle: {name}");
+                        ShrineTools.PrintError($"Failed to load asset bundle: {name}");
                         continue;
                     }
                     //Tools.PrintError($"Loaded assetbundle: {name}");
 
                     AssetBundles.Add(name, ResourceManager.LoadAssetBundle(name));
-                    Debug.Log($"loaded {name}");
                 }
                 catch (Exception e)
                 {
-                   Debug.LogError($"[Alexandria] Failed to load asset bundle: {name}");
-                    Debug.LogException(e);
+                    ShrineTools.PrintError($"Failed to load asset bundle: {name}");
+                    ShrineTools.PrintException(e);
                 }
             }
-            InitStaticRoomObjects();
-
+            // InitStaticRoomObjects();
+            SetupExoticObjects.InitialiseObjects();
             RoomTables = new Dictionary<string, GenericRoomTable>();
             foreach (var entry in roomTableMap)
             {
@@ -188,14 +135,14 @@ namespace Alexandria.DungeonAPI
                     var table = DungeonDatabase.GetOrLoadByName($"base_{entry.Key}").PatternSettings.flows[0].fallbackRoomTable;
                     if (entry.Key.Contains("resourcefulrat"))
                     {
-                        table = DungeonAPI.OfficialFlows.GetDungeonPrefab("base_resourcefulrat").PatternSettings.flows[0].AllNodes[18].overrideRoomTable; 
+                        table = OfficialFlows.GetDungeonPrefab("base_resourcefulrat").PatternSettings.flows[0].AllNodes[18].overrideRoomTable; 
                     }
                     RoomTables.Add(entry.Key, table);
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"[Alexandria] Failed to load room table: {entry.Key}:{entry.Value}");
-                    Debug.LogException(e);
+                    ShrineTools.PrintError($"Failed to load room table: {entry.Key}:{entry.Value}");
+                    ShrineTools.PrintException(e);
                 }
             }
 
@@ -208,13 +155,13 @@ namespace Alexandria.DungeonAPI
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"[Alexandria] Failed to load special room table: {entry.Key}:{entry.Value}");
-                    Debug.LogException(e);
+                    ShrineTools.PrintError($"Failed to load special room table: {entry.Key}:{entry.Value}");
+                    ShrineTools.PrintException(e);
                 }
             }
 
             //================================ Adss Boss Rooms into RoomTables
-            foreach (var entry in BossRoomGrabage)
+            foreach (var entry in BossRoomTableMap)
             {
                 try
                 {
@@ -223,12 +170,12 @@ namespace Alexandria.DungeonAPI
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"[Alexandria] Failed to load special room table: {entry.Key}:{entry.Value}");
-                    Debug.LogException(e);
+                    ShrineTools.PrintError($"Failed to load special room table: {entry.Key}:{entry.Value}");
+                    ShrineTools.PrintException(e);
                 }
             }
             //================================ Adss Mini Boss Rooms into RoomTables
-            foreach (var entry in MiniBossRoomPools)
+            foreach (var entry in MiniBossRoomTableMap)
             {
                 try
                 {
@@ -237,8 +184,8 @@ namespace Alexandria.DungeonAPI
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"[Alexandria] Failed to load special room table: {entry.Key}:{entry.Value}");
-                    Debug.LogException(e);
+                    ShrineTools.PrintError($"Failed to load special room table: {entry.Key}:{entry.Value}");
+                    ShrineTools.PrintException(e);
                 }
             }
 
@@ -250,7 +197,7 @@ namespace Alexandria.DungeonAPI
 
 
 
-            Debug.Log("[Alexandria] Static references initialized.");
+            ShrineTools.Print("Static references initialized.");
         }
        
 
@@ -290,8 +237,11 @@ namespace Alexandria.DungeonAPI
             rngDungeon = null;
 
             var forgeDungeon = DungeonDatabase.GetOrLoadByName("Base_Forge");
+
+              
             foreach (WeightedRoom wRoom in forgeDungeon.PatternSettings.flows[0].fallbackRoomTable.includedRooms.elements)
             {
+
                 if (wRoom.room != null && !string.IsNullOrEmpty(wRoom.room.name))
                 {
                     if (wRoom.room.name.ToLower().StartsWith("forge_normal_cubulead_03"))
@@ -384,10 +334,199 @@ namespace Alexandria.DungeonAPI
             newController.talkPoint = baseController.talkPoint;
             newController.usesCustomChestTable = baseController.usesCustomChestTable;
             if (ChallengeShrine.GetComponentInChildren<ChallengeShrineController>()) UnityEngine.Object.Destroy(ChallengeShrine.GetComponentInChildren<ChallengeShrineController>());
-            StoredRoomObjects.Add("ChallengeShrine", ChallengeShrine);            
+            StoredRoomObjects.Add("ChallengeShrine", ChallengeShrine);           
+        }
+
+        public static GameObject DefineMinecartFromValues(float maxSpeed, float timeToMaxSpeed)
+        {
+            GameObject asset = RoomFactory.GetExoticGameObject("minecart_pathing");
+            GameObject gameObject = FakePrefab.Clone(asset);
+            MineCartController component = gameObject.GetComponent<MineCartController>();
+            GameObject result;
+            if (component == null)
+            {
+                result = asset;
+            }
+            else
+            {
+                component.MaxSpeed = maxSpeed;
+                component.TimeToMaxSpeed = timeToMaxSpeed;
+                result = gameObject;
+            }
+            return result;
         }
 
 
+        public static GameObject DefineDeadBlowFromValues(bool followsPlayer, bool persistent, bool facesLeft, bool leaveGoop, bool fireBullets, string goopType, float initialDelay, float minDelay, float maxDelay)
+        {
+            GameObject asset = StaticReferences.GetAsset<GameObject>("Forge_Hammer");
+            GameObject gameObject = FakePrefab.Clone(asset);
+            ForgeHammerController component = gameObject.GetComponent<ForgeHammerController>();
+            bool flag = component == null;
+            GameObject result;
+            if (flag)
+            {
+                result = asset;
+            }
+            else
+            {
+                component.TracksPlayer = followsPlayer;
+                component.DeactivateOnEnemiesCleared = !persistent;
+                if (facesLeft)
+                {
+                    component.ForceLeft = true;
+                    component.ForceRight = false;
+                }
+                else
+                {
+                    component.ForceLeft = false;
+                    component.ForceRight = true;
+                }
+                component.DoGoopOnImpact = leaveGoop;
+                component.DoesBulletsOnImpact = fireBullets;
+                component.GoopToDo = StaticReferences.FetchGoopDefinitions(goopType);
+                component.InitialDelay = initialDelay;
+                component.MinTimeBetweenAttacks = minDelay;
+                component.MaxTimeBetweenAttacks = maxDelay;
+                result = gameObject;
+            }
+            return result;
+        }
+
+        public static GameObject GenerateCustomBarrel(string baseBarrel, float rollSpeed, bool trailgoop, string trailGoopType, float goopTrailWidth, bool doGoopPuddle, string puddleGoopType, float goopPuddleWidth, bool destroyedByPlayerRoll)
+        {
+            GameObject gameObject = new GameObject();
+            bool flag = baseBarrel == "red_explosive";
+            if (flag)
+            {
+                gameObject = FakePrefab.Clone(RoomFactory.GetGameObjectFromBundles("Red Barrel"));
+            }
+            else
+            {
+                bool flag2 = baseBarrel == "metal_explosive";
+                if (flag2)
+                {
+                    gameObject = FakePrefab.Clone(RoomFactory.GetGameObjectFromBundles("Red Drum"));
+                }
+                else
+                {
+                    bool flag3 = baseBarrel == "water_drum";
+                    if (flag3)
+                    {
+                        gameObject = FakePrefab.Clone(RoomFactory.GetGameObjectFromBundles("Blue Drum"));
+                    }
+                    else
+                    {
+                        bool flag4 = baseBarrel == "oil_drum";
+                        if (flag4)
+                        {
+                            gameObject = FakePrefab.Clone(RoomFactory.GetGameObjectFromBundles("Purple Drum"));
+                        }
+                        else
+                        {
+                            bool flag5 = baseBarrel == "poison_drum";
+                            if (flag5)
+                            {
+                                gameObject = FakePrefab.Clone(RoomFactory.GetGameObjectFromBundles("Yellow Drum"));
+                            }
+                            else
+                            {
+                                gameObject = FakePrefab.Clone(RoomFactory.GetGameObjectFromBundles("Blue Drum"));
+                            }
+                        }
+                    }
+                }
+            }
+            KickableObject component = gameObject.GetComponent<KickableObject>();
+            MinorBreakable component2 = gameObject.GetComponent<MinorBreakable>();
+            bool flag6 = component;
+            if (flag6)
+            {
+                component.rollSpeed = rollSpeed;
+                component.RollingDestroysSafely = destroyedByPlayerRoll;
+                component.leavesGoopTrail = trailgoop;
+                component.goopRadius = goopTrailWidth;
+                component.goopFrequency = 0.05f;
+                component.goopType = StaticReferences.FetchGoopDefinitions(trailGoopType);
+            }
+            bool flag7 = component2;
+            if (flag7)
+            {
+                component2.goopsOnBreak = doGoopPuddle;
+                component2.goopType = StaticReferences.FetchGoopDefinitions(puddleGoopType);
+                component2.goopRadius = goopPuddleWidth;
+            }
+            return gameObject;
+        }
+
+        public static GoopDefinition FetchGoopDefinitions(string desiredGoopType)
+        {
+            GoopDefinition goopDefinition = null;
+            string text = null;
+            if (desiredGoopType == "water")
+            {
+                text = "assets/data/goops/water goop.asset";
+            }
+            else if (desiredGoopType == "web")
+            {
+                text = "assets/data/goops/phasewebgoop.asset";
+            }
+            else if (desiredGoopType == "fire")
+            {
+                text = "assets/data/goops/napalmgoopthatworks.asset";
+            }
+            else if (desiredGoopType == "charm")
+            {
+                PickupObject byId = PickupObjectDatabase.GetById(310);
+                GoopDefinition goopDefinition2;
+                if (byId == null)
+                {
+                    goopDefinition2 = null;
+                }
+                else
+                {
+                    WingsItem component = byId.GetComponent<WingsItem>();
+                    goopDefinition2 = ((component != null) ? component.RollGoop : null);
+                }
+                goopDefinition = goopDefinition2;
+            }
+            else if (desiredGoopType == "greenfire")
+            {
+                goopDefinition = (PickupObjectDatabase.GetById(698) as Gun).DefaultModule.projectiles[0].GetComponent<GoopModifier>().goopDefinition;
+            }
+            else if (desiredGoopType == "cheese")
+            {
+                goopDefinition = (PickupObjectDatabase.GetById(808) as Gun).DefaultModule.projectiles[0].GetComponent<GoopModifier>().goopDefinition;
+            }
+
+            else if (desiredGoopType == "poison")
+            {
+                text = "assets/data/goops/poison goop.asset";
+            }
+
+            else if (desiredGoopType == "blobulon")
+            {
+                text = "assets/data/goops/blobulongoop.asset";
+            }
+            else if (desiredGoopType == "oil")
+            {
+                text = "assets/data/goops/oil goop.asset";
+            }
+            if (text != null)
+            {
+                try
+                {
+                    GameObject asset = StaticReferences.GetAsset<GameObject>(text);
+                    goopDefinition = asset.GetComponent<GoopDefinition>();
+                }
+                catch
+                {
+                    goopDefinition = StaticReferences.GetAsset<GoopDefinition>(text);
+                }
+                goopDefinition.name = text.Replace("assets/data/goops/", "").Replace(".asset", "");
+            }
+            return goopDefinition;
+        }
 
         public static Dictionary<string, GameObject> StoredRoomObjects = new Dictionary<string, GameObject>(){};
         public static Dictionary<string, DungeonPlaceable> StoredDungeonPlaceables = new Dictionary<string, DungeonPlaceable>() {};

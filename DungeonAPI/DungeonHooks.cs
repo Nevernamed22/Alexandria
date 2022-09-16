@@ -7,7 +7,6 @@ using UnityEngine;
 using Dungeonator;
 using MonoMod.RuntimeDetour;
 using Alexandria.ItemAPI;
-using Alexandria.Misc;
 
 namespace Alexandria.DungeonAPI
 {
@@ -68,7 +67,7 @@ namespace Alexandria.DungeonAPI
 
         public static void LoopGenConstructor(Action<LoopDungeonGenerator, Dungeon, int> orig, LoopDungeonGenerator self, Dungeon dungeon, int dungeonSeed)
         {
-
+            
             orig(self, dungeon, dungeonSeed);
 
             if (GameManager.Instance != null && GameManager.Instance != targetInstance)
@@ -102,14 +101,13 @@ namespace Alexandria.DungeonAPI
                     //Tools.Log(self.name, "RoomTables/" + self.name + ".txt");
                     foreach (var wroom in self.elements)
                     {
-                        Debug.Log($"(Alexandria) {wroom.room.name}, RoomTables/ + {seenTables.Count} + .txt");
+                        ShrineTools.Log(wroom.room.name, "RoomTables/" + seenTables.Count + ".txt");
                     }
                     seenTables.Add(self);
                 }
-            }
-            catch (Exception e)
+            }catch(Exception e)
             {
-                Debug.LogException(e);
+                ShrineTools.PrintException(e);
             }
             return orig(self);
         }
@@ -119,9 +117,9 @@ namespace Alexandria.DungeonAPI
             orig(self, buildData);
             if (buildData.assignedPrototypeRoom)
                 if (buildData.assignedPrototypeRoom.category != PrototypeDungeonRoom.RoomCategory.NORMAL)
-                    DebugUtility.LogPropertiesAndFields(buildData.assignedPrototypeRoom, "\n" + buildData.assignedPrototypeRoom.name);
+                    ShrineTools.LogPropertiesAndFields(buildData.assignedPrototypeRoom, "\n" + buildData.assignedPrototypeRoom.name);
                 else
-                    Debug.LogError("(Alexandria) ======================= NULL =======================\n");
+                    ShrineTools.Log("======================= NULL =======================\n");
         }
 
 
@@ -139,9 +137,9 @@ namespace Alexandria.DungeonAPI
                     string name = builderFlowNode.assignedPrototypeRoom.name.ToLower();
                     if (name.Contains("shrine") || name.Contains("glass"))
                     {
-                        DebugUtility.LogPropertiesAndFields(builderFlowNode, "Builder Flow Node");
-                        DebugUtility.LogPropertiesAndFields(builderFlowNode.assignedPrototypeRoom, "Proto Room");
-                        DebugUtility.LogPropertiesAndFields(builderFlowNode.assignedPrototypeRoom.requiredInjectionData, "InjectionData");
+                        ShrineTools.LogPropertiesAndFields(builderFlowNode, "Builder Flow Node");
+                        ShrineTools.LogPropertiesAndFields(builderFlowNode.assignedPrototypeRoom, "Proto Room");
+                        ShrineTools.LogPropertiesAndFields(builderFlowNode.assignedPrototypeRoom.requiredInjectionData, "InjectionData");
                     }
                 }
             }
@@ -174,7 +172,7 @@ namespace Alexandria.DungeonAPI
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                ShrineTools.PrintException(e);
             }
 
 

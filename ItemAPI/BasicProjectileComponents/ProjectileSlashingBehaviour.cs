@@ -14,7 +14,7 @@ namespace Alexandria.ItemAPI
         {
             DestroyBaseAfterFirstSlash = false;
             timeBetweenSlashes = 1;
-            slashParameters = new SlashData();
+            slashParameters = ScriptableObject.CreateInstance<SlashData>();
             SlashDamageUsesBaseProjectileDamage = true;
         }
         private void Start()

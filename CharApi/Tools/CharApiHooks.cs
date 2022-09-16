@@ -125,7 +125,7 @@ namespace Alexandria.CharacterAPI
 					typeof(Hooks).GetMethod("GetBaseAnimationNameHook", BindingFlags.Static | BindingFlags.Public)
 				);
 
-				Hook GetPlayerStatValueHook = new Hook(
+				/*Hook GetPlayerStatValueHook = new Hook(
 					typeof(GameStatsManager).GetMethod("GetPlayerStatValue", BindingFlags.Instance | BindingFlags.Public),
 					typeof(Hooks).GetMethod("GetPlayerStatValueHook", BindingFlags.Static | BindingFlags.Public)
 				);
@@ -136,7 +136,7 @@ namespace Alexandria.CharacterAPI
 				);
 
 
-				/*Hook LoadOptionHook = new Hook(
+				Hook LoadOptionHook = new Hook(
 					typeof(GameOptions).GetMethod("Load", BindingFlags.Static | BindingFlags.Public),
 					typeof(Hooks).GetMethod("LoadOptionHook", BindingFlags.Static | BindingFlags.Public)
 				);
@@ -317,7 +317,7 @@ namespace Alexandria.CharacterAPI
 				
 				if (self.gameObject.GetComponent<CustomCharacter>().data == null) self.gameObject.GetComponent<CustomCharacter>().GetData();
 
-				if (!self.IsUsingAlternateCostume && self.gameObject.GetComponent<CustomCharacter>()?.data.altGlowMaterial != null)
+				if (!self.IsUsingAlternateCostume && self.gameObject.GetComponent<CustomCharacter>()?.data?.altGlowMaterial != null)
 				{
 					if (self.gameObject.GetComponent<CustomCharacter>()?.data?.altGlowMaterial?.GetTexture("_MainTex") != self.AlternateCostumeLibrary?.clips[0]?.frames[0]?.spriteCollection?.spriteDefinitions[0]?.material.GetTexture("_MainTex"))
 					{
@@ -325,9 +325,9 @@ namespace Alexandria.CharacterAPI
 					}
 					self.sprite.renderer.material = self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial;					
 				}
-				else if (self.gameObject.GetComponent<CustomCharacter>()?.data.glowMaterial != null)
+				else if (self.gameObject.GetComponent<CustomCharacter>()?.data?.glowMaterial != null)
 				{
-					if (self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial.GetTexture("_MainTex") != self.sprite.renderer.material.GetTexture("_MainTex"))
+					if (self.gameObject.GetComponent<CustomCharacter>().data?.glowMaterial?.GetTexture("_MainTex") != self.sprite.renderer.material.GetTexture("_MainTex"))
 					{
 						self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial.SetTexture("_MainTexture", self.sprite.renderer.material.GetTexture("_MainTex"));
 					}

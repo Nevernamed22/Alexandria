@@ -12,8 +12,7 @@ using RoomCategory = PrototypeDungeonRoom.RoomCategory;
 using RoomNormalSubCategory = PrototypeDungeonRoom.RoomNormalSubCategory;
 using RoomBossSubCategory = PrototypeDungeonRoom.RoomBossSubCategory;
 using RoomSpecialSubCategory = PrototypeDungeonRoom.RoomSpecialSubCategory;
-using Alexandria.Misc;
-
+using Alexandria.ItemAPI;
 namespace Alexandria.DungeonAPI
 {
 
@@ -27,7 +26,9 @@ namespace Alexandria.DungeonAPI
         {
             if (!initialized)
             {
+
                 //RoomFactory.LoadRoomsFromRoomDirectory();
+
                 DungeonHooks.OnPreDungeonGeneration += OnPreDungeonGen;
                 initialized = true;
             }
@@ -256,7 +257,7 @@ namespace Alexandria.DungeonAPI
                                     }
                                     else
                                     {
-                                        Debug.LogError($"[Alexandria] Room name: " + wRoom.room.name.ToString() + " is of an INVALID height/width, and will NOT be added to the pool! Rat floor rooms should always be 34x | 24y to prevent issues!");
+                                        ShrineTools.PrintError($"Room name: " + wRoom.room.name.ToString() + " is of an INVALID height/width, and will NOT be added to the pool! Rat floor rooms should always be 34x | 24y to prevent issues!");
                                     }
                                 }
                                 else
@@ -312,8 +313,9 @@ namespace Alexandria.DungeonAPI
             };
             //AssetBundle shared_auto_001 = ResourceManager.LoadAssetBundle("shared_auto_001");
 
-            GameObject iconPrefab = (GameObject)BraveResources.Load("Global Prefabs/Minimap_Shrine_Icon", ".prefab");
-            room.associatedMinimapIcon = iconPrefab;
+            //GameObject iconPrefab = (GameObject)BraveResources.Load("Global Prefabs/Minimap_Shrine_Icon", ".prefab");
+            //room.associatedMinimapIcon = iconPrefab;
+            
             // bool success = false;
             switch (room.category)
             {
@@ -441,15 +443,15 @@ namespace Alexandria.DungeonAPI
                     {
                         if (data.exactRoom != null)
                         {
-                            Debug.Log(data.exactRoom.name);
+                            ShrineTools.Log(data.exactRoom.name);
 
                             if (data.prerequisites != null)
                                 foreach (var p in data.prerequisites)
-                                    Debug.Log("\t" + p.prerequisiteType);
+                                    ShrineTools.Log("\t" + p.prerequisiteType);
 
                             if (data.placementRules != null)
                                 foreach (var p in data.placementRules)
-                                    Debug.Log("\t" + p);
+                                    ShrineTools.Log("\t" + p);
                         }
                     }
             return null;
@@ -467,7 +469,7 @@ namespace Alexandria.DungeonAPI
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                ShrineTools.PrintException(e);
             }
             dungeon = null;
         }
@@ -475,16 +477,22 @@ namespace Alexandria.DungeonAPI
         public static void LogProtoRoomData(PrototypeDungeonRoom room)
         {
             int i = 0;
-            DebugUtility.LogPropertiesAndFields(room, "ROOM");
+            ShrineTools.LogPropertiesAndFields(room, "ROOM");
+
+            //room.placedObjects.ForEach(x =>  Tools.Log($"\n----------------Object #{i++}----------------" +x?.placeableContents +"\n" + x?.placeableContents?.variantTiers[0]));
+                //Tools.LogPropertiesAndFields(placedObject, "PLACED OBJECT");
+                //Tools.LogPropertiesAndFields(placedObject?.placeableContents, "PLACEABLE CONTENT");
+                //Tools.LogPropertiesAndFields(placedObject?.placeableContents?.variantTiers[0], "VARIANT TIERS"););
+
             foreach (var placedObject in room.placedObjects)
             {
-                Debug.Log($"\n----------------Object #{i++}----------------");
-                DebugUtility.LogPropertiesAndFields(placedObject, "PLACED OBJECT");
-                DebugUtility.LogPropertiesAndFields(placedObject?.placeableContents, "PLACEABLE CONTENT");
-                DebugUtility.LogPropertiesAndFields(placedObject?.placeableContents?.variantTiers[0], "VARIANT TIERS");
+                ShrineTools.Log($"\n----------------Object #{i++}----------------");
+                ShrineTools.LogPropertiesAndFields(placedObject, "PLACED OBJECT");
+                ShrineTools.LogPropertiesAndFields(placedObject?.placeableContents, "PLACEABLE CONTENT");
+                ShrineTools.LogPropertiesAndFields(placedObject?.placeableContents?.variantTiers[0], "VARIANT TIERS");
             }
 
-            Debug.Log("==LAYERS==");
+            ShrineTools.Print("==LAYERS==");
             foreach (var layer in room.additionalObjectLayers)
             {
                 //Tools.LogPropertiesAndFields(layer);

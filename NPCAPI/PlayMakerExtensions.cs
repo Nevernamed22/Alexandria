@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace Alexandria.NPCAPI
 {
@@ -24,6 +25,79 @@ namespace Alexandria.NPCAPI
             fsm.Fsm.States = dest;
             if (isStartState) fsm.Fsm.StartState = name;
             return newState;
+        }
+
+        public static FsmString AddFsmString(this PlayMakerFSM fsm, string name, string value)
+        {
+
+            var vari = new FsmString(name) { Value = value };
+
+            List<FsmString> list = new List<FsmString>(fsm.fsm.Variables.StringVariables);
+            list.Add(vari);
+            fsm.fsm.Variables.StringVariables = list.ToArray();
+
+            return vari;
+        }
+
+        public static FsmInt AddFsmInt(this PlayMakerFSM fsm, string name, int value)
+        {
+
+            var vari = new FsmInt(name) { Value = value };
+
+            List<FsmInt> list = new List<FsmInt>(fsm.fsm.Variables.IntVariables);
+            list.Add(vari);
+            fsm.fsm.Variables.IntVariables = list.ToArray();
+
+            return vari;
+        }
+
+        public static FsmBool AddFsmBool(this PlayMakerFSM fsm, string name, bool value)
+        {
+
+            var vari = new FsmBool(name) { Value = value };
+
+            List<FsmBool> list = new List<FsmBool>(fsm.fsm.Variables.BoolVariables);
+            list.Add(vari);
+            fsm.fsm.Variables.BoolVariables = list.ToArray();
+
+            return vari;
+        }
+
+        public static FsmFloat AddFsmFloat(this PlayMakerFSM fsm, string name, float value)
+        {
+
+            var vari = new FsmFloat(name) { Value = value };
+
+            List<FsmFloat> list = new List<FsmFloat>(fsm.fsm.Variables.FloatVariables);
+            list.Add(vari);
+            fsm.fsm.Variables.FloatVariables = list.ToArray();
+
+            return vari;
+        }
+
+        public static FsmVector2 AddFsmVector2(this PlayMakerFSM fsm, string name, Vector2 value)
+        {
+
+            var vari = new FsmVector2(name) { Value = value };
+
+            List<FsmVector2> list = new List<FsmVector2>(fsm.fsm.Variables.Vector2Variables);
+            list.Add(vari);
+            fsm.fsm.Variables.Vector2Variables = list.ToArray();
+
+            return vari;
+        }
+
+
+        public static FsmVector3 AddFsmVector3(this PlayMakerFSM fsm, string name, Vector3 value)
+        {
+
+            var vari = new FsmVector3(name) { Value = value };
+
+            List<FsmVector3> list = new List<FsmVector3>(fsm.fsm.Variables.Vector3Variables);
+            list.Add(vari);
+            fsm.fsm.Variables.Vector3Variables = list.ToArray();
+
+            return vari;
         }
 
         public static FsmState GetState(this PlayMakerFSM fsm, string name)

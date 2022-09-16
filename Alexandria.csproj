@@ -57,7 +57,6 @@
     <Compile Include="CharApi\Tools\TextureStitcher.cs" />
     <Compile Include="CharApi\Tools\Tools.cs" />
     <Compile Include="ChestAPI\ChestSpawnHelper.cs" />
-    <Compile Include="AlexandriaHooks.cs" />
     <Compile Include="DungeonAPI\RoomUtility.cs" />
     <Compile Include="DungeonAPI\SetupExoticObjects.cs" />
     <Compile Include="EnemyAPI\AIActorUtility.cs" />

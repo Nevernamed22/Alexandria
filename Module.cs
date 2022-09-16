@@ -60,7 +60,6 @@ namespace Alexandria
 
                 AlexandriaTags.InitGenericTags();
 
-                AlexandriaHooks.Init();
                 ChestSpawnHelper.Init();
 
                 Commands.Init();

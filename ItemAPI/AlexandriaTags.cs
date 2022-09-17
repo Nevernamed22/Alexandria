@@ -207,6 +207,12 @@ namespace Alexandria.ItemAPI
                 "31a3ea0c54a745e182e22ea54844a82d", //Sniper Shell
                 "c5b11bfc065d417b9c4d03a5e385fe2c", //Professional
              };
+            List<string> Royal = new List<string>()
+            {
+                "1a4872dafdb34fd29fe8ac90bd2cea67", //King Bullat
+                "ffca09398635467da3b1f4a54bcfda80", //Bullet King
+                "5729c8b5ffa7415bb3d01205663a33ef", //Old King
+             };
 
             foreach (string guid in Blobulonians) SetTag(guid, "blobulon");
             foreach (string guid in TitanBullets) SetTag(guid, "titan_bullet_kin");
@@ -227,6 +233,7 @@ namespace Alexandria.ItemAPI
             foreach (string guid in Mushrooms) SetTag(guid, "mushroom");
             foreach (string guid in MuzzleWisp) SetTag(guid, "muzzle_wisp");
             foreach (string guid in SniperKin) SetTag(guid, "sniper_kin");
+            foreach (string guid in Royal) SetTag(guid, "royalty");
 
         }
         //item tagging

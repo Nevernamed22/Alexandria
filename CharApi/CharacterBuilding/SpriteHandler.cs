@@ -289,7 +289,7 @@ namespace Alexandria.CharacterAPI
                 }
 
                 
-                var anim = AddAnimation(libary, collection, ids, $"{data.nameShort.ToLower()}{info.Key}", info.Value.Item1, info.Value.Item2);
+                var anim = SpriteBuilder.AddAnimation(libary, collection, ids, $"{data.nameShort.ToLower()}{info.Key}", info.Value.Item1, info.Value.Item2);
 
                 if (info.Key == "_knockout")
                 {
@@ -303,79 +303,6 @@ namespace Alexandria.CharacterAPI
             //}
         }
 
-        public static tk2dSpriteAnimationClip AddAnimation(tk2dSpriteAnimator animator, tk2dSpriteCollectionData collection, List<int> spriteIDs,
-            string clipName, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop, float fps = 15)
-        {
-            ////BotsMod.BotsModule.Log("a1");
-            if (animator.Library == null)
-            {
-                animator.Library = animator.gameObject.AddComponent<tk2dSpriteAnimation>();
-                animator.Library.clips = new tk2dSpriteAnimationClip[0];
-                animator.Library.enabled = true;
-
-            }
-            ////BotsMod.BotsModule.Log("a2");
-            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-            for (int i = 0; i < spriteIDs.Count; i++)
-            {
-                ////BotsMod.BotsModule.Log("a2.25");
-                tk2dSpriteDefinition sprite = collection.spriteDefinitions[spriteIDs[i]];
-                if (sprite.Valid)
-                {
-                    ////BotsMod.BotsModule.Log("a2.5");
-                    frames.Add(new tk2dSpriteAnimationFrame()
-                    {
-                        spriteCollection = collection,
-                        spriteId = spriteIDs[i]
-                    });
-                }
-            }
-            ////BotsMod.BotsModule.Log("a3");
-            var clip = new tk2dSpriteAnimationClip()
-            {
-                name = clipName,
-                fps = fps,
-                wrapMode = wrapMode,
-            };
-            Array.Resize(ref animator.Library.clips, animator.Library.clips.Length + 1);
-            animator.Library.clips[animator.Library.clips.Length - 1] = clip;
-
-            clip.frames = frames.ToArray();
-            return clip;
-        }
-
-        public static tk2dSpriteAnimationClip AddAnimation(tk2dSpriteAnimation animaton, tk2dSpriteCollectionData collection, List<int> spriteIDs,
-            string clipName, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop, float fps = 15)
-        {
-            ////BotsMod.BotsModule.Log("a2");
-            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-            for (int i = 0; i < spriteIDs.Count; i++)
-            {
-                ////BotsMod.BotsModule.Log("a2.25");
-                tk2dSpriteDefinition sprite = collection.spriteDefinitions[spriteIDs[i]];
-                if (sprite.Valid)
-                {
-                    ////BotsMod.BotsModule.Log("a2.5");
-                    frames.Add(new tk2dSpriteAnimationFrame()
-                    {
-                        spriteCollection = collection,
-                        spriteId = spriteIDs[i]
-                    });
-                }
-            }
-            ////BotsMod.BotsModule.Log("a3");
-            var clip = new tk2dSpriteAnimationClip()
-            {
-                name = clipName,
-                fps = fps,
-                wrapMode = wrapMode,
-            };
-            Array.Resize(ref animaton.clips, animaton.clips.Length + 1);
-            animaton.clips[animaton.clips.Length - 1] = clip;
-
-            clip.frames = frames.ToArray();
-            return clip;
-        }
         public static void HandleSprites(PlayerController player, CustomCharacterData data, Assembly assembly = null)
         {
             if (data.minimapIcon != null)
@@ -733,7 +660,7 @@ namespace Alexandria.CharacterAPI
                         }
                         if (textures.Count > 0)
                         {
-                            SpriteHandler.AddAnimation(data.animator, collection, spriteIds, customDirName, tk2dSpriteAnimationClip.WrapMode.Loop, 8);
+                            SpriteBuilder.AddAnimation(data.animator, collection, spriteIds, customDirName, tk2dSpriteAnimationClip.WrapMode.Loop, 8);
                         }
 
                         //}
@@ -753,7 +680,7 @@ namespace Alexandria.CharacterAPI
                         }
                         if (textures.Count > 0)
                         {
-                            SpriteHandler.AddAnimation(data.animator, collection, spriteIds, customDirName, tk2dSpriteAnimationClip.WrapMode.Loop, 8);
+                            SpriteBuilder.AddAnimation(data.animator, collection, spriteIds, customDirName, tk2dSpriteAnimationClip.WrapMode.Loop, 8);
                         }
                         /*
                         foreach (var customDir in Directory.GetDirectories(file))
@@ -799,7 +726,7 @@ namespace Alexandria.CharacterAPI
                             {
                                 //BotsModule.Log(spriteIds.Count.ToString());
 
-                                var anim = SpriteHandler.AddAnimation(data.animator, collection, spriteIds, dirName, playerAnimInfo[dirName.Replace("_armorless", "")].First, playerAnimInfo[dirName.Replace("_armorless", "")].Second);
+                                var anim = SpriteBuilder.AddAnimation(data.animator, collection, spriteIds, dirName, playerAnimInfo[dirName.Replace("_armorless", "")].First, playerAnimInfo[dirName.Replace("_armorless", "")].Second);
 
                                 for (int i = 0; i <= anim.frames.Length; i++)
                                 {

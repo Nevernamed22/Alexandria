@@ -107,8 +107,8 @@ namespace Alexandria.ItemAPI
         {
             AIAnimator orAddComponent = obj.GetOrAddComponent<AIAnimator>();
             DirectionalAnimation directionalAnimation = orAddComponent.GetDirectionalAnimation(name, directionType, type);
-            bool flag = directionalAnimation == null;
-            if (flag)
+
+            if (directionalAnimation == null)
             {
                 directionalAnimation = new DirectionalAnimation
                 {
@@ -118,14 +118,8 @@ namespace Alexandria.ItemAPI
                     Prefix = name
                 };
             }
-            directionalAnimation.AnimNames = directionalAnimation.AnimNames.Concat(new string[]
-            {
-                name
-            }).ToArray<string>();
-            directionalAnimation.Flipped = directionalAnimation.Flipped.Concat(new DirectionalAnimation.FlipType[]
-            {
-                flipType
-            }).ToArray<DirectionalAnimation.FlipType>();
+            directionalAnimation.AnimNames = directionalAnimation.AnimNames.Concat(new string[] { name }).ToArray<string>();
+            directionalAnimation.Flipped = directionalAnimation.Flipped.Concat(new DirectionalAnimation.FlipType[] { flipType }).ToArray<DirectionalAnimation.FlipType>();
             orAddComponent.AssignDirectionalAnimation(name, directionalAnimation, type);
             return CompanionBuilder.BuildAnimation(orAddComponent, name, spriteDirectory, fps, Assembly.GetCallingAssembly());
         }

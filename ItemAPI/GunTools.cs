@@ -482,9 +482,6 @@ namespace Alexandria.ItemAPI
                             }
                             catch { } // In case of NotImplementedException being thrown. For some reason specifying that exception didn't seem to catch it, so I didn't catch anything specific.
                         }
-                        else
-                        {
-                        }
                     }
                 }
                 if (includeFields)

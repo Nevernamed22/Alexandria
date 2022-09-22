@@ -119,7 +119,7 @@ namespace Alexandria.ItemAPI
         /// <summary>
         /// Converts an embedded resource to a byte array
         /// </summary>
-        public static byte[] ExtractEmbeddedResource(String filePath, Assembly assembly)
+        public static byte[] ExtractEmbeddedResource(String filePath, Assembly assembly = null)
         {
             filePath = filePath.Replace("/", ".");
             filePath = filePath.Replace("\\", ".");
@@ -129,9 +129,9 @@ namespace Alexandria.ItemAPI
 
             var baseAssembly = assembly;
 
-            //ETGModConsole.Log(baseAssembly.FullName);
+            //ETGModConsole.Log(assembly.FullName);
 
-            using (Stream resFilestream = baseAssembly.GetManifestResourceStream(filePath))
+            using (Stream resFilestream = (assembly ?? Assembly.GetCallingAssembly()).GetManifestResourceStream(filePath))
             {
                 if (resFilestream == null)
                 {

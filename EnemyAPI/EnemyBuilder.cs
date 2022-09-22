@@ -146,26 +146,11 @@ namespace Alexandria.EnemyAPI
 
         public enum AnimationType { Move, Idle, Fidget, Flight, Hit, Talk, Other }
         public static tk2dSpriteAnimationClip AddAnimation(this GameObject obj, string name, string spriteDirectory, int fps,
-            AnimationType type, DirectionType directionType = DirectionType.None, FlipType flipType = FlipType.None)
+            AnimationType type, DirectionType directionType = DirectionType.None, FlipType flipType = FlipType.None, Assembly assembly = null)
         {
-            AIAnimator aiAnimator = obj.GetOrAddComponent<AIAnimator>();
-            DirectionalAnimation animation = aiAnimator.GetDirectionalAnimation(name, directionType, type);
-            if (animation == null)
-            {
-                animation = new DirectionalAnimation()
-                {
-                    AnimNames = new string[0],
-                    Flipped = new FlipType[0],
-                    Type = directionType,
-                    Prefix = name
-                };
-            }
-
-            animation.AnimNames = animation.AnimNames.Concat(new string[] { name }).ToArray();
-            animation.Flipped = animation.Flipped.Concat(new FlipType[] { flipType }).ToArray();
-            aiAnimator.AssignDirectionalAnimation(name, animation, type);
-            return BuildAnimation(aiAnimator, name, spriteDirectory, fps, Assembly.GetCallingAssembly());
+            return obj.AddAnimation(name, spriteDirectory, fps, type, directionType, flipType, assembly ?? Assembly.GetCallingAssembly());
         }
+
 
         public static tk2dSpriteAnimationClip[] AddAnimation(this GameObject obj, string enemyName, string name, string spriteDirectory, int fps, AnimationType type, DirectionType directionType = DirectionType.None, FlipType flipType = FlipType.None,
     tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Once)

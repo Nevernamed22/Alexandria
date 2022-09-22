@@ -207,8 +207,37 @@ namespace Alexandria.ItemAPI
 			return AddSpriteToCollection(spriteDefinition, ammonomiconCollection);
 		}
 
-		public static tk2dSpriteAnimationClip AddAnimation(tk2dSpriteAnimator animator, tk2dSpriteCollectionData collection, List<int> spriteIDs,
-			string clipName, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop)
+		public static tk2dSpriteAnimationClip AddAnimation(tk2dSpriteAnimation animaton, tk2dSpriteCollectionData collection, List<int> spriteIDs,
+			string clipName, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop, float fps = 15)
+		{
+			List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
+			for (int i = 0; i < spriteIDs.Count; i++)
+			{
+				tk2dSpriteDefinition sprite = collection.spriteDefinitions[spriteIDs[i]];
+				if (sprite.Valid)
+				{
+					frames.Add(new tk2dSpriteAnimationFrame()
+					{
+						spriteCollection = collection,
+						spriteId = spriteIDs[i]
+					});
+				}
+			}
+			var clip = new tk2dSpriteAnimationClip()
+			{
+				name = clipName,
+				fps = fps,
+				wrapMode = wrapMode,
+			};
+			Array.Resize(ref animaton.clips, animaton.clips.Length + 1);
+			animaton.clips[animaton.clips.Length - 1] = clip;
+
+			clip.frames = frames.ToArray();
+			return clip;
+		}
+
+		public static tk2dSpriteAnimationClip AddAnimation(tk2dSpriteAnimator animator, tk2dSpriteCollectionData collection, List<string> spritePaths,
+	string clipName, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop, int fps = 15)
 		{
 			if (animator.Library == null)
 			{
@@ -216,6 +245,12 @@ namespace Alexandria.ItemAPI
 				animator.Library.clips = new tk2dSpriteAnimationClip[0];
 				animator.Library.enabled = true;
 
+			}
+			List<int> spriteIDs = new List<int>();
+
+			foreach(var FUCKINGDIE in spritePaths)
+            {
+				spriteIDs.Add(AddSpriteToCollection(FUCKINGDIE, collection, Assembly.GetCallingAssembly()));
 			}
 
 			List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
@@ -235,7 +270,7 @@ namespace Alexandria.ItemAPI
 			var clip = new tk2dSpriteAnimationClip()
 			{
 				name = clipName,
-				fps = 15,
+				fps = fps,
 				wrapMode = wrapMode,
 			};
 			Array.Resize(ref animator.Library.clips, animator.Library.clips.Length + 1);
@@ -406,9 +441,8 @@ namespace Alexandria.ItemAPI
 		public static T CopyFrom<T>(this Component comp, T other) where T : Component
 		{
 			Type type = comp.GetType();
-			bool flag = type != other.GetType();
 			T result;
-			if (flag)
+			if (type != other.GetType())
 			{
 				result = default(T);
 			}
@@ -417,8 +451,7 @@ namespace Alexandria.ItemAPI
 				PropertyInfo[] properties = type.GetProperties();
 				foreach (PropertyInfo propertyInfo in properties)
 				{
-					bool canWrite = propertyInfo.CanWrite;
-					if (canWrite)
+					if (propertyInfo.CanWrite)
 					{
 						try
 						{

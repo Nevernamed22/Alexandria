@@ -13,7 +13,7 @@ namespace Alexandria.ItemAPI
         {
             GunjurerCatchHook = new Hook(
                 typeof(WizardSpinShootBehavior).GetMethod("OnTriggerCollision", BindingFlags.Instance | BindingFlags.NonPublic),
-                typeof(GenericItemAPIHooks).GetMethod("GunjurerPreCatch", BindingFlags.Static | BindingFlags.NonPublic)
+                typeof(GenericItemAPIHooks).GetMethod("GunjurerPreCatch", BindingFlags.Static | BindingFlags.Public)
             );
         }
         public static void GunjurerPreCatch(Action<WizardSpinShootBehavior, SpeculativeRigidbody, SpeculativeRigidbody, CollisionData> orig, WizardSpinShootBehavior self, SpeculativeRigidbody specRigidbody, SpeculativeRigidbody sourceSpecRigidbody, CollisionData collisionData)

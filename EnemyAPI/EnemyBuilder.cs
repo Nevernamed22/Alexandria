@@ -148,7 +148,23 @@ namespace Alexandria.EnemyAPI
         public static tk2dSpriteAnimationClip AddAnimation(this GameObject obj, string name, string spriteDirectory, int fps,
             AnimationType type, DirectionType directionType = DirectionType.None, FlipType flipType = FlipType.None, Assembly assembly = null)
         {
-            return obj.AddAnimation(name, spriteDirectory, fps, type, directionType, flipType, assembly ?? Assembly.GetCallingAssembly());
+            AIAnimator orAddComponent = obj.GetOrAddComponent<AIAnimator>();
+            DirectionalAnimation directionalAnimation = orAddComponent.GetDirectionalAnimation(name, directionType, type);
+
+            if (directionalAnimation == null)
+            {
+                directionalAnimation = new DirectionalAnimation
+                {
+                    AnimNames = new string[0],
+                    Flipped = new DirectionalAnimation.FlipType[0],
+                    Type = directionType,
+                    Prefix = name
+                };
+            }
+            directionalAnimation.AnimNames = directionalAnimation.AnimNames.Concat(new string[] { name }).ToArray<string>();
+            directionalAnimation.Flipped = directionalAnimation.Flipped.Concat(new DirectionalAnimation.FlipType[] { flipType }).ToArray<DirectionalAnimation.FlipType>();
+            orAddComponent.AssignDirectionalAnimation(name, directionalAnimation, type);
+            return CompanionBuilder.BuildAnimation(orAddComponent, name, spriteDirectory, fps, Assembly.GetCallingAssembly());
         }
 
 

@@ -62,7 +62,10 @@
     <Compile Include="EnemyAPI\AIActorUtility.cs" />
     <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
     <Compile Include="ItemAPI\AnimationUtility.cs" />
+    <Compile Include="ItemAPI\BasicProjectileComponents\AdvancedTransmogrifyBehaviour.cs" />
+    <Compile Include="ItemAPI\BasicProjectileComponents\PreventGunjurerGrabBehaviour.cs" />
     <Compile Include="ItemAPI\BasicProjectileComponents\ProjectileSlashingBehaviour.cs" />
+    <Compile Include="ItemAPI\GenericItemAPIHooks.cs" />
     <Compile Include="ItemAPI\OrbitalUtility.cs" />
     <Compile Include="ItemAPI\SlashDoer.cs" />
     <Compile Include="Misc\ChamberGunAPI.cs" />
@@ -143,8 +146,8 @@
     <Compile Include="ItemAPI\SynergyTools\AdvancedFireOnReloadSynergyProcessor.cs" />
     <Compile Include="ItemAPI\SynergyTools\CustomSynergies.cs" />
     <Compile Include="ItemAPI\SynergyTools\DualWieldSynergyProcessor.cs" />
-    <Compile Include="ItemAPI\FakePrefab.cs" />
-    <Compile Include="ItemAPI\FakePrefabHooks.cs" />
+    <Compile Include="ItemAPI\Fakeprefab\FakePrefab.cs" />
+    <Compile Include="ItemAPI\Fakeprefab\FakePrefabHooks.cs" />
     <Compile Include="ItemAPI\GunTools.cs" />
     <Compile Include="ItemAPI\ItemBuilder.cs" />
     <Compile Include="ItemAPI\SpriteTools\ResourceExtractor.cs" />

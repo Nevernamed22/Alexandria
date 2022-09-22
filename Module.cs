@@ -57,6 +57,7 @@ namespace Alexandria
                 CustomActions.InitHooks();
                 ChamberGunAPI.Init();
                 ExtendedPlayerComponent.Init();
+                GenericItemAPIHooks.InitHooks();
 
                 AlexandriaTags.InitGenericTags();
 

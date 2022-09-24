@@ -12,18 +12,31 @@ namespace Alexandria.Misc
 {
     public class ExtendedPlayerComponent : MonoBehaviour
     {
+        #region InitAndHooks
         public static void Init()
         {
             playerStartHook = new Hook(
                 typeof(PlayerController).GetMethod("Start", BindingFlags.Public | BindingFlags.Instance),
                 typeof(ExtendedPlayerComponent).GetMethod("DoSetup"));
+            activeItemDropHook = new Hook(
+                typeof(PlayerController).GetMethod("DropActiveItem", BindingFlags.Public | BindingFlags.Instance),
+                typeof(ExtendedPlayerComponent).GetMethod("DropActiveHook", BindingFlags.Public | BindingFlags.Instance)
+            );
         }
         public static void DoSetup(Action<PlayerController> action, PlayerController player)
         {
             action(player);
             if (player.GetComponent<ExtendedPlayerComponent>() == null) player.gameObject.AddComponent<ExtendedPlayerComponent>();
         }
-        public static Hook playerStartHook;
+        public DebrisObject DropActiveHook(Func<PlayerController, PlayerItem, float, bool, DebrisObject> orig, PlayerController self, PlayerItem item, float force = 4f, bool deathdrop = false)
+        {
+            if (OnActiveItemPreDrop != null) OnActiveItemPreDrop(self, item, deathdrop);
+            return orig(self, item, force, deathdrop);
+        }
+        private static Hook playerStartHook;
+        private static Hook activeItemDropHook;
+        #endregion
+
         public PlayerController attachedPlayer;
         private void Start()
         {
@@ -40,6 +53,7 @@ namespace Alexandria.Misc
         public Action<PlayerController, Vector2, SlashData, AIActor> OnSlashHitEnemy;
         //Other
         public Action<PlayerController> OnBlessedGunChanged;
+        public Action<PlayerController, PlayerItem, bool> OnActiveItemPreDrop;
         #endregion
         public void Enrage(float dur)
         {

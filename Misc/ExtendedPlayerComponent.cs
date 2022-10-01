@@ -51,6 +51,11 @@ namespace Alexandria.Misc
         public Action<PlayerController, Vector2, SlashData> PreProcessSlash;
         public Action<PlayerController, Vector2, SlashData> PostProcessSlash;
         public Action<PlayerController, Vector2, SlashData, AIActor> OnSlashHitEnemy;
+        //Pickup Based
+        public Action<PlayerController, AmmoPickup> OnPickedUpAmmo;
+        public Action<PlayerController, KeyBulletPickup> OnPickedUpKey;
+        public Action<PlayerController, HealthPickup> OnPickedUpHP;
+        public Action<PlayerController, HealthPickup> OnNudgedHP;
         //Other
         public Action<PlayerController> OnBlessedGunChanged;
         public Action<PlayerController, PlayerItem, bool> OnActiveItemPreDrop;

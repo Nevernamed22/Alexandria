@@ -9,7 +9,6 @@ namespace Alexandria.ItemAPI
 
     public static class GunTools
     {
-
         public static Texture2D DesheetTexture(this tk2dSpriteDefinition definition)
         {
             if (definition?.material?.mainTexture != null && definition.material.mainTexture is Texture2D tex)
@@ -33,8 +32,6 @@ namespace Alexandria.ItemAPI
             }
             return null;
         }
-
-
         public static void TrimGunSpritesForSpecificAnims(this Gun gun, params string[] anims)
         {
             List<KeyValuePair<tk2dSpriteCollectionData, int>> ids = new List<KeyValuePair<tk2dSpriteCollectionData, int>>();
@@ -58,7 +55,6 @@ namespace Alexandria.ItemAPI
                 }
             };
         }
-
         public static void TrimGunSprites(this Gun gun)
         {
             List<KeyValuePair<tk2dSpriteCollectionData, int>> ids = new List<KeyValuePair<tk2dSpriteCollectionData, int>>();
@@ -96,7 +92,6 @@ namespace Alexandria.ItemAPI
             };
             gun.barrelOffset.localPosition += globalOffset.ToVector3ZUp(0f);
         }
-
         public static void TryTrimGunAnimation(this Gun gun, string animation, List<KeyValuePair<tk2dSpriteCollectionData, int>> ids)
         {
             if (!string.IsNullOrEmpty(animation) && gun.spriteAnimator != null)
@@ -139,7 +134,6 @@ namespace Alexandria.ItemAPI
                 }
             }
         }
-
         public static void AddOffset(this tk2dSpriteDefinition def, Vector2 offset, bool changesCollider = false)
         {
             float xOffset = offset.x;
@@ -157,8 +151,6 @@ namespace Alexandria.ItemAPI
                 def.colliderVertices[0] += new Vector3(xOffset, yOffset, 0);
             }
         }
-
-        // totally not stolen from ccm code :)
         public static IntVector2 TrimTexture(this Texture2D orig)
         {
             RectInt bounds = orig.GetTrimmedBounds();
@@ -188,7 +180,6 @@ namespace Alexandria.ItemAPI
             orig.Apply(false, false);
             return new IntVector2(bounds.x, bounds.y);
         }
-
         public static RectInt GetTrimmedBounds(this Texture2D t)
         {
 
@@ -213,8 +204,6 @@ namespace Alexandria.ItemAPI
 
             return new RectInt(xMin, yMin, xMax - xMin + 1, yMax - yMin + 1);
         }
-
-
         public static tk2dSpriteDefinition CopyDefinitionFrom(this tk2dSpriteDefinition other)
         {
             tk2dSpriteDefinition result = new tk2dSpriteDefinition
@@ -517,8 +506,7 @@ namespace Alexandria.ItemAPI
             gun.RawSourceVolley.projectiles.Add(projectile);
             return projectile;
         }
-
-        /*public static ProjectileModule AddProjectileModuleToRawVolleyFrom(this Gun gun, Gun other, bool cloned = true, bool clonedProjectiles = true)
+        public static ProjectileModule AddProjectileModuleToRawVolleyFrom(this Gun gun, Gun other, bool cloned = true)
         {
             ProjectileModule defaultModule = other.DefaultModule;
             if (!cloned)
@@ -529,11 +517,10 @@ namespace Alexandria.ItemAPI
             projectileModule.projectiles = new List<Projectile>(defaultModule.projectiles.Capacity);
             for (int i = 0; i < defaultModule.projectiles.Count; i++)
             {
-                projectileModule.projectiles.Add((!clonedProjectiles) ? defaultModule.projectiles[i] : defaultModule.projectiles[i].ClonedPrefab());
+                projectileModule.projectiles.Add(defaultModule.projectiles[i]);
             }
             return gun.AddProjectileModuleToRawVolley(projectileModule);
-        }*/
-
+        }
         public static ProjectileModule RawDefaultModule(this Gun self)
         {
             if (self.RawSourceVolley)

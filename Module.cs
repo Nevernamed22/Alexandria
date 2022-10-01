@@ -39,40 +39,37 @@ namespace Alexandria
 
             try
             {
+                //The Most important classes, which must be initialised first
                 StaticReferences.Init();
                 DungeonHandler.Init();
-
                 FakePrefabHooks.Init();
-
-                //GameStatsManager.Instance
-
                 ItemBuilder.Init();
-                //CharApi.Init("nn");
-                CustomClipAmmoTypeToolbox.Init();
+
+                //Medium Priority
+                CustomActions.InitHooks();
+                ExtendedPlayerComponent.Init();
                 EnemyTools.Init();
                 EnemyBuilder.Init();
                 BossBuilder.Init();
                 NPCAPI.NPCHooks.Init();
                 EnemyAPI.Hooks.Init();
-                CustomActions.InitHooks();
+
+                //Low Priority
+                CustomClipAmmoTypeToolbox.Init();
                 ChamberGunAPI.Init();
-                ExtendedPlayerComponent.Init();
                 GenericItemAPIHooks.InitHooks();
-
                 AlexandriaTags.InitGenericTags();
-
                 ChestSpawnHelper.Init();
-
                 Commands.Init();
-
                 BreachShopTools.Init();
+                AmmoPickupFixer.Init();
 
+                //Character API
                 CharacterAPI.Hooks.Init();
                 ToolsCharApi.Init();
 
                 ETGMod.StartGlobalCoroutine(this.delayedstarthandler());
                 ETGModConsole.Log("AlexandriaLib started correctly.");
-                //ETGModConsole.Log("started!!", true);
             }
             catch (Exception e)
             {

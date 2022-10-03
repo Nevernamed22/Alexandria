@@ -18,21 +18,13 @@ namespace Alexandria.Misc
             playerStartHook = new Hook(
                 typeof(PlayerController).GetMethod("Start", BindingFlags.Public | BindingFlags.Instance),
                 typeof(ExtendedPlayerComponent).GetMethod("DoSetup"));
-            activeItemDropHook = new Hook(
-                typeof(PlayerController).GetMethod("DropActiveItem", BindingFlags.Public | BindingFlags.Instance),
-                typeof(ExtendedPlayerComponent).GetMethod("DropActiveHook", BindingFlags.Public | BindingFlags.Instance)
-            );
         }
         public static void DoSetup(Action<PlayerController> action, PlayerController player)
         {
             action(player);
             if (player.GetComponent<ExtendedPlayerComponent>() == null) player.gameObject.AddComponent<ExtendedPlayerComponent>();
         }
-        public DebrisObject DropActiveHook(Func<PlayerController, PlayerItem, float, bool, DebrisObject> orig, PlayerController self, PlayerItem item, float force = 4f, bool deathdrop = false)
-        {
-            if (OnActiveItemPreDrop != null) OnActiveItemPreDrop(self, item, deathdrop);
-            return orig(self, item, force, deathdrop);
-        }
+        
         private static Hook playerStartHook;
         private static Hook activeItemDropHook;
         #endregion
@@ -46,6 +38,7 @@ namespace Alexandria.Misc
                 if (CustomActions.OnNewPlayercontrollerSpawned != null) CustomActions.OnNewPlayercontrollerSpawned(attachedPlayer);
             }
         }
+
         #region Actions
         //Slash Related
         public Action<PlayerController, Vector2, SlashData> PreProcessSlash;
@@ -60,32 +53,44 @@ namespace Alexandria.Misc
         public Action<PlayerController> OnBlessedGunChanged;
         public Action<PlayerController, PlayerItem, bool> OnActiveItemPreDrop;
         #endregion
-        public void Enrage(float dur)
+
+        #region RageHandler
+        /// <summary>
+        /// Triggers a rage effect (like the Enraging Photo) for the specified duration. Rage gives double damage, and comes with associated visual effects.
+        /// </summary>
+        /// <param name="dur">The length of the desired rage.</param>
+        /// <param name="resetExisting">If true, the given rage duration will override the duration of existing rage (if the player is already enraged) instead of adding to it. Can be used to cancel rage by setting duration to zero.</param>
+        public void Enrage(float dur, bool resetExisting)
         {
-            if (remainingRageTime > 0) { remainingRageTime += dur; }
-            else attachedPlayer.StartCoroutine(HandleRageDur(dur));
+            if (remainingRageTime > 0)
+            {
+                if (resetExisting) { remainingRageTime = dur; }
+                else { remainingRageTime += dur; }
+            }
+            else if (dur > 0) attachedPlayer.StartCoroutine(HandleRageDur(dur));
         }
         private IEnumerator HandleRageDur(float dur)
         {
             remainingRageTime = dur;
-            attachedPlayer.stats.RecalculateStats(attachedPlayer, true, false);
             this.instanceRageVFX = attachedPlayer.PlayEffectOnActor(RageVFX, new Vector3(0f, 1.375f, 0f), true, true, false);
             attachedPlayer.ownerlessStatModifiers.Add(DoubleDamageStatMod);
             attachedPlayer.stats.RecalculateStats(attachedPlayer, true, false);
 
             float elapsed = 0f;
             float particleCounter = 0f;
-            while (elapsed < remainingRageTime)
+
+            while (remainingRageTime > 0)
             {
+                remainingRageTime -= BraveTime.DeltaTime;
                 elapsed += BraveTime.DeltaTime;
                 attachedPlayer.baseFlatColorOverride = this.flatRageColourOverride.WithAlpha(Mathf.Lerp(this.flatRageColourOverride.a, 0f, Mathf.Clamp01(elapsed - (remainingRageTime - 1f))));
                 if (GameManager.Options.ShaderQuality != GameOptions.GenericHighMedLowOption.LOW && GameManager.Options.ShaderQuality != GameOptions.GenericHighMedLowOption.VERY_LOW && attachedPlayer && attachedPlayer.IsVisible && !attachedPlayer.IsFalling)
                 {
                     particleCounter += BraveTime.DeltaTime * 40f;
-                    if (this.instanceRageVFX && elapsed > 1f)
+                    if (instanceRageVFX && elapsed > 1f)
                     {
-                        this.instanceRageVFX.GetComponent<tk2dSpriteAnimator>().PlayAndDestroyObject("rage_face_vfx_out", null);
-                        this.instanceRageVFX = null;
+                        instanceRageVFX.GetComponent<tk2dSpriteAnimator>().PlayAndDestroyObject("rage_face_vfx_out", null);
+                        instanceRageVFX = null;
                     }
                     if (particleCounter > 1f)
                     {
@@ -99,14 +104,16 @@ namespace Alexandria.Misc
             if (this.instanceRageVFX) this.instanceRageVFX.GetComponent<tk2dSpriteAnimator>().PlayAndDestroyObject("rage_face_vfx_out", null);
             attachedPlayer.ownerlessStatModifiers.Remove(DoubleDamageStatMod);
             attachedPlayer.stats.RecalculateStats(attachedPlayer, true, false);
-            remainingRageTime = 0;
         }
+
         private float remainingRageTime;
         private static GameObject RageVFX = PickupObjectDatabase.GetById(353).GetComponent<RagePassiveItem>().OverheadVFX.gameObject;
         private GameObject instanceRageVFX;
         private static StatModifier DoubleDamageStatMod;
         private Color flatRageColourOverride = new Color(0.5f, 0f, 0f, 0.75f);
+        #endregion
 
+        #region TimedStatHandler
         public void DoTimedStatModifier(PlayerStats.StatType statToBoost, float amount, float time, StatModifier.ModifyMethod modifyMethod = StatModifier.ModifyMethod.MULTIPLICATIVE)
         {
             attachedPlayer.StartCoroutine(HandleTimedStatModifier(statToBoost, amount, time, modifyMethod));
@@ -126,5 +133,74 @@ namespace Alexandria.Misc
             attachedPlayer.stats.RecalculateStats(attachedPlayer);
             yield break;
         }
+        #endregion
+
+        #region IFrameHandler
+        private float remainingInvulnerabilityTime;
+
+        /// <summary>
+        /// Triggers blinking invulnerability frames for the specified duration. Does not trigger if the player is already invulnerable from basegame I-frames.
+        /// </summary>
+        /// <param name="incorporealityTime">The length of the desired invulnerability.</param>
+        /// <param name="resetExisting">If true, the given incorporeality duration will override the duration of existing incorporeality (if the player is already invulnerable) instead of adding to it. Can be used to cancel I-frames by setting duration to zero.</param>
+        public void TriggerInvulnerableFrames(float incorporealityTime, bool resetExisting = false)
+        {
+            if (attachedPlayer.healthHaver.m_isIncorporeal && !isLocallyIncorporeal) return;
+
+            if (remainingInvulnerabilityTime > 0)
+            {
+                if (resetExisting) remainingInvulnerabilityTime = incorporealityTime;
+                else remainingInvulnerabilityTime += incorporealityTime;
+            }
+            else if (incorporealityTime > 0) attachedPlayer.StartCoroutine(IncorporealityOnHit(incorporealityTime));
+        }
+        private IEnumerator IncorporealityOnHit(float incorporealityTime)
+        {
+            int enemyMask = CollisionMask.LayerToMask(CollisionLayer.EnemyCollider, CollisionLayer.EnemyHitBox, CollisionLayer.Projectile);
+            attachedPlayer.specRigidbody.AddCollisionLayerIgnoreOverride(enemyMask);
+            attachedPlayer.healthHaver.IsVulnerable = false;
+            attachedPlayer.healthHaver.m_isIncorporeal = true;
+            isLocallyIncorporeal = true;
+            yield return null;
+
+            float subtimer = 0f;
+            while (incorporealityTime > 0)
+            {
+                while (incorporealityTime > 0)
+                {
+                    remainingInvulnerabilityTime -= BraveTime.DeltaTime;
+                    subtimer += BraveTime.DeltaTime;
+                    if (subtimer > 0.12f)
+                    {
+                        attachedPlayer.IsVisible = false;
+                        subtimer -= 0.12f;
+                        break;
+                    }
+                    yield return null;
+                }
+                while (incorporealityTime > 0)
+                {
+                    remainingInvulnerabilityTime -= BraveTime.DeltaTime;
+                    subtimer += BraveTime.DeltaTime;
+                    if (subtimer > 0.12f)
+                    {
+                        attachedPlayer.IsVisible = true;
+                        subtimer -= 0.12f;
+                        break;
+                    }
+                    yield return null;
+                }
+            }
+
+            int mask = CollisionMask.LayerToMask(CollisionLayer.EnemyCollider, CollisionLayer.EnemyHitBox, CollisionLayer.Projectile);
+            attachedPlayer.IsVisible = true;
+            attachedPlayer.healthHaver.IsVulnerable = true;
+            attachedPlayer.specRigidbody.RemoveCollisionLayerIgnoreOverride(mask);
+            attachedPlayer.healthHaver.m_isIncorporeal = false;
+            isLocallyIncorporeal = false;
+            yield break;
+        }
+        private bool isLocallyIncorporeal;
+        #endregion
     }
 }

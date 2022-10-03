@@ -102,6 +102,11 @@ namespace Alexandria.ItemAPI
 
             return new_o;
         }
+
+        /// <summary>
+        /// Instantiates a copy of the given gameobject, marks it as a fake prefab, prevents it from being destroyed on load, and sets it as inactive. Returns the copy.
+        /// </summary>
+        /// <param name="target">The gameobject to be instantiated and fakeprefabbed.</param>
         public static GameObject InstantiateAndFakeprefab( GameObject target)
         {
             GameObject instantiatedTarget = UnityEngine.Object.Instantiate<GameObject>(target);
@@ -110,11 +115,30 @@ namespace Alexandria.ItemAPI
             UnityEngine.Object.DontDestroyOnLoad(instantiatedTarget);
             return instantiatedTarget;
         }
+
+        /// <summary>
+        /// Marks the given object as a Fake Prefab, prevents it from despawning on load, and sets it as inactive.
+        /// </summary>
+        /// <param name="target">The gameobject to be fakeprefabbed.</param>
         public static void MakeFakePrefab( GameObject target)
         {
             target.SetActive(false);
             FakePrefab.MarkAsFakePrefab(target);
             UnityEngine.Object.DontDestroyOnLoad(target);
         }
+    }
+    public static class FakePrefabExtensions
+    {
+        /// <summary>
+        /// Marks the given object as a Fake Prefab, prevents it from despawning on load, and sets it as inactive.
+        /// </summary>
+        /// <param name="target">The gameobject to be fakeprefabbed.</param>
+        public static void MakeFakePrefab(this GameObject target) { FakePrefab.MakeFakePrefab(target); }
+
+        /// <summary>
+        /// Instantiates a copy of the given gameobject, marks it as a fake prefab, prevents it from being destroyed on load, and sets it as inactive. Returns the copy.
+        /// </summary>
+        /// <param name="target">The gameobject to be instantiated and fakeprefabbed.</param>
+        public static GameObject InstantiateAndFakeprefab(this GameObject target) { return FakePrefab.InstantiateAndFakeprefab(target); }
     }
 }

@@ -8,6 +8,7 @@ using System.Text;
 using Alexandria.ItemAPI;
 using UnityEngine;
 using System.Collections;
+using Alexandria.NPCAPI;
 
 namespace Alexandria.Misc
 {
@@ -19,6 +20,7 @@ namespace Alexandria.Misc
         public static Action<PlayerController> OnNewPlayercontrollerSpawned;
         public static Action<RewardPedestal> OnRewardPedestalSpawned;
         public static Action<AdvancedShrineController, PlayerController> OnShrineUsed;
+        public static Action<ShopItemController> OnShopItemStarted;
 
         //Chest-based actions
         public static Action<Chest> OnChestPostSpawn;
@@ -43,6 +45,8 @@ namespace Alexandria.Misc
             new Hook(typeof(Dungeon).GetMethod("Start", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("StartHook", BindingFlags.Static | BindingFlags.Public));
             new Hook(typeof(RewardPedestal).GetMethod("MaybeBecomeMimic", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("PostProcessPedestal", BindingFlags.Static | BindingFlags.Public));
             new Hook(typeof(AdvancedShrineController).GetMethod("DoShrineEffect", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("ShrineUsed", BindingFlags.Static | BindingFlags.NonPublic));
+            new Hook(typeof(ShopItemController).GetMethods().Single(a => a.Name == "Initialize" && a.GetParameters().Length == 2 && a.GetParameters()[1].ParameterType == typeof(BaseShopController)), typeof(CustomActions).GetMethod("InitializeViaBaseShopController", BindingFlags.Static | BindingFlags.Public));
+            new Hook(typeof(ShopItemController).GetMethods().Single(a => a.Name == "Initialize" && a.GetParameters().Length == 2 && a.GetParameters()[1].ParameterType == typeof(ShopController)),typeof(CustomActions).GetMethod("InitializeViaShopController", BindingFlags.Static | BindingFlags.Public));
 
             //Chest-based actions
             new Hook(typeof(Chest).GetMethod("PossiblyCreateBowler", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("PostProcessChest", BindingFlags.Static | BindingFlags.NonPublic));
@@ -99,6 +103,22 @@ namespace Alexandria.Misc
         {
             if (OnShrineUsed != null) OnShrineUsed(self, playa);
             orig(self, playa);
+        }
+        public static void InitializeViaBaseShopController(Action<ShopItemController, PickupObject, BaseShopController> orig, ShopItemController self, PickupObject i, BaseShopController parent)
+        {
+            orig(self, i, parent);
+            if (CustomActions.OnShopItemStarted != null)
+            {
+                CustomActions.OnShopItemStarted(self);
+            }
+        }
+        public static void InitializeViaShopController(Action<ShopItemController, PickupObject, ShopController> orig, ShopItemController self, PickupObject i, ShopController parent)
+        {
+            orig(self, i, parent);
+            if (CustomActions.OnShopItemStarted != null)
+            {
+                CustomActions.OnShopItemStarted(self);
+            }
         }
 
         //Chest-based actions

@@ -53,6 +53,9 @@ namespace Alexandria
                 BossBuilder.Init();
                 NPCAPI.NPCHooks.Init();
                 EnemyAPI.Hooks.Init();
+                CustomDiscountManager.Init();
+
+                
 
                 //Low Priority
                 CustomClipAmmoTypeToolbox.Init();

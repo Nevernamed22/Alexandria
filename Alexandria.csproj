@@ -102,6 +102,7 @@
     <Compile Include="Misc\ShadowBulletDoer.cs" />
     <Compile Include="Misc\SupplyDropDoer.cs" />
     <Compile Include="NPCAPI\BreachShopTools.cs" />
+    <Compile Include="NPCAPI\CustomDiscountManager.cs" />
     <Compile Include="NPCAPI\PlayMakerExtensions.cs" />
     <Compile Include="NPCAPI\NpcAPI.cs" />
     <Compile Include="PrefabAPI\AssetBundleBuilder.cs" />

@@ -157,11 +157,7 @@ namespace Alexandria.EnemyAPI
                         {
                             foreach (MineFlayerShellGameBehavior behav in activeShellGames)
                             {
-                                AIActor myBell = ReflectionUtility.ReflectGetField<AIActor>(typeof(MineFlayerShellGameBehavior), "m_myBell", behav);
-                                if (myBell != null)
-                                {
-                                    if (myBell == target) return true;
-                                }
+                                if (behav.m_myBell != null && behav.m_myBell == target) return true;
                             }
 
                         }

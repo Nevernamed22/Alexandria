@@ -13,6 +13,7 @@ using Alexandria.ChestApi;
 using BepInEx;
 using Alexandria.CharacterAPI;
 using System.Collections;
+using HarmonyLib;
 
 namespace Alexandria
 {
@@ -31,6 +32,9 @@ namespace Alexandria
 
         public void Start()
         {
+            var harmony = new Harmony(GUID);
+            harmony.PatchAll();
+
             ETGModMainBehaviour.WaitForGameManagerStart(GMStart);
         }
 

@@ -437,6 +437,19 @@ namespace Alexandria.DungeonAPI
                             placeableContents = placeableFromBundles
                         });
                     }
+                    else if (placeableFromBundles == null && StaticReferences.customPlaceables.ContainsKey(assetPath))
+                    {
+                        DungeonPrerequisite[] instancePrerequisites = new DungeonPrerequisite[0];
+                        room.placedObjectPositions.Add(location);
+                        room.placedObjects.Add(new PrototypePlacedObjectData
+                        {
+                            contentsBasePosition = location,
+                            fieldData = new List<PrototypePlacedObjectFieldData>(),
+                            instancePrerequisites = instancePrerequisites,
+                            linkedTriggerAreaIDs = new List<int>(),
+                            placeableContents = StaticReferences.customPlaceables[assetPath]
+                        });
+                    }
                     else
                     {
                         ShrineTools.PrintError<string>("Unable to find asset in asset bundles: " + assetPath, "FF0000");

@@ -27,7 +27,7 @@ namespace Alexandria.CharacterAPI
         public float health = 3, armor = 0;
         public tk2dSpriteAnimation AlternateCostumeLibrary;
         public bool removeFoyerExtras;
-        public bool useGlow;
+        public bool useGlow, hasPast;
         public Color emissiveColor;
         public float emissiveColorPower, emissivePower, emissiveThresholdSensitivity;
 

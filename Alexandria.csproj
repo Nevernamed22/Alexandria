@@ -50,6 +50,7 @@
     <Compile Include="CharApi\CharacterBuilding\SpriteHandler.cs" />
     <Compile Include="CharApi\CharacterBuilding\StringHandler.cs" />
     <Compile Include="CharApi\CharacterSwitcher.cs" />
+    <Compile Include="CharApi\CustomCharacterBlackSmithHandler.cs" />
     <Compile Include="CharApi\CollectionDumper.cs" />
     <Compile Include="CharApi\Tools\CharApiHooks.cs" />
     <Compile Include="CharApi\Tools\HooksToMakeDodgeRollsCodeForRobotGood.cs" />

@@ -84,15 +84,20 @@ namespace Alexandria.ItemAPI
                 item.encounterTrackable = null;
 
                 ETGMod.Databases.Items.SetupItem(item, item.name);
-                SpriteBuilder.AddToAmmonomicon(item.sprite.GetCurrentSpriteDef());
+                SpriteBuilder.AddToAmmonomicon(item.sprite.GetCurrentSpriteDef(), idPool);
+                //item.encounterTrackable.journalData.AmmonomiconSprite = idPool + item.sprite.GetCurrentSpriteDef().name;
                 item.encounterTrackable.journalData.AmmonomiconSprite = item.sprite.GetCurrentSpriteDef().name;
+
+                //item.encounterTrackable.journalData.PrimaryDisplayName = idPool.ToUpper() + "_" + item.encounterTrackable.journalData.PrimaryDisplayName;
+                //item.encounterTrackable.journalData.NotificationPanelDescription = idPool.ToUpper() + "_" + item.encounterTrackable.journalData.NotificationPanelDescription;
+                //item.encounterTrackable.journalData.AmmonomiconFullEntry = idPool.ToUpper() + "_" + item.encounterTrackable.journalData.AmmonomiconFullEntry;
 
                 item.SetName(item.name);
                 item.SetShortDescription(shortDesc);
                 item.SetLongDescription(longDesc);
 
-                if (item is PlayerItem)
-                    (item as PlayerItem).consumable = false;
+                if (item is PlayerItem) (item as PlayerItem).consumable = false;
+
                 Gungeon.Game.Items.Add(idPool + ":" + item.name.ToLower().Replace(" ", "_"), item);
                 ETGMod.Databases.Items.Add(item);
             }

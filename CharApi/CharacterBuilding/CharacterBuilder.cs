@@ -114,9 +114,9 @@ namespace Alexandria.CharacterAPI
 
             customCharacter.past = customPast;
             customCharacter.hasPast = hasCustomPast;
-            
+            data.hasPast = hasCustomPast;
 
-           
+            
             gameObject.SetActive(false);
             FakePrefab.MarkAsFakePrefab(gameObject);
         }

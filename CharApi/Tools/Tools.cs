@@ -22,30 +22,6 @@ namespace Alexandria.CharacterAPI
         private static Dictionary<string, float> timers = new Dictionary<string, float>();
         private static string[] BundlePrereqs;
 
-        public static byte[] ExtractEmbeddedResource(string filePath, Assembly assembly = null)
-        {
-            filePath = filePath.Replace("/", ".");
-            filePath = filePath.Replace("\\", ".");
-            Assembly callingAssembly = assembly ?? Assembly.GetCallingAssembly();
-            byte[] result;
-            using (Stream manifestResourceStream = callingAssembly.GetManifestResourceStream(filePath))
-            {
-                bool flag = manifestResourceStream == null;
-                if (flag)
-                {
-                    result = null;
-                }
-                else
-                {
-                    byte[] array = new byte[manifestResourceStream.Length];
-                    manifestResourceStream.Read(array, 0, array.Length);
-                    result = array;
-                }
-            }
-            return result;
-        }
-
-
         public static Material[] SetOverrideMaterial (this PlayerController player, Material overrideMaterial)
         {
             FieldInfo _cachedOverrideMaterials = typeof(PlayerController).GetField("m_cachedOverrideMaterials", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -113,75 +89,6 @@ namespace Alexandria.CharacterAPI
             output.Apply();
             return output;
         }
-
-        public static List<Texture2D> GetTexturesFromResource(string resourceName, Assembly assembly = null)
-        {
-            string[] resources = ToolsCharApi.GetResourceNames(assembly ?? Assembly.GetCallingAssembly());
-            List<Texture2D> result = new List<Texture2D>();
-
-            for (int i = 0; i < resources.Length; i++)
-            {
-                if (resources[i].StartsWith(resourceName.Replace('/', '.') + ".", StringComparison.OrdinalIgnoreCase))
-                {
-                    ////DebugUtility.PrintError<string>(resourceName, "FF0000");
-                    result.Add(GetTextureFromResource(resources[i], assembly ?? Assembly.GetCallingAssembly()));
-                }
-            }
-
-            if (result.Count == 0)
-            {
-                ToolsCharApi.PrintError<string>("No bytes found in " + resourceName, "FF0000");
-                result = null;
-            }
-
-            return result;
-        }
-
-        public static Texture2D GetTextureFromResource(string resourceName, Assembly assembly = null)
-        {
-            byte[] array = ExtractEmbeddedResource(resourceName, assembly ?? Assembly.GetCallingAssembly());
-            bool flag = array == null;
-            Texture2D result;
-            if (flag)
-            {
-                ToolsCharApi.PrintError<string>("No bytes found in " + resourceName, "FF0000");
-                result = null;
-            }
-            else
-            {
-                Texture2D texture2D = new Texture2D(1, 1, TextureFormat.RGBAFloat, false);
-                texture2D.LoadImage(array);
-                texture2D.filterMode = FilterMode.Point;
-                string text = resourceName.Substring(0, resourceName.LastIndexOf('.'));
-                bool flag2 = text.LastIndexOf('.') >= 0;
-                if (flag2)
-                {
-                    text = text.Substring(text.LastIndexOf('.') + 1);
-                }
-                texture2D.name = text;
-                result = texture2D;
-            }
-            return result;
-        }
-
-        public static string[] GetResourceNames(Assembly assembly = null)
-        {
-            Assembly callingAssembly = assembly ?? Assembly.GetCallingAssembly();
-            string[] manifestResourceNames = callingAssembly.GetManifestResourceNames();
-            bool flag = manifestResourceNames == null;
-            string[] result;
-            if (flag)
-            {
-                ETGModConsole.Log("No manifest resources found.", false);
-                result = null;
-            }
-            else
-            {
-                result = manifestResourceNames;
-            }
-            return result;
-        }
-
         
 
         public static T LoadAssetFromAnywhere<T>(string path) where T : UnityEngine.Object

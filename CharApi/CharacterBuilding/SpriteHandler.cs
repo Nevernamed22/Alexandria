@@ -609,7 +609,7 @@ namespace Alexandria.CharacterAPI
             data.animator.Library.enabled = true;
 
 
-            foreach (var file in ToolsCharApi.GetResourceNames(assembly ?? Assembly.GetCallingAssembly()))
+            foreach (var file in ResourceExtractor.GetResourceNames(assembly ?? Assembly.GetCallingAssembly()))
             {
                 var splitPath = file.Split('.');
 
@@ -640,7 +640,7 @@ namespace Alexandria.CharacterAPI
 
                     if (!file.Contains("cc_sprite_placeholder"))
                     {
-                        textures = ToolsCharApi.GetTexturesFromResource($"{path}.{dirName}", assembly ?? Assembly.GetCallingAssembly());
+                        textures = ResourceExtractor.GetTexturesFromResource($"{path}.{dirName}", assembly ?? Assembly.GetCallingAssembly());
                     }
 
                     if (dirName.Contains("custom"))
@@ -652,7 +652,7 @@ namespace Alexandria.CharacterAPI
                         var customDirName = splitPath[splitPath.Count() - 3];
                         //BotsModule.Log($"Custom animation found \"{customDirName}\"");
                         animName = data.nameShort + "_" + customDirName;
-                        textures = ToolsCharApi.GetTexturesFromResource($"{path}.{dirName}.{customDirName}", assembly ?? Assembly.GetCallingAssembly());
+                        textures = ResourceExtractor.GetTexturesFromResource($"{path}.{dirName}.{customDirName}", assembly ?? Assembly.GetCallingAssembly());
 
                         for (int i = 0; i < textures.Count; i++)
                         {
@@ -672,7 +672,7 @@ namespace Alexandria.CharacterAPI
                         var customDirName = splitPath[splitPath.Count() - 3];
                         //BotsModule.Log($"Custom breach animation found \"{customDirName}\"");
                         animName = data.nameShort + "_" + customDirName;
-                        textures = ToolsCharApi.GetTexturesFromResource($"{path}.{dirName}.{customDirName}", assembly ?? Assembly.GetCallingAssembly());
+                        textures = ResourceExtractor.GetTexturesFromResource($"{path}.{dirName}.{customDirName}", assembly ?? Assembly.GetCallingAssembly());
 
                         for (int i = 0; i < textures.Count; i++)
                         {
@@ -688,7 +688,7 @@ namespace Alexandria.CharacterAPI
                             var customDirName = customDir.Replace(file, "").Replace(".", "");
                             BotsModule.Log($"Breach Idle animation found \"{customDirName}\"");
                             animName = data.nameShort + "_" + customDirName;
-                            textures = ToolsCharApi.GetTexturesFromResource(customDir);
+                            textures = ResourceExtractor.GetTexturesFromResource(customDir);
 
                             for (int i = 1; i < textures.Count; i++)
                             {
@@ -706,12 +706,12 @@ namespace Alexandria.CharacterAPI
                         if (((dirName.EndsWith("_hand") || dirName.EndsWith("_twohands"))) && file.Contains("cc_sprite_placeholder"))//textures.Count <= 0)
                         {
                             //BotsModule.Log($"hands located! lethal force engaged against {dirName}");
-                            textures = ToolsCharApi.GetTexturesFromResource((path + "." + dirName).Replace("_twohands", "").Replace("_hand", ""), assembly ?? Assembly.GetCallingAssembly());
+                            textures = ResourceExtractor.GetTexturesFromResource((path + "." + dirName).Replace("_twohands", "").Replace("_hand", ""), assembly ?? Assembly.GetCallingAssembly());
                         }
                         if (dirName.EndsWith("death_coop") && file.Contains("cc_sprite_placeholder"))//textures.Count <= 0)
                         {
                             //BotsModule.Log($"hands located! lethal force engaged against {dirName}");
-                            textures = ToolsCharApi.GetTexturesFromResource((path + "." + dirName).Replace("_coop", ""), assembly ?? Assembly.GetCallingAssembly());
+                            textures = ResourceExtractor.GetTexturesFromResource((path + "." + dirName).Replace("_coop", ""), assembly ?? Assembly.GetCallingAssembly());
                         }
                         if (textures.Count > 0)
                         {
@@ -835,7 +835,7 @@ namespace Alexandria.CharacterAPI
                 }
                 else if (splitPath[splitPath.Count() - 2] == (alt ? "hand_alt_001" : "hand_001"))
                 {
-                    var texture = ToolsCharApi.GetTextureFromResource($"{path}.{(alt ? "hand_alt_001" : "hand_001")}.png", assembly ?? Assembly.GetCallingAssembly());
+                    var texture = ResourceExtractor.GetTextureFromResource($"{path}.{(alt ? "hand_alt_001" : "hand_001")}.png", assembly ?? Assembly.GetCallingAssembly());
                     var id = AddSpriteToCollection(texture, collection, "hand" + (alt ? "_alt" : ""));
                     collection.spriteDefinitions[id].position0 = new Vector3(-0.125f, -0.125f, 0);
                     collection.spriteDefinitions[id].position1 = new Vector3(0.125f, -0.125f, 0);

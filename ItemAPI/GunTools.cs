@@ -214,9 +214,49 @@ namespace Alexandria.ItemAPI
             return new RectInt(xMin, yMin, xMax - xMin + 1, yMax - yMin + 1);
         }
 
+        public static tk2dSpriteDefinition Copy(this tk2dSpriteDefinition other)
+        {
+            tk2dSpriteDefinition result = new tk2dSpriteDefinition
+            {
+                boundsDataCenter = other.boundsDataCenter,
+                boundsDataExtents = other.boundsDataExtents,
+                colliderConvex = other.colliderConvex,
+                colliderSmoothSphereCollisions = other.colliderSmoothSphereCollisions,
+                colliderType = other.colliderType,
+                colliderVertices = other.colliderVertices,
+                collisionLayer = other.collisionLayer,
+                complexGeometry = other.complexGeometry,
+                extractRegion = other.extractRegion,
+                flipped = other.flipped,
+                indices = other.indices,
+                material = new Material(other.material),
+                materialId = other.materialId,
+                materialInst = new Material(other.materialInst ?? other.material),
+                metadata = other.metadata,
+                name = other.name,
+                normals = other.normals,
+                physicsEngine = other.physicsEngine,
+                position0 = other.position0,
+                position1 = other.position1,
+                position2 = other.position2,
+                position3 = other.position3,
+                regionH = other.regionH,
+                regionW = other.regionW,
+                regionX = other.regionX,
+                regionY = other.regionY,
+                tangents = other.tangents,
+                texelSize = other.texelSize,
+                untrimmedBoundsDataCenter = other.untrimmedBoundsDataCenter,
+                untrimmedBoundsDataExtents = other.untrimmedBoundsDataExtents,
+                uvs = other.uvs,                
+            };
+            return result;
+        }
 
         public static tk2dSpriteDefinition CopyDefinitionFrom(this tk2dSpriteDefinition other)
         {
+            if (other.boundsDataCenter == null) Debug.LogWarning("FUUUUUUUUUUUUUUUUUUUUUCK");
+            if (other.boundsDataExtents == null) Debug.LogWarning("FUUUUUUUUUUUUUUUUUUUUUCK2");
             tk2dSpriteDefinition result = new tk2dSpriteDefinition
             {
                 boundsDataCenter = new Vector3
@@ -239,10 +279,10 @@ namespace Alexandria.ItemAPI
                 complexGeometry = other.complexGeometry,
                 extractRegion = other.extractRegion,
                 flipped = other.flipped,
-                indices = other.indices,
+                indices = other.indices,              
                 material = new Material(other.material),
                 materialId = other.materialId,
-                materialInst = new Material(other.materialInst),
+                materialInst = new Material(other.materialInst ?? other.material),
                 metadata = other.metadata,
                 name = other.name,
                 normals = other.normals,

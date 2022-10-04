@@ -324,7 +324,7 @@ namespace Alexandria.CharacterAPI
             string punchoutSpritesDir = Path.Combine(filePath, "punchout.sprites").Replace("/", ".").Replace("\\", ".");
 
 
-            string[] resources = ToolsCharApi.GetResourceNames(assembly);
+            string[] resources = ResourceExtractor.GetResourceNames(assembly);
             
             for (int i = 0; i < resources.Length; i++)
             {
@@ -334,7 +334,7 @@ namespace Alexandria.CharacterAPI
                     if (resources[i].StartsWith(spritesDir.Replace('/', '.'), StringComparison.OrdinalIgnoreCase) && data.sprites == null)
                     {
                         //ToolsCharApi.PrintError("Found: Sprites folder");
-                        data.sprites = ToolsCharApi.GetTexturesFromResource(spritesDir, assembly);
+                        data.sprites = ResourceExtractor.GetTexturesFromResource(spritesDir, assembly);
                     }
 
                     
@@ -342,7 +342,7 @@ namespace Alexandria.CharacterAPI
                     if (resources[i].StartsWith(altSpritesDir.Replace('/', '.'), StringComparison.OrdinalIgnoreCase) && data.altSprites == null)
                     {
                         //ToolsCharApi.PrintError("Found: Alt Sprites folder");
-                        data.altSprites = ToolsCharApi.GetTexturesFromResource(altSpritesDir, assembly);
+                        data.altSprites = ResourceExtractor.GetTexturesFromResource(altSpritesDir, assembly);
                     }
 
                     if (resources[i].StartsWith(newSpritesDir.Replace('/', '.'), StringComparison.OrdinalIgnoreCase) && string.IsNullOrEmpty(data.pathForSprites))
@@ -361,7 +361,7 @@ namespace Alexandria.CharacterAPI
                     if (resources[i].StartsWith(foyerDir.Replace('/', '.'), StringComparison.OrdinalIgnoreCase) && data.foyerCardSprites == null)
                     {
                         //ToolsCharApi.PrintError("Found: Foyer card folder");
-                        data.foyerCardSprites = ToolsCharApi.GetTexturesFromResource(foyerDir, assembly);
+                        data.foyerCardSprites = ResourceExtractor.GetTexturesFromResource(foyerDir, assembly);
                     }
                    
 
@@ -370,7 +370,7 @@ namespace Alexandria.CharacterAPI
                     {
                         //ToolsCharApi.PrintError("Found: Loadout card folder");
 
-                        data.loadoutSprites = ToolsCharApi.GetTexturesFromResource(loadoutDir, assembly);
+                        data.loadoutSprites = ResourceExtractor.GetTexturesFromResource(loadoutDir, assembly);
 
                         //ToolsCharApi.PrintError(data.loadoutSprites.Count.ToString());
                     }
@@ -381,7 +381,7 @@ namespace Alexandria.CharacterAPI
                         ToolsCharApi.Print("Found: Punchout Sprites folder");
                         ETGModConsole.Log("Found: Punchout Sprites folder");
                         data.punchoutSprites = new Dictionary<string, Texture2D>();
-                        foreach (var tex in ToolsCharApi.GetTexturesFromResource(punchoutSpritesDir, assembly))
+                        foreach (var tex in ResourceExtractor.GetTexturesFromResource(punchoutSpritesDir, assembly))
                         {
                             data.punchoutSprites.Add(tex.name, tex);
                         }
@@ -393,7 +393,7 @@ namespace Alexandria.CharacterAPI
                     {
                         data.punchoutFaceCards = new List<Texture2D>();
                         //ETGModConsole.Log(punchoutDir);
-                        var punchoutSprites = ToolsCharApi.GetTexturesFromResource(punchoutDir, assembly);
+                        var punchoutSprites = ResourceExtractor.GetTexturesFromResource(punchoutDir, assembly);
                         foreach (var tex in punchoutSprites)
                         {
                             string name = tex.name.ToLower();
@@ -415,7 +415,7 @@ namespace Alexandria.CharacterAPI
             //ToolsCharApi.PrintError("foyer card sprites");
 
             //ToolsCharApi.PrintError("loadout sprites");
-            List<Texture2D> miscTextures = ToolsCharApi.GetTexturesFromResource(filePath, assembly ?? Assembly.GetCallingAssembly());
+            List<Texture2D> miscTextures = ResourceExtractor.GetTexturesFromResource(filePath, assembly ?? Assembly.GetCallingAssembly());
             foreach (var tex in miscTextures)
             {
                 string name = tex.name.ToLower();

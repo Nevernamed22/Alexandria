@@ -147,6 +147,8 @@ namespace Alexandria.EnemyAPI
             FakePrefab.MarkAsFakePrefab(prefab);
             prefab.SetActive(false);
 
+            StaticReferenceManager.AllHealthHavers.Remove(healthHaver);
+
             return prefab;
         }
 

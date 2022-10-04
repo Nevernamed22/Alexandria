@@ -19,6 +19,7 @@ namespace Alexandria.DungeonAPI
         public static SharedInjectionData subShopTable;
 
         public static Dictionary<string, GameObject> customObjects = new Dictionary<string, GameObject>();
+        public static Dictionary<string, DungeonPlaceable> customPlaceables = new Dictionary<string, DungeonPlaceable>();
 
         public static Dictionary<string, string> roomTableMap = new Dictionary<string, string>()
         {

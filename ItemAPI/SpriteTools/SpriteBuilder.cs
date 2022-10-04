@@ -188,6 +188,9 @@ namespace Alexandria.ItemAPI
 		{
 			//Add definition to collection
 			var defs = collection.spriteDefinitions;
+
+
+
 			var newDefs = defs.Concat(new tk2dSpriteDefinition[] { spriteDefinition }).ToArray();
 			collection.spriteDefinitions = newDefs;
 
@@ -202,8 +205,10 @@ namespace Alexandria.ItemAPI
 		/// Adds a sprite definition to the Ammonomicon sprite collection
 		/// </summary>
 		/// <returns>The spriteID of the defintion in the ammonomicon collection</returns>
-		public static int AddToAmmonomicon(tk2dSpriteDefinition spriteDefinition)
+		public static int AddToAmmonomicon(tk2dSpriteDefinition spriteDefinition, string prefix = "")
 		{
+			//var newDef = spriteDefinition.Copy();
+			//newDef.name = prefix + newDef.name;
 			return AddSpriteToCollection(spriteDefinition, ammonomiconCollection);
 		}
 

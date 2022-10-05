@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Alexandria.ItemAPI
 {
-    static class TrailAPI
+    public static class TrailAPI
     {
         /// <summary>
         /// Adds a tiled trail to the Projectile

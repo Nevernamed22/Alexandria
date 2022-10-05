@@ -9,7 +9,7 @@ using Alexandria.EnemyAPI;
 using Alexandria.DungeonAPI;
 using Alexandria.ItemAPI;
 using Alexandria.Misc;
-using Alexandria.ChestApi;
+using Alexandria.ChestAPI;
 using BepInEx;
 using Alexandria.CharacterAPI;
 using System.Collections;
@@ -27,7 +27,7 @@ namespace Alexandria
 
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
-        public const string VERSION = "0.2.3";
+        public const string VERSION = "0.2.5";
 
 
         public void Start()
@@ -43,40 +43,41 @@ namespace Alexandria
 
             try
             {
+                //The Most important classes, which must be initialised first
                 StaticReferences.Init();
                 DungeonHandler.Init();
-
                 FakePrefabHooks.Init();
-
-                //GameStatsManager.Instance
-
                 ItemBuilder.Init();
-                //CharApi.Init("nn");
-                CustomClipAmmoTypeToolbox.Init();
+
+                //Medium Priority
+                CustomActions.InitHooks();
+                ExtendedPlayerComponent.Init();
                 EnemyTools.Init();
                 EnemyBuilder.Init();
                 BossBuilder.Init();
                 NPCAPI.NPCHooks.Init();
                 EnemyAPI.Hooks.Init();
-                CustomActions.InitHooks();
+                CustomDiscountManager.Init();
+
+                
+
+                //Low Priority
+                CustomClipAmmoTypeToolbox.Init();
                 ChamberGunAPI.Init();
-                ExtendedPlayerComponent.Init();
                 GenericItemAPIHooks.InitHooks();
-
                 AlexandriaTags.InitGenericTags();
-
                 ChestSpawnHelper.Init();
-
                 Commands.Init();
-
                 BreachShopTools.Init();
+                AmmoPickupFixer.Init();
+                LabelablePlayerItemSetup.InitLabelHook();
 
+                //Character API
                 CharacterAPI.Hooks.Init();
                 ToolsCharApi.Init();
 
                 ETGMod.StartGlobalCoroutine(this.delayedstarthandler());
                 ETGModConsole.Log("AlexandriaLib started correctly.");
-                //ETGModConsole.Log("started!!", true);
             }
             catch (Exception e)
             {

@@ -112,7 +112,7 @@ namespace Alexandria.DungeonAPI
                             break;
                         case RoomSpecialSubCategory.WEIRD_SHOP:    //subshops
                             StaticReferences.subShopTable.InjectionData.AddRange(GetFlowModifier(roomData));
-                           /// Tools.Print($"Registering {roomData.room.name} with weight {wRoom.weight} as {roomData.category}:{roomData.specialSubCategory}");
+                           // Tools.Print($"Registering {roomData.room.name} with weight {wRoom.weight} as {roomData.category}:{roomData.specialSubCategory}");
                            // success = true;
                             break;
                         default:
@@ -329,7 +329,7 @@ namespace Alexandria.DungeonAPI
                             break;
                         case RoomSpecialSubCategory.WEIRD_SHOP:    //subshops
                             StaticReferences.subShopTable.InjectionData.AddRange(GetFlowModifier(roomData));
-                            /// Tools.Print($"Registering {roomData.room.name} with weight {wRoom.weight} as {roomData.category}:{roomData.specialSubCategory}");
+                            // Tools.Print($"Registering {roomData.room.name} with weight {wRoom.weight} as {roomData.category}:{roomData.specialSubCategory}");
                         //    success = true;
                             break;
                         default:

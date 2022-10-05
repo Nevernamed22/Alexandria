@@ -7,6 +7,9 @@ namespace Alexandria.ItemAPI
 {
     public static class AlexandriaTags
     {
+        /// <summary>
+        /// The setup method which adds tags to basegame items and enemies. DO NOT CALL THIS METHOD.
+        /// </summary>
         public static void InitGenericTags()
         {
             //Items
@@ -236,10 +239,17 @@ namespace Alexandria.ItemAPI
             foreach (string guid in Royal) SetTag(guid, "royalty");
 
         }
-        //item tagging
 
         static Dictionary<string, List<int>> itemTags = new Dictionary<string, List<int>>();
+        static Dictionary<string, List<string>> aiActorTags = new Dictionary<string, List<string>>();
 
+        //Item Based Tag Interaction Methods
+
+        /// <summary>
+        /// Adds the specified tag to the PickupObject.
+        /// </summary>
+        /// <param name="item">The item to which the tag should be added.</param>
+        /// <param name="tag">The tag which should be added.</param>
         public static void SetTag(this PickupObject item, string tag)
         {
             if (!itemTags.ContainsKey(tag))
@@ -249,6 +259,11 @@ namespace Alexandria.ItemAPI
             if (!itemTags[tag].Contains(item.PickupObjectId)) itemTags[tag].Add(item.PickupObjectId);
         }
 
+        /// <summary>
+        /// Adds the specified tag to the PickupObject corresponding to the given ID.
+        /// </summary>
+        /// <param name="id">The ID of the item to which the tag should be added.</param>
+        /// <param name="tag">The tag which should be added.</param>
         public static void SetTag(int id, string tag)
         {
             if (!itemTags.ContainsKey(tag))
@@ -258,6 +273,11 @@ namespace Alexandria.ItemAPI
             if (!itemTags[tag].Contains(id)) itemTags[tag].Add(id);
         }
 
+        /// <summary>
+        /// Returns true if the PickupObject has the specified tag.
+        /// </summary>
+        /// <param name="item">The item which is being checked for the tag.</param>
+        /// <param name="tag">The tag which is being checked for.</param>
         public static bool HasTag(this PickupObject item, string tag)
         {
             if (!itemTags.ContainsKey(tag))
@@ -267,6 +287,10 @@ namespace Alexandria.ItemAPI
             return (itemTags[tag].Contains(item.PickupObjectId));
         }
 
+        /// <summary>
+        /// Returns a list of all item IDs which have the specified tag.
+        /// </summary>
+        /// <param name="tag">The tag to be searched for.</param>
         public static List<int> GetAllItemsIdsWithTag(string tag)
         {
             if (!itemTags.ContainsKey(tag))
@@ -276,6 +300,10 @@ namespace Alexandria.ItemAPI
             return itemTags[tag];
         }
 
+        /// <summary>
+        /// Returns a list of all PickupObjects in the PickupObjectDatabase which have the specified tag.
+        /// </summary>
+        /// <param name="tag">The tag to be searched for.</param>
         public static List<PickupObject> GetAllItemsWithTag(string tag)
         {
             if (!itemTags.ContainsKey(tag))
@@ -288,10 +316,13 @@ namespace Alexandria.ItemAPI
             return pickupObjects;
         }
 
-        //enemy tagging
+        //Enemy based Tag Interaction Methods
 
-        static Dictionary<string, List<string>> aiActorTags = new Dictionary<string, List<string>>();
-
+        /// <summary>
+        /// Adds the specified tag to the AIActor.
+        /// </summary>
+        /// <param name="aiActor">The AIActor to be tagged.</param>
+        /// <param name="tag">The tag to be added.</param>
         public static void SetTag(this AIActor aiActor, string tag)
         {
             if (!aiActorTags.ContainsKey(tag))
@@ -302,6 +333,11 @@ namespace Alexandria.ItemAPI
 
         }
 
+        /// <summary>
+        /// Adds the specified tag to the AIActor with the given GUID.
+        /// </summary>
+        /// <param name="guid">The guid corresponding to the AIActor to be tagged.</param>
+        /// <param name="tag">The tag to be added.</param>
         public static void SetTag(string guid, string tag)
         {
             if (!aiActorTags.ContainsKey(tag))
@@ -311,6 +347,12 @@ namespace Alexandria.ItemAPI
             if (!aiActorTags[tag].Contains(guid)) aiActorTags[tag].Add(guid);
 
         }
+
+        /// <summary>
+        /// Returns true if the AIActor corresponding to the given GUID has the specified tag.
+        /// </summary>
+        /// <param name="guid">The guid corresponding to the AIActor to be checked for the tag.</param>
+        /// <param name="tag">The tag to be checked for.</param>
         public static bool HasTag(string guid, string tag)
         {
             if (!aiActorTags.ContainsKey(tag))
@@ -319,6 +361,12 @@ namespace Alexandria.ItemAPI
             }
             return (aiActorTags[tag].Contains(guid));
         }
+
+        /// <summary>
+        /// Returns true if the AIActor has the specified tag.
+        /// </summary>
+        /// <param name="aiActor">The AIActor being checked.</param>
+        /// <param name="tag">The tag to be checked for.</param>
         public static bool HasTag(this AIActor aiActor, string tag)
         {
             if (!aiActorTags.ContainsKey(tag))
@@ -328,7 +376,11 @@ namespace Alexandria.ItemAPI
             return (aiActorTags[tag].Contains(aiActor.EnemyGuid));
         }
 
-        public static List<string> GetAllEnemiesGuidWithTag(string tag)
+        /// <summary>
+        /// Returns a list of all enemy guids of AIActors with the specified tag.
+        /// </summary>
+        /// <param name="tag">The tag to be searched for.</param>
+        public static List<string> GetAllEnemyGuidsWithTag(string tag)
         {
             if (!aiActorTags.ContainsKey(tag))
             {
@@ -337,6 +389,10 @@ namespace Alexandria.ItemAPI
             return aiActorTags[tag];
         }
 
+        /// <summary>
+        /// Returns a list of all AIActors in the EnemyDatabase with the specified tag.
+        /// </summary>
+        /// <param name="tag">The tag to be searched for.</param>
         public static List<AIActor> GetAllEnemiesWithTag(string tag)
         {
             if (!aiActorTags.ContainsKey(tag))
@@ -347,6 +403,23 @@ namespace Alexandria.ItemAPI
             foreach (var id in aiActorTags[tag]) { if (EnemyDatabase.GetOrLoadByGuid(id) != null) aiActors.Add(EnemyDatabase.GetOrLoadByGuid(id)); }
 
             return aiActors;
+        }
+
+        /// <summary>
+        /// Returns true if the AIActor has any of the tags in the provided list.
+        /// </summary>
+        /// <param name="aiActor">The AIActor to be checked.</param>
+        /// <param name="tags">The list of tags to be checked for.</param>
+        /// <param name="reqAll">If true, the AIActor must have ALL specified tags to return true. If false, the AIActor must only have one.</param>
+        public static bool HasTags(this AIActor aiActor, List<string> tags, bool reqAll = false)
+        {
+            int tagsFound = 0;
+            foreach (string tag in tags)
+            {
+                if (aiActor.HasTag(tag)) tagsFound++;
+            }
+            if ((reqAll && tagsFound >= tags.Count) || (!reqAll && tagsFound > 0)) return true;
+            else return false;
         }
 
     }

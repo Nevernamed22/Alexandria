@@ -58,7 +58,7 @@ namespace Alexandria.Misc
             new Hook(typeof(AmmoPickup).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("ammoPickupHookMethod"));
             new Hook(typeof(HealthPickup).GetMethod("PrePickupLogic", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("healthPrePickupHook"));
             new Hook(typeof(KeyBulletPickup).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public),typeof(CustomActions).GetMethod("keyPickupHookMethod"));
-            new Hook(typeof(PlayerController).GetMethod("DropActiveItem", BindingFlags.Public | BindingFlags.Instance),typeof(CustomActions).GetMethod("DropActiveHook", BindingFlags.Public | BindingFlags.Instance));
+            new Hook(typeof(PlayerController).GetMethod("DropActiveItem", BindingFlags.Public | BindingFlags.Instance),typeof(CustomActions).GetMethod("DropActiveHook", BindingFlags.Public | BindingFlags.Static));
 
             //Misc
             new Hook(typeof(Exploder).GetMethod("Explode", BindingFlags.Static | BindingFlags.Public), typeof(CustomActions).GetMethod("ExplosionHook", BindingFlags.Static | BindingFlags.NonPublic));
@@ -170,7 +170,7 @@ namespace Alexandria.Misc
             if (OnAnyPlayerCollectedKey != null) OnAnyPlayerCollectedKey(self, player);
             if (player.GetExtComp() && player.GetExtComp().OnPickedUpKey != null) player.GetExtComp().OnPickedUpKey(player, self);
         }
-        public DebrisObject DropActiveHook(Func<PlayerController, PlayerItem, float, bool, DebrisObject> orig, PlayerController self, PlayerItem item, float force = 4f, bool deathdrop = false)
+        public static DebrisObject DropActiveHook(Func<PlayerController, PlayerItem, float, bool, DebrisObject> orig, PlayerController self, PlayerItem item, float force = 4f, bool deathdrop = false)
         {
             if (self && self.GetExtComp().OnActiveItemPreDrop != null) self.GetExtComp().OnActiveItemPreDrop(self, item, deathdrop);
             return orig(self, item, force, deathdrop);

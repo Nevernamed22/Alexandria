@@ -9,7 +9,7 @@ using Alexandria.EnemyAPI;
 using Alexandria.DungeonAPI;
 using Alexandria.ItemAPI;
 using Alexandria.Misc;
-using Alexandria.ChestApi;
+using Alexandria.ChestAPI;
 using BepInEx;
 using Alexandria.CharacterAPI;
 using System.Collections;
@@ -26,7 +26,7 @@ namespace Alexandria
 
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
-        public const string VERSION = "0.2.4";
+        public const string VERSION = "0.2.5";
 
 
         public void Start()

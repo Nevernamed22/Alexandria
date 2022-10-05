@@ -100,10 +100,10 @@ namespace Alexandria.Misc
         /// <param name="checkIsWorthShooting">If true, the projectile will ignore enemies with IsWorthShootingAt set to false, such as Mountain Cubes.</param>
         /// <param name="type">Determines whether or not the projectile should take into account if an enemy needs to be killed for room clear.</param>
         /// <param name="overrideValidityCheck">A function which allows for the setting of custom parameters for whether or not an enemy is valid.</param>
-        public static Vector2 GetVectorToNearestEnemy(this Projectile bullet, bool checkIsWorthShooting = true, RoomHandler.ActiveEnemyType type = RoomHandler.ActiveEnemyType.RoomClear, Func<AIActor, bool> overrideValidityCheck = null)
+        public static Vector2 GetVectorToNearestEnemy(this Projectile bullet, bool checkIsWorthShooting = true, RoomHandler.ActiveEnemyType type = RoomHandler.ActiveEnemyType.RoomClear, List<AIActor> excludedActors = null, Func<AIActor, bool> overrideValidityCheck = null)
         {    
             IntVector2 bulletPositionIntVector2 = bullet.sprite != null ? bullet.sprite.WorldCenter.ToIntVector2() : bullet.specRigidbody.UnitCenter.ToIntVector2();
-            AIActor closestToPosition = bulletPositionIntVector2.GetNearestEnemyToPosition(checkIsWorthShooting, type, overrideValidityCheck);
+            AIActor closestToPosition = bulletPositionIntVector2.GetNearestEnemyToPosition(checkIsWorthShooting, type, excludedActors, overrideValidityCheck);
             if (closestToPosition) return closestToPosition.CenterPosition - (bullet.sprite != null ? bullet.sprite.WorldCenter : bullet.specRigidbody.UnitCenter);
             else return Vector2.zero;
         }
@@ -212,20 +212,9 @@ namespace Alexandria.Misc
         /// Automatically instantiates and fakeprefabs the given projectile and returns the new fake prefab.
         /// </summary>
         /// <param name="projToCopy">The original projectile which you intend to return a clone of</param>
-        public static Projectile SetupProjectile(Projectile projToCopy)
+        public static Projectile InstantiateAndFakeprefab(this Projectile projToCopy)
         {
-            Projectile proj = UnityEngine.Object.Instantiate<Projectile>(projToCopy);
-            proj.gameObject.SetActive(false);
-            FakePrefab.MarkAsFakePrefab(proj.gameObject);
-            UnityEngine.Object.DontDestroyOnLoad(proj);
-            return proj;
-        }
-        public static Projectile InstantiateAndFakeprefab(this Projectile target)
-        {
-            GameObject instantiatedTarget = UnityEngine.Object.Instantiate<GameObject>(target.gameObject);
-            instantiatedTarget.SetActive(false);
-            FakePrefab.MarkAsFakePrefab(instantiatedTarget);
-            UnityEngine.Object.DontDestroyOnLoad(instantiatedTarget);
+            GameObject instantiatedTarget = projToCopy.gameObject.InstantiateAndFakeprefab();
             return instantiatedTarget.GetComponent<Projectile>();
         }
 

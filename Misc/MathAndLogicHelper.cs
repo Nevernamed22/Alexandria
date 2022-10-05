@@ -166,36 +166,42 @@ namespace Alexandria.Misc
 
         /// <summary>
         /// Returns the AIActor of the nearest enemy to the Vector2 position.
+        /// By default, will only return engaged enemies with HealthHavers who are alive and vulnerable. Use overrideValidityCheck if this is not what you want.
         /// </summary>
         /// <param name="position">The position to check.</param>
         /// <param name="checkIsWorthShootingAt">If true, will ignore enemies such as Mountain Cubes.</param>
         /// <param name="type">Controls whether or not the check should ignore enemies who are not required for room clear.</param>
+        /// <param name="excludedActors">AIactors on this list will be ignored.</param>
         /// <param name="overrideValidityCheck">A func which allows the manual checking of custom parameters for enemy validity.</param>
-        public static AIActor GetNearestEnemyToPosition(this Vector2 position, bool checkIsWorthShootingAt = true, RoomHandler.ActiveEnemyType type = RoomHandler.ActiveEnemyType.RoomClear, Func<AIActor, bool> overrideValidityCheck = null)
+        public static AIActor GetNearestEnemyToPosition(this Vector2 position, bool checkIsWorthShootingAt = true, RoomHandler.ActiveEnemyType type = RoomHandler.ActiveEnemyType.RoomClear, List<AIActor> excludedActors = null, Func<AIActor, bool> overrideValidityCheck = null)
         {
-            Func<AIActor, bool> isValid = (AIActor a) => a && a.HasBeenEngaged && a.healthHaver && a.healthHaver.IsVulnerable && a.healthHaver.IsAlive && ((checkIsWorthShootingAt && a.IsWorthShootingAt) || !checkIsWorthShootingAt);
+            List<AIActor> excluded = excludedActors == null ? new List<AIActor>() : excludedActors;
+            Func<AIActor, bool> isValid = (AIActor a) => a && a.HasBeenEngaged && a.healthHaver && a.healthHaver.IsVulnerable && a.healthHaver.IsAlive && !excluded.Contains(a) &&((checkIsWorthShootingAt && a.IsWorthShootingAt) || !checkIsWorthShootingAt);
             if (overrideValidityCheck != null) isValid = overrideValidityCheck;
             AIActor closestToPosition = BraveUtility.GetClosestToPosition<AIActor>(GameManager.Instance.Dungeon.data.GetAbsoluteRoomFromPosition(position.ToIntVector2()).GetActiveEnemies(type), position, isValid, new AIActor[] { });
             if (closestToPosition) return closestToPosition;
             else return null;
         }
-      
+
         /// <summary>
         /// Returns the AIActor of the nearest enemy to the IntVector2 position.
+        /// By default, will only return engaged enemies with HealthHavers who are alive and vulnerable. Use overrideValidityCheck if this is not what you want.
         /// </summary>
         /// <param name="position">The position to check.</param>
         /// <param name="checkIsWorthShootingAt">If true, will ignore enemies such as Mountain Cubes.</param>
         /// <param name="type">Controls whether or not the check should ignore enemies who are not required for room clear.</param>
+        /// <param name="excludedActors">AIactors on this list will be ignored.</param>
         /// <param name="overrideValidityCheck">A func which allows the manual checking of custom parameters for enemy validity.</param>
-        public static AIActor GetNearestEnemyToPosition(this IntVector2 position, bool checkIsWorthShootingAt = true, RoomHandler.ActiveEnemyType type = RoomHandler.ActiveEnemyType.RoomClear, Func<AIActor, bool> overrideValidityCheck = null)
+        public static AIActor GetNearestEnemyToPosition(this IntVector2 position, bool checkIsWorthShootingAt = true, RoomHandler.ActiveEnemyType type = RoomHandler.ActiveEnemyType.RoomClear, List<AIActor> excludedActors = null, Func<AIActor, bool> overrideValidityCheck = null)
         {
-            Func<AIActor, bool> isValid = (AIActor a) => a && a.HasBeenEngaged && a.healthHaver && a.healthHaver.IsVulnerable && a.healthHaver.IsAlive && ((checkIsWorthShootingAt && a.IsWorthShootingAt) || !checkIsWorthShootingAt);
+            List<AIActor> excluded = excludedActors == null ? new List<AIActor>() : excludedActors;
+            Func<AIActor, bool> isValid = (AIActor a) => a && a.HasBeenEngaged && a.healthHaver && a.healthHaver.IsVulnerable && a.healthHaver.IsAlive && !excluded.Contains(a) && ((checkIsWorthShootingAt && a.IsWorthShootingAt) || !checkIsWorthShootingAt);
             if (overrideValidityCheck != null) isValid = overrideValidityCheck;
             AIActor closestToPosition = BraveUtility.GetClosestToPosition<AIActor>(GameManager.Instance.Dungeon.data.GetAbsoluteRoomFromPosition(position).GetActiveEnemies(type), (Vector2)position, isValid, new AIActor[] { });
             if (closestToPosition) return closestToPosition;
             else return null;
         }
-              
+
         //Misc
 
         /// <summary>

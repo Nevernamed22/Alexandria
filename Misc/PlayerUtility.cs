@@ -237,10 +237,10 @@ namespace Alexandria.Misc
                 silencerInstance.TriggerSilencer(blankPosition, 50f, 25f, bigSilencerVFX, 0.15f, 0.2f, 50f, 10f, 140f, 15f, 0.5f, blankOwner, true, false);
             }
         }
-        public enum EasyBlankType
-        {
-            FULL,
-            MINI,
-        }
+    }
+    public enum EasyBlankType
+    {
+        FULL,
+        MINI,
     }
 }

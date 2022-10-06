@@ -202,6 +202,54 @@ namespace Alexandria.Misc
             else return null;
         }
 
+        /// <summary>
+        /// Returns a Vector2 corresponding to the direction towards the nearest enemy to the initial position.
+        /// By default, will only return engaged enemies with HealthHavers who are alive and vulnerable. Use overrideValidityCheck if this is not what you want.
+        /// </summary>
+        /// <param name="position">The position to check.</param>
+        /// <param name="checkIsWorthShooting">If true, will ignore enemies such as Mountain Cubes.</param>
+        /// <param name="type">Controls whether or not the check should ignore enemies who are not required for room clear.</param>
+        /// <param name="excludedActors">AIactors on this list will be ignored.</param>
+        /// <param name="overrideValidityCheck">A func which allows the manual checking of custom parameters for enemy validity.</param>
+        public static Vector2 GetVectorToNearestEnemy(this Vector2 position, bool checkIsWorthShooting = true, RoomHandler.ActiveEnemyType type = RoomHandler.ActiveEnemyType.RoomClear, List<AIActor> excludedActors = null, Func<AIActor, bool> overrideValidityCheck = null)
+        {
+            AIActor closestToPosition = position.GetNearestEnemyToPosition(checkIsWorthShooting, type, excludedActors, overrideValidityCheck);
+            if (closestToPosition) return closestToPosition.CenterPosition - position;
+            else return Vector2.zero;
+        }
+
+        /// <summary>
+        /// Returns a Vector2 corresponding to position of the nearest enemy to the original position.
+        /// By default, will only return engaged enemies with HealthHavers who are alive and vulnerable. Use overrideValidityCheck if this is not what you want.
+        /// Returns Vector2.zero if there is not a valid enemy in the room, or it did not have the required component for the centerType.
+        /// </summary>
+        /// <param name="position">The position to check.</param>
+        /// <param name="centerType">How the position of the enemy should be determined. RIGIDBODY will return the SpecRigidBody UnitCenter, SPRITE will return the Sprite.WorldCenter, and TRANSFORM will return the Transform position.</param>
+        /// <param name="checkIsWorthShootingAt">If true, will ignore enemies such as Mountain Cubes.</param>
+        /// <param name="type">Controls whether or not the check should ignore enemies who are not required for room clear.</param>
+        /// <param name="excludedActors">AIactors on this list will be ignored.</param>
+        /// <param name="overrideValidityCheck">A func which allows the manual checking of custom parameters for enemy validity.</param>
+        public static Vector2 GetPositionOfNearestEnemy(this Vector2 position, ActorCenter centerType, bool checkIsWorthShootingAt = true, RoomHandler.ActiveEnemyType type = RoomHandler.ActiveEnemyType.RoomClear, List<AIActor> excludedActors = null, Func<AIActor, bool> overrideValidityCheck = null)
+        {
+            AIActor closestToPosition = position.GetNearestEnemyToPosition(checkIsWorthShootingAt, type, excludedActors, overrideValidityCheck);
+            if (closestToPosition)
+            {
+                switch (centerType)
+                {
+                    case ActorCenter.RIGIDBODY:
+                        if (closestToPosition.specRigidbody != null) return closestToPosition.specRigidbody.UnitCenter;
+                        break;
+                    case ActorCenter.SPRITE:
+                        if (closestToPosition.sprite != null) return closestToPosition.sprite.WorldCenter;
+                        break;
+                    case ActorCenter.TRANSFORM:
+                        if (closestToPosition.transform != null) return closestToPosition.transform.position;
+                        break;
+                }
+            }
+           return Vector2.zero;
+        }
+
         //Misc
 
         /// <summary>
@@ -273,6 +321,12 @@ namespace Alexandria.Misc
     
     }
     //Enums & Enum Stuff
+    public enum ActorCenter
+    {
+        TRANSFORM,
+        RIGIDBODY,
+        SPRITE
+    }
     public enum ThreeStateValue
     {
         FORCEYES,

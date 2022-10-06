@@ -71,6 +71,7 @@ namespace Alexandria
                 BreachShopTools.Init();
                 AmmoPickupFixer.Init();
                 LabelablePlayerItemSetup.InitLabelHook();
+                MasteryOverrideHandler.Init();
 
                 //Character API
                 CharacterAPI.Hooks.Init();

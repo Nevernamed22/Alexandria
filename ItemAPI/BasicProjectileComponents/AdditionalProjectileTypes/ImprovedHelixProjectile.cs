@@ -8,7 +8,7 @@ using Alexandria.Misc;
 namespace Alexandria.ItemAPI
 {
     //Includes inbuilt shadow bullet functionality.
-    class ImprovedHelixProjectile : Projectile
+   public class ImprovedHelixProjectile : Projectile
     {
         public ImprovedHelixProjectile()
         {

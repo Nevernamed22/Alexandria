@@ -13,6 +13,10 @@ namespace Alexandria.Misc
     public class ExtendedPlayerComponent : MonoBehaviour
     {
         #region InitAndHooks
+        public ExtendedPlayerComponent()
+        {
+            playerHasExperiencedRunStartHook = false;
+        }
         public static void Init()
         {
             playerStartHook = new Hook(
@@ -41,16 +45,58 @@ namespace Alexandria.Misc
 
         #region Actions
         //Slash Related
+        /// <summary>
+        /// Runs just before a melee slash belonging to the attached player occurs, containing information about the slash and facilitating modification.
+        /// </summary>
         public Action<PlayerController, Vector2, SlashData> PreProcessSlash;
+        /// <summary>
+        /// Runs after a melee slash belonging to the attached player occurs.
+        /// </summary>
         public Action<PlayerController, Vector2, SlashData> PostProcessSlash;
+        /// <summary>
+        /// Runs when an AIActor is hit by a melee slash belonging to the attached player. Ideal for transferring bullet effects.
+        /// </summary>
         public Action<PlayerController, Vector2, SlashData, AIActor> OnSlashHitEnemy;
+
         //Pickup Based
+        /// <summary>
+        /// Runs whenever the attached player collects an ammo box.
+        /// </summary>
         public Action<PlayerController, AmmoPickup> OnPickedUpAmmo;
+        /// <summary>
+        /// Runs whenever the attached player collects a key pickup. Note, Rat Keys count as Keys.
+        /// </summary>
         public Action<PlayerController, KeyBulletPickup> OnPickedUpKey;
+        /// <summary>
+        /// Runs whenever the attached player collects HP. Note, Armor is counted as HP.
+        /// </summary>
         public Action<PlayerController, HealthPickup> OnPickedUpHP;
+        /// <summary>
+        /// Runs whenever the attached player touches HP. Occurs before pickup, and will still run if the player nudges a heart pickup at full HP.
+        /// </summary>
         public Action<PlayerController, HealthPickup> OnNudgedHP;
+        /// <summary>
+        /// Runs whenever the attached player collects a blank.
+        /// </summary>
+        public Action<SilencerItem, PlayerController> OnPickedUpBlank;
+
+        //Companion Based
+        /// <summary>
+        /// Runs whenever a companion belonging to the attached player spawns a projectile.
+        /// </summary>
+        public Action<CompanionController, Projectile> OnCompanionSpawnedBullet;
+        /// <summary>
+        /// Runs whenever a QueryCompanionStats is called. Useful for modifying companion stats not accessible via OnCompanionSpawnedBullet.
+        /// </summary>
+        public Action<GameObject, QueriedCompanionStats> OnCompanionStatsQueried;
         //Other
+        /// <summary>
+        /// Runs whenever the player's gun changes in Blessed Mode.
+        /// </summary>
         public Action<PlayerController> OnBlessedGunChanged;
+        /// <summary>
+        /// Runs just before the attached player drops their active item, for any reason.
+        /// </summary>
         public Action<PlayerController, PlayerItem, bool> OnActiveItemPreDrop;
         #endregion
 
@@ -202,5 +248,69 @@ namespace Alexandria.Misc
         }
         private bool isLocallyIncorporeal;
         #endregion
+
+        #region Queries
+        public QueriedCompanionStats QueryCompanionStats(GameObject objectQueried, 
+            float damage,
+            float firerate,
+            float range,
+            float speed, 
+            float shotspeed,
+            float accuracy,
+            float knockback,
+            float bossdamage)
+        {
+            QueriedCompanionStats query = new QueriedCompanionStats()
+            {
+                initialDamage = damage,
+                modifiedDamage = damage,
+                initialFirerate = firerate,
+                modifiedFirerate = firerate,
+                initialRange = range,
+                modifiedRange = range,
+                initialSpeed = speed,
+                modifiedSpeed = speed,
+                initialShotSpeed = shotspeed,
+                modifiedShotSpeed = shotspeed,
+                initialAccuracy = accuracy,
+                modifiedAccuracy = accuracy,
+                initialKnockback = knockback,
+                modifiedKnockback = knockback,
+                initialBossDamage = bossdamage,
+                modifiedBossDamage = bossdamage
+            };
+            if (OnCompanionStatsQueried != null) OnCompanionStatsQueried(objectQueried, query);
+            return query;
+        }
+
+            public class QueriedCompanionStats : EventArgs
+        {
+            public float initialDamage;
+            public float modifiedDamage;
+
+            public float initialFirerate;
+            public float modifiedFirerate;
+
+            public float initialRange;
+            public float modifiedRange;
+
+            public float initialSpeed;
+            public float modifiedSpeed;
+
+            public float initialShotSpeed;
+            public float modifiedShotSpeed;
+
+            public float initialAccuracy;
+            public float modifiedAccuracy;
+
+            public float initialKnockback;
+            public float modifiedKnockback;
+
+            public float initialBossDamage;
+            public float modifiedBossDamage;
+        }
+        #endregion
+
+        public bool playerHasExperiencedRunStartHook;
     }
 }

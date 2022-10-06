@@ -113,12 +113,13 @@ namespace Alexandria.Misc
         /// Returns the position of the target player's cursor. Returned Vector2 is nullable, and will be null if the target player is using a controller.
         /// </summary>
         /// <param name="user">The target player.</param>
-        public static Vector2? GetCursorPosition(this PlayerController user)
+        /// <param name="fallbackAimDirDistance">If the player does not have a cursor, and fallbackAimDirDistance is greater than zero, returns a position the specified distance in the direction being aimed.</param>
+        public static Vector2 GetCursorPosition(this PlayerController user, float fallbackAimDirDistance = 0)
         {
             Vector2 position = Vector2.zero;
             if (BraveInput.GetInstanceForPlayer(user.PlayerIDX).IsKeyboardAndMouse(false)) { position = user.unadjustedAimPoint.XY() - (user.CenterPosition - user.specRigidbody.UnitCenter); }
-            else { return null; }
-            position = BraveMathCollege.ClampToBounds(position, GameManager.Instance.MainCameraController.MinVisiblePoint, GameManager.Instance.MainCameraController.MaxVisiblePoint);
+            else if (fallbackAimDirDistance != 0) { position = user.PositionInDistanceFromAimDir(fallbackAimDirDistance); }
+            if (position != Vector2.zero) position = BraveMathCollege.ClampToBounds(position, GameManager.Instance.MainCameraController.MinVisiblePoint, GameManager.Instance.MainCameraController.MaxVisiblePoint);
             return position;
         }
 

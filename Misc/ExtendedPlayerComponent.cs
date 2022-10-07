@@ -28,7 +28,7 @@ namespace Alexandria.Misc
             action(player);
             if (player.GetComponent<ExtendedPlayerComponent>() == null) player.gameObject.AddComponent<ExtendedPlayerComponent>();
         }
-        
+
         private static Hook playerStartHook;
         private static Hook activeItemDropHook;
         #endregion
@@ -88,7 +88,8 @@ namespace Alexandria.Misc
         /// <summary>
         /// Runs whenever a QueryCompanionStats is called. Useful for modifying companion stats not accessible via OnCompanionSpawnedBullet.
         /// </summary>
-        public Action<GameObject, QueriedCompanionStats> OnCompanionStatsQueried;
+        public Action<GameObject, QueriedCompanionStats, PlayerController> OnCompanionStatsQueried;
+
         //Other
         /// <summary>
         /// Runs whenever the player's gun changes in Blessed Mode.
@@ -98,6 +99,15 @@ namespace Alexandria.Misc
         /// Runs just before the attached player drops their active item, for any reason.
         /// </summary>
         public Action<PlayerController, PlayerItem, bool> OnActiveItemPreDrop;
+        /// <summary>
+        /// Runs whenever a BlankModificationItem belonging to the attached player is processed after a blank.
+        /// </summary>
+        public Action<PlayerController, SilencerInstance, Vector2, BlankModificationItem> OnBlankModificationItemProcessed;
+        /// <summary>
+        /// Runs whenever a PlayerOrbital belonging to the attached player is initialised.
+        /// </summary>
+        public Action<PlayerController, PlayerOrbital> OnNewOrbitalInitialised;
+
         #endregion
 
         #region RageHandler
@@ -250,15 +260,16 @@ namespace Alexandria.Misc
         #endregion
 
         #region Queries
-        public QueriedCompanionStats QueryCompanionStats(GameObject objectQueried, 
+        public QueriedCompanionStats QueryCompanionStats(GameObject objectQueried,
             float damage,
             float firerate,
             float range,
-            float speed, 
+            float speed,
             float shotspeed,
             float accuracy,
             float knockback,
-            float bossdamage)
+            float bossdamage,
+            bool doVanillaModifications = true)
         {
             QueriedCompanionStats query = new QueriedCompanionStats()
             {
@@ -279,11 +290,16 @@ namespace Alexandria.Misc
                 initialBossDamage = bossdamage,
                 modifiedBossDamage = bossdamage
             };
-            if (OnCompanionStatsQueried != null) OnCompanionStatsQueried(objectQueried, query);
+            if (OnCompanionStatsQueried != null) OnCompanionStatsQueried(objectQueried, query, attachedPlayer);
+            if (doVanillaModifications)
+            {
+                if (PassiveItem.IsFlagSetForCharacter(attachedPlayer, typeof(BattleStandardItem))) query.modifiedDamage *= BattleStandardItem.BattleStandardCompanionDamageMultiplier;
+                if (attachedPlayer.CurrentGun && attachedPlayer.CurrentGun.LuteCompanionBuffActive) query.modifiedDamage *= 2;
+            }
             return query;
         }
 
-            public class QueriedCompanionStats : EventArgs
+        public class QueriedCompanionStats : EventArgs
         {
             public float initialDamage;
             public float modifiedDamage;

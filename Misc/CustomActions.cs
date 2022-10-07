@@ -131,15 +131,18 @@ namespace Alexandria.Misc
             new Hook(typeof(AmmoPickup).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("ammoPickupHookMethod"));
             new Hook(typeof(HealthPickup).GetMethod("PrePickupLogic", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("healthPrePickupHook"));
             new Hook(typeof(KeyBulletPickup).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("keyPickupHookMethod"));
-            new Hook(typeof(SilencerItem).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public),typeof(CustomActions).GetMethod("blankPickupHookMethod"));
+            new Hook(typeof(SilencerItem).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("blankPickupHookMethod"));
+            new Hook(typeof(HealthPickup).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("heartPickupHookMethod"));
             new Hook(typeof(CompanionController).GetMethod("HandleCompanionPostProcessProjectile", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("companionSpawnedbullet", BindingFlags.Static | BindingFlags.Public));
             new Hook(typeof(PlayerController).GetMethod("DropActiveItem", BindingFlags.Public | BindingFlags.Instance), typeof(CustomActions).GetMethod("DropActiveHook", BindingFlags.Public | BindingFlags.Static));
+            new Hook(typeof(SilencerInstance).GetMethod("ProcessBlankModificationItemAdditionalEffects", BindingFlags.Instance | BindingFlags.NonPublic),typeof(CustomActions).GetMethod("BlankModHook", BindingFlags.Static | BindingFlags.Public));
 
             //Misc
             new Hook(typeof(Exploder).GetMethod("Explode", BindingFlags.Static | BindingFlags.Public), typeof(CustomActions).GetMethod("ExplosionHook", BindingFlags.Static | BindingFlags.NonPublic));
             new Hook(typeof(PlayerController).GetMethod("ChangeToRandomGun", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("ChangeToRandomGunHook", BindingFlags.Static | BindingFlags.Public));
-            new Hook(typeof(SuperReaperController).GetMethod("Start", BindingFlags.NonPublic | BindingFlags.Instance),typeof(CustomActions).GetMethod("LOTJSpawnHook"));
-            new Hook(typeof(LootEngine).GetMethod("PostprocessItemSpawn", BindingFlags.Static | BindingFlags.NonPublic),typeof(CustomActions).GetMethod("PostProcessItemHook", BindingFlags.Static | BindingFlags.Public));
+            new Hook(typeof(SuperReaperController).GetMethod("Start", BindingFlags.NonPublic | BindingFlags.Instance), typeof(CustomActions).GetMethod("LOTJSpawnHook"));
+            new Hook(typeof(LootEngine).GetMethod("PostprocessItemSpawn", BindingFlags.Static | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("PostProcessItemHook", BindingFlags.Static | BindingFlags.Public));
+            new Hook(typeof(PlayerOrbital).GetMethod("Initialize", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("OrbitalInitialiseHook", BindingFlags.Static | BindingFlags.Public));
 
         }
 
@@ -210,7 +213,7 @@ namespace Alexandria.Misc
         {
             ValidPedestalContents contentsSet = new ValidPedestalContents();
             contentsSet.overrideItemPool = new List<Tuple<int, float>>();
-           
+
             if (OnRewardPedestalDetermineContents != null) OnRewardPedestalDetermineContents(self, compareAgainst, contentsSet);
 
             if (contentsSet.overrideItemPool.Count > 0)
@@ -279,6 +282,12 @@ namespace Alexandria.Misc
             if (OnAnyPlayerCollectedBlank != null) OnAnyPlayerCollectedBlank(self, player);
             if (player.GetExtComp() && player.GetExtComp().OnPickedUpBlank != null) player.GetExtComp().OnPickedUpBlank(self, player);
         }
+        public static void heartPickupHookMethod(Action<HealthPickup, PlayerController> orig, HealthPickup self, PlayerController player)
+        {
+            orig(self, player);
+            if (OnAnyPlayerCollectedHealth != null) OnAnyPlayerCollectedHealth(self, player);
+            if (player.GetExtComp() && player.GetExtComp().OnPickedUpHP != null) player.GetExtComp().OnPickedUpHP(player, self);
+        }
         public static void companionSpawnedbullet(Action<CompanionController, Projectile> orig, CompanionController self, Projectile spawnedProjectile)
         {
             orig(self, spawnedProjectile);
@@ -288,6 +297,11 @@ namespace Alexandria.Misc
         {
             if (self && self.GetExtComp().OnActiveItemPreDrop != null) self.GetExtComp().OnActiveItemPreDrop(self, item, deathdrop);
             return orig(self, item, force, deathdrop);
+        }
+        public static void BlankModHook(Action<SilencerInstance, BlankModificationItem, Vector2, PlayerController> orig, SilencerInstance silencer, BlankModificationItem bmi, Vector2 centerPoint, PlayerController user)
+        {
+            orig(silencer, bmi, centerPoint, user);
+            if (user && user.GetExtComp() && user.GetExtComp().OnBlankModificationItemProcessed != null) user.GetExtComp().OnBlankModificationItemProcessed(user, silencer, centerPoint, bmi);
         }
 
         //Misc
@@ -321,6 +335,11 @@ namespace Alexandria.Misc
         {
             orig(spawnedItem);
             if (OnPostProcessItemSpawn != null && spawnedItem != null) OnPostProcessItemSpawn(spawnedItem);
+        }
+        public static void OrbitalInitialiseHook(Action<PlayerOrbital, PlayerController> orig, PlayerOrbital self, PlayerController owner)
+        {
+            orig(self, owner);
+            if (owner && owner.GetExtComp() && owner.GetExtComp().OnNewOrbitalInitialised != null) owner.GetExtComp().OnNewOrbitalInitialised(owner, self);
         }
 
         //Stat Queries

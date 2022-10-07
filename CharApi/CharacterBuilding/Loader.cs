@@ -379,7 +379,7 @@ namespace Alexandria.CharacterAPI
                     if (resources[i].StartsWith(punchoutSpritesDir.Replace('/', '.'), StringComparison.OrdinalIgnoreCase) && data.punchoutSprites == null)
                     {
                         ToolsCharApi.Print("Found: Punchout Sprites folder");
-                        ETGModConsole.Log("Found: Punchout Sprites folder");
+                        Debug.Log("Found: Punchout Sprites folder");
                         data.punchoutSprites = new Dictionary<string, Texture2D>();
                         foreach (var tex in ResourceExtractor.GetTexturesFromResource(punchoutSpritesDir, assembly))
                         {

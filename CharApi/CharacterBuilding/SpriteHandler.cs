@@ -824,12 +824,12 @@ namespace Alexandria.CharacterAPI
                             }
                             else
                             {
-                                ETGModConsole.Log($"No Anim data found for \"{dirName}\"! please double check animation folder names");
+                                Debug.LogWarning($"No Anim data found for \"{dirName}\"! please double check animation folder names");
                             }
                         }
                         else
                         {
-                            ETGModConsole.Log($"No sprites found in {dirName} please make sure youve actually put sprites in that folder");
+                            Debug.LogWarning($"No sprites found in {dirName} please make sure youve actually put sprites in that folder");
                         }
                     }
                 }

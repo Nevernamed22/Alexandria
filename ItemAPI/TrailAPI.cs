@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -26,7 +27,7 @@ namespace Alexandria.ItemAPI
                 float convertedOffsetX = colliderOffsets.x / 16f;
                 float convertedOffsetY = colliderOffsets.y / 16f;
 
-                int spriteID = SpriteBuilder.AddSpriteToCollection(spritePath, ETGMod.Databases.Items.ProjectileCollection);
+                int spriteID = SpriteBuilder.AddSpriteToCollection(spritePath, ETGMod.Databases.Items.ProjectileCollection, Assembly.GetCallingAssembly());
                 tk2dTiledSprite tiledSprite = newTrailObject.GetOrAddComponent<tk2dTiledSprite>();
 
                 tiledSprite.SetSprite(ETGMod.Databases.Items.ProjectileCollection, spriteID);
@@ -48,7 +49,7 @@ namespace Alexandria.ItemAPI
                 //---------------- Sets up the animation for the main part of the trail
                 if (animPaths != null)
                 {
-                    BeamAPI.SetupBeamPart(animation, animPaths, "trail_mid", animFPS, null, null, def.colliderVertices);
+                    BeamAPI.SetupBeamPart(animation, animPaths, "trail_mid", animFPS, Assembly.GetCallingAssembly(), null, null, def.colliderVertices);
                     trail.animation = "trail_mid";
                     trail.usesAnimation = true;
                 }
@@ -59,7 +60,7 @@ namespace Alexandria.ItemAPI
 
                 if (startAnimPaths != null)
                 {
-                    BeamAPI.SetupBeamPart(animation, startAnimPaths, "trail_start", startAnimFPS, null, null, def.colliderVertices);
+                    BeamAPI.SetupBeamPart(animation, startAnimPaths, "trail_start", startAnimFPS, Assembly.GetCallingAssembly(), null, null, def.colliderVertices);
                     trail.startAnimation = "trail_start";
                     trail.usesStartAnimation = true;
                 }

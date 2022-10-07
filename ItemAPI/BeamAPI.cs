@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using System.Reflection;
 
 namespace Alexandria.ItemAPI
 {
@@ -129,7 +130,7 @@ namespace Alexandria.ItemAPI
                 float convertedOffsetX = colliderOffsets.x / 16f;
                 float convertedOffsetY = colliderOffsets.y / 16f;
 
-                int spriteID = SpriteBuilder.AddSpriteToCollection(spritePath, ETGMod.Databases.Items.ProjectileCollection);
+                int spriteID = SpriteBuilder.AddSpriteToCollection(spritePath, ETGMod.Databases.Items.ProjectileCollection, Assembly.GetCallingAssembly());
                 tk2dTiledSprite tiledSprite = projectile.gameObject.GetOrAddComponent<tk2dTiledSprite>();
 
 
@@ -161,7 +162,7 @@ namespace Alexandria.ItemAPI
                     foreach (string path in spritePaths)
                     {
                         tk2dSpriteCollectionData collection = ETGMod.Databases.Items.ProjectileCollection;
-                        int frameSpriteId = SpriteBuilder.AddSpriteToCollection(path, collection);
+                        int frameSpriteId = SpriteBuilder.AddSpriteToCollection(path, collection, Assembly.GetCallingAssembly());
                         tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                         frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.MiddleLeft);
                         frameDef.colliderVertices = def.colliderVertices;
@@ -175,31 +176,31 @@ namespace Alexandria.ItemAPI
                 //------------- Sets up the animation for the part of the beam that touches the wall
                 if (endVFXAnimationPaths != null && endVFXColliderDimensions != null && endVFXColliderOffsets != null)
                 {
-                    SetupBeamPart(animation, endVFXAnimationPaths, "beam_end", beamEndFPS, (Vector2)endVFXColliderDimensions, (Vector2)endVFXColliderOffsets);
+                    SetupBeamPart(animation, endVFXAnimationPaths, "beam_end", beamEndFPS, Assembly.GetCallingAssembly(),(Vector2)endVFXColliderDimensions, (Vector2)endVFXColliderOffsets);
                     beamController.beamEndAnimation = "beam_end";
                 }
                 else
                 {
-                    SetupBeamPart(animation, beamAnimationPaths, "beam_end", beamFPS, null, null, def.colliderVertices);
+                    SetupBeamPart(animation, beamAnimationPaths, "beam_end", beamFPS, Assembly.GetCallingAssembly(), null, null, def.colliderVertices);
                     beamController.beamEndAnimation = "beam_end";
                 }
 
                 //---------------Sets up the animaton for the VFX that plays over top of the end of the beam where it hits stuff
                 if (impactVFXAnimationPaths != null && impactVFXColliderDimensions != null && impactVFXColliderOffsets != null)
                 {
-                    SetupBeamPart(animation, impactVFXAnimationPaths, "beam_impact", beamImpactFPS, (Vector2)impactVFXColliderDimensions, (Vector2)impactVFXColliderOffsets);
+                    SetupBeamPart(animation, impactVFXAnimationPaths, "beam_impact", beamImpactFPS, Assembly.GetCallingAssembly(), (Vector2)impactVFXColliderDimensions, (Vector2)impactVFXColliderOffsets);
                     beamController.impactAnimation = "beam_impact";
                 }
 
                 //--------------Sets up the animation for the very start of the beam
                 if (muzzleVFXAnimationPaths != null && muzzleVFXColliderDimensions != null && muzzleVFXColliderOffsets != null)
                 {
-                    SetupBeamPart(animation, muzzleVFXAnimationPaths, "beam_start", beamMuzzleFPS, (Vector2)muzzleVFXColliderDimensions, (Vector2)muzzleVFXColliderOffsets);
+                    SetupBeamPart(animation, muzzleVFXAnimationPaths, "beam_start", beamMuzzleFPS, Assembly.GetCallingAssembly(), (Vector2)muzzleVFXColliderDimensions, (Vector2)muzzleVFXColliderOffsets);
                     beamController.beamStartAnimation = "beam_start";
                 }
                 else
                 {
-                    SetupBeamPart(animation, beamAnimationPaths, "beam_start", beamFPS, null, null, def.colliderVertices);
+                    SetupBeamPart(animation, beamAnimationPaths, "beam_start", beamFPS, Assembly.GetCallingAssembly(), null, null, def.colliderVertices);
                     beamController.beamStartAnimation = "beam_start";
                 }
 
@@ -225,10 +226,11 @@ namespace Alexandria.ItemAPI
         /// <param name="animSpritePaths">The sprite paths of the segment's animations.</param>
         /// <param name="animationName">The name of the animation.</param>
         /// <param name="fps">The frames per second of the segment's animation.</param>
+        /// <param name="assembly">The calling assembly.</param>
         /// <param name="colliderDimensions">The dimensions of the segment's pixel collider.</param>
         /// <param name="colliderOffsets">The offsets of the segment's pixel collider. Offsets are calculated from the bottom left.</param>
         /// <param name="overrideVertices">A set of override colliders, if applicable.</param>
-        public static void SetupBeamPart(tk2dSpriteAnimation beamAnimation, List<string> animSpritePaths, string animationName, int fps, Vector2? colliderDimensions = null, Vector2? colliderOffsets = null, Vector3[] overrideVertices = null)
+        public static void SetupBeamPart(tk2dSpriteAnimation beamAnimation, List<string> animSpritePaths, string animationName, int fps, Assembly assembly, Vector2? colliderDimensions = null, Vector2? colliderOffsets = null, Vector3[] overrideVertices = null)
         {
             tk2dSpriteAnimationClip clip = new tk2dSpriteAnimationClip() { name = animationName, frames = new tk2dSpriteAnimationFrame[0], fps = fps };
             List<string> spritePaths = animSpritePaths;
@@ -237,7 +239,7 @@ namespace Alexandria.ItemAPI
             foreach (string path in spritePaths)
             {
                 tk2dSpriteCollectionData collection = ETGMod.Databases.Items.ProjectileCollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(path, collection);
+                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(path, collection, assembly);
                 tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                 frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.MiddleCenter);
                 if (overrideVertices != null)

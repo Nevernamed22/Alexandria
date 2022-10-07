@@ -49,7 +49,7 @@ namespace Alexandria.CharacterAPI
 					typeof(Hooks).GetMethod("FoyerCallbacks2")
 
 				);
-				ETGModConsole.Log("charapi hooks: 1");
+				Debug.Log("charapi hooks: 1");
 				Hook languageManagerHook = new Hook(
 					typeof(dfControl).GetMethod("getLocalizedValue", BindingFlags.NonPublic | BindingFlags.Instance),
 					typeof(Hooks).GetMethod("DFGetLocalizedValue")
@@ -69,7 +69,7 @@ namespace Alexandria.CharacterAPI
 					typeof(Foyer).GetMethod("PlayerCharacterChanged", BindingFlags.Public | BindingFlags.Instance),
 					typeof(Hooks).GetMethod("OnPlayerChanged")
 				);
-				ETGModConsole.Log("charapi hooks: 2");
+				Debug.Log("charapi hooks: 2");
 				//Hook clearP1Hook = new Hook(
 				//	typeof(ETGModConsole).GetMethod("SwitchCharacter", BindingFlags.NonPublic | BindingFlags.Instance),
 				//	typeof(Hooks).GetMethod("PrimaryPlayerSwitched")

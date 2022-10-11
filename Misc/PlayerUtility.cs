@@ -93,7 +93,12 @@ namespace Alexandria.Misc
         public static ExtendedPlayerComponent GetExtComp(this PlayerController owner)
         {
             if (owner.GetComponent<ExtendedPlayerComponent>() != null) return owner.GetComponent<ExtendedPlayerComponent>();
-            else return null;
+            else
+            {
+                Debug.LogError("Alexandria (PlayerUtility): NO EXTENDEDPLAYERCOMPONENT WAS FOUND ON CHECK!!! - GetExtComp() was unable to find an Extended Player Component on the given PlayerController, so an emergency backup was created instead. This should never happen, and is a serious issue.");
+                ExtendedPlayerComponent newComp = owner.gameObject.AddComponent<ExtendedPlayerComponent>();
+                return newComp;
+            }
         }
 
         /// <summary>

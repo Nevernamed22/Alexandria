@@ -19,28 +19,26 @@ namespace Alexandria.Misc
         }
         public static void Init()
         {
-            playerStartHook = new Hook(
+            new Hook(
                 typeof(PlayerController).GetMethod("Start", BindingFlags.Public | BindingFlags.Instance),
                 typeof(ExtendedPlayerComponent).GetMethod("DoSetup"));
         }
         public static void DoSetup(Action<PlayerController> action, PlayerController player)
         {
             action(player);
+            if (player != null)
+            {
+                if (CustomActions.OnNewPlayercontrollerSpawned != null) CustomActions.OnNewPlayercontrollerSpawned(player);
+            }
             if (player.GetComponent<ExtendedPlayerComponent>() == null) player.gameObject.AddComponent<ExtendedPlayerComponent>();
         }
 
-        private static Hook playerStartHook;
-        private static Hook activeItemDropHook;
         #endregion
 
         public PlayerController attachedPlayer;
         private void Start()
         {
             attachedPlayer = base.GetComponent<PlayerController>();
-            if (attachedPlayer != null)
-            {
-                if (CustomActions.OnNewPlayercontrollerSpawned != null) CustomActions.OnNewPlayercontrollerSpawned(attachedPlayer);
-            }
         }
 
         #region Actions

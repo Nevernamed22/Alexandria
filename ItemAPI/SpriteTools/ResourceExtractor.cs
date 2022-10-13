@@ -101,14 +101,14 @@ namespace Alexandria.ItemAPI
         /// <summary>
         /// Returns a list of folders in the ETG resources directory
         /// </summary>
-        public static List<String> GetResourceFolders()
+        public static List<string> GetResourceFolders()
         {
-            List<String> dirs = new List<String>();
+            List<string> dirs = new List<string>();
             string spritesDirectory = Path.Combine(ETGMod.ResourcesDirectory, "sprites");
 
             if (Directory.Exists(spritesDirectory))
             {
-                foreach (String directory in Directory.GetDirectories(spritesDirectory))
+                foreach (string directory in Directory.GetDirectories(spritesDirectory))
                 {
                     dirs.Add(Path.GetFileName(directory));
                 }
@@ -119,12 +119,16 @@ namespace Alexandria.ItemAPI
         /// <summary>
         /// Converts an embedded resource to a byte array
         /// </summary>
-        public static byte[] ExtractEmbeddedResource(String filePath, Assembly assembly = null)
+        public static byte[] ExtractEmbeddedResource(string filePath, Assembly assembly = null)
         {
             filePath = filePath.Replace("/", ".");
             filePath = filePath.Replace("\\", ".");
+
+            //ETGModConsole.Log($"[{(assembly ?? Assembly.GetCallingAssembly()).GetName().Name}]: {filePath}");
+
             using (Stream resFilestream = (assembly ?? Assembly.GetCallingAssembly()).GetManifestResourceStream(filePath))
             {
+                
                 if (resFilestream == null)
                 {
                     return null;

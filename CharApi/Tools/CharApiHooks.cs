@@ -312,7 +312,7 @@ namespace Alexandria.CharacterAPI
 		public static void SwapToAlternateCostumeHook(Action<PlayerController, tk2dSpriteAnimation> orig, PlayerController self, tk2dSpriteAnimation overrideTargetLibrary = null)
 		{
 			
-			if (self?.characterIdentity > (PlayableCharacters)10)
+			if (self?.characterIdentity > (PlayableCharacters)10 && self.gameObject.GetComponent<CustomCharacter>() != null)
 			{
 				
 				if (self.gameObject.GetComponent<CustomCharacter>().data == null) self.gameObject.GetComponent<CustomCharacter>().GetData();
@@ -397,7 +397,7 @@ namespace Alexandria.CharacterAPI
 			}
 			else
 			{
-				if (self.characterIdentity > (PlayableCharacters)10)
+				if (self.characterIdentity > (PlayableCharacters)10 && self.gameObject.GetComponent<CustomCharacter>() != null)
 				{
 					if (self.gameObject.GetComponent<CustomCharacter>().data == null)
 					{
@@ -1171,7 +1171,7 @@ namespace Alexandria.CharacterAPI
 
 			for (int i = 0; i < GameManager.Instance.AllPlayers.Length; i++)
 			{
-				if (GameManager.Instance.AllPlayers[i].characterIdentity > (PlayableCharacters)10)
+				if (GameManager.Instance.AllPlayers[i].characterIdentity > (PlayableCharacters)10 && GameManager.Instance.AllPlayers[i].gameObject.GetComponent<CustomCharacter>() != null)
 				{
 					result.NumMetas += GameManager.Instance.AllPlayers[i].GetComponent<CustomCharacter>().data.metaCost;
 				}

@@ -98,6 +98,7 @@
     <Compile Include="Misc\CustomActions.cs" />
     <Compile Include="Misc\ExtendedPlayerComponent.cs" />
     <Compile Include="Misc\GameManagerUtility.cs" />
+    <Compile Include="Misc\GoopUtility.cs" />
     <Compile Include="Misc\PickupUtility.cs" />
     <Compile Include="Misc\PlayerUtility.cs" />
     <Compile Include="Misc\RuntimeRoomhandlerUtility.cs" />

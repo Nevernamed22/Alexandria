@@ -27,7 +27,7 @@ namespace Alexandria
 
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
-        public const string VERSION = "0.2.8";
+        public const string VERSION = "0.2.9";
 
 
         public void Start()
@@ -58,6 +58,7 @@ namespace Alexandria
                 NPCAPI.NPCHooks.Init();
                 EnemyAPI.Hooks.Init();
                 CustomDiscountManager.Init();
+                GoopUtility.Init();
 
                 
 

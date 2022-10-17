@@ -39,6 +39,15 @@ namespace Alexandria.Misc
         private void Start()
         {
             attachedPlayer = base.GetComponent<PlayerController>();
+            if (DoubleDamageStatMod == null)
+            {
+                DoubleDamageStatMod = new StatModifier()
+                {
+                    statToBoost = PlayerStats.StatType.Damage,
+                    amount = 2,
+                    modifyType = StatModifier.ModifyMethod.MULTIPLICATIVE,                
+                };
+            }
         }
 
         #region Actions
@@ -215,12 +224,13 @@ namespace Alexandria.Misc
             attachedPlayer.healthHaver.IsVulnerable = false;
             attachedPlayer.healthHaver.m_isIncorporeal = true;
             isLocallyIncorporeal = true;
+            remainingInvulnerabilityTime = incorporealityTime;
             yield return null;
 
             float subtimer = 0f;
-            while (incorporealityTime > 0)
+            while (remainingInvulnerabilityTime > 0)
             {
-                while (incorporealityTime > 0)
+                while (remainingInvulnerabilityTime > 0)
                 {
                     remainingInvulnerabilityTime -= BraveTime.DeltaTime;
                     subtimer += BraveTime.DeltaTime;
@@ -232,7 +242,7 @@ namespace Alexandria.Misc
                     }
                     yield return null;
                 }
-                while (incorporealityTime > 0)
+                while (remainingInvulnerabilityTime > 0)
                 {
                     remainingInvulnerabilityTime -= BraveTime.DeltaTime;
                     subtimer += BraveTime.DeltaTime;

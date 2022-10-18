@@ -38,6 +38,8 @@ namespace Alexandria.Misc
             new Hook(typeof(DeadlyDeadlyGoopManager).GetMethod("InitialGoopEffect", BindingFlags.Instance | BindingFlags.Public), typeof(GoopUtility).GetMethod("ActorEnteredGoopHook", BindingFlags.Static | BindingFlags.NonPublic));
             new Hook(typeof(DeadlyDeadlyGoopManager).GetMethod("EndGoopEffect", BindingFlags.Instance | BindingFlags.Public), typeof(GoopUtility).GetMethod("ActorLeftGoopHook", BindingFlags.Static | BindingFlags.NonPublic));
             new Hook(typeof(DeadlyDeadlyGoopManager).GetMethod("GetGoopManagerForGoopType", BindingFlags.Static | BindingFlags.Public), typeof(GoopUtility).GetMethod("GoopManagerForTypeHook", BindingFlags.Static | BindingFlags.NonPublic));
+
+            specialGoopComps = new Dictionary<string, Type>();
         }
         public static void RegisterComponentToGoopDefinition(GoopDefinition def, Type comp)
         {

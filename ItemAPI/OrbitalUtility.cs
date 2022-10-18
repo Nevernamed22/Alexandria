@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -10,7 +11,7 @@ namespace Alexandria.ItemAPI
     {
         public static GameObject MakeAnimatedOrbital(string name, float orbitRadius, float orbitalDegreesPerSecond, int orbitalTier, PlayerOrbital.OrbitalMotionStyle motionStyle, float perfectOrbitalFactor, List<string> idleAnimPaths, int fps, Vector2 colliderDimensions, Vector2 colliderOffsets, tk2dBaseSprite.Anchor anchorMode, tk2dSpriteAnimationClip.WrapMode wrapMode)
         {
-            GameObject prefab = SpriteBuilder.SpriteFromResource(idleAnimPaths[0]);
+            GameObject prefab = SpriteBuilder.SpriteFromResource(idleAnimPaths[0], null, Assembly.GetCallingAssembly());
             prefab.name = name;
             var body = prefab.GetComponent<tk2dSprite>().SetUpSpeculativeRigidbody(colliderOffsets.ToIntVector2(), colliderDimensions.ToIntVector2());
 
@@ -19,7 +20,7 @@ namespace Alexandria.ItemAPI
             body.PrimaryPixelCollider.CollisionLayer = CollisionLayer.EnemyBulletBlocker;
 
             tk2dSpriteCollectionData spriteCollection = SpriteBuilder.ConstructCollection(prefab, $"{name}_Collection");
-            prefab.AddAnimationToObject(spriteCollection, "start", idleAnimPaths, fps, colliderDimensions, colliderOffsets, anchorMode, wrapMode, true);
+            prefab.AddAnimationToObject(spriteCollection, "start", idleAnimPaths, fps, colliderDimensions, colliderOffsets, anchorMode, wrapMode, true, Assembly.GetCallingAssembly());
 
             PlayerOrbital orbitalPrefab = prefab.AddComponent<PlayerOrbital>();
             orbitalPrefab.motionStyle = motionStyle;
@@ -34,7 +35,7 @@ namespace Alexandria.ItemAPI
         }
         public static GameObject MakeOrbital(string name, float orbitRadius, float orbitalDegreesPerSecond, int orbitalTier, PlayerOrbital.OrbitalMotionStyle motionStyle, float perfectOrbitalFactor, string spritePath, Vector2 colliderDimensions, Vector2 colliderOffsets)
         {
-            GameObject prefab = SpriteBuilder.SpriteFromResource(spritePath);
+            GameObject prefab = SpriteBuilder.SpriteFromResource(spritePath, null, Assembly.GetCallingAssembly());
             prefab.name = name;
             var body = prefab.GetComponent<tk2dSprite>().SetUpSpeculativeRigidbody(colliderOffsets.ToIntVector2(), colliderDimensions.ToIntVector2());
 

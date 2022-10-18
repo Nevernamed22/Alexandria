@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace Alexandria.ItemAPI
 {
    public static class AnimationUtility
     {
-        public static void AddAnimationToObject(this GameObject target, tk2dSpriteCollectionData spriteCollection, string animationName, List<string> spritePaths, int fps, Vector2 colliderDimensions, Vector2 colliderOffsets, tk2dBaseSprite.Anchor anchor, tk2dSpriteAnimationClip.WrapMode wrapMode, bool isDefaultAnimation = false)
+        public static void AddAnimationToObject(this GameObject target, tk2dSpriteCollectionData spriteCollection, string animationName, List<string> spritePaths, int fps, Vector2 colliderDimensions, Vector2 colliderOffsets, tk2dBaseSprite.Anchor anchor, tk2dSpriteAnimationClip.WrapMode wrapMode, bool isDefaultAnimation = false, Assembly assembly = null)
         {
             tk2dSpriteAnimator animator = target.GetOrAddComponent<tk2dSpriteAnimator>();
             tk2dSpriteAnimation animation = target.GetOrAddComponent<tk2dSpriteAnimation>();
@@ -21,7 +22,7 @@ namespace Alexandria.ItemAPI
             foreach (string path in spritePaths)
             {
                 tk2dSpriteCollectionData collection = spriteCollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(path, collection);
+                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(path, collection, assembly);
                 tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
 
                 frameDef.colliderVertices = new Vector3[]{

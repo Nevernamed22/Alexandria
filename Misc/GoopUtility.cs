@@ -44,9 +44,9 @@ namespace Alexandria.Misc
             if (specialGoopComps == null) specialGoopComps = new Dictionary<string, Type>();
             specialGoopComps.Add(def.name, comp);
         }
-        private static DeadlyDeadlyGoopManager GoopManagerForTypeHook(Func<DeadlyDeadlyGoopManager, GoopDefinition, DeadlyDeadlyGoopManager> orig, DeadlyDeadlyGoopManager self, GoopDefinition goop)
+        private static DeadlyDeadlyGoopManager GoopManagerForTypeHook(Func<GoopDefinition, DeadlyDeadlyGoopManager> orig, GoopDefinition goop)
         {
-            DeadlyDeadlyGoopManager newThing = orig(self, goop);
+            DeadlyDeadlyGoopManager newThing = orig( goop);
             string repairedGoopName = goop.name.Replace("(clone)", "");
             if (specialGoopComps.ContainsKey(repairedGoopName))
             {

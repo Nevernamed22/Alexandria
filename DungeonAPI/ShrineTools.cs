@@ -15,8 +15,8 @@ namespace Alexandria.DungeonAPI
     public static class ShrineTools
     {
         public static bool verbose = false;
-        private static string defaultLog = Path.Combine(ETGMod.ResourcesDirectory, "PSOG.txt");
-        public static string modID = "PSOG";
+        private static string defaultLog = Path.Combine(ETGMod.ResourcesDirectory, "AlexandriaDungonApiLog.txt");
+        public static string modID = "Alexandria";
 
         private static Dictionary<string, float> timers = new Dictionary<string, float>();
 

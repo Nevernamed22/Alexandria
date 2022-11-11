@@ -206,6 +206,7 @@ namespace Alexandria.CharacterAPI
         {
             player.name = data.nameInternal;
             if (data.faceCard != null)
+                //data.faceCard.a
                 player.uiPortraitName = data.nameInternal + "_facecard";
 
             //HandleDictionaries(data);

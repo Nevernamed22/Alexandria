@@ -434,22 +434,27 @@ namespace Alexandria.CharacterAPI
                 
                 if (data.foyerCardSprites != null)
                 {
-
+                    //ETGModConsole.Log("fart");
                     var facecard = selectCharacter.OverheadElement.GetComponentInChildren<CharacterSelectFacecardIdleDoer>();
                     theCauseOfMySuffering.transform.parent = facecard.transform.parent;
-                    theCauseOfMySuffering.transform.localScale = new Vector3(1, 1, 1);
+                    
+                    //theCauseOfMySuffering.transform.localScale = new Vector3(1, 1, 1);
                     theCauseOfMySuffering.transform.localPosition = new Vector3(0, 1.687546f, 0.2250061f);
                     theCauseOfMySuffering.transform.parent.localPosition = new Vector3(0, 0, 0);
-                    theCauseOfMySuffering.transform.parent.localScale = new Vector3(0.2f, 0.2f, 1);
-                    theCauseOfMySuffering.transform.parent.localScale = new Vector3(0.1975309f, 0.1975309f, 1);
-                    //theCauseOfMySuffering.transform.localScale = Vector3.one;
-                    //facecard.gameObject.SetActive(false);
+                    
+                    //theCauseOfMySuffering.transform.parent.localScale = new Vector3(0.2f, 0.2f, 1);
+                    //theCauseOfMySuffering.transform.parent.localScale = new Vector3(0.1975309f, 0.1975309f, 1);
+
+                    theCauseOfMySuffering.transform.parent.localScale *= 7;
+
+                    facecard.gameObject.SetActive(false);
                     facecard.transform.parent = null;
                     UnityEngine.Object.Destroy(facecard.gameObject);
                     facecard = theCauseOfMySuffering.GetComponent<CharacterSelectFacecardIdleDoer>();
-                    facecard.gameObject.name = data.nameShort + " Sprite FaceCard";
-                    //facecard.RegenerateCache();
-                    
+                    facecard.gameObject.name = data.nameShort + " Sprite FaceCard";// <---------------- this object needs to be shrank
+
+
+                    //facecard.gameObject.transform.world
 
                     Debug.Log($"foyer cards arent null. {facecard.gameObject.transform.parent.position}");
                     Debug.Log($"foyer cards arent null. {facecard.gameObject.activeSelf}");
@@ -567,6 +572,11 @@ namespace Alexandria.CharacterAPI
                     }
                     facecard.gameObject.SetActive(true);
                     facecard.spriteAnimator = facecard.gameObject.GetComponent<tk2dSpriteAnimator>();
+
+                    var listSp = new List<tk2dSprite>();
+                    listSp.AddRange(infoPanel.scaledSprites.ToList());
+                    listSp.Add(facecard.spriteAnimator.sprite.GetComponent<tk2dSprite>());
+                    infoPanel.scaledSprites = listSp.ToArray();
 
                     SpriteBuilder.AddAnimation(facecard.spriteAnimator, orig, idleAnimIds, idleAnimName, tk2dSpriteAnimationClip.WrapMode.Loop).fps = 4;
                     var name = SpriteBuilder.AddAnimation(facecard.spriteAnimator, orig, appearAnimIds, appearAnimName, tk2dSpriteAnimationClip.WrapMode.Once);

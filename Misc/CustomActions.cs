@@ -20,7 +20,7 @@ namespace Alexandria.Misc
         /// </summary>
         public static Action<PlayerController, PlayerController, GameManager.GameMode> OnRunStart;
         /// <summary>
-        /// Runs whenever a new Dungeon is created.
+        /// Runs whenever a new Dungeon instance is created, but BEFORE it is built. Used to modify aspects of Dungeon so they get applied on generation.
         /// </summary>
         public static Action<Dungeon> PostDungeonTrueStart;
         /// <summary>

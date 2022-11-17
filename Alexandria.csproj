@@ -43,6 +43,7 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BreakableAPI\BreakableAPIToolbox.cs" />
     <Compile Include="CharApi\CharacterBuilding\CharacterBuilder.cs" />
     <Compile Include="CharApi\CharacterBuilding\CustomCharacter.cs" />
     <Compile Include="CharApi\CharacterBuilding\FoyerCharacterHandler.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="DungeonAPI\SetupExoticObjects.cs" />
     <Compile Include="EnemyAPI\AIActorUtility.cs" />
     <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
+    <Compile Include="EnemyAPI\EnemyBuildingTools.cs" />
     <Compile Include="ItemAPI\AnimationUtility.cs" />
     <Compile Include="ItemAPI\BasicProjectileComponents\AdditionalProjectileTypes\ImprovedHelixProjectile.cs" />
     <Compile Include="ItemAPI\BasicProjectileComponents\AdvancedTransmogrifyBehaviour.cs" />
@@ -99,11 +101,13 @@
     <Compile Include="Misc\ExtendedPlayerComponent.cs" />
     <Compile Include="Misc\GameManagerUtility.cs" />
     <Compile Include="Misc\GoopUtility.cs" />
+    <Compile Include="Misc\MiscUtility.cs" />
     <Compile Include="Misc\PickupUtility.cs" />
     <Compile Include="Misc\PlayerUtility.cs" />
     <Compile Include="Misc\RuntimeRoomhandlerUtility.cs" />
     <Compile Include="Misc\ShadowBulletDoer.cs" />
     <Compile Include="Misc\SupplyDropDoer.cs" />
+    <Compile Include="Misc\Tk2dSpriteAnimatorUtility.cs" />
     <Compile Include="NPCAPI\BreachShopTools.cs" />
     <Compile Include="NPCAPI\CustomDiscountManager.cs" />
     <Compile Include="NPCAPI\PlayMakerExtensions.cs" />
@@ -416,6 +420,7 @@
     <Error Condition="!Exists('packages\BepInEx.Core.5.4.21\build\BepInEx.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\BepInEx.Core.5.4.21\build\BepInEx.Core.targets'))" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>COPY "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\BepInEx\plugins\Alexandria\plugins"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>

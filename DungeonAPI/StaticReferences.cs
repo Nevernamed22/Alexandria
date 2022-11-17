@@ -529,7 +529,13 @@ namespace Alexandria.DungeonAPI
             return goopDefinition;
         }
 
+        /// <summary>
+        /// LEGACY VERSION, use customObjects instead.
+        /// </summary>
         public static Dictionary<string, GameObject> StoredRoomObjects = new Dictionary<string, GameObject>(){};
+        /// <summary>
+        /// LEGACY VERSION, use customPlaceables instead.
+        /// </summary>
         public static Dictionary<string, DungeonPlaceable> StoredDungeonPlaceables = new Dictionary<string, DungeonPlaceable>() {};
 
 

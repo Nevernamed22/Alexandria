@@ -12,7 +12,7 @@ namespace Alexandria.EnemyAPI
     public static class EnemyTools
     {
         public static ReadOnlyCollection<OverrideBehavior> overrideBehaviors = null;
-        static bool hasInit = false;
+        //static bool hasInit = false;
 
         public static void Init()
         {
@@ -26,7 +26,7 @@ namespace Alexandria.EnemyAPI
                     obs.Add((OverrideBehavior)Activator.CreateInstance(type));
                 }
                 overrideBehaviors = new ReadOnlyCollection<OverrideBehavior>(obs);
-                hasInit = true;
+                //hasInit = true;
             }
             catch (Exception e)
             {

@@ -75,7 +75,13 @@ namespace Alexandria.CharacterAPI
                 foreach (var character in CharacterBuilder.storedCharacters)
                 {                  
                     if (character.Value.First.hasPast) __instance.gameObject.AddNewCharacter(character.Value.First.nameShort.Replace(" ", ""), character.Value.First.identity);
-                    if (character.Value.First.hasPast) ETGModConsole.Log($"Added \"{character.Value.First.identity}\" to the blacksmith fsm");
+                    if (character.Value.First.hasPast) 
+                    {
+                        if (ToolsCharApi.EnableDebugLogging == true)
+                        {
+                            ETGModConsole.Log($"Added \"{character.Value.First.identity}\" to the blacksmith fsm");
+                        }
+                    }
                 }
 
 
@@ -86,7 +92,10 @@ namespace Alexandria.CharacterAPI
                         var a = action as CharacterClassSwitch;
                         for (int i = 0; i < a.sendEvent.Length; i++)
                         {
-                            ETGModConsole.Log($"{a.sendEvent[i].name} - {a.compareTo[i]} >> {state.Transitions.Where(x => x.EventName == a.sendEvent[i].name).First().toState}");
+                            if (ToolsCharApi.EnableDebugLogging == true)
+                            {
+                                ETGModConsole.Log($"{a.sendEvent[i].name} - {a.compareTo[i]} >> {state.Transitions.Where(x => x.EventName == a.sendEvent[i].name).First().toState}");
+                            }
                         }
                     }
                }

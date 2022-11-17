@@ -128,8 +128,9 @@ namespace Alexandria.EnemyAPI
             else
             {
                 AIBulletBank aibulletBank = prefab.AddComponent<AIBulletBank>();
+                aibulletBank.Bullets = new List<AIBulletBank.Entry>();
             }
- 
+
             //Add to enemy database
             EnemyDatabaseEntry enemyDatabaseEntry = new EnemyDatabaseEntry()
             {

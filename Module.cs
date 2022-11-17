@@ -17,8 +17,6 @@ using HarmonyLib;
 
 namespace Alexandria
 {
-
-
     [BepInDependency("etgmodding.etg.mtgapi")]
     [BepInPlugin(GUID, NAME, VERSION)]
     public class Alexandria : BaseUnityPlugin
@@ -27,7 +25,7 @@ namespace Alexandria
 
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
-        public const string VERSION = "0.2.10";
+        public const string VERSION = "0.2.12";
 
 
         public void Start()

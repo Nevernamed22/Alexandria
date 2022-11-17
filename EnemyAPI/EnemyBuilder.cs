@@ -100,6 +100,7 @@ namespace Alexandria.EnemyAPI
             bs.OverrideBehaviors = new List<OverrideBehaviorBase>();
             bs.OtherBehaviors = new List<BehaviorBase>();
             AIBulletBank aibulletBank = prefab.AddComponent<AIBulletBank>();
+            aibulletBank.Bullets = new List<AIBulletBank.Entry>();
             if (HasAiShooter)
             {
                 var actor = EnemyDatabase.GetOrLoadByGuid("01972dee89fc4404a5c408d50007dad5");

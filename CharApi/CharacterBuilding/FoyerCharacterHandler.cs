@@ -321,13 +321,19 @@ namespace Alexandria.CharacterAPI
 
                 if (selectCharacter.OverheadElement == null)
                 {
-                    ETGModConsole.Log($"CHR_{data.nameShort}Panel is null");
+                    if (ToolsCharApi.EnableDebugLogging == true)
+                    {
+                        ETGModConsole.Log($"CHR_{data.nameShort}Panel is null");
+                    }
                     return;
                 }
 
                 if (selectCharacter.OverheadElement?.name == $"CHR_{data.nameShort}Panel")
                 {
-                    ETGModConsole.Log($"CHR_{data.nameShort}Panel already exists");
+                    if (ToolsCharApi.EnableDebugLogging == true)
+                    {
+                        ETGModConsole.Log($"CHR_{data.nameShort}Panel already exists");
+                    }
                     return;
                 }
 
@@ -434,7 +440,6 @@ namespace Alexandria.CharacterAPI
                 
                 if (data.foyerCardSprites != null)
                 {
-                    //ETGModConsole.Log("fart");
                     var facecard = selectCharacter.OverheadElement.GetComponentInChildren<CharacterSelectFacecardIdleDoer>();
                     theCauseOfMySuffering.transform.parent = facecard.transform.parent;
                     
@@ -456,8 +461,12 @@ namespace Alexandria.CharacterAPI
 
                     //facecard.gameObject.transform.world
 
-                    Debug.Log($"foyer cards arent null. {facecard.gameObject.transform.parent.position}");
-                    Debug.Log($"foyer cards arent null. {facecard.gameObject.activeSelf}");
+                    if (ToolsCharApi.EnableDebugLogging == true)
+                    {
+                        Debug.Log($"foyer cards arent null. {facecard.gameObject.transform.parent.position}");
+                        Debug.Log($"foyer cards arent null. {facecard.gameObject.activeSelf}");
+                    }
+
 
                     var orig = facecard.sprite.Collection;
 
@@ -502,8 +511,10 @@ namespace Alexandria.CharacterAPI
                         }
                         //ETGModConsole.Log(sprite.name);
                     }
-
-                    Debug.Log($"anchors done");
+                    if (ToolsCharApi.EnableDebugLogging == true)
+                    {
+                        Debug.Log($"anchors done");
+                    }
 
                     for (int i = 0; i < appearAnimIds.Count; i++)
                     {
@@ -531,8 +542,10 @@ namespace Alexandria.CharacterAPI
 
                         orig.spriteDefinitions[appearAnimIds[i]] = def;*/
                     }
-
-                    Debug.Log($"appearAnimIds position0-3 done");
+                    if (ToolsCharApi.EnableDebugLogging == true)
+                    {
+                        Debug.Log($"appearAnimIds position0-3 done");
+                    }
 
                     for (int i = 0; i < idleAnimIds.Count; i++)
                     {
@@ -561,7 +574,10 @@ namespace Alexandria.CharacterAPI
 
                         orig.spriteDefinitions[idleAnimIds[i]] = def;*/
                     }
-                    Debug.Log($"idleAnimIds position0-3 done");
+                    if (ToolsCharApi.EnableDebugLogging == true)
+                    {
+                        Debug.Log($"idleAnimIds position0-3 done");
+                    }
 
                     foreach (var def in orig.spriteDefinitions)
                     {
@@ -580,7 +596,10 @@ namespace Alexandria.CharacterAPI
 
                     SpriteBuilder.AddAnimation(facecard.spriteAnimator, orig, idleAnimIds, idleAnimName, tk2dSpriteAnimationClip.WrapMode.Loop).fps = 4;
                     var name = SpriteBuilder.AddAnimation(facecard.spriteAnimator, orig, appearAnimIds, appearAnimName, tk2dSpriteAnimationClip.WrapMode.Once);
-                    Debug.Log($"anims added");
+                    if (ToolsCharApi.EnableDebugLogging == true)
+                    {
+                        Debug.Log($"anims added");
+                    }
                     name.fps = 17;
                     facecard.spriteAnimator.DefaultClipId = facecard.spriteAnimator.Library.GetClipIdByName(appearAnimName);
 
@@ -591,7 +610,10 @@ namespace Alexandria.CharacterAPI
                     
                     facecard.appearAnimation = appearAnimName;
                     facecard.coreIdleAnimation = idleAnimName;
-                    Debug.Log($"foyer card done");
+                    if (ToolsCharApi.EnableDebugLogging == true)
+                    {
+                        Debug.Log($"foyer card done");
+                    }
                 }
 
                     //selectCharacter.CreateOverheadElement();
@@ -600,7 +622,7 @@ namespace Alexandria.CharacterAPI
 
             catch (Exception e)
             {
-                ETGModConsole.Log("overhead thing broke: " + e);
+                ETGModConsole.Log("Overhead setup code broke: " + e);
             }
         }
 

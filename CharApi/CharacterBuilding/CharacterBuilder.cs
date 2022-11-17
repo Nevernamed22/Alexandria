@@ -33,10 +33,13 @@ namespace Alexandria.CharacterAPI
                 ToolsCharApi.PrintError("Could not find prefab for: " + data.baseCharacter.ToString());
                 return;
             }
+            if (ToolsCharApi.EnableDebugLogging == true) 
+            {
+                ToolsCharApi.Print("");
+                ToolsCharApi.Print("--Building Character: " + data.nameShort + "--", "0000FF");
+            }
 
-            ToolsCharApi.Print("");
-            ToolsCharApi.Print("--Building Character: " + data.nameShort + "--", "0000FF");
-            
+
             PlayerController playerController;
             GameObject gameObject = GameObject.Instantiate(basePrefab);
 
@@ -229,12 +232,15 @@ namespace Alexandria.CharacterAPI
 
             if (loadout == null)
             {
-                ToolsCharApi.PrintError("loadout is null :((((((((");
+                ToolsCharApi.PrintError("loadout is NULL, please verify it exists!");
+
+                //ToolsCharApi.PrintError("loadout is null :((((((((");
             }
 
             if (altGun == null)
             {
-                ToolsCharApi.PrintError("altGun is null :((((((((");
+                ToolsCharApi.PrintError("altGun is NULL, please verify it exists!");
+                //ToolsCharApi.PrintError("altGun is null :((((((((");
             }
 
             StripPlayer(player);

@@ -824,12 +824,20 @@ namespace Alexandria.CharacterAPI
                             }
                             else
                             {
-                                Debug.LogWarning($"No Anim data found for \"{dirName}\"! please double check animation folder names");
+                                Debug.LogWarning($"No Anim data found for \"{dirName}\"! DOUBLE-CHECK animation folder names!");
+                                if (ToolsCharApi.EnableDebugLogging == true)
+                                {
+                                    ETGModConsole.Log($"No Anim data found for \"{dirName}\"! DOUBLE-CHECK animation folder names!");
+                                }
                             }
                         }
                         else
                         {
-                            Debug.LogWarning($"No sprites found in {dirName} please make sure youve actually put sprites in that folder");
+                            Debug.LogWarning($"No sprites found in {dirName}, MAKE SURE youve actually put sprites in that folder!");
+                            if (ToolsCharApi.EnableDebugLogging == true)
+                            {
+                                ETGModConsole.Log($"No sprites found in {dirName}, MAKE SURE youve actually put sprites in that folder!");
+                            }
                         }
                     }
                 }
@@ -1008,7 +1016,10 @@ namespace Alexandria.CharacterAPI
             
             if (data.playerSheet != null)
             {
-                ToolsCharApi.Print("        Using sprite sheet replacement.", "FFBB00");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("        Using sprite sheet replacement.", "FFBB00");
+                }
                 var materialsToCopy = orig.materials;
                 copyCollection.materials = new Material[orig.materials.Length];
                 for (int i = 0; i < copyCollection.materials.Length; i++)
@@ -1062,7 +1073,10 @@ namespace Alexandria.CharacterAPI
                     }
                 }*/
 
-                ToolsCharApi.Print("        Using individual sprite replacement.", "FFBB00");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("        Using individual sprite replacement.", "FFBB00");
+                }
                 bool notSlinger = data.baseCharacter != PlayableCharacters.Gunslinger;
 
                 RuntimeAtlasPage page = new RuntimeAtlasPage();
@@ -1228,7 +1242,10 @@ namespace Alexandria.CharacterAPI
 
             if (data.altPlayerSheet != null)
             {
-                ToolsCharApi.Print("        Using sprite sheet replacement.", "FFBB00");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("        Using sprite sheet replacement.", "FFBB00");
+                }
                 var materialsToCopy = orig.materials;
                 copyCollection.materials = new Material[orig.materials.Length];
                 for (int i = 0; i < copyCollection.materials.Length; i++)
@@ -1257,7 +1274,10 @@ namespace Alexandria.CharacterAPI
             else if (data.altSprites != null)
             {
                 //BotsModule.Log("altSprites arent null thank god!");
-                ToolsCharApi.Print("        Using individual sprite replacement.", "FFBB00");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("        Using individual sprite replacement.", "FFBB00");
+                }
                 bool notSlinger = data.baseCharacter != PlayableCharacters.Gunslinger;
 
                 RuntimeAtlasPage page = new RuntimeAtlasPage();
@@ -1438,7 +1458,10 @@ namespace Alexandria.CharacterAPI
             var atlasTex = atlas.Texture;
             if (data.punchoutFaceCards != null)
             {
-                ToolsCharApi.Print("Adding punchout facecards");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("Adding punchout facecards");
+                }
                 int count = Mathf.Min(data.punchoutFaceCards.Count, 3);
                 for (int i = 0; i < count; i++)
                 {
@@ -1456,7 +1479,10 @@ namespace Alexandria.CharacterAPI
 
         public static void HandlePunchoutAnimations(PunchoutPlayerController player, CustomCharacterData data)
         {
-            ToolsCharApi.Print("Replacing punchout sprites...");
+            if (ToolsCharApi.EnableDebugLogging == true)
+            {
+                ToolsCharApi.Print("Replacing punchout sprites...");
+            }
 
             var orig = player.sprite.Collection;
             var copyCollection = GameObject.Instantiate(orig);
@@ -1493,7 +1519,10 @@ namespace Alexandria.CharacterAPI
             copyCollection.name = data.nameShort + " Punchout Collection";
             //CharacterBuilder.storedCollections.Add(data.nameInternal, copyCollection);
             player.sprite.Collection = copyCollection;
-            ToolsCharApi.Print("Punchout sprites successfully replaced");
+            if (ToolsCharApi.EnableDebugLogging == true)
+            {
+                ToolsCharApi.Print("Punchout sprites successfully replaced");
+            }
         }
 
         public static void SetMinimapIconSpriteID(int key, int value)

@@ -143,14 +143,21 @@ namespace Alexandria.CharacterAPI
         {
             while (!checkedGuns)
             {
-                ToolsCharApi.Print("    Data check");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("    Data check");
+                }
+
                 if (data == null)
                 {
                     ToolsCharApi.PrintError("Couldn't find a character data object for this player!");
                     yield return new WaitForSeconds(.1f);
                 }
 
-                ToolsCharApi.Print("    Loadout check");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("    Loadout check");
+                }
                 var loadout = data.loadout;
                 if (loadout == null)
                 {
@@ -164,10 +171,17 @@ namespace Alexandria.CharacterAPI
                     ToolsCharApi.PrintError("Player or inventory not found");
                     yield return new WaitForSeconds(.1f);
                 }
-                ToolsCharApi.Print($"Doing infinite gun check on {player.name}");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print($"Doing infinite gun check on {player.name}");
+
+                }
 
                 this.infiniteGunIDs = GetInfiniteGunIDs();
-                ToolsCharApi.Print("    Gun check");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("    Gun check");
+                }
                 foreach (var gun in player.inventory.AllGuns)
                 {
                     if (infiniteGunIDs.Contains(gun.PickupObjectId))

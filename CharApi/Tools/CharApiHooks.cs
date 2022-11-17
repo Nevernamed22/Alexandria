@@ -355,7 +355,7 @@ namespace Alexandria.CharacterAPI
 					//ETGModConsole.Log($"[Charapi]: custom character data nulled... thats really bad");
 					if (!p.gameObject.GetComponent<CustomCharacter>().GetData())
 					{
-						ETGModConsole.Log($"[Charapi]: custom character data nulled... seems it dosent exists... fuck!");
+						ETGModConsole.Log($"[Charapi]: custom character data NULLED as it DOES NOT EXIST");
 					}
 				}
 
@@ -404,9 +404,9 @@ namespace Alexandria.CharacterAPI
 						//ETGModConsole.Log($"[Charapi]: custom character data nulled... thats really bad");
 						if (!self.gameObject.GetComponent<CustomCharacter>().GetData())
 						{
-							ETGModConsole.Log($"[Charapi]: custom character data nulled... seems it dosent exists... fuck!");
-						}
-					}
+                            ETGModConsole.Log($"[Charapi]: custom character data NULLED as it DOES NOT EXIST");
+                        }
+                    }
 
 					if (self.IsUsingAlternateCostume && self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial != null)
 					{
@@ -485,13 +485,19 @@ namespace Alexandria.CharacterAPI
 					float smoothT = Mathf.SmoothStep(0f, 1f, t);
 					if (currentInput == null)
 					{
-						ETGModConsole.Log("currentInput null");
-					}
+						if (ToolsCharApi.EnableDebugLogging == true)
+						{
+                            ETGModConsole.Log("currentInput null");
+                        }
+                    }
 
 					if (clockhairTargetPosition == null)
 					{
-						ETGModConsole.Log("clockhairTargetPosition null");
-					}
+                        if (ToolsCharApi.EnableDebugLogging == true)
+						{
+                            ETGModConsole.Log("clockhairTargetPosition null");
+                        }
+                    }
 					clockhairTargetPosition = (Vector2)typeof(ArkController).GetMethod("GetTargetClockhairPosition", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { currentInput, clockhairTargetPosition });
 					//clockhairTargetPosition = self.GetTargetClockhairPosition(currentInput, clockhairTargetPosition);
 					Vector3 currentPosition = Vector3.Slerp(clockhairStartPosition, clockhairTargetPosition, smoothT);
@@ -879,7 +885,7 @@ namespace Alexandria.CharacterAPI
 						} 
 						else
                         {
-							ETGModConsole.Log($"[Charapi]: a glow material nulled");
+							ETGModConsole.Log($"[Charapi]: glow material NULLED");
                         }
 					}					
                 }
@@ -956,7 +962,7 @@ namespace Alexandria.CharacterAPI
 					}
 					else
 					{
-						ETGModConsole.Log($"[Charapi]: a glow material nulled");
+						ETGModConsole.Log($"[Charapi]: glow material NULLED");
 					}
 				}
 			}			
@@ -1472,7 +1478,7 @@ namespace Alexandria.CharacterAPI
             "#CHAR_PARADOX_SHORT",
             "#CHAR_GUNSLINGER_SHORT"
         };
-		static bool ab = false;
+		//static bool ab = false;
 		public struct GunBackupData
         {
             public bool InfiniteAmmo,

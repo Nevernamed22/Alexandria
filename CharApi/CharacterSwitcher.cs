@@ -34,7 +34,10 @@ namespace Alexandria.CharacterAPI
             var prefab = (GameObject)BraveResources.Load(prefabPath, ".prefab");
             if (prefab == null)
             {
-                ToolsCharApi.Print("Failed getting prefab for " + args[0]);
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("Failed getting prefab for " + args[0]);
+                }
                 return;
             }
             GameManager.Instance.StartCoroutine(HandleCharacterChange());
@@ -82,7 +85,10 @@ namespace Alexandria.CharacterAPI
 
             //Reset
             GameManager.Instance.RefreshAllPlayers();
-            ToolsCharApi.Print("Character swapped", "FFFFFF", true);
+            if (ToolsCharApi.EnableDebugLogging == true)
+            {
+                ToolsCharApi.Print("Character swapped", "FFFFFF", true);
+            }
             yield break;
         }
 

@@ -100,6 +100,8 @@ namespace Alexandria.Misc
         /// <param name="checkIsWorthShooting">If true, the projectile will ignore enemies with IsWorthShootingAt set to false, such as Mountain Cubes.</param>
         /// <param name="type">Determines whether or not the projectile should take into account if an enemy needs to be killed for room clear.</param>
         /// <param name="overrideValidityCheck">A function which allows for the setting of custom parameters for whether or not an enemy is valid.</param>
+        /// <param name="excludedActors">Enemies that are in this list will not be taken into account.</param>
+
         public static Vector2 GetVectorToNearestEnemy(this Projectile bullet, bool checkIsWorthShooting = true, RoomHandler.ActiveEnemyType type = RoomHandler.ActiveEnemyType.RoomClear, List<AIActor> excludedActors = null, Func<AIActor, bool> overrideValidityCheck = null)
         {    
             IntVector2 bulletPositionIntVector2 = bullet.sprite != null ? bullet.sprite.WorldCenter.ToIntVector2() : bullet.specRigidbody.UnitCenter.ToIntVector2();

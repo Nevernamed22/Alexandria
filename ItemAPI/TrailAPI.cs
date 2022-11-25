@@ -14,6 +14,17 @@ namespace Alexandria.ItemAPI
         /// Adds a tiled trail to the Projectile
         /// </summary>
         /// <param name="timeTillAnimStart">How long after spawning until the trail will begin to play it's animation, if it has one.</param>
+        /// <param name="target">The projectile its being added to.</param>
+        /// <param name="spritePath">The sprite oath to your trail.</param>
+        /// <param name="colliderDimensions">The collider dimensions of your trail.</param>
+        /// <param name="colliderOffsets">The offset of your trail from the bottom left corner of your projectile.</param>
+        /// <param name="animPaths">The list of sprite paths for your trails animation.</param>
+        /// <param name="animFPS">The main animations FPS.</param>
+        /// <param name="startAnimPaths">The list of sprite paths for your trails "start" animation.</param>
+        /// <param name="startAnimFPS">The "start" animations FPS.</param>
+        /// <param name="cascadeTimer">The duration between the trail updating its length.</param>
+        /// <param name="softMaxLength">A soft cap on your trails length</param>
+        /// <param name="destroyOnEmpty">Will it be destroyed if it isnt visible anymore? No idea.</param>
         public static void AddTrailToProjectile(this Projectile target, string spritePath, Vector2 colliderDimensions, Vector2 colliderOffsets, List<string> animPaths = null, int animFPS = -1, List<string> startAnimPaths = null, int startAnimFPS = -1, float timeTillAnimStart = -1, float cascadeTimer = -1, float softMaxLength = -1, bool destroyOnEmpty = false)
         {
             try

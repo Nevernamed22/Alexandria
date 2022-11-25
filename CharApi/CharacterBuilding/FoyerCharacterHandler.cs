@@ -68,8 +68,8 @@ namespace Alexandria.CharacterAPI
                 }
                 catch (Exception e)
                 {
-                    //DebugUtility.PrintError($"An error occured while adding character {character.Key} to the breach.");
-                    //DebugUtility.PrintException(e);
+                    ToolsCharApi.PrintError($"An error occured while adding character {character.Key} to the breach.");
+                    ToolsCharApi.PrintException(e);
                 }
             }
             

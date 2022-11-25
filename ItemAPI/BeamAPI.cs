@@ -333,6 +333,7 @@ namespace Alexandria.ItemAPI
                 else sourcePos = otherShooter.UnitCenter;
 
                 elapsed += BraveTime.DeltaTime;
+                if (beam == null) { yield break; }
                 if (sourcePos != null)
                 {
                     if (otherShooter != null && otherShooter.GetComponent<Projectile>() && followProjDir)
@@ -347,7 +348,7 @@ namespace Alexandria.ItemAPI
                 else { ETGModConsole.Log("SOURCEPOS WAS NULL IN BEAM FIRING HANDLER"); }
                 yield return null;
             }
-            beam.CeaseAttack();
+            if (beam){beam.CeaseAttack();}
             yield break;
         }
     }

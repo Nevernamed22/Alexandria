@@ -670,7 +670,7 @@ namespace Alexandria.CharacterAPI
 				{
 					yield return null;
 				}
-				yield break;
+				//yield break;
 			}
 
 		}
@@ -1461,8 +1461,8 @@ namespace Alexandria.CharacterAPI
 				{
 					self.photoSprite.Texture = GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data.pastWinPic;
 				}
-			}		
-		}
+			}	
+        }
 
 
 

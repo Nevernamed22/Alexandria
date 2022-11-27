@@ -9,12 +9,14 @@ using UnityEngine;
 
 namespace Alexandria.NPCAPI
 {
-    static class NpcTools
+    public static class NpcTools
     {
         public static void Init()
         {
 
             NPCHooks.Init();
+
+
             //ETGModConsole.Log("AAAAAAAAAAAAAAA 0");
         }
 
@@ -63,8 +65,6 @@ namespace Alexandria.NPCAPI
                 stringCollection.AddString(value, 1f);
                 stringdb[key] = stringCollection;
             }
-
-
         }
 
 
@@ -175,8 +175,8 @@ namespace Alexandria.NPCAPI
             Vector2Int point = new Vector2Int(0, 0);
             int pointIndex = -1;
             List<RectInt> rects = atlas.GetPixelRegions();
-            float x = 0;
-            float y = 0;
+            //float x = 0;
+            //float y = 0;
 
 
             while (true)
@@ -281,13 +281,14 @@ namespace Alexandria.NPCAPI
 
 
         /// <summary>
-		/// Resizes <paramref name="tex"/> without it losing it's pixel information.
-		/// </summary>
-		/// <param name="tex">The <see cref="Texture2D"/> to resize.</param>
-		/// <param name="width">The <paramref name="tex"/>'s new width.</param>
-		/// <param name="height">The <paramref name="tex"/>'s new height.</param>
-		/// <returns></returns>
-		public static bool ResizeBetter(this Texture2D tex, int width, int height, bool center = false)
+        /// Resizes <paramref name="tex"/> without it losing it's pixel information.
+        /// </summary>
+        /// <param name="tex">The <see cref="Texture2D"/> to resize.</param>
+        /// <param name="width">The <paramref name="tex"/>'s new width.</param>
+        /// <param name="height">The <paramref name="tex"/>'s new height.</param>
+        /// <param name="center">Centers (Default of false).</param>
+        /// <returns></returns>
+        public static bool ResizeBetter(this Texture2D tex, int width, int height, bool center = false)
         {
             if (tex.IsReadable())
             {

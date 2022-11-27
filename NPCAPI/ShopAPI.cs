@@ -604,6 +604,18 @@ namespace Alexandria.NPCAPI
         /// <param name="poolType">Determines how your shop pool will pick items. DEFAULT is how basegame does it, DUPES allows your shop to sell deplicates and DUPES_AND_NOEXCLUSION allows your shop to sell duplicate items and EXCLUDED tier items.</param> 
         /// <param name="RainbowModeImmunity">Enables/Disables immunity to the dreaded capitalism killer, Rainbow mode.</param> 
 
+        /// <param name="stolenFromStringKey">String key for when the NPC is stolen from.</param> 
+        /// <param name="talkPointOffset">The offset at which the NPCs text box will appear.</param>
+        /// <param name="npcPosition">Additional offset for where the NPC is positioned relative to its goods.</param> 
+
+        /// <param name="voiceBox">An enum for selecting which pre-existing voice the NPC will use when talking.</param> 
+        /// <param name="OnPurchase">An action for when the NPC is purchased from.</param> 
+        /// <param name="OnSteal">An action for when the NPC is stolen from.</param> 
+        /// <param name="canBeRobbed">Toggles whether an NPC can be stolen from.</param> 
+
+        /// <param name="CarpetOffset">The offset of your carpet, relative to your NPC.</param> 
+        /// <param name="hitboxSize">The size of your enemies hitbox. Remember, 1 is equal to 16 pixels, not 1.</param> 
+        /// <param name="hitboxOffset">The offset of your enemies hitbox. Remember, 1 is equal to 16 pixels, not 1.</param> 
 
         /// <returns></returns>
         /// 

@@ -211,7 +211,7 @@ namespace Alexandria.ItemAPI
 
                 gun.gunClass = gunClass;
 
-                ETGMod.Databases.Items.Add(gun, null, "ANY");
+                ETGMod.Databases.Items.Add(gun, false, "ANY");
 
                 return gun;
             }
@@ -268,7 +268,7 @@ namespace Alexandria.ItemAPI
 
                 gun.gunClass = gunClass;
 
-                ETGMod.Databases.Items.Add(gun, null, "ANY");
+                ETGMod.Databases.Items.Add(gun, false, "ANY");
 
                 return gun;
             }

@@ -36,7 +36,7 @@ namespace Alexandria.NPCAPI
         /// </summary>
         public float PriceMultiplier = 1f;
         /// <summary>
-        /// A list of item IDs you want to be discounted when the discount condition is active.
+        /// A function for the *validity* in which your discount will be active. Make sure to return it as TRUE when the item is valid to be discounted.
         /// </summary>
         public Func<ShopItemController, bool> ItemIsValidForDiscount;
 
@@ -46,7 +46,7 @@ namespace Alexandria.NPCAPI
         public Func<bool> CanDiscountCondition;
 
         /// <summary>
-        /// A function that lets you give a *custom* price multipler, for more dynamic price reductions..
+        /// A function that lets you give a *custom* price multipler, for more dynamic price reductions.
         /// </summary>
         public Func<float> CustomPriceMultiplier;
 
@@ -150,7 +150,6 @@ namespace Alexandria.NPCAPI
             {
                 num3 *= GameManager.Instance.SecondaryPlayer.stats.GetStatValue(PlayerStats.StatType.GlobalPriceMultiplier);
             }
-
             newCost *= num4 * num3;
             shopItemSelf.OverridePrice = (int)(newCost);
         }

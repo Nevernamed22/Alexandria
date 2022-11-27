@@ -321,7 +321,7 @@ namespace Alexandria.CharacterAPI
 				{
 					if (self.gameObject.GetComponent<CustomCharacter>()?.data?.altGlowMaterial?.GetTexture("_MainTex") != self.AlternateCostumeLibrary?.clips[0]?.frames[0]?.spriteCollection?.spriteDefinitions[0]?.material.GetTexture("_MainTex"))
 					{
-						self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial.SetTexture("_MainTexture", self.AlternateCostumeLibrary.clips[0].frames[0].spriteCollection.spriteDefinitions[0].material.GetTexture("_MainTex"));
+						self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial.SetTexture("_MainTex", self.AlternateCostumeLibrary.clips[0].frames[0].spriteCollection.spriteDefinitions[0].material.GetTexture("_MainTex"));
 					}
 					self.sprite.renderer.material = self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial;					
 				}
@@ -329,7 +329,8 @@ namespace Alexandria.CharacterAPI
 				{
 					if (self.gameObject.GetComponent<CustomCharacter>().data?.glowMaterial?.GetTexture("_MainTex") != self.sprite.renderer.material.GetTexture("_MainTex"))
 					{
-						self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial.SetTexture("_MainTexture", self.sprite.renderer.material.GetTexture("_MainTex"));
+                        //_MainTexture
+                        self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial.SetTexture("_MainTex", self.sprite.renderer.material.GetTexture("_MainTex"));
 					}
 					self.sprite.renderer.material = self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial;
 				}
@@ -346,11 +347,11 @@ namespace Alexandria.CharacterAPI
 			{
 				return;
 			}
-			if (p && p.gameObject.GetComponent<CustomCharacter>())
+			var CCC = p.gameObject.GetComponent<CustomCharacter>();
+
+            if (p && CCC != null)
 			{
-
-
-				if (p.gameObject.GetComponent<CustomCharacter>().data == null)
+				if (CCC.data == null)
 				{
 					//ETGModConsole.Log($"[Charapi]: custom character data nulled... thats really bad");
 					if (!p.gameObject.GetComponent<CustomCharacter>().GetData())
@@ -360,26 +361,27 @@ namespace Alexandria.CharacterAPI
 				}
 
 				p.ForceStaticFaceDirection(Vector2.up);
-				if (p.IsUsingAlternateCostume && p.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial != null)
+				if (p.IsUsingAlternateCostume && CCC.data.altGlowMaterial != null)
 				{
 
-					if (p.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial.GetTexture("_MainTex") != p.sprite.renderer.material.GetTexture("_MainTex"))
+					if (CCC.data.altGlowMaterial.GetTexture("_MainTex") != p.sprite.renderer.material.GetTexture("_MainTex"))
 					{
-						p.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial.SetTexture("_MainTexture", p.sprite.renderer.material.GetTexture("_MainTex"));
+                        CCC.data.altGlowMaterial.SetTexture("_MainTex", p.sprite.renderer.material.GetTexture("_MainTex"));
 					}
-					p.SetOverrideMaterial(p.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial);
+					p.SetOverrideMaterial(CCC.data.altGlowMaterial);
 
 					//ETGModConsole.Log($"[Charapi]: set shader for alt skin");
 
 				}
-				else if (p.gameObject.GetComponent<CustomCharacter>().data.glowMaterial != null)
+				else if (CCC.data.glowMaterial != null)
 				{
 
-					if (p.gameObject.GetComponent<CustomCharacter>().data.glowMaterial.GetTexture("_MainTex") != p.sprite.renderer.material.GetTexture("_MainTex"))
+					if (CCC.data.glowMaterial.GetTexture("_MainTex") != p.sprite.renderer.material.GetTexture("_MainTex"))
 					{
-						p.gameObject.GetComponent<CustomCharacter>().data.glowMaterial.SetTexture("_MainTexture", p.sprite.renderer.material.GetTexture("_MainTex"));
+                        //_MainTexture
+                        CCC.data.glowMaterial.SetTexture("_MainTex", p.sprite.renderer.material.GetTexture("_MainTex"));
 					}
-					p.SetOverrideMaterial(p.gameObject.GetComponent<CustomCharacter>().data.glowMaterial);
+					p.SetOverrideMaterial(CCC.data.glowMaterial);
 
 					//ETGModConsole.Log($"[Charapi]: set shader for main skin");
 				}
@@ -404,39 +406,42 @@ namespace Alexandria.CharacterAPI
 						//ETGModConsole.Log($"[Charapi]: custom character data nulled... thats really bad");
 						if (!self.gameObject.GetComponent<CustomCharacter>().GetData())
 						{
-                            ETGModConsole.Log($"[Charapi]: custom character data NULLED as it DOES NOT EXIST");
+							ETGModConsole.Log($"[Charapi]: custom character data NULLED as it DOES NOT EXIST");
+						}
+					}
+
+					var CCC = self.gameObject.GetComponent<CustomCharacter>();
+                    if (CCC != null)
+					{
+                        if (self.IsUsingAlternateCostume && CCC.data.altGlowMaterial != null)
+                        {
+                            if (CCC.data.altGlowMaterial.GetTexture("_MainTex") != self.sprite.renderer.material.GetTexture("_MainTex"))
+                            {
+                                //_MainTexture
+                                CCC.data.altGlowMaterial.SetTexture("_MainTex", self.sprite.renderer.material.GetTexture("_MainTex"));
+                            }
+                            self.sprite.renderer.material = CCC.data.altGlowMaterial;
+                            result = CCC.data.altGlowMaterial.shader.name;
+                        }
+                        else if (CCC.data.glowMaterial != null)
+                        {
+                            if (CCC.data.glowMaterial.GetTexture("_MainTex") != self.sprite.renderer.material.GetTexture("_MainTex"))
+                            {
+                                CCC.data.glowMaterial.SetTexture("_MainTex", self.sprite.renderer.material.GetTexture("_MainTex"));
+                            }
+                            self.sprite.renderer.material = CCC.data.glowMaterial;
+                            result = CCC.data.glowMaterial.shader.name;
+                        }
+                        else
+                        {
+                            result = orig(self);
                         }
                     }
-
-					if (self.IsUsingAlternateCostume && self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial != null)
-					{
-
-						if (self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial.GetTexture("_MainTex") != self.sprite.renderer.material.GetTexture("_MainTex"))
-						{
-							self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial.SetTexture("_MainTexture", self.sprite.renderer.material.GetTexture("_MainTex"));
-						}
-						self.sprite.renderer.material = self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial;
-						result = self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial.shader.name;
-
-
-					}
-					else if (self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial != null)
-					{
-
-						if (self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial.GetTexture("_MainTex") != self.sprite.renderer.material.GetTexture("_MainTex"))
-						{
-							self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial.SetTexture("_MainTexture", self.sprite.renderer.material.GetTexture("_MainTex"));
-						}
-						self.sprite.renderer.material = self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial;
-						result = self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial.shader.name;
-
-					}
-					else
-					{
-						result = orig(self);
-					}
-
-				}
+                    else
+                    {
+                        result = orig(self);
+                    }
+                }
 				else
 				{
 					result = orig(self);

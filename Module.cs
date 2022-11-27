@@ -78,10 +78,6 @@ namespace Alexandria
 
                 ETGMod.StartGlobalCoroutine(this.delayedstarthandler());
                 ETGModConsole.Log("AlexandriaLib started correctly.");
-
-
-
-
             }
             catch (Exception e)
             {

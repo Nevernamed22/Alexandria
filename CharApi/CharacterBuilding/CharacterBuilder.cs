@@ -122,6 +122,8 @@ namespace Alexandria.CharacterAPI
             
             gameObject.SetActive(false);
             FakePrefab.MarkAsFakePrefab(gameObject);
+
+            ETGModConsole.Characters.Add(data.nameShort.ToLowerInvariant(), data.nameShort); //Adds characters to MTGAPIs character database
         }
 
 

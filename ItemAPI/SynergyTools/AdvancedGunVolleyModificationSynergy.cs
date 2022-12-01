@@ -7,7 +7,7 @@ using Alexandria.ItemAPI;
 
 namespace Alexandria.ItemAPI
 {
-    class AdvancedGunVolleyModificationSynergy : MonoBehaviour
+   public class AdvancedGunVolleyModificationSynergy : MonoBehaviour
     {
         public AdvancedGunVolleyModificationSynergy()
         {

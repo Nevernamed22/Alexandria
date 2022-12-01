@@ -8,7 +8,7 @@ using Alexandria.Misc;
 
 namespace Alexandria.ItemAPI
 {
-    class AdvancedFireOnReloadSynergyProcessor : MonoBehaviour
+    public class AdvancedFireOnReloadSynergyProcessor : MonoBehaviour
     {
         public AdvancedFireOnReloadSynergyProcessor()
         {

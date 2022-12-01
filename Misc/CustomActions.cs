@@ -44,6 +44,10 @@ namespace Alexandria.Misc
         /// </summary>
         public static Action<ResourcefulRatMazeSystemController, PlayerController> OnRatMazeFailed;
         /// <summary>
+        /// Runs when a minorbreakable is shattered.
+        /// </summary>
+        public static Action<MinorBreakable> OnMinorBreakableShattered;
+        /// <summary>
         /// Runs just before a reward pedestal determines it's contents. 
         /// Can be used to modify the contents by adding to the 'overrideItemPool' list in 'ValidPedestalContents'.
         /// </summary>
@@ -119,6 +123,7 @@ namespace Alexandria.Misc
             new Hook(typeof(ShopItemController).GetMethods().Single(a => a.Name == "Initialize" && a.GetParameters().Length == 2 && a.GetParameters()[1].ParameterType == typeof(BaseShopController)), typeof(CustomActions).GetMethod("InitializeViaBaseShopController", BindingFlags.Static | BindingFlags.Public));
             new Hook(typeof(ShopItemController).GetMethods().Single(a => a.Name == "Initialize" && a.GetParameters().Length == 2 && a.GetParameters()[1].ParameterType == typeof(ShopController)), typeof(CustomActions).GetMethod("InitializeViaShopController", BindingFlags.Static | BindingFlags.Public));
             new Hook(typeof(ResourcefulRatMazeSystemController).GetMethod("HandleFailure", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("OnFailedRatMaze", BindingFlags.Static | BindingFlags.Public));
+            new Hook(typeof(MinorBreakable).GetMethod("FinishBreak", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("MinorBreakableBreak", BindingFlags.Static | BindingFlags.Public));
             new Hook(typeof(RewardPedestal).GetMethod("DetermineContents", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("RewardPedestalDetermineContents", BindingFlags.Static | BindingFlags.Public));
 
             //Chest-based actions
@@ -225,6 +230,11 @@ namespace Alexandria.Misc
                 self.contents = null;
             }
             orig(self, compareAgainst);
+        }
+        public static void MinorBreakableBreak(Action<MinorBreakable> orig, MinorBreakable self)
+        {
+            if (OnMinorBreakableShattered != null) OnMinorBreakableShattered(self);
+            orig(self);
         }
 
         //Chest-based actions

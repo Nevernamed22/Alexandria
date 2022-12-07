@@ -76,6 +76,7 @@
     <Compile Include="ItemAPI\ItemInterfaces\LabelablePlayerItem.cs" />
     <Compile Include="ItemAPI\OrbitalUtility.cs" />
     <Compile Include="ItemAPI\SlashDoer.cs" />
+    <Compile Include="ItemAPI\SynergyTools\AdvancedGunVolleyModificationSynergy.cs" />
     <Compile Include="Misc\AmmoPickupFixer.cs" />
     <Compile Include="Misc\ChamberGunAPI.cs" />
     <Compile Include="EnemyAPI\BossBuilder.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="Misc\ExtendedPlayerComponent.cs" />
     <Compile Include="Misc\GameManagerUtility.cs" />
     <Compile Include="Misc\GoopUtility.cs" />
+    <Compile Include="Misc\MagicCircleDoer.cs" />
     <Compile Include="Misc\MiscUtility.cs" />
     <Compile Include="Misc\PickupUtility.cs" />
     <Compile Include="Misc\PlayerUtility.cs" />
@@ -408,6 +410,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />
+    <EmbeddedResource Include="Misc\gay_porn.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -25,7 +25,7 @@ namespace Alexandria
 
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
-        public const string VERSION = "0.2.16";
+        public const string VERSION = "0.2.17";
 
 
         public void Start()
@@ -78,7 +78,7 @@ namespace Alexandria
                 ToolsCharApi.Init();
 
                 ETGMod.StartGlobalCoroutine(this.delayedstarthandler());
-                ETGModConsole.Log("AlexandriaLib started correctly.");
+                ETGModConsole.Log("AlexandriaLib started correctly. Ver. : "+VERSION);
             }
             catch (Exception e)
             {

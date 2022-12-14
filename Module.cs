@@ -25,7 +25,7 @@ namespace Alexandria
 
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
-        public const string VERSION = "0.2.14";
+        public const string VERSION = "0.2.17";
 
 
         public void Start()
@@ -71,13 +71,14 @@ namespace Alexandria
                 AmmoPickupFixer.Init();
                 LabelablePlayerItemSetup.InitLabelHook();
                 MasteryOverrideHandler.Init();
+                RoomRewardAPI.Init();
 
                 //Character API
                 CharacterAPI.Hooks.Init();
                 ToolsCharApi.Init();
 
                 ETGMod.StartGlobalCoroutine(this.delayedstarthandler());
-                ETGModConsole.Log("AlexandriaLib started correctly.");
+                ETGModConsole.Log("AlexandriaLib started correctly. Ver. : "+VERSION);
             }
             catch (Exception e)
             {

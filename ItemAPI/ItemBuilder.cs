@@ -396,12 +396,19 @@ namespace Alexandria.ItemAPI
                 else
                     item.passiveStatModifiers = item.passiveStatModifiers.Concat(new StatModifier[] { modifier }).ToArray();
             }
+            else if (po is Gun)
+            {
+                var item = (po as Gun);
+                if (item.passiveStatModifiers == null)
+                    item.passiveStatModifiers = new StatModifier[] { modifier };
+                else
+                    item.passiveStatModifiers = item.passiveStatModifiers.Concat(new StatModifier[] { modifier }).ToArray();
+            }
             else
             {
-                throw new NotSupportedException("Object must be of type PlayerItem or PassiveItem");
+                throw new NotSupportedException("Object must be of type PlayerItem, PassiveItem, or Gun");
             }
         }
-
         public static bool RemovePassiveStatModifier(this PickupObject po, StatModifier modifier)
         {
             bool success = false;
@@ -423,14 +430,36 @@ namespace Alexandria.ItemAPI
                 success = list.Remove(modifier);
                 item.passiveStatModifiers = list.ToArray();
             }
+            else if (po is Gun)
+            {
+                var item = (po as Gun);
+                if (item.passiveStatModifiers == null) return false;
+
+                var list = item.passiveStatModifiers.ToList();
+                success = list.Remove(modifier);
+                item.passiveStatModifiers = list.ToArray();
+            }
             else
             {
-                throw new NotSupportedException("Object must be of type PlayerItem or PassiveItem");
+                throw new NotSupportedException("Object must be of type PlayerItem, PassiveItem, or Gun");
             }
             return success;
         }
+        public static void AddCurrentGunDamageTypeModifier(this Gun gun, CoreDamageTypes damageTypes, float damageMultiplier)
+        {
+            gun.currentGunDamageTypeModifiers = gun.currentGunDamageTypeModifiers.Concat(new DamageTypeModifier[] { new DamageTypeModifier { damageType = damageTypes, damageMultiplier = damageMultiplier } }).ToArray();
+        }
 
-
+        public static void AddCurrentGunStatModifier(this Gun gun, PlayerStats.StatType statType, float amount, StatModifier.ModifyMethod modifyMethod)
+        {
+            gun.currentGunStatModifiers = gun.currentGunStatModifiers.Concat(new StatModifier[] { new StatModifier { statToBoost = statType, amount = amount, modifyType = modifyMethod } }).ToArray();
+        }
+        public static void RemoveCurrentGunStatModifier(this Gun gun, PlayerStats.StatType statType)
+        {
+            var newModifiers = new List<StatModifier>();
+            for (int i = 0; i < gun.currentGunStatModifiers.Length; i++) { if (gun.currentGunStatModifiers[i].statToBoost != statType) { newModifiers.Add(gun.currentGunStatModifiers[i]); } }
+            gun.currentGunStatModifiers = newModifiers.ToArray();
+        }
         public static IEnumerator HandleDuration(PlayerItem item, float duration, PlayerController user, Action<PlayerController> OnFinish)
         {
             if (item.IsCurrentlyActive)

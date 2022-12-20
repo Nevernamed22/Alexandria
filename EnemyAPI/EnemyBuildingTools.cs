@@ -108,5 +108,71 @@ namespace Alexandria.EnemyAPI
             shootpoint.transform.position = attachpoint;
             return attacher.transform.Find(name).gameObject;
         }
+
+
+        /// <summary>
+        /// Returns a deplicate BulletBank.Entry that you can modify the bullet Object of without altering the original. Useful for making specific projectiles fire without audio or have them have special effects i.e hitscan.
+        /// </summary>
+        /// <param name="entryToCopy">The enrty you are copying in the first place.</param>
+        /// <param name="Name">Your new Bullet Bank entry name. You will use this name when trying to spawn a projectile from this entry.</param>
+        /// <param name="AudioEvent">The audio event your projectile will sound when it is fired. Change this to "DNC" if you want to keep the original audio, or set it to null to have none.</param>
+        /// <param name="muzzleflashVFX">Your muzzle flash VFX it will play when the bullet is fired.</param>
+        /// <param name="ChangeMuzzleFlashToEmpty">If set to true and muzzleflashVFX is NULL, will remove the muzzleflash from your entry.</param>
+
+        public static AIBulletBank.Entry CopyBulletBankEntry(AIBulletBank.Entry entryToCopy, string Name, string AudioEvent = null, VFXPool muzzleflashVFX = null, bool ChangeMuzzleFlashToEmpty = true)
+        {
+            AIBulletBank.Entry entry = CopyBulletBankFields<AIBulletBank.Entry>(entryToCopy);
+            entry.Name = Name;
+            Projectile projectile = UnityEngine.Object.Instantiate<GameObject>(entry.BulletObject).GetComponent<Projectile>();
+            projectile.gameObject.SetLayerRecursively(18);
+            projectile.transform.position = projectile.transform.position.WithZ(210.5125f);
+            projectile.gameObject.SetActive(false);
+            FakePrefab.MarkAsFakePrefab(projectile.gameObject);
+            UnityEngine.Object.DontDestroyOnLoad(projectile);
+            entry.BulletObject = projectile.gameObject;
+            if (AudioEvent != "DNC") { entry.AudioEvent = AudioEvent; }
+            if (ChangeMuzzleFlashToEmpty == true && muzzleflashVFX == null) { entry.MuzzleFlashEffects = new VFXPool { type = VFXPoolType.None, effects = new VFXComplex[0] }; }
+            else { entry.MuzzleFlashEffects = muzzleflashVFX == null ? new VFXPool { type = VFXPoolType.None, effects = new VFXComplex[0] } : muzzleflashVFX; }
+            return entry;
+        }
+
+
+        private static AIBulletBank.Entry CopyBulletBankFields<T>(AIBulletBank.Entry sample2) where T : AIBulletBank.Entry
+        {
+            AIBulletBank.Entry sample = new AIBulletBank.Entry();
+            sample.AudioEvent = sample2.AudioEvent;
+            sample.AudioLimitOncePerAttack = sample2.AudioLimitOncePerAttack;
+            sample.AudioLimitOncePerFrame = sample2.AudioLimitOncePerFrame;
+            sample.AudioSwitch = sample2.AudioSwitch;
+            sample.PlayAudio = sample2.PlayAudio;
+            sample.BulletObject = sample2.BulletObject;
+            sample.conditionalMinDegFromNorth = sample2.conditionalMinDegFromNorth;
+
+            sample.DontRotateShell = sample2.DontRotateShell;
+            sample.forceCanHitEnemies = sample2.forceCanHitEnemies;
+            sample.MuzzleFlashEffects = sample2.MuzzleFlashEffects;
+            sample.MuzzleInheritsTransformDirection = sample2.MuzzleInheritsTransformDirection;
+            sample.MuzzleLimitOncePerFrame = sample2.MuzzleLimitOncePerFrame;
+            sample.Name = sample2.Name;
+            sample.OverrideProjectile = sample2.OverrideProjectile;
+            sample.preloadCount = sample2.preloadCount;
+            sample.ProjectileData = sample2.ProjectileData;
+            sample.rampBullets = sample2.rampBullets;
+
+            sample.rampStartHeight = sample2.rampStartHeight;
+            sample.rampTime = sample2.rampTime;
+            sample.ShellForce = sample2.ShellForce;
+            sample.ShellForceVariance = sample2.ShellForceVariance;
+            sample.ShellGroundOffset = sample2.ShellGroundOffset;
+            sample.ShellPrefab = sample2.ShellPrefab;
+            sample.ShellsLimitOncePerFrame = sample2.ShellsLimitOncePerFrame;
+            sample.ShellTransform = sample2.ShellTransform;
+            sample.SpawnShells = sample2.SpawnShells;
+            sample.suppressHitEffectsIfOffscreen = sample2.suppressHitEffectsIfOffscreen;
+
+            return sample;
+        }
+
+
     }
 }

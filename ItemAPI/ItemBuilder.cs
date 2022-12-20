@@ -67,7 +67,7 @@ namespace Alexandria.ItemAPI
         {
             GameObject spriteObject = SpriteBuilder.SpriteFromResource(resourcePath, obj, assembly ?? Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(spriteObject);
-            obj.SetActive(false);
+            spriteObject.SetActive(false);
 
             spriteObject.name = name;
             return spriteObject;

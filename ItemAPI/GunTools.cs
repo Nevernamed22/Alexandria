@@ -398,6 +398,24 @@ namespace Alexandria.ItemAPI
 
             return def;
         }
+
+
+        /// <summary>
+        /// Adds a custom sprite to your projectile from your mods sprites/ProjectileCollection folder.
+        /// </summary>
+        /// <param name="proj">Your projectile you'll be adding a sprite to.</param>
+        /// <param name="name">The name of your projectile sprite that you have in the sprites/ProjectileCollection folder. Does not require to have a .png at the end.</param>
+        /// <param name="pixelWidth">The width in pixels your projectile sprite is.</param>
+        /// <param name="pixelHeight">The height in pixels your projectile sprite is.</param>
+        /// <param name="lightened">If true, will make your projectile glow a little.</param>
+        /// <param name="anchor">The projectile sprites anchor point. Usually left as default (LowerLeft) to match most basegame sprite anchor points.</param>
+        /// <param name="overrideColliderPixelWidth">Your override projectile hitbox width. If left as null, uses the projectiles current hitbox width.</param>
+        /// <param name="overrideColliderPixelHeight">Your override projectile hitbox height. If left as null, uses the projectiles current hitbox height.</param>
+        /// <param name="anchorChangesCollider">Honestly not sure but it's left as true by default so leave it as true. I'll update the summary here if someone tells me.</param>
+        /// <param name="fixesScale">Honestly not sure but it's left as true by default so leave it as true. I'll update the summary here if someone tells me.</param>
+        /// <param name="overrideColliderOffsetX">The X offset in pixels that your projectile hitbox is offset by.</param>
+        /// <param name="overrideColliderOffsetY">The Y offset in pixels that your projectile hitbox is offset by.</param>
+        /// <param name="overrideProjectileToCopyFrom">An override to copy projectile data from. Left as null by default.</param>
         public static tk2dSpriteDefinition SetProjectileSpriteRight(this Projectile proj, string name, int pixelWidth, int pixelHeight, bool lightened = true, tk2dBaseSprite.Anchor anchor = tk2dBaseSprite.Anchor.LowerLeft, int? overrideColliderPixelWidth = null, int? overrideColliderPixelHeight = null, bool anchorChangesCollider = true,
             bool fixesScale = false, int? overrideColliderOffsetX = null, int? overrideColliderOffsetY = null, Projectile overrideProjectileToCopyFrom = null)
         {
@@ -609,6 +627,99 @@ namespace Alexandria.ItemAPI
                     newModifiers.Add(item.passiveStatModifiers[i]);
             }
             item.passiveStatModifiers = newModifiers.ToArray();
+        }
+
+
+
+        /// <summary>
+        /// Adds a custom animation to your projectile. Sprites for the animation are taken from the sprites/ProjectileCollection folder
+        /// </summary>
+        /// <param name="proj">Your projectile you'll be adding a sprite to.</param>
+        /// <param name="names">The names of your projectile sprites that you have in the sprites/ProjectileCollection folder for your animation. Does not require to have a .png at the end.</param>
+        /// <param name="fps">The frames per second that your aniamtion plays at.</param>
+        /// <param name="pixelSizes">The sprite sizes of EACH frame in your animation. You MUST have an equal amount of entries in this list as your frames.</param>
+        /// <param name="lighteneds">Whether an individual frame will be glowy or not. You MUST have an equal amount of entries in this list as your frames.</param>
+        /// <param name="anchors">The anchor of every individual frame. You MUST have an equal amount of entries in this list as your frames.</param>
+        /// <param name="anchorsChangeColliders">Whether the anchor of every individual frame affects the current frames colliders. You MUST have an equal amount of entries in this list as your frames.</param>
+        /// <param name="fixesScales">No idea. You MUST have an equal amount of entries in this list as your frames.</param>
+        /// <param name="manualOffsets">The offset of the sprite on each individial frame. You MUST have an equal amount of entries in this list as your frames.</param>
+        /// <param name="overrideColliderPixelSizes">The override collider sizes of the projectile on each individial frame. You MUST have an equal amount of entries in this list as your frames.</param>
+        /// <param name="overrideColliderOffsets">The override collider offsets of the projectile on each individial frame. You MUST have an equal amount of entries in this list as your frames.</param>
+        /// <param name="overrideProjectilesToCopyFrom">The override projectile too use on each individial frame. You MUST have an equal amount of entries in this list as your frames.</param>
+        /// <param name="wrapMode">Your animations wrap mode. If you just want it to do a looping animation, leave it as Loop. Only useful for when adding multiple differing animations</param>
+        /// <param name="clipName">Your animations clip name. Only useful for when adding multiple differing animations</param>
+        /// <param name="defaultClipName">The default animation your projectile will play, by default. If left as null will use the most recently added clips name as the default.</param>
+
+        public static void AddAnimationToProjectile(this Projectile proj, List<string> names, int fps, List<IntVector2> pixelSizes, List<bool> lighteneds, List<tk2dBaseSprite.Anchor> anchors, List<bool> anchorsChangeColliders,
+        List<bool> fixesScales, List<Vector3?> manualOffsets, List<IntVector2?> overrideColliderPixelSizes, List<IntVector2?> overrideColliderOffsets, List<Projectile> overrideProjectilesToCopyFrom, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop , string clipName = "idle", string defaultClipName = "idle")
+        {
+            tk2dSpriteAnimationClip clip = new tk2dSpriteAnimationClip();
+            clip.name = clipName;
+            clip.fps = fps;
+            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
+            for (int i = 0; i < names.Count; i++)
+            {
+                string name = names[i];
+                IntVector2 pixelSize = pixelSizes[i];
+                IntVector2? overrideColliderPixelSize = overrideColliderPixelSizes[i];
+                IntVector2? overrideColliderOffset = overrideColliderOffsets[i];
+                Vector3? manualOffset = manualOffsets[i];
+                bool anchorChangesCollider = anchorsChangeColliders[i];
+                bool fixesScale = fixesScales[i];
+                if (!manualOffset.HasValue)
+                {
+                    manualOffset = new Vector2?(Vector2.zero);
+                }
+                tk2dBaseSprite.Anchor anchor = anchors[i];
+                bool lightened = lighteneds[i];
+                Projectile overrideProjectileToCopyFrom = overrideProjectilesToCopyFrom[i];
+                tk2dSpriteAnimationFrame frame = new tk2dSpriteAnimationFrame();
+                frame.spriteId = ETGMod.Databases.Items.ProjectileCollection.inst.GetSpriteIdByName(name);
+                frame.spriteCollection = ETGMod.Databases.Items.ProjectileCollection;
+                frames.Add(frame);
+                int? overrideColliderPixelWidth = null;
+                int? overrideColliderPixelHeight = null;
+                if (overrideColliderPixelSize.HasValue)
+                {
+                    overrideColliderPixelWidth = overrideColliderPixelSize.Value.x;
+                    overrideColliderPixelHeight = overrideColliderPixelSize.Value.y;
+                }
+                int? overrideColliderOffsetX = null;
+                int? overrideColliderOffsetY = null;
+                if (overrideColliderOffset.HasValue)
+                {
+                    overrideColliderOffsetX = overrideColliderOffset.Value.x;
+                    overrideColliderOffsetY = overrideColliderOffset.Value.y;
+                }
+                tk2dSpriteDefinition def = GunTools.SetupDefinitionForProjectileSprite(name, frame.spriteId, pixelSize.x, pixelSize.y, lightened, overrideColliderPixelWidth, overrideColliderPixelHeight, overrideColliderOffsetX, overrideColliderOffsetY,
+                    overrideProjectileToCopyFrom);
+                def.ConstructOffsetsFromAnchor(anchor, def.position3, fixesScale, anchorChangesCollider);
+                def.position0 += manualOffset.Value;
+                def.position1 += manualOffset.Value;
+                def.position2 += manualOffset.Value;
+                def.position3 += manualOffset.Value;
+                if (i == 0)
+                {
+                    proj.GetAnySprite().SetSprite(frame.spriteCollection, frame.spriteId);
+                }
+            }
+            clip.wrapMode = wrapMode;
+            clip.frames = frames.ToArray();
+            if (proj.sprite.spriteAnimator == null)
+            {
+                proj.sprite.spriteAnimator = proj.sprite.gameObject.AddComponent<tk2dSpriteAnimator>();
+            }
+            proj.sprite.spriteAnimator.playAutomatically = true;
+            bool flag = proj.sprite.spriteAnimator.Library == null;
+            if (flag)
+            {
+                proj.sprite.spriteAnimator.Library = proj.sprite.spriteAnimator.gameObject.AddComponent<tk2dSpriteAnimation>();
+                proj.sprite.spriteAnimator.Library.clips = new tk2dSpriteAnimationClip[0];
+                proj.sprite.spriteAnimator.Library.enabled = true;
+            }
+            proj.sprite.spriteAnimator.Library.clips = proj.sprite.spriteAnimator.Library.clips.Concat(new tk2dSpriteAnimationClip[] { clip }).ToArray();
+            proj.sprite.spriteAnimator.DefaultClipId = proj.sprite.spriteAnimator.Library.GetClipIdByName(defaultClipName ?? clipName);
+            proj.sprite.spriteAnimator.deferNextStartClip = false;
         }
     }  
 }

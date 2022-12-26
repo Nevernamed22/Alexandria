@@ -17,8 +17,8 @@ namespace Alexandria.CharacterAPI
     {
         public static bool verbose = false;
         private static string defaultLog = Path.Combine(ETGMod.ResourcesDirectory, "customCharacterLog.txt");
-        public static string modID = "CharApi";
-        public static bool EnableDebugLogging = false;
+        public static string modID = "CharAPI";
+        public static bool EnableDebugLogging = true;
 
         private static Dictionary<string, float> timers = new Dictionary<string, float>();
         private static string[] BundlePrereqs;

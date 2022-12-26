@@ -89,12 +89,13 @@ namespace Alexandria.Misc
         /// <param name="bullet">The target projectile.</param>
         public static void SendInRandomDirection(this Projectile bullet)
         {
+            if (bullet == null) { return; }
             Vector2 dirVec = UnityEngine.Random.insideUnitCircle;
             bullet.SendInDirection(dirVec, false, true);
         }
 
         /// <summary>
-        /// Returns a vector corresponding to the direction of the nearest enemy to the projectile's position.
+        /// Returns a vector corresponding to the direction of the nearest enemy to the projectile's position. Returns Vector2.zero if the Projectile is null
         /// </summary>
         /// <param name="bullet">The target projectile</param>
         /// <param name="checkIsWorthShooting">If true, the projectile will ignore enemies with IsWorthShootingAt set to false, such as Mountain Cubes.</param>
@@ -103,7 +104,8 @@ namespace Alexandria.Misc
         /// <param name="excludedActors">Enemies that are in this list will not be taken into account.</param>
 
         public static Vector2 GetVectorToNearestEnemy(this Projectile bullet, bool checkIsWorthShooting = true, RoomHandler.ActiveEnemyType type = RoomHandler.ActiveEnemyType.RoomClear, List<AIActor> excludedActors = null, Func<AIActor, bool> overrideValidityCheck = null)
-        {    
+        {
+            if (bullet == null) { return Vector2.zero; }
             IntVector2 bulletPositionIntVector2 = bullet.sprite != null ? bullet.sprite.WorldCenter.ToIntVector2() : bullet.specRigidbody.UnitCenter.ToIntVector2();
             AIActor closestToPosition = bulletPositionIntVector2.GetNearestEnemyToPosition(checkIsWorthShooting, type, excludedActors, overrideValidityCheck);
             if (closestToPosition) return closestToPosition.CenterPosition - (bullet.sprite != null ? bullet.sprite.WorldCenter : bullet.specRigidbody.UnitCenter);

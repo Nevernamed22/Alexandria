@@ -99,6 +99,7 @@ namespace Alexandria
                 ValidRoomRewardContents contentsSet = new ValidRoomRewardContents();
                 contentsSet.overrideItemPool = new List<Tuple<float, int>>();
                 contentsSet.overrideFunctionPool = new List<Action<Vector3, RoomHandler>>();
+                contentsSet.additionalRewardChance = 0;
 
                 if (OnRoomRewardDetermineContents != null) OnRoomRewardDetermineContents(self, contentsSet, num);
 
@@ -112,6 +113,7 @@ namespace Alexandria
 
                     return;
                 }
+                num -= contentsSet.additionalRewardChance;
                 if (value > num && !GuaranteeRoomClearRewardDrop)
                 {
                     if (flag)
@@ -197,6 +199,7 @@ namespace Alexandria
         {
             public List<Action<Vector3, RoomHandler>> overrideFunctionPool;
             public List<Tuple<float, int>> overrideItemPool;
+            public float additionalRewardChance;
         }
     }
 }

@@ -364,6 +364,45 @@ namespace Alexandria.ItemAPI
                     break;
             }
         }
+        /// <summary>
+        /// Removes all stat modifiers of the set stat type from a PlayerItem, PassiveItem, or Gun.
+        /// </summary>
+        ///  /// <param name="po">A PassiveItem, PlayerItem, or Gun to add the stat to.</param>
+        ///  /// <param name="statType">The stat to be wiped.</param>
+        public static void RemovePassiveStatModifier(this PickupObject po, PlayerStats.StatType statType)
+        {
+            if (po is PlayerItem)
+            {
+                var item = (po as PlayerItem);
+                if (item.passiveStatModifiers == null) return;
+
+                var list = item.passiveStatModifiers.ToList();
+                for (int i = list.Count() - 1; i >= 0; i--) { if (list[i].statToBoost == statType) { list.RemoveAt(i); } }
+                item.passiveStatModifiers = list.ToArray();
+            }
+            else if (po is PassiveItem)
+            {
+                var item = (po as PassiveItem);
+                if (item.passiveStatModifiers == null) return;
+
+                var list = item.passiveStatModifiers.ToList();
+                for (int i = list.Count() - 1; i >= 0; i--) { if (list[i].statToBoost == statType) { list.RemoveAt(i); } }
+                item.passiveStatModifiers = list.ToArray();
+            }
+            else if (po is Gun)
+            {
+                var item = (po as Gun);
+                if (item.passiveStatModifiers == null) return;
+
+                var list = item.passiveStatModifiers.ToList();
+                for (int i = list.Count() - 1; i >= 0; i--) { if (list[i].statToBoost == statType) { list.RemoveAt(i); } }
+                item.passiveStatModifiers = list.ToArray();
+            }
+            else
+            {
+                throw new NotSupportedException("Object must be of type PlayerItem, PassiveItem, or Gun");
+            }
+        }
 
         /// <summary>
         /// Adds a passive player stat modifier to a PlayerItem or PassiveItem

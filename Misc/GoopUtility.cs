@@ -41,6 +41,88 @@ namespace Alexandria.Misc
 
             specialGoopComps = new Dictionary<string, Type>();
         }
+        public static GoopDefinition Clone(this GoopDefinition toClone)
+        {
+            GoopDefinition newGoo = ScriptableObject.CreateInstance<GoopDefinition>();
+
+            //Status Effects
+            newGoo.CanBeIgnited = toClone.CanBeIgnited;
+            newGoo.igniteSpreadTime = toClone.igniteSpreadTime;
+            newGoo.SelfIgnites = toClone.SelfIgnites;
+            newGoo.selfIgniteDelay = toClone.selfIgniteDelay;
+            newGoo.ignitionChangesLifetime = toClone.ignitionChangesLifetime;
+            newGoo.ignitedLifetime = toClone.ignitedLifetime;
+            newGoo.CanBeElectrified = toClone.CanBeElectrified;
+            newGoo.electrifiedTime = toClone.electrifiedTime;
+            newGoo.fireDamageToPlayer = toClone.fireDamageToPlayer;
+            newGoo.fireDamagePerSecondToEnemies = toClone.fireDamagePerSecondToEnemies;
+            newGoo.fireBurnsEnemies = toClone.fireBurnsEnemies;
+            newGoo.fireEffect = toClone.fireEffect;
+            newGoo.UsesGreenFire = toClone.UsesGreenFire;
+            //Misc
+            newGoo.AppliesCharm = toClone.AppliesCharm;
+            newGoo.CharmModifierEffect = toClone.CharmModifierEffect;
+            newGoo.AppliesCheese = toClone.AppliesCheese;
+            newGoo.CheeseModifierEffect = toClone.CheeseModifierEffect;
+
+
+            //Direct Damage
+            newGoo.damagesEnemies = toClone.damagesEnemies;
+            newGoo.damagesPlayers = toClone.damagesPlayers;
+            newGoo.damagePerSecondtoEnemies = toClone.damagePerSecondtoEnemies;
+            newGoo.electrifiedDamageToPlayer = toClone.electrifiedDamageToPlayer;
+            newGoo.electrifiedDamagePerSecondToEnemies = toClone.electrifiedDamagePerSecondToEnemies;
+            newGoo.delayBeforeDamageToPlayers = toClone.delayBeforeDamageToPlayers;
+            newGoo.damageTypes = toClone.damageTypes;
+
+            //Appearance
+            newGoo.baseColor32 = toClone.baseColor32;
+            newGoo.goopTexture = toClone.goopTexture;
+            newGoo.fadeColor32 = toClone.fadeColor32;
+            newGoo.worldTexture = toClone.worldTexture;
+            newGoo.usesWorldTextureByDefault = toClone.usesWorldTextureByDefault;
+            newGoo.usesOverrideOpaqueness = toClone.usesOverrideOpaqueness;
+            newGoo.overrideOpaqueness = toClone.overrideOpaqueness;
+            newGoo.ambientGoopFX = toClone.ambientGoopFX;
+            newGoo.ambientGoopFXChance = toClone.ambientGoopFXChance;
+            newGoo.usesAmbientGoopFX = toClone.usesAmbientGoopFX;
+            newGoo.isOily = toClone.isOily;
+            newGoo.usesAcidAudio = toClone.usesAcidAudio;
+            newGoo.usesWaterVfx = toClone.usesWaterVfx;
+            newGoo.igniteColor32 = toClone.igniteColor32;
+            newGoo.fireColor32 = toClone.fireColor32;
+
+            //Freeze
+            newGoo.CanBeFrozen = toClone.CanBeFrozen;
+            newGoo.freezeLifespan = toClone.freezeLifespan;
+            newGoo.freezeSpreadTime = toClone.freezeSpreadTime;
+            newGoo.prefreezeColor32 = toClone.prefreezeColor32;
+            newGoo.frozenColor32 = toClone.frozenColor32;
+
+            //Speed
+            newGoo.AppliesSpeedModifier = toClone.AppliesSpeedModifier;
+            newGoo.AppliesSpeedModifierContinuously = toClone.AppliesSpeedModifierContinuously;
+            newGoo.SpeedModifierEffect = toClone.SpeedModifierEffect;
+
+            //Poison
+            newGoo.AppliesDamageOverTime = toClone.AppliesDamageOverTime;
+            newGoo.HealthModifierEffect = toClone.HealthModifierEffect;
+
+
+            //Properties
+            newGoo.lifespan = toClone.lifespan;
+            newGoo.usesLifespan = toClone.usesLifespan;
+            newGoo.fadePeriod = toClone.fadePeriod;
+            newGoo.goopDamageTypeInteractions = toClone.goopDamageTypeInteractions;
+            newGoo.lifespanRadialReduction = toClone.lifespanRadialReduction;
+            newGoo.eternal = toClone.eternal;
+            newGoo.playerStepsChangeLifetime = toClone.playerStepsChangeLifetime;
+            newGoo.playerStepsLifetime = toClone.playerStepsLifetime;
+            newGoo.DrainsAmmo = toClone.DrainsAmmo;
+            newGoo.PercentAmmoDrainPerSecond = toClone.PercentAmmoDrainPerSecond;
+
+            return newGoo;
+        }
         public static void RegisterComponentToGoopDefinition(GoopDefinition def, Type comp)
         {
             if (specialGoopComps == null) specialGoopComps = new Dictionary<string, Type>();

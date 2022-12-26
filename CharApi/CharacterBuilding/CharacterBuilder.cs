@@ -18,11 +18,14 @@ namespace Alexandria.CharacterAPI
     public static class CharacterBuilder
     {
         public static Dictionary<string, Tuple<CustomCharacterData, GameObject>> storedCharacters = new Dictionary<string, Tuple<CustomCharacterData, GameObject>>();
+
+
         //public static Dictionary<string, tk2dSpriteCollectionData> storedCollections = new Dictionary<string, tk2dSpriteCollectionData>();
         public static List<Gun> guns = new List<Gun>();
+        public static Dictionary<string, tk2dSpriteCollectionData> storedCollections = new Dictionary<string, tk2dSpriteCollectionData>();
 
 
-        
+
 
         public static void BuildCharacter(CustomCharacterData data, bool hasAltSkin, bool paradoxUsesSprites, bool removeFoyerExtras, bool hasArmourlessAnimations = false, bool usesArmourNotHealth = false, bool hasCustomPast = false, string customPast = "", int metaCost = 0, bool useGlow = false,
             GlowMatDoer glowVars = null, GlowMatDoer altGlowVars = null, Assembly assembly = null)

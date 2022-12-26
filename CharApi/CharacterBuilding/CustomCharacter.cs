@@ -22,6 +22,9 @@ namespace Alexandria.CharacterAPI
         public Texture2D faceCard;
         public List<Texture2D> bossCard = new List<Texture2D>();
         public Dictionary<string, Texture2D> punchoutSprites;
+
+        public tk2dSpriteCollectionData punchoutCollection;
+
         public List<Tuple<PickupObject, bool>> loadout, altGun;
         public int characterID, metaCost;
         public float health = 3, armor = 0;

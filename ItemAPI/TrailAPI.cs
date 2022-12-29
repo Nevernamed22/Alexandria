@@ -13,19 +13,20 @@ namespace Alexandria.ItemAPI
         /// <summary>
         /// Adds a tiled trail to the Projectile
         /// </summary>
-        /// <param name="timeTillAnimStart">How long after spawning until the trail will begin to play it's animation, if it has one.</param>
+        /// <param name="timeTillAnimStart">If set, once this time is reached, the whole trail will animate and dissipate uniformly, interrupting the progressive cascade.</param>
         /// <param name="target">The projectile its being added to.</param>
-        /// <param name="spritePath">The sprite oath to your trail.</param>
+        /// <param name="spritePath">The sprite path for the first frame of your trail's animation. Used for collider generation.</param>
         /// <param name="colliderDimensions">The collider dimensions of your trail.</param>
         /// <param name="colliderOffsets">The offset of your trail from the bottom left corner of your projectile.</param>
-        /// <param name="animPaths">The list of sprite paths for your trails animation.</param>
-        /// <param name="animFPS">The main animations FPS.</param>
-        /// <param name="startAnimPaths">The list of sprite paths for your trails "start" animation.</param>
-        /// <param name="startAnimFPS">The "start" animations FPS.</param>
-        /// <param name="cascadeTimer">The duration between the trail updating its length.</param>
-        /// <param name="softMaxLength">A soft cap on your trails length</param>
+        /// <param name="animPaths">The full list of sprite paths for your trails animation.</param>
+        /// <param name="animFPS">The frames per second of the main trail animation. The longer the animation lasts, the longer the trail will linger.</param>
+        /// <param name="startAnimPaths">The list of sprites for the first segment of the trail, aka the part right next to the gun barrel. Used for 'flaring' trail effects. Can be set to the same list as the regular animation.</param>
+        /// <param name="startAnimFPS">The frames per second of the 'start' animation.</param>
+        /// <param name="cascadeTimer">How quickly the animation will progress between each segment of the trail once it begins to play. Aka: How fast will the trail dissipate.</param>
+        /// <param name="softMaxLength">If the trail length is longer than this value, it will begin to dissipate.</param>
         /// <param name="destroyOnEmpty">Will it be destroyed if it isnt visible anymore? No idea.</param>
-        public static void AddTrailToProjectile(this Projectile target, string spritePath, Vector2 colliderDimensions, Vector2 colliderOffsets, List<string> animPaths = null, int animFPS = -1, List<string> startAnimPaths = null, int startAnimFPS = -1, float timeTillAnimStart = -1, float cascadeTimer = -1, float softMaxLength = -1, bool destroyOnEmpty = false)
+        /// <param name="emissive">If set to true, the trail will glow.</param>
+        public static void AddTrailToProjectile(this Projectile target, string spritePath, Vector2 colliderDimensions, Vector2 colliderOffsets, List<string> animPaths = null, int animFPS = -1, List<string> startAnimPaths = null, int startAnimFPS = -1, float timeTillAnimStart = -1, float cascadeTimer = -1, float softMaxLength = -1, bool emissive = false, bool destroyOnEmpty = true)
         {
             try
             {
@@ -84,12 +85,52 @@ namespace Alexandria.ItemAPI
                 if (softMaxLength > 0) { trail.usesSoftMaxLength = true; trail.softMaxLength = softMaxLength; }
                 if (cascadeTimer > 0) { trail.usesCascadeTimer = true; trail.cascadeTimer = cascadeTimer; }
                 if (timeTillAnimStart > 0) { trail.usesGlobalTimer = true; trail.globalTimer = timeTillAnimStart; }
+                if (emissive) { target.gameObject.GetOrAddComponent<EmmisiveTrail>(); }
                 trail.destroyOnEmpty = destroyOnEmpty;
             }
             catch (Exception e)
             {
                 ETGModConsole.Log(e.ToString());
             }
+        }
+        public class EmmisiveTrail : MonoBehaviour
+        {
+            public EmmisiveTrail()
+            {
+                this.EmissivePower = 75;
+                this.EmissiveColorPower = 1.55f;
+                debugLogging = false;
+            }
+            public void Start()
+            {
+                Shader glowshader = ShaderCache.Acquire("Brave/LitTk2dCustomFalloffTiltedCutoutEmissive");
+
+                foreach (Transform transform in base.transform)
+                {
+
+                    tk2dBaseSprite sproot = transform.GetComponent<tk2dBaseSprite>();
+                    if (sproot != null)
+                    {
+                        if (debugLogging) Debug.Log($"Checks were passed for transform; {transform.name}");
+                        sproot.usesOverrideMaterial = true;
+                        sproot.renderer.material.shader = glowshader;
+                        sproot.renderer.material.EnableKeyword("BRIGHTNESS_CLAMP_ON");
+                        sproot.renderer.material.SetFloat("_EmissivePower", EmissivePower);
+                        sproot.renderer.material.SetFloat("_EmissiveColorPower", EmissiveColorPower);
+                    }
+                    else
+                    {
+                        if (debugLogging) Debug.Log("Sprite was null");
+                    }
+                }
+            }
+            private List<string> TransformList = new List<string>()
+        {
+            "trailObject",
+        };
+            public float EmissivePower;
+            public float EmissiveColorPower;
+            public bool debugLogging;
         }
     }
 }

@@ -32,7 +32,7 @@ namespace Alexandria.EnemyAPI
             return bholsterbeam1;
         }
         /// <summary>
-        /// Adds a directional animation to your AIAnimator (Mostly found in enemies). Directional animations control, the animations that play depending on direction.
+        /// Adds a directional animation to your AIAnimator (Mostly found in enemies). Directional animations control the animations that play depending on direction.
         /// </summary>
         /// <param name="animator">The target AIAnimator.</param>
         /// <param name="Prefix">The prefix of your directional animation. When making your enemy play a specific animation, use this prefix to play the animation so it also accounts for direction.</param>
@@ -172,7 +172,5 @@ namespace Alexandria.EnemyAPI
 
             return sample;
         }
-
-
     }
 }

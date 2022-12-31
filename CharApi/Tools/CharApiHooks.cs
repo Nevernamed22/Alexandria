@@ -688,7 +688,7 @@ namespace Alexandria.CharacterAPI
 
             if ((int)self.m_playerId > 7)
             {
-                string str = PunchoutPlayerController.PlayerUiNames[self.m_playerId];
+                string str = backUpUI[self.m_playerId];
 
                 //string str = (_PlayerUiNames.GetValue(null) as string[])[(int)self.m_playerId];
                 self.HealthBarUI.SpriteName = "punch_health_bar_001";
@@ -727,6 +727,9 @@ namespace Alexandria.CharacterAPI
 
         }
 
+        public static string[] backUp = PunchoutPlayerController.PlayerNames;
+        public static string[] backUpUI = PunchoutPlayerController.PlayerUiNames;
+
 
         //one hook in and im already at the point of wanting to punch my screen thats gotta be a new record!! Update its like 3? (i think, ive lost track couldve been a week) days later and i can say it got worse 
         public static void InitHook(Action<PunchoutController> orig, PunchoutController self)
@@ -736,11 +739,12 @@ namespace Alexandria.CharacterAPI
             FieldInfo _PlayerNames = typeof(PunchoutPlayerController).GetField("PlayerNames", BindingFlags.NonPublic | BindingFlags.Static);
             FieldInfo _PlayerUiNames = typeof(PunchoutPlayerController).GetField("PlayerUiNames", BindingFlags.NonPublic | BindingFlags.Static);
             //ETGModConsole.Log("InitHook 1");
-            if ((int)GameManager.Instance.PrimaryPlayer.characterIdentity > 10 && GameManager.Instance.PrimaryPlayer.gameObject.GetComponent<CustomCharacter>() != null)
+            var CCC = GameManager.Instance.PrimaryPlayer.gameObject.GetComponent<CustomCharacter>();
+            if ((int)GameManager.Instance.PrimaryPlayer.characterIdentity > 10 && CCC != null)
             {
-                var name = GameManager.Instance.PrimaryPlayer.gameObject.GetComponent<CustomCharacter>().data.nameShort.ToLower();
+                var name = CCC.data.nameShort.ToLower();
 
-                if (!((_PlayerNames.GetValue(null) as string[]).Contains("eevee")))
+                if (!backUp.Contains("eevee"))
                 {
                     var fuckFuckFuck = (_PlayerNames.GetValue(null) as string[]).ToList();
                     fuckFuckFuck.Add("eevee");
@@ -751,8 +755,12 @@ namespace Alexandria.CharacterAPI
                     _PlayerUiNames.SetValue(null, fuckFuckFuckShit.ToArray());
                 }
 
+                //ETGModConsole.Log(name);
 
-                if (!((_PlayerNames.GetValue(null) as string[]).Contains(name)))
+  
+
+
+                if (!backUp.Contains(name)) //.Contains(name)))
                 {
                     var fuckFuckFuck = (_PlayerNames.GetValue(null) as string[]).ToList();
                     fuckFuckFuck.Add(name);
@@ -764,10 +772,12 @@ namespace Alexandria.CharacterAPI
 
 
                     CustomCharacter.punchoutBullShit.Add(name, (_PlayerUiNames.GetValue(null) as string[]).Length - 1);
+                    backUp = _PlayerNames.GetValue(null) as string[];
+                    backUpUI = _PlayerUiNames.GetValue(null) as string[];
                 }
 
 
-
+                //Debug.Log("ID to change to: "+ ((_PlayerUiNames.GetValue(null) as string[]).Length - 1));
 
                 //ETGModConsole.Log("InitHook 1.5");
                 //ETGModConsole.Log(PunchoutPlayerController.PlayerNames.Length.ToString());
@@ -779,21 +789,33 @@ namespace Alexandria.CharacterAPI
                 //ETGModConsole.Log("InitHook 3");
                 self.StartCoroutine(self.GetType().GetMethod("UiFadeInCR", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, null) as IEnumerator);
                 _isInitialized.SetValue(self, true);
+                self.Player.sprite.usesOverrideMaterial = true;
 
-                if ((int)GameManager.Instance.PrimaryPlayer?.characterIdentity > 10 && GameManager.Instance.PrimaryPlayer.gameObject.GetComponent<CustomCharacter>() != null)
+
+
+                bool hasMat = false;
+                if ((int)GameManager.Instance.PrimaryPlayer?.characterIdentity > 10 && CCC != null)
                 {
-                    if (GameManager.Instance.PrimaryPlayer.gameObject.GetComponent<CustomCharacter>().data.useGlow)
+
+                    if (CCC.data.useGlow)
                     {
-                        if (GameManager.Instance.PrimaryPlayer.gameObject.GetComponent<CustomCharacter>().data.glowMaterial != null)
+                        if (CCC.data.glowMaterial != null)
                         {
-                            if (GameManager.Instance.PrimaryPlayer.gameObject.GetComponent<CustomCharacter>().data.glowMaterial.GetTexture("_MainTex") != self.Player.sprite.renderer.material.GetTexture("_MainTex"))
+                            if (CCC.data.glowMaterial.GetTexture("_MainTex") != self.Player.sprite.renderer.material.GetTexture("_MainTex"))
                             {
-                                GameManager.Instance.PrimaryPlayer.gameObject.GetComponent<CustomCharacter>().data.glowMaterial.SetTexture("_MainTexture", self.Player.sprite.renderer.material.GetTexture("_MainTex"));
+                                CCC.data.glowMaterial.SetTexture("_MainTexture", self.Player.sprite.renderer.material.GetTexture("_MainTex"));
                             }
-                            self.Player.sprite.renderer.material = GameManager.Instance.PrimaryPlayer.gameObject.GetComponent<CustomCharacter>().data.glowMaterial;
+                            if (hasMat == false) { hasMat = !hasMat; }
+                            self.Player.sprite.renderer.material = CCC.data.glowMaterial;
                         }
                     }
-                    self.Player.sprite.usesOverrideMaterial = true;
+                }
+                if (hasMat == false) 
+                {
+                    Material mat = new Material(SpriteHandler.Default_Punchout_Material);
+                    mat.mainTexture = self.Player.sprite.renderer.material.mainTexture;
+                    mat.SetTexture("_MainTexture", self.Player.sprite.renderer.material.GetTexture("_MainTex"));
+                    self.Player.sprite.renderer.material = mat;
                 }
             }
             else
@@ -804,6 +826,8 @@ namespace Alexandria.CharacterAPI
 
         private static void CustomSwapPlayer(this PunchoutPlayerController self, int? newPlayerIndex = null, bool keepEevee = false)
         {
+
+
             if (newPlayerIndex == null)
             {
                 if (self.IsEevee && !keepEevee)
@@ -812,9 +836,10 @@ namespace Alexandria.CharacterAPI
                 }
                 else
                 {
-                    newPlayerIndex = new int?((self.m_playerId + 1) % (PunchoutPlayerController.PlayerNames.Length));
+                    newPlayerIndex = new int?((self.m_playerId) % (PunchoutPlayerController.PlayerNames.Length));
                 }
             }
+
             if (!keepEevee)
             {
                 bool flag = newPlayerIndex.Value == 7;
@@ -833,24 +858,36 @@ namespace Alexandria.CharacterAPI
                     self.sprite.usesOverrideMaterial = false;
                 }
             }
+
             if (self.IsEevee)
             {
                 newPlayerIndex = new int?(UnityEngine.Random.Range(0, PunchoutPlayerController.PlayerNames.Length));
             }
-            string oldName = PunchoutPlayerController.PlayerNames[self.m_playerId];
-            string newName = PunchoutPlayerController.PlayerNames[newPlayerIndex.Value];
+
+
+            string oldName = backUp[self.m_playerId];
+
+            string newName = backUp[newPlayerIndex.Value];
+
+
             self.m_playerId = newPlayerIndex.Value;
+
             self.SwapAnim(self.aiAnimator.IdleAnimation, oldName, newName);
+
             self.SwapAnim(self.aiAnimator.HitAnimation, oldName, newName);
+
             for (int i = 0; i < self.aiAnimator.OtherAnimations.Count; i++)
             {
                 self.SwapAnim(self.aiAnimator.OtherAnimations[i].anim, oldName, newName);
+
             }
+
             self.UpdateUI();
             List<AIAnimator.NamedDirectionalAnimation> otherAnimations = self.aiAnimator.ChildAnimator.OtherAnimations;
             otherAnimations[0].anim.Type = DirectionalAnimation.DirectionType.None;
             otherAnimations[1].anim.Type = DirectionalAnimation.DirectionType.None;
             otherAnimations[2].anim.Type = DirectionalAnimation.DirectionType.None;
+            /*
             if (self.m_playerId == 4)
             {
                 otherAnimations[0].anim.Type = DirectionalAnimation.DirectionType.Single;
@@ -874,6 +911,7 @@ namespace Alexandria.CharacterAPI
                 otherAnimations[1].anim.Type = DirectionalAnimation.DirectionType.Single;
                 otherAnimations[1].anim.Prefix = "slinger_super_final_vfx";
             }
+            */
         }
 
 

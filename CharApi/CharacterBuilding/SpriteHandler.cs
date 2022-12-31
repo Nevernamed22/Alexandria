@@ -159,6 +159,7 @@ namespace Alexandria.CharacterAPI
                 var libary = player.gameObject.GetComponent<tk2dSpriteAnimator>().Library;
                 var collection = libary.clips[0].frames[0].spriteCollection;
                 var baseName = GetPlayerStringFromIdentity(data.baseCharacter);
+
                 if (data.punchoutFaceCards != null && data.punchoutFaceCards.Count > 0)
                 {
                     for (int i = 0; i < data.punchoutFaceCards.Count; i++)
@@ -166,13 +167,16 @@ namespace Alexandria.CharacterAPI
                         player.PlayerUiSprite.Atlas.AddNewItemToAtlas(data.punchoutFaceCards[i], $"punch_player_health_{data.nameShort.ToLower()}_00{i + 1}");
                     }
                 }
+
                 //ETGModConsole.Log("added to atlas");
                 var defMatches = collection.spriteDefinitions.Where(def => def.name.Contains(baseName) && !def.name.Contains("vfx")).Select(def => def);
                 List<int> ids = new List<int>();
                 //ETGModConsole.Log("pre foreach");
+
                 bool h = false;
                 foreach (var def in defMatches)
                 {
+
                     //.Log(def.name.Replace(baseName, data.nameShort.ToLower()) +": " + data.punchoutSprites.Where(sprite => sprite.Key == (def.name.Replace(baseName, data.nameShort.ToLower()))).Select(sprite => sprite).Count().ToString());
                     /*
                     var sList = data.punchoutSprites.Where(sprite => sprite.Key == (def.name.Replace(baseName, data.nameShort.ToLower()))).ToList();
@@ -181,17 +185,24 @@ namespace Alexandria.CharacterAPI
                         ETGModConsole.Log($"An issue occursed while trying to add the sprite: \"{collection.spriteDefinitions[frame.spriteId].name}\"");
                     }
                     */
+
+
+                    //ETGModConsole.Log(def.name.Replace(baseName, data.nameShort.ToLower()));
+
                     var id = AddSpriteToCollection(data.punchoutSprites.Where(sprite => sprite.Key == (def.name.Replace(baseName, data.nameShort.ToLower()))).First().Value, collection);
                     if (!h)
                     {
+
                         //ToolsCharApi.ExportTexture(collection.spriteDefinitions[id].material.mainTexture.GetReadable(), "ihateyou", "zatherzyoulittlefucker");
                         h = true;
                     }
+
                     collection.spriteDefinitions[id].CopyToSelf(def);
                     //ETGModConsole.Log(collection.spriteDefinitions[id].name);
                     ids.Add(id);
 
                 }
+
                 //ETGModConsole.Log("added to collectiom");
                 var animMatches = libary.clips.Where(clip => clip.name.Contains(baseName) && !clip.name.Contains("vfx")).Select(clip => clip);
 
@@ -214,11 +225,10 @@ namespace Alexandria.CharacterAPI
                     //ETGModConsole.Log(newClip.name);
                     libary.clips = libary.clips.Concat(new tk2dSpriteAnimationClip[] { newClip }).ToArray();
                 }
-
-
             }
-
         }
+
+        public static Material Default_Punchout_Material;
 
         public static string GetPlayerStringFromIdentity(PlayableCharacters identity)
         {
@@ -349,8 +359,10 @@ namespace Alexandria.CharacterAPI
                 //ToolsCharApi.ExportTexture(ToolsCharApi.LoadAssetFromAnywhere<GameObject>("Ammonomicon Atlas").GetComponent<dfAtlas>().Texture.GetReadable(), "ihateyou", "YoumadeashitofpiecewithyourtrashMTG");
             }
 
-
-
+            Default_Punchout_Material = new Material(EnemyDatabase.GetOrLoadByName("GunNut").sprite.renderer.material);
+            Default_Punchout_Material.SetColor("_EmissiveColor", new Color32(0, 0, 0, 0));
+            Default_Punchout_Material.SetFloat("_EmissiveColorPower", 0f);
+            Default_Punchout_Material.SetFloat("_EmissivePower", 0);
         }
         private static tk2dSpriteCollectionData itemCollection = PickupObjectDatabase.GetByEncounterName("singularity").sprite.Collection;
         /// <summary>

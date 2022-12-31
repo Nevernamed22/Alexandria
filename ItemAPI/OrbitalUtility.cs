@@ -53,7 +53,6 @@ namespace Alexandria.ItemAPI
 
             prefab.MakeFakePrefab();
             return prefab;
-        }
-        
+        }     
     }
 }

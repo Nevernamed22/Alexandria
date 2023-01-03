@@ -89,7 +89,30 @@ namespace Alexandria.NPCAPI
         public ShopDiscountController()
         {
             shopItemSelf = this.GetComponent<ShopItemController>();
+            if (shopItemSelf != null)
+            {
+                if (DoManyChecks() == true)
+                {
+                    if (shopItemSelf is CustomShopItemController)
+                    {
+                        StartPrice = shopItemSelf.OverridePrice ?? (shopItemSelf as CustomShopItemController).ModifiedPrice;//shopItemSelf.ModifiedPrice;
+
+                    }
+                    else
+                    {
+                        StartPrice = shopItemSelf.OverridePrice ?? shopItemSelf.ModifiedPrice;
+                    }
+                }
+            }
         }
+        private bool DoManyChecks()
+        {
+            if (GameManager.Instance == null) { return false; }
+            if (GameManager.Instance.PrimaryPlayer == null) { return false; }
+            return true;
+        }
+
+        private float StartPrice = -1;
 
         public void Update()
         {
@@ -120,21 +143,29 @@ namespace Alexandria.NPCAPI
             }
             DoTotalDiscount(mult);
         }
+
+
+        public bool ReturnMoneyCurrencyType()
+        {
+            return shopItemSelf.CurrencyType == ShopItemController.ShopCurrencyType.COINS;
+        }
         private void DoTotalDiscount(float H)
         {
             if (shopItemSelf == null) { return; }
             if (GameManager.Instance == null) { return; }
             if (GameManager.Instance.PrimaryPlayer == null) { return; }
 
-            GameLevelDefinition lastLoadedLevelDefinition = GameManager.Instance.GetLastLoadedLevelDefinition();
-            float newCost = shopItemSelf.item.PurchasePrice;
-            float num4 = (lastLoadedLevelDefinition == null) ? 1f : lastLoadedLevelDefinition.priceMultiplier;
+            //GameLevelDefinition lastLoadedLevelDefinition = GameManager.Instance.GetLastLoadedLevelDefinition();
+            float newCost = StartPrice != -1 ? StartPrice : ReturnMoneyCurrencyType() == false ? shopItemSelf.CurrentPrice : shopItemSelf.ModifiedPrice;
+            //float num4 = (lastLoadedLevelDefinition == null) ? 1f : lastLoadedLevelDefinition.priceMultiplier;
+
             float num3 = GameManager.Instance.PrimaryPlayer.stats.GetStatValue(PlayerStats.StatType.GlobalPriceMultiplier);
+
             if (GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER && GameManager.Instance.SecondaryPlayer)
             {
                 num3 *= GameManager.Instance.SecondaryPlayer.stats.GetStatValue(PlayerStats.StatType.GlobalPriceMultiplier);
             }
-            newCost *= num4 * num3;
+            newCost *= num3;
             shopItemSelf.OverridePrice = (int)(newCost *= H);
         }
 
@@ -142,7 +173,7 @@ namespace Alexandria.NPCAPI
         {
             if (shopItemSelf == null) { return; }
             GameLevelDefinition lastLoadedLevelDefinition = GameManager.Instance != null ? GameManager.Instance.GetLastLoadedLevelDefinition() : null;
-            float newCost = shopItemSelf.item.PurchasePrice;
+            float newCost = StartPrice != -1 ? StartPrice : shopItemSelf.item.PurchasePrice;
             float num4 = (lastLoadedLevelDefinition == null) ? 1f : lastLoadedLevelDefinition.priceMultiplier;
 
             float num3 = GameManager.Instance.PrimaryPlayer != null ? GameManager.Instance.PrimaryPlayer.stats.GetStatValue(PlayerStats.StatType.GlobalPriceMultiplier) : 1;
@@ -150,6 +181,7 @@ namespace Alexandria.NPCAPI
             {
                 num3 *= GameManager.Instance.SecondaryPlayer.stats.GetStatValue(PlayerStats.StatType.GlobalPriceMultiplier);
             }
+
             newCost *= num4 * num3;
             shopItemSelf.OverridePrice = (int)(newCost);
         }

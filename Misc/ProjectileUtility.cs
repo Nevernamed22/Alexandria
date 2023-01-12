@@ -350,6 +350,27 @@ namespace Alexandria.Misc
             if (target.aiActor && target.aiActor.IsBlackPhantom) dmg *= bullet.BlackPhantomDamageMultiplier;
             return dmg;
         }
+
+        /// <summary>
+        /// Makes the target projectile the property of the given player, and scales the projectile's stats off of that player's stats.
+        /// </summary>
+        /// <param name="bullet">Target projectile</param>
+        /// <param name="player">The player the bullet will be assigned to.</param>
+        /// <param name="postProcess">Whether or not to automatically postprocess the given projectile.</param>
+        public static void AssignToPlayer(this Projectile bullet, PlayerController player, bool postProcess = false)
+        {
+            if (player && bullet)
+            {
+                bullet.Owner = player;
+                bullet.Shooter = player.specRigidbody;
+                bullet.baseData.damage *= player.stats.GetStatValue(PlayerStats.StatType.Damage);
+                bullet.baseData.speed *= player.stats.GetStatValue(PlayerStats.StatType.ProjectileSpeed);
+                bullet.baseData.range *= player.stats.GetStatValue(PlayerStats.StatType.RangeMultiplier);
+                bullet.baseData.force *= player.stats.GetStatValue(PlayerStats.StatType.KnockbackMultiplier);
+                bullet.BossDamageMultiplier *= player.stats.GetStatValue(PlayerStats.StatType.KnockbackMultiplier);
+                if (postProcess) player.DoPostProcessProjectile(bullet);
+            }
+        }
     }
 
 }

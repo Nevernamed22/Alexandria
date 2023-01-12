@@ -364,7 +364,7 @@ namespace Alexandria.CharacterAPI
             Default_Punchout_Material.SetFloat("_EmissiveColorPower", 0f);
             Default_Punchout_Material.SetFloat("_EmissivePower", 0);
         }
-        private static tk2dSpriteCollectionData itemCollection = PickupObjectDatabase.GetByEncounterName("singularity").sprite.Collection;
+        private static tk2dSpriteCollectionData itemCollection = PickupObjectDatabase.GetById(155).sprite.Collection;
         /// <summary>
         /// Returns an object with a tk2dSprite component with the texture provided
         /// </summary>

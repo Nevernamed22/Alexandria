@@ -547,6 +547,11 @@ namespace Alexandria.ItemAPI
                 }
             }
         }
+
+        /// <summary>
+        /// Returns true if the gun has an owner, and that owner is currently using it as their active weapon.
+        /// </summary>
+        /// <param name="gun">The gun being checked.</param>
         public static bool IsCurrentGun(this Gun gun)
         {
             if (gun && gun.CurrentOwner)
@@ -556,15 +561,112 @@ namespace Alexandria.ItemAPI
             }
             else return false;
         }
-        public static PlayerController GunPlayerOwner(this Gun bullet)
+
+        /// <summary>
+        /// Returns the owner of the gun if that owner is a player. If the gun does not have an owner, or that owner is an enemy, returns null.
+        /// </summary>
+        /// <param name="gun">The gun being checked for an owner.</param>
+        public static PlayerController GunPlayerOwner(this Gun gun)
         {
-            if (bullet && bullet.CurrentOwner && bullet.CurrentOwner is PlayerController) return bullet.CurrentOwner as PlayerController;
+            if (gun && gun.CurrentOwner && gun.CurrentOwner is PlayerController) return gun.CurrentOwner as PlayerController;
             else return null;
         }
+
         public static ProjectileModule AddProjectileModuleToRawVolley(this Gun gun, ProjectileModule projectile)
         {
             gun.RawSourceVolley.projectiles.Add(projectile);
             return projectile;
+        }
+
+        /// <summary>
+        /// Adds an additional form to the Gun.
+        /// </summary>
+        /// <param name="gun">The gun being given an additional form.</param>
+        /// <param name="synergyFormeID">The item ID of the additional form. All 'forms' are actually other guns in the EXCLUDED tier, so they have an ID.</param>
+        /// <param name="requiresSynergy">If true, the form will only be available when a set synergy is obtained.</param>
+        /// <param name="requiredSynergy">The enum value of the required synergy. Only matters if 'requiresSynergy' is true. For string-type synergies, there is another extension of the same name that takes a string here instead.</param>
+        /// <param name="overridesDefault">If true, this form will prevent the player from using the default form of the gun. Set true for forced override forms like Blunderbuss 'Blunderbrace', set false for optional swappable forms like AK-47 'Island Forme' or the Megahand's synergies.</param>
+        public static AdvancedGunFormeSynergyProcessor AddTransformSynergy(this Gun gun, int synergyFormeID, bool requiresSynergy, CustomSynergyType requiredSynergy, bool overridesDefault = true)
+        {
+            return AddTransformSynergyInternal(gun, synergyFormeID, "", requiredSynergy, overridesDefault, requiresSynergy, true);
+        }
+        /// <summary>
+        /// Adds an additional form to the Gun.
+        /// </summary>
+        /// <param name="gun">The gun being given an additional form.</param>
+        /// <param name="synergyFormeID">The item ID of the additional form. All 'forms' are actually other guns in the EXCLUDED tier, so they have an ID.</param>
+        /// <param name="requiresSynergy">If true, the form will only be available when a set synergy is obtained.</param>
+        /// <param name="requiredSynergy">The string identifier of the required synergy. Only matters if 'requiresSynergy' is true. For enum-type synergies, there is another extension of the same name that takes an enum here instead.</param>
+        /// <param name="overridesDefault">If true, this form will prevent the player from using the default form of the gun. Set true for forced override forms like Blunderbuss 'Blunderbrace', set false for optional swappable forms like AK-47 'Island Forme' or the Megahand's synergies.</param>
+        public static AdvancedGunFormeSynergyProcessor AddTransformSynergy(this Gun gun, int synergyFormeID, bool requiresSynergy, string requiredSynergy, bool overridesDefault = true)
+        {
+            return AddTransformSynergyInternal(gun, synergyFormeID, requiredSynergy, CustomSynergyType.AIR_BUSTER, overridesDefault, requiresSynergy, false);
+        }
+        private static AdvancedGunFormeSynergyProcessor AddTransformSynergyInternal(Gun gun, int targetID, string synergyString, CustomSynergyType enumSynergy, bool invalidIfOnly, bool requiresSynergy, bool enumType)
+        {
+            AdvancedGunFormeSynergyProcessor existing = gun.GetComponent<AdvancedGunFormeSynergyProcessor>();
+            if (existing == null)
+            {
+                existing = gun.gameObject.AddComponent<AdvancedGunFormeSynergyProcessor>();
+                AdvancedGunFormeData defaultForme = ScriptableObject.CreateInstance<AdvancedGunFormeData>();
+                defaultForme.defaultInvalidIfOnlyForm = false;
+                defaultForme.FormeID = gun.PickupObjectId;
+                defaultForme.RequiresSynergy = false;
+                existing.Formes = new List<AdvancedGunFormeData>() { defaultForme };
+            }
+
+            GunFormeSynergyProcessor existingFormeHandler = gun.GetComponent<GunFormeSynergyProcessor>();
+            if (existingFormeHandler != null)
+            {
+                List<GunFormeData> extData = existingFormeHandler.Formes.ToList();
+                foreach (GunFormeData forme in extData)
+                {
+                    if (forme.FormeID != gun.PickupObjectId)
+                    {
+                        AdvancedGunFormeData portedForme = ScriptableObject.CreateInstance<AdvancedGunFormeData>();
+                        portedForme.defaultInvalidIfOnlyForm = false;
+                        if (requiresSynergy)
+                        {
+                            portedForme.EnumTypeSynergy = true;
+                            portedForme.RequiredSynergyEnum = forme.RequiredSynergy;
+                        }
+                        portedForme.RequiresSynergy = forme.RequiresSynergy;
+                        portedForme.FormeID = forme.FormeID;
+                        existing.Formes.Add(portedForme);
+                    }
+                }
+                UnityEngine.Object.Destroy(existingFormeHandler);
+            }
+
+            TransformGunSynergyProcessor existingTransformer = gun.GetComponent<TransformGunSynergyProcessor>();
+            if (existingTransformer != null)
+            {
+                AdvancedGunFormeData portedTransformation = ScriptableObject.CreateInstance<AdvancedGunFormeData>();
+                portedTransformation.defaultInvalidIfOnlyForm = true;
+                if (requiresSynergy)
+                {
+                    portedTransformation.EnumTypeSynergy = true;
+                    portedTransformation.RequiredSynergyEnum = existingTransformer.SynergyToCheck;
+                }
+                portedTransformation.RequiresSynergy = true;
+                portedTransformation.FormeID = existingTransformer.SynergyGunId;
+                existing.Formes.Add(portedTransformation);
+            }
+
+            AdvancedGunFormeData newForme = ScriptableObject.CreateInstance<AdvancedGunFormeData>();
+            newForme.defaultInvalidIfOnlyForm = invalidIfOnly;
+            if (requiresSynergy)
+            {
+                newForme.EnumTypeSynergy = enumType;
+                newForme.RequiredSynergyEnum = enumSynergy;
+                newForme.RequiredSynergyString = synergyString;
+            }
+            newForme.RequiresSynergy = requiresSynergy;
+            newForme.FormeID = targetID;
+
+            existing.Formes.Add(newForme);
+
+            return existing;
         }
         public static ProjectileModule AddProjectileModuleToRawVolleyFrom(this Gun gun, Gun other, bool cloned = true)
         {

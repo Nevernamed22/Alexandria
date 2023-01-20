@@ -14,10 +14,12 @@ namespace Alexandria.ItemAPI
         {
             DestroyBaseAfterFirstSlash = false;
             timeBetweenSlashes = 1;
-            initialDelay = 0;
+            initialDelay = 0f;
             slashParameters = ScriptableObject.CreateInstance<SlashData>();
             SlashDamageUsesBaseProjectileDamage = true;
             timeBetweenCustomSequenceSlashes = 0.15f;
+            customSequence = null;
+            angleVariance = 0;
         }
         private void Start()
         {
@@ -29,34 +31,27 @@ namespace Alexandria.ItemAPI
         {
             if (this.m_projectile)
             {
-                if (timer > 0)
-                {
-                    timer -= BraveTime.DeltaTime;
-                }
-                if (timer <= 0)
-                {
-                    this.m_projectile.StartCoroutine(DoAttackSequence());
-                    timer = timeBetweenSlashes;
-                }
+                if (timer > 0f) { timer -= BraveTime.DeltaTime; }
+                else { m_projectile.StartCoroutine(DoAttackSequence()); }
             }
         }
         private IEnumerator DoAttackSequence()
         {
-            if (customSequence != null)
+            if (customSequence != null && customSequence.Count > 0)
             {
                 foreach (float angle in customSequence)
                 {
-                    yield return DoSlash(angle);
+                    DoSlash(angle);
                     yield return new WaitForSeconds(timeBetweenCustomSequenceSlashes);
                 }
             }
-            else { yield return DoSlash(0); }
-            
+            else { DoSlash(0); }
+
             timer = timeBetweenSlashes;
-            if (DestroyBaseAfterFirstSlash) yield return Suicide();
+            if (DestroyBaseAfterFirstSlash) StartCoroutine(Suicide());
             yield break;
         }
-        private IEnumerator DoSlash(float angle)
+        private void DoSlash(float angle)
         {
             Projectile proj = this.m_projectile;
             List<GameActorEffect> effects = new List<GameActorEffect>();
@@ -72,13 +67,13 @@ namespace Alexandria.ItemAPI
                 instSlash.enemyKnockbackForce = this.m_projectile.baseData.force;
             }
             instSlash.OnHitTarget += SlashHitTarget;
+            instSlash.OnHitBullet += SlashHitBullet;
+            instSlash.OnHitMajorBreakable += SlashHitMajorBreakable;
+            instSlash.OnHitMinorBreakable += SlashHitMinorBreakable;
 
             angle += UnityEngine.Random.Range(angleVariance, -angleVariance);
 
             SlashDoer.DoSwordSlash(this.m_projectile.specRigidbody.UnitCenter, (this.m_projectile.Direction.ToAngle() + angle), owner, instSlash);
-
-            
-            yield break;
         }
         private IEnumerator Suicide()
         {
@@ -92,6 +87,21 @@ namespace Alexandria.ItemAPI
         /// <param name="target">The game actor that has been hit by the slash.</param>
         /// <param name="fatal">Whether or not the slash killed the actor it hit.</param>
         public virtual void SlashHitTarget(GameActor target, bool fatal) { }
+        /// <summary>
+        /// Called when the slash hits a projectile.
+        /// </summary>
+        /// <param name="target">The projectile that has been hit by the slash.</param>
+        public virtual void SlashHitBullet(Projectile target) { }
+        /// <summary>
+        /// Called when the slash hits a Minor breakable object
+        /// </summary>
+        /// <param name="target">The object that has been hit by the slash.</param>
+        public virtual void SlashHitMinorBreakable(MinorBreakable target) { }
+        /// <summary>
+        /// Called when the slash hits a Major breakable object
+        /// </summary>
+        /// <param name="target">The object that has been hit by the slash.</param>
+        public virtual void SlashHitMajorBreakable(MajorBreakable target) { }
 
         /// <summary>
         /// How long should the projectile wait after spawning before doing it's first slash. Zero by default, meaning it occurs instantly.

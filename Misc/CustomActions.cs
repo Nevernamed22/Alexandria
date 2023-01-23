@@ -218,16 +218,12 @@ namespace Alexandria.Misc
         {
             ValidPedestalContents contentsSet = new ValidPedestalContents();
             contentsSet.overrideItemPool = new List<Tuple<int, float>>();
-
             if (OnRewardPedestalDetermineContents != null) OnRewardPedestalDetermineContents(self, compareAgainst, contentsSet);
-
             if (contentsSet.overrideItemPool.Count > 0)
             {
                 GenericLootTable onTheFlyLootTable = LootUtility.CreateLootTable();
                 foreach (Tuple<int, float> entry in contentsSet.overrideItemPool) { onTheFlyLootTable.AddItemToPool(entry.First, entry.Second); }
-                self.lootTable.lootTable = onTheFlyLootTable;
-                self.UsesSpecificItem = false;
-                self.contents = null;
+                self.contents = onTheFlyLootTable.SelectByWeightNoExclusions().GetComponent<PickupObject>();
             }
             orig(self, compareAgainst);
         }

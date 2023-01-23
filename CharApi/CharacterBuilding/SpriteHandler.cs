@@ -3,11 +3,13 @@ using System.Linq;
 using System.Reflection;
 
 using UnityEngine;
+using System.Text.RegularExpressions;
 
 
 using System;
 using Alexandria.ItemAPI;
 using System.IO;
+using Microsoft.Cci;
 
 namespace Alexandria.CharacterAPI
 {
@@ -312,6 +314,59 @@ namespace Alexandria.CharacterAPI
             //ETGModConsole.Log(anim.name);
             //}
         }
+        public static void HandleSpritesBundle(PlayerController player, tk2dSpriteAnimation d1, tk2dSpriteCollectionData spr1, tk2dSpriteAnimation d2, tk2dSpriteCollectionData spr2, CustomCharacterData data, Assembly assembly = null)
+        {
+            if (data.minimapIcon != null)
+                HandleMinimapIcons(player, data);
+
+            if (data.bossCard != null)
+                HandleBossCards(player, data);
+
+            if ((data.altSprites != null || data.altPlayerSheet != null) && string.IsNullOrEmpty(data.pathForAltSprites))
+                HandleAltAnimations(player, data);
+
+
+            if ((data.sprites != null || data.playerSheet != null) && string.IsNullOrEmpty(data.pathForSprites))
+                HandleAnimations(player, data);
+
+            
+            if (d2 != null && spr2 != null)
+                SetupLitterallyEverythingPremade(player, spr2, d2, data, data.pathForAltSprites, true, assembly ?? Assembly.GetCallingAssembly());
+
+
+            if (d1 != null && spr1 != null)
+                SetupLitterallyEverythingPremade(player, spr1, d1, data, data.pathForSprites, false, assembly ?? Assembly.GetCallingAssembly());
+            
+
+
+            //face card stuff
+            uiAtlas = GameUIRoot.Instance.ConversationBar.portraitSprite.Atlas;
+            if (data.faceCard != null)
+                HandleFacecards(player, data);
+
+            if (data.punchoutSprites != null && data.punchoutSprites.Count > 0)
+            {
+                //ETGModConsole.Log("pre punchout setup");
+                SetupLitterallyEverythingForPunchOut2(data);
+            }
+
+
+            if (data.loadoutSprites != null)
+                HandleLoudoutSprites(player, data);
+
+            if (data.coopDeathScreenIcon != null)
+            {
+                //ETGModConsole.Log($"\"coop_page_death_{data.nameShort.ToLower()}_001\" added");
+                uiAtlas.AddNewItemToAtlas(data.coopDeathScreenIcon, $"coop_page_death_{data.nameShort.ToLower()}_001");
+                //ToolsCharApi.ExportTexture(ToolsCharApi.LoadAssetFromAnywhere<GameObject>("Ammonomicon Atlas").GetComponent<dfAtlas>().Texture.GetReadable(), "ihateyou", "YoumadeashitofpiecewithyourtrashMTG");
+            }
+
+            Default_Punchout_Material = new Material(EnemyDatabase.GetOrLoadByName("GunNut").sprite.renderer.material);
+            Default_Punchout_Material.SetColor("_EmissiveColor", new Color32(0, 0, 0, 0));
+            Default_Punchout_Material.SetFloat("_EmissiveColorPower", 0f);
+            Default_Punchout_Material.SetFloat("_EmissivePower", 0);
+        }
+
 
         public static void HandleSprites(PlayerController player, CustomCharacterData data, Assembly assembly = null)
         {
@@ -589,6 +644,128 @@ namespace Alexandria.CharacterAPI
             return tex.Resize(width, height);
         }
 
+        public static void SetupLitterallyEverythingPremade(PlayerController player, tk2dSpriteCollectionData SpriteData, tk2dSpriteAnimation d1, CustomCharacterData data, string path, bool alt, Assembly assembly = null)
+        {
+
+            GameObject libaryObject = new GameObject((data.nameShort + "Animator").Replace(" ", "_") + (alt ? "_alt" : ""));
+
+            FakePrefab.MarkAsFakePrefab(libaryObject);
+            var collection = d1;
+
+            if (alt)
+            {
+                data.altCollection = SpriteData;
+            }
+            else
+            {
+                data.collection = SpriteData;
+            }
+
+
+            data.animator = player.gameObject.transform.Find("PlayerSprite").gameObject.GetOrAddComponent<tk2dSpriteAnimator>();
+            data.animator.Library = d1;
+
+            foreach (var anim in data.animator.Library.clips)
+            {
+                for (int i = 0; i <= anim.frames.Length; i++)
+                {
+                    if (anim.name.Contains("run_"))
+                    {
+                        if (i == 2 || i == 5)
+                        {
+                            anim.frames[i].eventAudio = "Play_FS";
+                            anim.frames[i].triggerEvent = true;
+                        }
+                    }
+                    if (anim.name == "pitfall" || anim.name == "pitfall_down")
+                    {
+                        if (i == 0)
+                        {
+                            anim.frames[i].eventAudio = "Play_Fall";
+                            anim.frames[i].triggerEvent = true;
+                        }
+                    }
+                    if (anim.name == "pitfall_return")
+                    {
+                        if (i == 0)
+                        {
+                            anim.frames[i].eventAudio = "Play_Respawn";
+                            anim.frames[i].triggerEvent = true;
+                        }
+                    }
+
+                    if (anim.name.Contains("dodge"))
+                    {
+                        if (i == 0)
+                        {
+                            anim.frames[i].eventAudio = "Play_Leap";
+                            anim.frames[i].triggerEvent = true;
+                        }
+                        if (i == 5)
+                        {
+                            anim.frames[i].eventAudio = "Play_Roll";
+                            anim.frames[i].triggerEvent = true;
+                        }
+                    }
+
+                    if (anim.name == "doorway")
+                    {
+                        if (i == 0)
+                        {
+                            anim.frames[i].eventAudio = "Play_CHR_boot_stairs_01";
+                            anim.frames[i].triggerEvent = true;
+                        }
+                    }
+
+                    if (anim.name == "pet")
+                    {
+                        if (i == 0)
+                        {
+                            anim.frames[i].eventAudio = "Play_CHR_fool_voice_01";
+                            anim.frames[i].triggerEvent = true;
+                        }
+                    }
+                }
+
+                if (anim.name.Contains("dodge"))
+                {
+                    for (int i = 0; i <= (anim.frames.Length / 2); i++)
+                    {
+                        anim.frames[i].invulnerableFrame = true;
+                        anim.frames[i].groundedFrame = false;
+                    }
+                }
+
+                if (anim.name.Contains("tablekick"))
+                {
+                    for (int i = 0; i < (anim.frames.Length); i++)
+                    {
+                        anim.frames[i].invulnerableFrame = true;
+                    }
+                }
+
+                if (anim.name.Contains("slide"))
+                {
+                    for (int i = 0; i < (anim.frames.Length); i++)
+                    {
+                        anim.frames[i].invulnerableFrame = true;
+                    }
+                }
+            }
+
+           
+
+            if (alt)
+            {
+                player.AlternateCostumeLibrary = data.animator.Library;
+            }
+            else
+            {
+                player.spriteAnimator.Library = data.animator.Library;
+                player.sprite.Collection = data.collection;
+                player.sprite.spriteId = data.collection.GetSpriteIdByName($"{data.nameShort}_idle0");
+            }
+        }
 
 
         public static void SetupLitterallyEverything(PlayerController player, CustomCharacterData data, string path, bool alt, Assembly assembly = null)

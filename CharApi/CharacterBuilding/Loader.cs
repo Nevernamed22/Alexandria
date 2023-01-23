@@ -269,6 +269,63 @@ namespace Alexandria.CharacterAPI
         }
 
 
+        public static CustomCharacterData BuildCharacterBundle(string filePath, tk2dSpriteCollectionData d1, tk2dSpriteAnimation SteveData1, tk2dSpriteCollectionData d2, tk2dSpriteAnimation SteveData2, string guid, Vector3 foyerPos, bool hasAltSkin, Vector3 altSwapperPos, bool removeFoyerExtras = true, bool hasArmourlessAnimations = false, bool usesArmourNotHealth = false, bool paradoxUsesSprites = true,
+    bool useGlow = false, GlowMatDoer glowVars = null, GlowMatDoer altGlowVars = null, int metaCost = 0, bool hasCustomPast = false, string customPast = "", Texture2D BossCard = null)
+        {
+            //ETGModConsole.Log(BotsModule.FilePath);
+            //ETGModConsole.Log(BotsModule.ZipFilePath);
+
+            var data = GetCharacterDataBundle(filePath, Assembly.GetCallingAssembly());
+            if (BossCard)
+            {
+                data.bossCard.Add(BossCard);
+            }
+            data.foyerPos = foyerPos;
+            data.idleDoer = new CharacterSelectIdleDoer
+            {
+                onSelectedAnimation = "select_choose",
+                coreIdleAnimation = "select_idle",
+                idleMax = 10,
+                idleMin = 4,
+                EeveeTex = null,
+                IsEevee = false,
+                AnimationLibraries = new tk2dSpriteAnimation[0],
+                phases = new CharacterSelectIdlePhase[0],
+
+            };
+
+
+
+
+            data.skinSwapperPos = altSwapperPos;
+
+            data.identity = ETGModCompatibility.ExtendEnum<PlayableCharacters>(guid, data.nameShort);
+
+            bool success = true;
+
+            try
+            {
+                CharacterBuilder.BuildCharacterBundle(data, d1, SteveData1, d2, SteveData2, hasAltSkin, paradoxUsesSprites, removeFoyerExtras, hasArmourlessAnimations, usesArmourNotHealth, hasCustomPast, customPast, metaCost, useGlow, glowVars, altGlowVars, Assembly.GetCallingAssembly());
+                myPlayableCharacters.Add(data.identity);
+            }
+            catch (Exception e)
+            {
+                success = false;
+                ToolsCharApi.PrintError("An error occured while creating the character: " + data.name);
+                ToolsCharApi.PrintException(e);
+            }
+
+
+            if (success)
+            {
+                ToolsCharApi.Print("Built prefab for: " + data.name);
+                return data;
+            }
+            return null;
+        }
+
+
+
         public static void AddCoopBlankOverride(string character, Func<PlayerController, float> overrideMethod)
         {
             CharacterBuilder.storedCharacters[character.ToLower()].First.coopBlankReplacement = overrideMethod;
@@ -476,7 +533,206 @@ namespace Alexandria.CharacterAPI
 
             return data;
             
-        }       
+        }
+
+        private static CustomCharacterData GetCharacterDataBundle(string filePath, Assembly assembly = null)
+        {
+
+            filePath = filePath.Replace("/", ".").Replace("\\", ".");
+
+            ToolsCharApi.StartTimer("Loading data for " + Path.GetFileName(filePath));
+            ToolsCharApi.Print("");
+            ToolsCharApi.Print("--Loading " + Path.GetFileName(filePath) + "--", "0000FF");
+            //string customCharacterDir = Path.Combine(CharacterDirectory, filePath).Replace("/", ".").Replace("\\", ".");
+            string dataFilePath = Path.Combine(filePath, "characterdata.txt").Replace("/", ".").Replace("\\", ".");
+
+
+            assembly = assembly ?? Assembly.GetCallingAssembly();
+            var lines = new string[0];
+
+            using (Stream stream = assembly.GetManifestResourceStream(dataFilePath))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                var linesList = new List<string>();
+                string line = null;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    linesList.Add(line);
+                }
+                //ToolsCharApi.PrintError(linesList.Count().ToString());
+                lines = linesList.ToArray();
+            }
+
+
+
+            if (lines.Count() <= 0)
+            {
+                ToolsCharApi.PrintError($"No \"{DataFile}\" file found for " + Path.GetFileName(filePath));
+                return null;
+            }
+
+
+            //var lines = ToolsCharApi.GetLinesFromFile(dataFilePath);
+            var data = ParseCharacterData(lines);
+
+            string spritesDir = Path.Combine(filePath, "sprites").Replace("/", ".").Replace("\\", ".");
+            string newSpritesDir = Path.Combine(filePath, "newspritesetup").Replace("/", ".").Replace("\\", ".");
+            string newAltSpritesDir = Path.Combine(filePath, "newaltspritesetup").Replace("/", ".").Replace("\\", ".");
+            string altSpritesDir = Path.Combine(filePath, "alt_sprites").Replace("/", ".").Replace("\\", ".");
+            string loadoutDir = Path.Combine(filePath, "loadoutsprites").Replace("/", ".").Replace("\\", ".");
+            string foyerDir = Path.Combine(filePath, "foyercard").Replace("/", ".").Replace("\\", ".");
+            string punchoutDir = Path.Combine(filePath, "punchout").Replace("/", ".").Replace("\\", ".");
+            string punchoutSpritesDir = Path.Combine(filePath, "punchout.sprites").Replace("/", ".").Replace("\\", ".");
+
+
+            string[] resources = ResourceExtractor.GetResourceNames(assembly);
+
+            for (int i = 0; i < resources.Length; i++)
+            {
+                if (resources[i].Contains(filePath))
+                {
+
+                    if (resources[i].StartsWith(spritesDir.Replace('/', '.'), StringComparison.OrdinalIgnoreCase) && data.sprites == null)
+                    {
+                        //ToolsCharApi.PrintError("Found: Sprites folder");
+                        data.sprites = ResourceExtractor.GetTexturesFromResource(spritesDir, assembly);
+                    }
+
+
+
+                    if (resources[i].StartsWith(altSpritesDir.Replace('/', '.'), StringComparison.OrdinalIgnoreCase) && data.altSprites == null)
+                    {
+                        //ToolsCharApi.PrintError("Found: Alt Sprites folder");
+                        data.altSprites = ResourceExtractor.GetTexturesFromResource(altSpritesDir, assembly);
+                    }
+
+                    if (resources[i].StartsWith(newSpritesDir.Replace('/', '.'), StringComparison.OrdinalIgnoreCase) && string.IsNullOrEmpty(data.pathForSprites))
+                    {
+                        //ToolsCharApi.PrintError("Found: New Sprites folder");
+                        data.pathForSprites = newSpritesDir;
+                    }
+
+                    if (resources[i].StartsWith(newAltSpritesDir.Replace('/', '.'), StringComparison.OrdinalIgnoreCase) && string.IsNullOrEmpty(data.pathForAltSprites))
+                    {
+                        //ToolsCharApi.PrintError("Found: New Sprites folder");
+                        data.pathForAltSprites = newAltSpritesDir;
+                    }
+
+
+                    if (resources[i].StartsWith(foyerDir.Replace('/', '.'), StringComparison.OrdinalIgnoreCase) && data.foyerCardSprites == null)
+                    {
+                        //ToolsCharApi.PrintError("Found: Foyer card folder");
+                        data.foyerCardSprites = ResourceExtractor.GetTexturesFromResource(foyerDir, assembly);
+                    }
+
+
+
+                    if (resources[i].StartsWith(loadoutDir.Replace('/', '.'), StringComparison.OrdinalIgnoreCase) && data.loadoutSprites == null)
+                    {
+                        //ToolsCharApi.PrintError("Found: Loadout card folder");
+
+                        data.loadoutSprites = ResourceExtractor.GetTexturesFromResource(loadoutDir, assembly);
+
+                        //ToolsCharApi.PrintError(data.loadoutSprites.Count.ToString());
+                    }
+
+
+                    if (resources[i].StartsWith(punchoutSpritesDir.Replace('/', '.'), StringComparison.OrdinalIgnoreCase) && data.punchoutSprites == null)
+                    {
+                        ToolsCharApi.Print("Found: Punchout Sprites folder");
+                        Debug.Log("Found: Punchout Sprites folder");
+                        data.punchoutSprites = new Dictionary<string, Texture2D>();
+                        foreach (var tex in ResourceExtractor.GetTexturesFromResource(punchoutSpritesDir, assembly))
+                        {
+                            data.punchoutSprites.Add(tex.name, tex);
+                        }
+
+
+                    }
+
+                    if (resources[i].StartsWith(punchoutDir.Replace('/', '.'), StringComparison.OrdinalIgnoreCase) && data.punchoutFaceCards == null)
+                    {
+                        data.punchoutFaceCards = new List<Texture2D>();
+                        //ETGModConsole.Log(punchoutDir);
+                        var punchoutSprites = ResourceExtractor.GetTexturesFromResource(punchoutDir, assembly);
+                        foreach (var tex in punchoutSprites)
+                        {
+                            string name = tex.name.ToLower();
+                            if (name.Contains("facecard1") || name.Contains("facecard2") || name.Contains("facecard3"))
+                            {
+                                data.punchoutFaceCards.Add(tex);
+                                ToolsCharApi.Print("Found: Punchout facecard " + tex.name);
+                            }
+                        }
+                    }
+
+                }
+            }
+
+
+            //ToolsCharApi.PrintError("new sprites");
+
+            //ToolsCharApi.PrintError("alt sprites");
+            //ToolsCharApi.PrintError("foyer card sprites");
+
+            //ToolsCharApi.PrintError("loadout sprites");
+            List<Texture2D> miscTextures = ResourceExtractor.GetTexturesFromResource(filePath, assembly ?? Assembly.GetCallingAssembly());
+            foreach (var tex in miscTextures)
+            {
+                string name = tex.name.ToLower();
+                if (name.Equals("icon"))
+                {
+                    //ToolsCharApi.PrintError("Found: Icon ");
+                    data.minimapIcon = tex;
+                }
+                if (name.Equals("coop_page_death"))
+                {
+                    //ToolsCharApi.PrintError("Found: Icon ");
+                    data.coopDeathScreenIcon = tex;
+                }
+                if (name.Equals("playersheet"))
+                {
+                    //ToolsCharApi.PrintError("Found: Playersheet");
+                    data.playerSheet = tex;
+                }
+                if (name.Equals("facecard"))
+                {
+                    //ToolsCharApi.PrintError("Found: Facecard");
+                    data.faceCard = tex;
+                }
+                if (name.Equals("win_pic_junkan"))
+                {
+                    //ToolsCharApi.PrintError("Found: Junkan Win Pic");
+                    data.junkanWinPic = tex;
+                }
+                if (name.Equals("win_pic"))
+                {
+                    //ToolsCharApi.PrintError("Found: Past Win Pic");
+                    data.pastWinPic = tex;
+                }
+
+                if (name.Equals("alt_skin_obj_sprite_001"))
+                {
+                    //ToolsCharApi.PrintError("Found: alt_skin_obj_sprite_001");
+                    data.altObjSprite1 = tex;
+                }
+                if (name.Equals("alt_skin_obj_sprite_002"))
+                {
+                    //ToolsCharApi.PrintError("Found: alt_skin_obj_sprite_002");
+                    data.altObjSprite2 = tex;
+                }
+
+
+            }
+            //ToolsCharApi.PrintError("other sprites");
+
+
+            //ToolsCharApi.StopTimerAndReport("Loading data for " + Path.GetFileName(directories[i]));
+
+            return data;
+
+        }
+
 
         //Main parse loop
         public static CustomCharacterData ParseCharacterData(string[] lines)

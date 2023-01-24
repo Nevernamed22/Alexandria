@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using Alexandria.Misc;
+using System.Collections;
 
 namespace Alexandria.NPCAPI
 {
@@ -15,8 +16,9 @@ namespace Alexandria.NPCAPI
 
         public static void OnMyShopItemStartedGlobal(ShopItemController shopItemController)
         {
-            ShopDiscountController steamSale = shopItemController.gameObject.AddComponent<ShopDiscountController>();
-            steamSale.discounts = DiscountsToAdd ?? new List<ShopDiscount>();
+            ShopDiscountController steamSale = shopItemController.gameObject.GetOrAddComponent<ShopDiscountController>();
+            steamSale.UpdatePlacement();
+            steamSale.discounts = DiscountsToAdd ?? new List<ShopDiscount>() { };
         }
 
         /// <summary>
@@ -88,23 +90,46 @@ namespace Alexandria.NPCAPI
     {
         public ShopDiscountController()
         {
+        }
+
+        public void UpdatePlacement()
+        {
             shopItemSelf = this.GetComponent<ShopItemController>();
             if (shopItemSelf != null)
             {
-                if (DoManyChecks() == true)
-                {
-                    if (shopItemSelf is CustomShopItemController)
-                    {
-                        StartPrice = shopItemSelf.OverridePrice ?? (shopItemSelf as CustomShopItemController).ModifiedPrice;//shopItemSelf.ModifiedPrice;
-
-                    }
-                    else
-                    {
-                        StartPrice = shopItemSelf.OverridePrice ?? shopItemSelf.ModifiedPrice;
-                    }
-                }
+                shopItemSelf.StartCoroutine(FrameDelay());
             }
         }
+        public IEnumerator FrameDelay()
+        {
+            yield return null;
+            if (DoManyChecks() == true)
+            {
+                if (shopItemSelf is CustomShopItemController)
+                {
+                    StartPrice = shopItemSelf.OverridePrice ?? (shopItemSelf as CustomShopItemController).ModifiedPrice;//shopItemSelf.ModifiedPrice;
+                }
+                else
+                {
+                    StartPrice = shopItemSelf.OverridePrice ?? shopItemSelf.ModifiedPrice;
+                }
+            }
+            FullyInited = true;
+            yield break;
+        }
+
+        public void ResetPrice(int? currentOverridePrice)
+        {
+            if (shopItemSelf is CustomShopItemController)
+            {
+                StartPrice = currentOverridePrice ?? (shopItemSelf as CustomShopItemController).ModifiedPrice;//shopItemSelf.ModifiedPrice;
+            }
+            else
+            {
+                StartPrice = currentOverridePrice ?? shopItemSelf.ModifiedPrice;
+            }
+        }
+        private bool FullyInited = false;
         private bool DoManyChecks()
         {
             if (GameManager.Instance == null) { return false; }
@@ -116,6 +141,7 @@ namespace Alexandria.NPCAPI
 
         public void Update()
         {
+            if (FullyInited == false) { return; }
             DoPriceReduction();
         }
         private void DoPriceReduction()

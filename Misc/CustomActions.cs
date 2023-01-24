@@ -196,6 +196,11 @@ namespace Alexandria.Misc
         public static void InitializeViaBaseShopController(Action<ShopItemController, PickupObject, BaseShopController> orig, ShopItemController self, PickupObject i, BaseShopController parent)
         {
             orig(self, i, parent);
+            var a = self.gameObject.GetComponent<ShopDiscountController>();
+            if (a != null)
+            {
+                a.ResetPrice(self.OverridePrice);
+            }
             if (CustomActions.OnShopItemStarted != null)
             {
                 CustomActions.OnShopItemStarted(self);
@@ -204,6 +209,11 @@ namespace Alexandria.Misc
         public static void InitializeViaShopController(Action<ShopItemController, PickupObject, ShopController> orig, ShopItemController self, PickupObject i, ShopController parent)
         {
             orig(self, i, parent);
+            var a = self.gameObject.GetComponent<ShopDiscountController>();
+            if (a != null)
+            {
+                a.ResetPrice(self.OverridePrice);
+            }
             if (CustomActions.OnShopItemStarted != null)
             {
                 CustomActions.OnShopItemStarted(self);

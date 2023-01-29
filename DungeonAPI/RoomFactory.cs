@@ -35,7 +35,7 @@ namespace Alexandria.DungeonAPI
                 if (g.EndsWith(".room", StringComparison.OrdinalIgnoreCase))
                 {
                     string name = Path.GetFullPath(g).RemovePrefix(roomDirectory).RemoveSuffix(".room");
-                    //Tools.PrintNoID($"Found room: \"{name}\"");
+                    //ETGModConsole.Log($"Found room: \"{name}\"");
                     var roomData = BuildFromRoomFile(g);
                     DungeonHandler.Register(roomData);
                     rooms.Add(modPrefix + ":" + name, roomData);
@@ -44,7 +44,7 @@ namespace Alexandria.DungeonAPI
                 else if (g.EndsWith(".newroom", StringComparison.OrdinalIgnoreCase))
                 {
                     string name = Path.GetFullPath(g).RemovePrefix(roomDirectory).RemoveSuffix(".newroom");
-                    //Tools.PrintNoID($"Found room: \"{name}\"");
+                    //ETGModConsole.Log($"New Found room: \"{name}\"");
                     var roomData = BuildFromRoomFileWithoutTexture(g);
                     DungeonHandler.Register(roomData);
                     rooms.Add(modPrefix + ":" + name, roomData);
@@ -246,7 +246,7 @@ namespace Alexandria.DungeonAPI
             int height = data.roomSize.y;
             PrototypeDungeonRoom room = GetNewPrototypeDungeonRoom(width, height);
             PrototypeDungeonRoomCellData[] cellData = new PrototypeDungeonRoomCellData[width * height];
-            if (data.tilePositions == null) ETGModConsole.Log($"tilePositions not found for room \"{data.name}\"");
+            //if (data.tilePositions == null) ETGModConsole.Log($"tilePositions not found for room \"{data.name}\"");
 
             for (int y = 0; y < data.roomSize.y; y++)
             {
@@ -1135,7 +1135,7 @@ namespace Alexandria.DungeonAPI
         public struct RoomData
         {
             public string tileInfo;
-            public Vector2[] tilePositions;
+            //public Vector2[] tilePositions;
 
             public Vector2Int roomSize;
 

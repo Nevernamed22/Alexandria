@@ -35,7 +35,7 @@ namespace Alexandria.DungeonAPI
                 if (g.EndsWith(".room", StringComparison.OrdinalIgnoreCase))
                 {
                     string name = Path.GetFullPath(g).RemovePrefix(roomDirectory).RemoveSuffix(".room");
-                    //ETGModConsole.Log($"Found room: \"{name}\"");
+                    ETGModConsole.Log($"Found room: \"{name}\"");
                     var roomData = BuildFromRoomFile(g);
                     DungeonHandler.Register(roomData);
                     rooms.Add(modPrefix + ":" + name, roomData);
@@ -44,7 +44,7 @@ namespace Alexandria.DungeonAPI
                 else if (g.EndsWith(".newroom", StringComparison.OrdinalIgnoreCase))
                 {
                     string name = Path.GetFullPath(g).RemovePrefix(roomDirectory).RemoveSuffix(".newroom");
-                    //ETGModConsole.Log($"New Found room: \"{name}\"");
+                    ETGModConsole.Log($"New Found room: \"{name}\"");
                     var roomData = BuildFromRoomFileWithoutTexture(g);
                     DungeonHandler.Register(roomData);
                     rooms.Add(modPrefix + ":" + name, roomData);
@@ -147,6 +147,7 @@ namespace Alexandria.DungeonAPI
                     //AddEnemyToRoom(room, roomData.enemyPositions[i], roomData.enemyGUIDs[i], roomData.enemyReinforcementLayers[i], roomData.randomizeEnemyPositions); ///GOES FROM HERE==================================================
                 }
             }
+            ETGModConsole.Log("enemy done");
             if (roomData.placeablePositions != null)
             {
                 for (int i = 0; i < roomData.placeablePositions.Length; i++)
@@ -156,6 +157,7 @@ namespace Alexandria.DungeonAPI
                     //AddPlaceableToRoom(room, roomData.placeablePositions[i], roomData.placeableGUIDs[i]);
                 }
             }
+            ETGModConsole.Log("placeable done");
             if (roomData.nodePositions != null)
             {
                 for (int j = 0; j < roomData.nodePositions.Length; j++)
@@ -163,6 +165,7 @@ namespace Alexandria.DungeonAPI
                     RoomFactory.AddNodeToRoom(room, roomData.nodePositions[j], roomData.nodeTypes[j], roomData.nodePaths[j]);
                 }   
             }
+            ETGModConsole.Log("node done");
             if (roomData.floors != null)
             {
                 foreach (var floor in roomData.floors)
@@ -242,11 +245,15 @@ namespace Alexandria.DungeonAPI
 
         public static PrototypeDungeonRoom CreateRoomFromData(RoomData data)
         {
+            
+
             int width = data.roomSize.x;
             int height = data.roomSize.y;
             PrototypeDungeonRoom room = GetNewPrototypeDungeonRoom(width, height);
             PrototypeDungeonRoomCellData[] cellData = new PrototypeDungeonRoomCellData[width * height];
             //if (data.tilePositions == null) ETGModConsole.Log($"tilePositions not found for room \"{data.name}\"");
+
+            ETGModConsole.Log($"{data.name}: {data.tileInfo.Length} - {width * height}");
 
             for (int y = 0; y < data.roomSize.y; y++)
             {

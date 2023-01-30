@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -22,7 +23,7 @@ namespace Alexandria.VisualAPI
             foreach (string path in spritePaths)
             {
                 tk2dSpriteCollectionData collection = spriteCollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(path, collection);
+                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(path, collection, Assembly.GetCallingAssembly());
                 tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
 
                 frameDef.colliderVertices = new Vector3[]{
@@ -64,7 +65,7 @@ namespace Alexandria.VisualAPI
                     if (resourceNames[i].StartsWith(data.pathDirectory.Replace('/', '.'), StringComparison.OrdinalIgnoreCase))
                     {
                         // ETGModConsole.Log($"Resource Found: {resourceNames[i]}.");
-                        list.Add(SpriteBuilder.AddSpriteToCollection(resourceNames[i], tk2dSpriteCollectionData));
+                        list.Add(SpriteBuilder.AddSpriteToCollection(resourceNames[i], tk2dSpriteCollectionData, Assembly.GetCallingAssembly()));
                     }
                 }
                 //ETGModConsole.Log($"Adding animation {data.subAnimationName} with list length {list.Count}.");

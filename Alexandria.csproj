@@ -198,6 +198,8 @@
     <Compile Include="NPCAPI\NPCTools.cs" />
     <Compile Include="NPCAPI\ShopAPI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VisualAPI\AnimationBuilder.cs" />
+    <Compile Include="VisualAPI\VFXBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -425,6 +427,7 @@
     <Error Condition="!Exists('packages\BepInEx.Core.5.4.21\build\BepInEx.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\BepInEx.Core.5.4.21\build\BepInEx.Core.targets'))" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>COPY "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\Enter the Gungeon\BepInEx\plugins\Alexandria\plugins"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -10,6 +10,7 @@ using System.Collections;
 using MonoMod.RuntimeDetour;
 using Alexandria.ItemAPI;
 using Alexandria.Misc;
+using Alexandria.VisualAPI;
 using Gungeon;
 
 namespace Alexandria.ItemAPI
@@ -281,7 +282,13 @@ namespace Alexandria.ItemAPI
             }
         }
 
-
+        public static VFXPool AddCustomMuzzleflash(this Gun target, string name, List<string> spriteNames, int fps, List<IntVector2> spriteSizes, List<tk2dBaseSprite.Anchor> anchors, List<Vector2> manualOffsets, bool orphaned, bool attached, bool persistsOnDeath,
+           bool usesZHeight, float zHeight, VFXAlignment alignment, bool destructible, List<float> emissivePowers, List<Color> emissiveColors)
+        {
+            VFXPool vfx = VFXBuilder.CreateMuzzleflash(name, spriteNames, fps, spriteSizes, anchors, manualOffsets, orphaned, attached, persistsOnDeath, usesZHeight, zHeight, alignment, destructible, emissivePowers, emissiveColors);
+            target.muzzleFlashEffects = vfx;
+            return vfx;
+        }
         public static Projectile BuildProjectile(int baseProj, string spriteName, IntVector2 spriteSize, bool shouldProjectileSpriteRotate, float damage, float speed, float force, float range)
         {
             try

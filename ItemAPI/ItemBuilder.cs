@@ -282,10 +282,9 @@ namespace Alexandria.ItemAPI
             }
         }
 
-        public static VFXPool AddCustomMuzzleflash(this Gun target, string name, List<string> spriteNames, int fps, List<IntVector2> spriteSizes, List<tk2dBaseSprite.Anchor> anchors, List<Vector2> manualOffsets, bool orphaned, bool attached, bool persistsOnDeath,
-           bool usesZHeight, float zHeight, VFXAlignment alignment, bool destructible, List<float> emissivePowers, List<Color> emissiveColors)
+        public static VFXPool AddCustomMuzzleflash(this Gun target, string name, List<string> spritePaths, int fps, IntVector2 Dimensions, tk2dBaseSprite.Anchor anchor, bool usesZHeight, float zHeightOffset, bool persist = false, VFXAlignment alignment = VFXAlignment.NormalAligned, float emissivePower = -1, Color? emissiveColour = null)
         {
-            VFXPool vfx = VFXBuilder.CreateMuzzleflash(name, spriteNames, fps, spriteSizes, anchors, manualOffsets, orphaned, attached, persistsOnDeath, usesZHeight, zHeight, alignment, destructible, emissivePowers, emissiveColors);
+            VFXPool vfx = VFXBuilder.CreateVFXPool(name,spritePaths, fps, Dimensions, anchor, usesZHeight, zHeightOffset, persist, alignment, emissivePower, emissiveColour, Assembly.GetCallingAssembly());
             target.muzzleFlashEffects = vfx;
             return vfx;
         }

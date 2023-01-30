@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -22,71 +23,7 @@ namespace Alexandria.VisualAPI
         {
             return new VFXPool { type = VFXPoolType.None, effects = new VFXComplex[] { new VFXComplex() { effects = new VFXObject[] { new VFXObject() { effect = effect } } } } };
         }
-        public static VFXPool CreateMuzzleflash(string name, List<string> spriteNames, int fps, List<IntVector2> spriteSizes, List<tk2dBaseSprite.Anchor> anchors, List<Vector2> manualOffsets, bool orphaned, bool attached, bool persistsOnDeath,
-           bool usesZHeight, float zHeight, VFXAlignment alignment, bool destructible, List<float> emissivePowers, List<Color> emissiveColors)
-        {
-            VFXPool pool = new VFXPool();
-            pool.type = VFXPoolType.All;
-            VFXComplex complex = new VFXComplex();
-            VFXObject vfObj = new VFXObject();
-            GameObject obj = new GameObject(name);
-            obj.SetActive(false);
-            FakePrefab.MarkAsFakePrefab(obj);
-            UnityEngine.Object.DontDestroyOnLoad(obj);
-            tk2dSprite sprite = obj.AddComponent<tk2dSprite>();
-            tk2dSpriteAnimator animator = obj.AddComponent<tk2dSpriteAnimator>();
-            tk2dSpriteAnimationClip clip = new tk2dSpriteAnimationClip();
-            clip.fps = fps;
-            clip.frames = new tk2dSpriteAnimationFrame[0];
-            for (int i = 0; i < spriteNames.Count; i++)
-            {
-                string spriteName = spriteNames[i];
-                IntVector2 spriteSize = spriteSizes[i];
-                tk2dBaseSprite.Anchor anchor = anchors[i];
-                Vector2 manualOffset = manualOffsets[i];
-                float emissivePower = emissivePowers[i];
-                Color emissiveColor = emissiveColors[i];
-                tk2dSpriteAnimationFrame frame = new tk2dSpriteAnimationFrame();
-                frame.spriteId = itemCollection.GetSpriteIdByName(spriteName);
-                tk2dSpriteDefinition def = VFXBuilder.SetupDefinitionForShellSprite(spriteName, frame.spriteId, spriteSize.x, spriteSize.y);
-                def.ConstructOffsetsFromAnchor(anchor, def.position3);
-                def.MakeOffset(manualOffset);
-                def.material.shader = ShaderCache.Acquire("Brave/LitTk2dCustomFalloffTintableTiltedCutoutEmissive");
-                def.material.SetFloat("_EmissiveColorPower", emissivePower);
-                def.material.SetColor("_EmissiveColor", emissiveColor);
-                def.materialInst.shader = ShaderCache.Acquire("Brave/LitTk2dCustomFalloffTintableTiltedCutoutEmissive");
-                def.materialInst.SetFloat("_EmissiveColorPower", emissivePower);
-                def.materialInst.SetColor("_EmissiveColor", emissiveColor);
-                frame.spriteCollection = itemCollection;
-                clip.frames = clip.frames.Concat(new tk2dSpriteAnimationFrame[] { frame }).ToArray();
-            }
-            sprite.renderer.material.shader = ShaderCache.Acquire("Brave/LitTk2dCustomFalloffTintableTiltedCutoutEmissive");
-            sprite.renderer.material.SetFloat("_EmissiveColorPower", emissivePowers[0]);
-            sprite.renderer.material.SetColor("_EmissiveColor", emissiveColors[0]);
-            clip.wrapMode = tk2dSpriteAnimationClip.WrapMode.Once;
-            clip.name = "start";
-            animator.spriteAnimator.Library = animator.gameObject.AddComponent<tk2dSpriteAnimation>();
-            animator.spriteAnimator.Library.clips = new tk2dSpriteAnimationClip[] { clip };
-            animator.spriteAnimator.Library.enabled = true;
-            SpriteAnimatorKiller kill = animator.gameObject.AddComponent<SpriteAnimatorKiller>();
-            kill.fadeTime = -1f;
-            kill.animator = animator;
-            kill.delayDestructionTime = -1f;
-            vfObj.orphaned = orphaned;
-            vfObj.attached = attached;
-            vfObj.persistsOnDeath = persistsOnDeath;
-            vfObj.usesZHeight = usesZHeight;
-            vfObj.zHeight = zHeight;
-            vfObj.alignment = alignment;
-            vfObj.destructible = destructible;
-            vfObj.effect = obj;
-            complex.effects = new VFXObject[] { vfObj };
-            pool.effects = new VFXComplex[] { complex };
-            animator.playAutomatically = true;
-            animator.DefaultClipId = animator.GetClipIdByName("start");
-            return pool;
-        }
-        public static VFXPool CreateVFXPool(string name, List<string> spritePaths, int fps, IntVector2 Dimensions, tk2dBaseSprite.Anchor anchor, bool usesZHeight, float zHeightOffset, bool persist = false, VFXAlignment alignment = VFXAlignment.NormalAligned, float emissivePower = -1, Color? emissiveColour = null)
+        public static VFXPool CreateVFXPool(string name, List<string> spritePaths, int fps, IntVector2 Dimensions, tk2dBaseSprite.Anchor anchor, bool usesZHeight, float zHeightOffset, bool persist = false, VFXAlignment alignment = VFXAlignment.NormalAligned, float emissivePower = -1, Color? emissiveColour = null, Assembly ass = null)
         {
             GameObject Obj = new GameObject(name);
             VFXPool pool = new VFXPool();
@@ -98,7 +35,7 @@ namespace Alexandria.VisualAPI
             UnityEngine.Object.DontDestroyOnLoad(Obj);
 
             tk2dSpriteCollectionData VFXSpriteCollection = SpriteBuilder.ConstructCollection(Obj, (name + "_Collection"));
-            int spriteID = SpriteBuilder.AddSpriteToCollection(spritePaths[0], VFXSpriteCollection);
+            int spriteID = SpriteBuilder.AddSpriteToCollection(spritePaths[0], VFXSpriteCollection, ass != null ? ass : Assembly.GetCallingAssembly());
 
             tk2dSprite sprite = Obj.GetOrAddComponent<tk2dSprite>();
             sprite.SetSprite(VFXSpriteCollection, spriteID);
@@ -117,7 +54,7 @@ namespace Alexandria.VisualAPI
             for (int i = 0; i < spritePaths.Count; i++)
             {
                 tk2dSpriteCollectionData collection = VFXSpriteCollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(spritePaths[i], collection);
+                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(spritePaths[i], collection, Assembly.GetCallingAssembly());
                 tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                 frameDef.ConstructOffsetsFromAnchor(anchor);
                 frameDef.colliderVertices = defaultDef.colliderVertices;
@@ -167,7 +104,7 @@ namespace Alexandria.VisualAPI
             UnityEngine.Object.DontDestroyOnLoad(Obj);
 
             tk2dSpriteCollectionData VFXSpriteCollection = SpriteBuilder.ConstructCollection(Obj, (name + "_Collection"));
-            int spriteID = SpriteBuilder.AddSpriteToCollection(spritePaths[0], VFXSpriteCollection);
+            int spriteID = SpriteBuilder.AddSpriteToCollection(spritePaths[0], VFXSpriteCollection, Assembly.GetCallingAssembly());
 
             tk2dSprite sprite = Obj.GetOrAddComponent<tk2dSprite>();
             sprite.SetSprite(VFXSpriteCollection, spriteID);
@@ -186,7 +123,7 @@ namespace Alexandria.VisualAPI
             for (int i = 0; i < spritePaths.Count; i++)
             {
                 tk2dSpriteCollectionData collection = VFXSpriteCollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(spritePaths[i], collection);
+                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(spritePaths[i], collection, Assembly.GetCallingAssembly());
                 tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                 frameDef.ConstructOffsetsFromAnchor(anchor);
                 frameDef.colliderVertices = defaultDef.colliderVertices;
@@ -230,7 +167,7 @@ namespace Alexandria.VisualAPI
             UnityEngine.Object.DontDestroyOnLoad(Obj);
 
             tk2dSpriteCollectionData VFXSpriteCollection = SpriteBuilder.ConstructCollection(Obj, (name + "_Collection"));
-            int spriteID = SpriteBuilder.AddSpriteToCollection(spritePaths[0], VFXSpriteCollection);
+            int spriteID = SpriteBuilder.AddSpriteToCollection(spritePaths[0], VFXSpriteCollection, Assembly.GetCallingAssembly());
 
             tk2dSprite sprite = Obj.GetOrAddComponent<tk2dSprite>();
             sprite.SetSprite(VFXSpriteCollection, spriteID);
@@ -249,7 +186,7 @@ namespace Alexandria.VisualAPI
             for (int i = 0; i < spritePaths.Count; i++)
             {
                 tk2dSpriteCollectionData collection = VFXSpriteCollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(spritePaths[i], collection);
+                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(spritePaths[i], collection, Assembly.GetCallingAssembly());
                 tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                 frameDef.ConstructOffsetsFromAnchor(anchor);
                 frameDef.colliderVertices = defaultDef.colliderVertices;

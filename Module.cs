@@ -21,9 +21,6 @@ namespace Alexandria
     [BepInPlugin(GUID, NAME, VERSION)]
     public class Alexandria : BaseUnityPlugin
     {
-        //Push directions:
-        // nuget pack
-        // nuget push EtG.Alexandria.0.2.29.nupkg oy2omfvzz5kf4c2f35rq2mcqjfdbea6ubhig7fmpdchpka -Source https://api.nuget.org/v3/index.json
 
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";

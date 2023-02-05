@@ -16,7 +16,8 @@ namespace Alexandria.NPCAPI
 
         public static void OnMyShopItemStartedGlobal(ShopItemController shopItemController)
         {
-            ShopDiscountController steamSale = shopItemController.gameObject.GetOrAddComponent<ShopDiscountController>();
+            if (shopItemController.gameObject.GetComponent<ShopDiscountController>() != null) { UnityEngine.Object.Destroy(shopItemController.gameObject.GetComponent<ShopDiscountController>()); }
+            ShopDiscountController steamSale = shopItemController.gameObject.AddComponent<ShopDiscountController>();
             steamSale.UpdatePlacement();
             steamSale.discounts = DiscountsToAdd ?? new List<ShopDiscount>() { };
         }
@@ -118,8 +119,9 @@ namespace Alexandria.NPCAPI
             yield break;
         }
 
-        public void ResetPrice(int? currentOverridePrice)
+        public void ResetPrice(ShopItemController newSelf, int? currentOverridePrice)
         {
+            shopItemSelf = newSelf;
             if (shopItemSelf is CustomShopItemController)
             {
                 StartPrice = currentOverridePrice ?? (shopItemSelf as CustomShopItemController).ModifiedPrice;//shopItemSelf.ModifiedPrice;
@@ -129,6 +131,10 @@ namespace Alexandria.NPCAPI
                 StartPrice = currentOverridePrice ?? shopItemSelf.ModifiedPrice;
             }
         }
+
+
+
+
         private bool FullyInited = false;
         private bool DoManyChecks()
         {
@@ -195,22 +201,6 @@ namespace Alexandria.NPCAPI
             shopItemSelf.OverridePrice = (int)(newCost *= H);
         }
 
-        private void ReturnPriceToDefault()
-        {
-            if (shopItemSelf == null) { return; }
-            GameLevelDefinition lastLoadedLevelDefinition = GameManager.Instance != null ? GameManager.Instance.GetLastLoadedLevelDefinition() : null;
-            float newCost = StartPrice != -1 ? StartPrice : shopItemSelf.item.PurchasePrice;
-            float num4 = (lastLoadedLevelDefinition == null) ? 1f : lastLoadedLevelDefinition.priceMultiplier;
-
-            float num3 = GameManager.Instance.PrimaryPlayer != null ? GameManager.Instance.PrimaryPlayer.stats.GetStatValue(PlayerStats.StatType.GlobalPriceMultiplier) : 1;
-            if (GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER && GameManager.Instance.SecondaryPlayer)
-            {
-                num3 *= GameManager.Instance.SecondaryPlayer.stats.GetStatValue(PlayerStats.StatType.GlobalPriceMultiplier);
-            }
-
-            newCost *= num4 * num3;
-            shopItemSelf.OverridePrice = (int)(newCost);
-        }
 
         /// <summary>
         /// Sets the override for a ShopDiscount with a specific IdentificationKey.
@@ -238,7 +228,7 @@ namespace Alexandria.NPCAPI
         {
             if (shopItemSelf != null)
             {
-                ReturnPriceToDefault();
+                shopItemSelf.OverridePrice = null;
             }
         }
 

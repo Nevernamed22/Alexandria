@@ -120,8 +120,11 @@ namespace Alexandria.Misc
             new Hook(typeof(Dungeon).GetMethod("Start", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("StartHook", BindingFlags.Static | BindingFlags.Public));
             new Hook(typeof(RewardPedestal).GetMethod("MaybeBecomeMimic", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("PostProcessPedestal", BindingFlags.Static | BindingFlags.Public));
             new Hook(typeof(AdvancedShrineController).GetMethod("DoShrineEffect", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("ShrineUsed", BindingFlags.Static | BindingFlags.NonPublic));
+
             new Hook(typeof(ShopItemController).GetMethods().Single(a => a.Name == "Initialize" && a.GetParameters().Length == 2 && a.GetParameters()[1].ParameterType == typeof(BaseShopController)), typeof(CustomActions).GetMethod("InitializeViaBaseShopController", BindingFlags.Static | BindingFlags.Public));
             new Hook(typeof(ShopItemController).GetMethods().Single(a => a.Name == "Initialize" && a.GetParameters().Length == 2 && a.GetParameters()[1].ParameterType == typeof(ShopController)), typeof(CustomActions).GetMethod("InitializeViaShopController", BindingFlags.Static | BindingFlags.Public));
+            //new Hook(typeof(ShopItemController).GetMethod("InitializeInternal", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("InitializeInternalHook", BindingFlags.Static | BindingFlags.Public));
+
             new Hook(typeof(ResourcefulRatMazeSystemController).GetMethod("HandleFailure", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("OnFailedRatMaze", BindingFlags.Static | BindingFlags.Public));
             new Hook(typeof(MinorBreakable).GetMethod("FinishBreak", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("MinorBreakableBreak", BindingFlags.Static | BindingFlags.Public));
             new Hook(typeof(RewardPedestal).GetMethod("DetermineContents", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("RewardPedestalDetermineContents", BindingFlags.Static | BindingFlags.Public));
@@ -196,11 +199,6 @@ namespace Alexandria.Misc
         public static void InitializeViaBaseShopController(Action<ShopItemController, PickupObject, BaseShopController> orig, ShopItemController self, PickupObject i, BaseShopController parent)
         {
             orig(self, i, parent);
-            var a = self.gameObject.GetComponent<ShopDiscountController>();
-            if (a != null)
-            {
-                a.ResetPrice(self.OverridePrice);
-            }
             if (CustomActions.OnShopItemStarted != null)
             {
                 CustomActions.OnShopItemStarted(self);
@@ -209,16 +207,14 @@ namespace Alexandria.Misc
         public static void InitializeViaShopController(Action<ShopItemController, PickupObject, ShopController> orig, ShopItemController self, PickupObject i, ShopController parent)
         {
             orig(self, i, parent);
-            var a = self.gameObject.GetComponent<ShopDiscountController>();
-            if (a != null)
-            {
-                a.ResetPrice(self.OverridePrice);
-            }
             if (CustomActions.OnShopItemStarted != null)
             {
                 CustomActions.OnShopItemStarted(self);
             }
         }
+      
+
+
         public static void OnFailedRatMaze(Action<ResourcefulRatMazeSystemController, PlayerController> orig, ResourcefulRatMazeSystemController self, PlayerController playa)
         {
             orig(self, playa);

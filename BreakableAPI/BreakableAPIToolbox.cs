@@ -1901,7 +1901,7 @@ namespace Alexandria.BreakableAPI
 
         public static DebrisObject GenerateDebrisObject(string shardSpritePath, bool debrisObjectsCanRotate = true, float LifeSpanMin = 0.33f, float LifeSpanMax = 2f, float AngularVelocity = 540, float AngularVelocityVariance = 180f, tk2dSprite shadowSprite = null, float Mass = 1, string AudioEventName = null, GameObject BounceVFX = null, int DebrisBounceCount = 0, bool DoesGoopOnRest = false, GoopDefinition GoopType = null, float GoopRadius = 1f)
         {
-            GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePath, null);
+            GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePath, null, Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(debrisObject);
             tk2dSprite tk2dsprite = debrisObject.GetComponent<tk2dSprite>();
             DebrisObject DebrisObj = debrisObject.AddComponent<DebrisObject>();

@@ -198,6 +198,8 @@
     <Compile Include="NPCAPI\NPCTools.cs" />
     <Compile Include="NPCAPI\ShopAPI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VisualAPI\AnimationBuilder.cs" />
+    <Compile Include="VisualAPI\VFXBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

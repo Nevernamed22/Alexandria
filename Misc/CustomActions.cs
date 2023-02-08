@@ -90,10 +90,17 @@ namespace Alexandria.Misc
         /// </summary>
         public static Action<HealthPickup, PlayerController> OnAnyPlayerNudgedHealth;
         /// <summary>
-        /// Runs whenever the any player player collects a blank.
+        /// Runs whenever any player collects a blank.
         /// </summary>
         public static Action<SilencerItem, PlayerController> OnAnyPlayerCollectedBlank;
-
+        /// <summary>
+        /// Runs whenever any player collects any kind of Pickup Object. Runs AFTER pickup, so be aware of that.
+        /// </summary>
+        public static Action<PickupObject, PlayerController> OnAnyPlayerCollectedPickup;
+        /// <summary>
+        /// Runs whenever any player drops a passive item.
+        /// </summary>
+        public static Action<PassiveItem, PlayerController, DebrisObject> OnAnyPlayerDroppedPassiveItem;
 
         //Misc
         /// <summary>
@@ -143,7 +150,9 @@ namespace Alexandria.Misc
             new Hook(typeof(HealthPickup).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("heartPickupHookMethod"));
             new Hook(typeof(CompanionController).GetMethod("HandleCompanionPostProcessProjectile", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("companionSpawnedbullet", BindingFlags.Static | BindingFlags.Public));
             new Hook(typeof(PlayerController).GetMethod("DropActiveItem", BindingFlags.Public | BindingFlags.Instance), typeof(CustomActions).GetMethod("DropActiveHook", BindingFlags.Public | BindingFlags.Static));
-            new Hook(typeof(SilencerInstance).GetMethod("ProcessBlankModificationItemAdditionalEffects", BindingFlags.Instance | BindingFlags.NonPublic),typeof(CustomActions).GetMethod("BlankModHook", BindingFlags.Static | BindingFlags.Public));
+            new Hook(typeof(SilencerInstance).GetMethod("ProcessBlankModificationItemAdditionalEffects", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("BlankModHook", BindingFlags.Static | BindingFlags.Public));
+            new Hook(typeof(PickupObject).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("AcquirePickupObjectHook", BindingFlags.Static | BindingFlags.Public));
+            new Hook(typeof(PassiveItem).GetMethod("Drop", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("DropPassiveItemHook", BindingFlags.Static | BindingFlags.Public));
 
             //Misc
             new Hook(typeof(Exploder).GetMethod("Explode", BindingFlags.Static | BindingFlags.Public), typeof(CustomActions).GetMethod("ExplosionHook", BindingFlags.Static | BindingFlags.NonPublic));
@@ -212,9 +221,6 @@ namespace Alexandria.Misc
                 CustomActions.OnShopItemStarted(self);
             }
         }
-      
-
-
         public static void OnFailedRatMaze(Action<ResourcefulRatMazeSystemController, PlayerController> orig, ResourcefulRatMazeSystemController self, PlayerController playa)
         {
             orig(self, playa);
@@ -315,6 +321,19 @@ namespace Alexandria.Misc
             orig(silencer, bmi, centerPoint, user);
             if (user && user.GetExtComp() && user.GetExtComp().OnBlankModificationItemProcessed != null) user.GetExtComp().OnBlankModificationItemProcessed(user, silencer, centerPoint, bmi);
         }
+        public static void AcquirePickupObjectHook(Action<PickupObject, PlayerController> orig, PickupObject self, PlayerController player)
+        {
+            orig(self, player);
+            if (OnAnyPlayerCollectedPickup != null) { OnAnyPlayerCollectedPickup(self, player); }
+            if (player && player.GetExtComp() && player.GetExtComp().OnCollectedPickup != null) { player.GetExtComp().OnCollectedPickup(self, player); }
+        }
+        public static DebrisObject DropPassiveItemHook(Func<PassiveItem, PlayerController, DebrisObject> orig, PassiveItem self, PlayerController player)
+        {
+            DebrisObject dropped = orig(self, player);
+            if (OnAnyPlayerDroppedPassiveItem != null) { OnAnyPlayerDroppedPassiveItem(self, player, dropped); }
+            if (player && player.GetExtComp() && player.GetExtComp().OnDroppedPassiveItem != null) { player.GetExtComp().OnDroppedPassiveItem(self, player, dropped); }
+            return dropped;
+        }
 
         //Misc
         private static void ExplosionHook(Action<Vector3, ExplosionData, Vector2, Action, bool, CoreDamageTypes, bool> orig, Vector3 position, ExplosionData data, Vector2 sourceNormal, Action onExplosionBegin = null, bool ignoreQueues = false, CoreDamageTypes damageTypes = CoreDamageTypes.None, bool ignoreDamageCaps = false)
@@ -330,13 +349,16 @@ namespace Alexandria.Misc
                 return;
             }
 
-            var currentGun = self.CurrentGun;
-
-            if (currentGun && currentGun.HasTag("exclude_blessed"))
+            if (self)
             {
-                self.ChangeToRandomGun();
+                var currentGun = self.CurrentGun;
+
+                if (currentGun && currentGun.HasTag("exclude_blessed"))
+                {
+                    self.ChangeToRandomGun();
+                }
+                else { if (self && self.GetExtComp() != null) self.GetExtComp().OnBlessedGunChanged(self); }
             }
-            else { if (self && self.GetExtComp() != null) self.GetExtComp().OnBlessedGunChanged(self); }
         }
         public static void LOTJSpawnHook(Action<SuperReaperController> orig, SuperReaperController self)
         {

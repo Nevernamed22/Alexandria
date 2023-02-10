@@ -325,6 +325,7 @@ namespace Alexandria.Misc
         public static void ChangeToRandomGunHook(Action<PlayerController> orig, PlayerController self)
         {
             orig(self);
+
             if (GameManager.Instance.CurrentLevelOverrideState == GameManager.LevelOverrideState.END_TIMES || GameManager.Instance.CurrentLevelOverrideState == GameManager.LevelOverrideState.CHARACTER_PAST || GameManager.Instance.CurrentLevelOverrideState == GameManager.LevelOverrideState.TUTORIAL)
             {
                 return;
@@ -336,7 +337,16 @@ namespace Alexandria.Misc
             {
                 self.ChangeToRandomGun();
             }
-            else { if (self && self.GetExtComp() != null) self.GetExtComp().OnBlessedGunChanged(self); }
+            else
+            {
+                if (self && self.GetExtComp() != null) 
+                {
+                    if (self.GetExtComp().OnBlessedGunChanged != null)
+                    {
+                        self.GetExtComp().OnBlessedGunChanged(self);
+                    }
+                }
+            }
         }
         public static void LOTJSpawnHook(Action<SuperReaperController> orig, SuperReaperController self)
         {

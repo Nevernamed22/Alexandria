@@ -75,6 +75,24 @@ namespace Alexandria.ItemAPI
         }
 
         /// <summary>
+        /// Adds a tk2dSprite component to an object and adds that sprite to the ammonomicon for later use. If obj is null, returns a new GameObject with the sprite
+        /// Capable of taking an additional argument for the sprite's perpendicular state. 'Flat' sprites will always lay down on the floor, like carpets.
+        /// </summary>
+        public static GameObject AddSpriteToObjectPerpendicular(string name, string resourcePath, GameObject obj = null, tk2dBaseSprite.PerpendicularState perpendicular = tk2dBaseSprite.PerpendicularState.UNDEFINED, int? sortingLayer = null, Assembly assembly = null)
+        {
+            GameObject spriteObject = SpriteBuilder.SpriteFromResource(resourcePath, obj, assembly ?? Assembly.GetCallingAssembly());
+            FakePrefab.MarkAsFakePrefab(spriteObject);
+            spriteObject.SetActive(false);
+
+            tk2dSprite sprite = spriteObject.GetComponent<tk2dSprite>();
+            if (sortingLayer != null) { sprite.SortingOrder = (int)sortingLayer; }
+            sprite.CachedPerpState = perpendicular;
+
+            spriteObject.name = name;
+            return spriteObject;
+        }
+
+        /// <summary>
         /// Finishes the item setup, adds it to the item databases, adds an encounter trackable 
         /// blah, blah, blah
         /// </summary>

@@ -324,10 +324,12 @@ namespace Alexandria.ItemAPI
         }
         private static IEnumerator HandleFreeFiringBeam(BeamController beam, SpeculativeRigidbody otherShooter, Vector2 fixedPosition, float targetAngle, float duration, bool followProjDir, float projFollowOffset)
         {
+            bool parented = otherShooter != null;
             float elapsed = 0f;
             yield return null;
             while (elapsed < duration)
             {
+                if (otherShooter == null && parented) { break; }
                 Vector2 sourcePos;
                 if (otherShooter == null) sourcePos = fixedPosition;
                 else sourcePos = otherShooter.UnitCenter;

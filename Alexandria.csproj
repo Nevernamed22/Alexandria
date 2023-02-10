@@ -60,8 +60,10 @@
     <Compile Include="CharApi\Tools\Tools.cs" />
     <Compile Include="ChestAPI\ChestSpawnHelper.cs" />
     <Compile Include="ChestAPI\ChestUtility.cs" />
+    <Compile Include="DungeonAPI\BreachExtensions.cs" />
     <Compile Include="DungeonAPI\MasteryOverrideHandler.cs" />
     <Compile Include="DungeonAPI\RoomUtility.cs" />
+    <Compile Include="DungeonAPI\RuntimeDungeonEditing.cs" />
     <Compile Include="DungeonAPI\SetupExoticObjects.cs" />
     <Compile Include="EnemyAPI\AIActorUtility.cs" />
     <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
@@ -414,6 +416,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />
+    <EmbeddedResource Include="NativeResources\debugfloor.png" />
+    <EmbeddedResource Include="NativeResources\debugnorthwall.png" />
+    <EmbeddedResource Include="NativeResources\debugwalls.png" />
     <EmbeddedResource Include="Misc\mdl_os.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

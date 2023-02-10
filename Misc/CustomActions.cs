@@ -357,7 +357,7 @@ namespace Alexandria.Misc
                 {
                     self.ChangeToRandomGun();
                 }
-                else { if (self && self.GetExtComp() != null) self.GetExtComp().OnBlessedGunChanged(self); }
+                else { if (self && self.GetExtComp() != null && self.GetExtComp().OnBlessedGunChanged != null) self.GetExtComp().OnBlessedGunChanged(self); }
             }
         }
         public static void LOTJSpawnHook(Action<SuperReaperController> orig, SuperReaperController self)

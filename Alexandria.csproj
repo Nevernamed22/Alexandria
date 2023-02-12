@@ -78,8 +78,9 @@
     <Compile Include="ItemAPI\ItemInterfaces\LabelablePlayerItem.cs" />
     <Compile Include="ItemAPI\OrbitalUtility.cs" />
     <Compile Include="ItemAPI\SlashDoer.cs" />
-    <Compile Include="ItemAPI\SynergyTools\AdvancedGunVolleyModificationSynergy.cs" />
+    <Compile Include="ItemAPI\SynergyTools\AdvancedVolleyModificationSynergy.cs" />
     <Compile Include="ItemAPI\SynergyTools\AdvancedGunFormeSynergyProcessor.cs" />
+    <Compile Include="ItemAPI\SynergyTools\AdvancedHoveringGunSynergyProcessor.cs" />
     <Compile Include="Misc\AmmoPickupFixer.cs" />
     <Compile Include="Misc\ChamberGunAPI.cs" />
     <Compile Include="EnemyAPI\BossBuilder.cs" />

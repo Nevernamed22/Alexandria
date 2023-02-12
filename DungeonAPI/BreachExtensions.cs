@@ -18,7 +18,7 @@ namespace Alexandria.DungeonAPI
         {
             yield return enumerator;
 
-            RoomHandler m_TargetRoom = RuntimeDungeonEditing.AddCustomRuntimeRoom(GameManager.Instance.Dungeon, new IntVector2(19, 9), new GameObject(), roomWorldPositionOverride: new IntVector2(-30, 60));
+        /*    RoomHandler m_TargetRoom = RuntimeDungeonEditing.AddCustomRuntimeRoom(GameManager.Instance.Dungeon, new IntVector2(19, 9), new GameObject(), roomWorldPositionOverride: new IntVector2(-30, 60));
 
             GameObject floor = new GameObject();
             ItemBuilder.AddSpriteToObjectPerpendicular("tentFloor",  "Alexandria/NativeResources/debugfloor", floor, tk2dBaseSprite.PerpendicularState.FLAT, 0);
@@ -51,7 +51,7 @@ namespace Alexandria.DungeonAPI
             Tenteleport tentInt = tent.AddComponent<Tenteleport>();
             tentInt.target = m_TargetRoom;
             GameManager.Instance.Dungeon.data.GetAbsoluteRoomFromPosition(tent.transform.position.IntXY()).RegisterInteractable(tentInt);
-
+        */
             yield break;
         }
     }

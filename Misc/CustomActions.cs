@@ -151,7 +151,7 @@ namespace Alexandria.Misc
             new Hook(typeof(CompanionController).GetMethod("HandleCompanionPostProcessProjectile", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("companionSpawnedbullet", BindingFlags.Static | BindingFlags.Public));
             new Hook(typeof(PlayerController).GetMethod("DropActiveItem", BindingFlags.Public | BindingFlags.Instance), typeof(CustomActions).GetMethod("DropActiveHook", BindingFlags.Public | BindingFlags.Static));
             new Hook(typeof(SilencerInstance).GetMethod("ProcessBlankModificationItemAdditionalEffects", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("BlankModHook", BindingFlags.Static | BindingFlags.Public));
-            new Hook(typeof(PickupObject).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("AcquirePickupObjectHook", BindingFlags.Static | BindingFlags.Public));
+            //new Hook(typeof(PickupObject).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("AcquirePickupObjectHook", BindingFlags.Static | BindingFlags.Public));
             new Hook(typeof(PassiveItem).GetMethod("Drop", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("DropPassiveItemHook", BindingFlags.Static | BindingFlags.Public));
 
             //Misc
@@ -321,12 +321,12 @@ namespace Alexandria.Misc
             orig(silencer, bmi, centerPoint, user);
             if (user && user.GetExtComp() && user.GetExtComp().OnBlankModificationItemProcessed != null) user.GetExtComp().OnBlankModificationItemProcessed(user, silencer, centerPoint, bmi);
         }
-        public static void AcquirePickupObjectHook(Action<PickupObject, PlayerController> orig, PickupObject self, PlayerController player)
+        /*public static void AcquirePickupObjectHook(Action<PickupObject, PlayerController> orig, PickupObject self, PlayerController player)
         {
             orig(self, player);
             if (OnAnyPlayerCollectedPickup != null) { OnAnyPlayerCollectedPickup(self, player); }
             if (player && player.GetExtComp() && player.GetExtComp().OnCollectedPickup != null) { player.GetExtComp().OnCollectedPickup(self, player); }
-        }
+        }*/
         public static DebrisObject DropPassiveItemHook(Func<PassiveItem, PlayerController, DebrisObject> orig, PassiveItem self, PlayerController player)
         {
             DebrisObject dropped = orig(self, player);

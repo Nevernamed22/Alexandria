@@ -14,6 +14,7 @@ using BepInEx;
 using Alexandria.CharacterAPI;
 using System.Collections;
 using HarmonyLib;
+using System.Reflection;
 
 namespace Alexandria
 {
@@ -24,12 +25,13 @@ namespace Alexandria
 
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
+
         public const string VERSION = "0.3.3";
 
         public void Start()
         {
             var harmony = new Harmony(GUID);
-            harmony.PatchAll();
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             ETGModMainBehaviour.WaitForGameManagerStart(GMStart);
         }

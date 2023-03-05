@@ -94,7 +94,7 @@ namespace Alexandria.Misc
         /// </summary>
         public static Action<SilencerItem, PlayerController> OnAnyPlayerCollectedBlank;
         /// <summary>
-        /// Runs whenever any player collects any kind of Pickup Object. Runs AFTER pickup, so be aware of that.
+        /// (DOES NOT WORK) Runs whenever any player collects any kind of Pickup Object. Runs AFTER pickup, so be aware of that.
         /// </summary>
         public static Action<PickupObject, PlayerController> OnAnyPlayerCollectedPickup;
         /// <summary>
@@ -151,8 +151,17 @@ namespace Alexandria.Misc
             new Hook(typeof(CompanionController).GetMethod("HandleCompanionPostProcessProjectile", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("companionSpawnedbullet", BindingFlags.Static | BindingFlags.Public));
             new Hook(typeof(PlayerController).GetMethod("DropActiveItem", BindingFlags.Public | BindingFlags.Instance), typeof(CustomActions).GetMethod("DropActiveHook", BindingFlags.Public | BindingFlags.Static));
             new Hook(typeof(SilencerInstance).GetMethod("ProcessBlankModificationItemAdditionalEffects", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("BlankModHook", BindingFlags.Static | BindingFlags.Public));
-            new Hook(typeof(PickupObject).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("AcquirePickupObjectHook", BindingFlags.Static | BindingFlags.Public));
             new Hook(typeof(PassiveItem).GetMethod("Drop", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("DropPassiveItemHook", BindingFlags.Static | BindingFlags.Public));
+
+
+            //============= WARNING, VOLATILE HOOK, DO NOT ENABLE UNLESS YOU KNOW HOW TO FIX IT
+            //
+            //
+            //new Hook(typeof(PickupObject).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("AcquirePickupObjectHook", BindingFlags.Static | BindingFlags.Public));
+            //
+            //
+            //============= WARNING, VOLATILE HOOK, DO NOT ENABLE UNLESS YOU KNOW HOW TO FIX IT
+
 
             //Misc
             new Hook(typeof(Exploder).GetMethod("Explode", BindingFlags.Static | BindingFlags.Public), typeof(CustomActions).GetMethod("ExplosionHook", BindingFlags.Static | BindingFlags.NonPublic));
@@ -323,7 +332,7 @@ namespace Alexandria.Misc
         }
         public static void AcquirePickupObjectHook(Action<PickupObject, PlayerController> orig, PickupObject self, PlayerController player)
         {
-            orig(self, player);
+            //orig(self, player);
             if (OnAnyPlayerCollectedPickup != null) { OnAnyPlayerCollectedPickup(self, player); }
             if (player && player.GetExtComp() && player.GetExtComp().OnCollectedPickup != null) { player.GetExtComp().OnCollectedPickup(self, player); }
         }

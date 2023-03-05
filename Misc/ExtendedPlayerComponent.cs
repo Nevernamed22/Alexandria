@@ -86,11 +86,11 @@ namespace Alexandria.Misc
         /// Runs whenever the attached player collects a blank.
         /// </summary>
         public Action<SilencerItem, PlayerController> OnPickedUpBlank;
-        /// <summary>
-        /// Runs whenever the attached player collects any kind of pickup object.
-        /// Runs AFTER pickup, so be aware of that.
-        /// </summary>
-        public Action<PickupObject, PlayerController> OnCollectedPickup;
+        ///// <summary>
+        ///// Runs whenever the attached player collects any kind of pickup object.
+        ///// Runs AFTER pickup, so be aware of that.
+        ///// </summary>
+        //public Action<PickupObject, PlayerController> OnCollectedPickup;
         /// <summary>
         /// Runs whenever the attached player drops a passive item.
         /// </summary>

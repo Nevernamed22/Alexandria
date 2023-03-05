@@ -1,4 +1,4 @@
-﻿using Alexandria.ItemAPI;
+﻿/*using Alexandria.ItemAPI;
 using Dungeonator;
 using HarmonyLib;
 using System;
@@ -51,7 +51,7 @@ namespace Alexandria.DungeonAPI
             Tenteleport tentInt = tent.AddComponent<Tenteleport>();
             tentInt.target = m_TargetRoom;
             GameManager.Instance.Dungeon.data.GetAbsoluteRoomFromPosition(tent.transform.position.IntXY()).RegisterInteractable(tentInt);
-        */
+        
             yield break;
         }
     }
@@ -99,4 +99,4 @@ namespace Alexandria.DungeonAPI
             return 1f;
         }
     }
-}
+}*/

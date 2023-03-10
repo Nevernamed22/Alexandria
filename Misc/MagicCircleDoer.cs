@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Alexandria.Misc
 {
-    class MagicCircle : MonoBehaviour
+    public class MagicCircle : MonoBehaviour
     {
         public static List<MagicCircle> AllMagicCircles = new List<MagicCircle>();
         public MagicCircle()

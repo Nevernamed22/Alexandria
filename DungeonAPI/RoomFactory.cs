@@ -160,9 +160,17 @@ namespace Alexandria.DungeonAPI
             ETGModConsole.Log("placeable done");
             if (roomData.nodePositions != null)
             {
+
+                Dictionary<int, int> stupidJankyPieceOfShit = new Dictionary<int, int>();
+
+                for (int j = 0; j < roomData.nodeOrder.Length; j++)
+                {
+                    stupidJankyPieceOfShit.Add(roomData.nodeOrder[j], j);
+                }
+
                 for (int j = 0; j < roomData.nodePositions.Length; j++)
                 {
-                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[j], roomData.nodeTypes[j], roomData.nodePaths[j]);
+                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[stupidJankyPieceOfShit[j]], roomData.nodeTypes[stupidJankyPieceOfShit[j]], roomData.nodePaths[stupidJankyPieceOfShit[j]]);
                 }   
             }
             ETGModConsole.Log("node done");
@@ -1151,6 +1159,7 @@ namespace Alexandria.DungeonAPI
             public string[] nodeWrapModes;
             public Vector2[] nodePositions;
             public int[] nodePaths;
+            public int[] nodeOrder;
             public string category;
             public string normalSubCategory;
             public string specialSubCategory;

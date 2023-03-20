@@ -161,16 +161,16 @@ namespace Alexandria.DungeonAPI
             if (roomData.nodePositions != null)
             {
 
-                Dictionary<int, int> stupidJankyPieceOfShit = new Dictionary<int, int>();
+                Dictionary<string, int> stupidJankyPieceOfShit = new Dictionary<string, int>();
 
                 for (int j = 0; j < roomData.nodeOrder.Length; j++)
                 {
-                    stupidJankyPieceOfShit.Add(roomData.nodeOrder[j], j);
+                    stupidJankyPieceOfShit.Add($"{roomData.nodePaths[roomData.nodeOrder[j]]}{roomData.nodeOrder[j]}", j);
                 }
 
                 for (int j = 0; j < roomData.nodePositions.Length; j++)
                 {
-                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[stupidJankyPieceOfShit[j]], roomData.nodeTypes[stupidJankyPieceOfShit[j]], roomData.nodePaths[stupidJankyPieceOfShit[j]]);
+                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[stupidJankyPieceOfShit[$"{roomData.nodePaths[j]}{j}"]], roomData.nodeTypes[stupidJankyPieceOfShit[$"{roomData.nodePaths[j]}{j}"]], roomData.nodePaths[stupidJankyPieceOfShit[$"{roomData.nodePaths[j]}{j}"]]);
                 }   
             }
             ETGModConsole.Log("node done");

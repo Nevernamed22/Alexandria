@@ -167,23 +167,30 @@ namespace Alexandria.DungeonAPI
                     //AddPlaceableToRoom(room, roomData.placeablePositions[i], roomData.placeableGUIDs[i]);
                 }
             }
+
             if (RoomUtility.EnableDebugLogging == true)
             {
                 ETGModConsole.Log("placeable done");
             }
-            if (roomData.nodePositions != null)
+            if (roomData.nodePositions != null && roomData.nodePositions.Length > 0)
+
             {
 
                 Dictionary<string, int> stupidJankyPieceOfShit = new Dictionary<string, int>();
 
                 for (int j = 0; j < roomData.nodeOrder.Length; j++)
                 {
-                    stupidJankyPieceOfShit.Add($"{roomData.nodePaths[roomData.nodeOrder[j]]}{roomData.nodeOrder[j]}", j);
+
+
+                    ETGModConsole.Log($"{roomData.nodePaths[j]}{roomData.nodeOrder[j]}");
+                    stupidJankyPieceOfShit.Add($"{roomData.nodePaths[j]}{roomData.nodeOrder[j]}", j);
                 }
 
                 for (int j = 0; j < roomData.nodePositions.Length; j++)
                 {
-                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[stupidJankyPieceOfShit[$"{roomData.nodePaths[j]}{j}"]], roomData.nodeTypes[stupidJankyPieceOfShit[$"{roomData.nodePaths[j]}{j}"]], roomData.nodePaths[stupidJankyPieceOfShit[$"{roomData.nodePaths[j]}{j}"]]);
+                    var fuckThisMod = stupidJankyPieceOfShit[$"{roomData.nodePaths[j]}{roomData.nodeOrder[j]}"];
+
+                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[fuckThisMod], roomData.nodeTypes[fuckThisMod], roomData.nodePaths[fuckThisMod]);
                 }   
             }
             if (RoomUtility.EnableDebugLogging == true)

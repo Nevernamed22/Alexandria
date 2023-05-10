@@ -14,6 +14,7 @@ namespace Alexandria.DungeonAPI
 {
     public static class StaticReferences
     {
+
         public static Dictionary<string, AssetBundle> AssetBundles;
         public static Dictionary<string, GenericRoomTable> RoomTables;
         public static SharedInjectionData subShopTable;

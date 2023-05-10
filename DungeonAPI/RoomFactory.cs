@@ -12,6 +12,7 @@ using FloorType = Dungeonator.CellVisualData.CellFloorType;
 using Random = UnityEngine.Random;
 using Newtonsoft.Json.Linq;
 using Gungeon;
+using Microsoft.Cci;
 
 namespace Alexandria.DungeonAPI
 {
@@ -35,7 +36,10 @@ namespace Alexandria.DungeonAPI
                 if (g.EndsWith(".room", StringComparison.OrdinalIgnoreCase))
                 {
                     string name = Path.GetFullPath(g).RemovePrefix(roomDirectory).RemoveSuffix(".room");
-                    ETGModConsole.Log($"Found room: \"{name}\"");
+                    if (RoomUtility.EnableDebugLogging == true) 
+                    {
+                        ETGModConsole.Log($"Found room: \"{name}\"");
+                    }
                     var roomData = BuildFromRoomFile(g);
                     DungeonHandler.Register(roomData);
                     rooms.Add(modPrefix + ":" + name, roomData);
@@ -44,7 +48,10 @@ namespace Alexandria.DungeonAPI
                 else if (g.EndsWith(".newroom", StringComparison.OrdinalIgnoreCase))
                 {
                     string name = Path.GetFullPath(g).RemovePrefix(roomDirectory).RemoveSuffix(".newroom");
-                    ETGModConsole.Log($"New Found room: \"{name}\"");
+                    if (RoomUtility.EnableDebugLogging == true)
+                    {
+                        ETGModConsole.Log($"New Found room: \"{name}\"");
+                    }
                     var roomData = BuildFromRoomFileWithoutTexture(g);
                     DungeonHandler.Register(roomData);
                     rooms.Add(modPrefix + ":" + name, roomData);
@@ -147,7 +154,10 @@ namespace Alexandria.DungeonAPI
                     //AddEnemyToRoom(room, roomData.enemyPositions[i], roomData.enemyGUIDs[i], roomData.enemyReinforcementLayers[i], roomData.randomizeEnemyPositions); ///GOES FROM HERE==================================================
                 }
             }
-            ETGModConsole.Log("enemy done");
+            if (RoomUtility.EnableDebugLogging == true)
+            {
+                ETGModConsole.Log("enemy done");
+            }
             if (roomData.placeablePositions != null)
             {
                 for (int i = 0; i < roomData.placeablePositions.Length; i++)
@@ -157,7 +167,10 @@ namespace Alexandria.DungeonAPI
                     //AddPlaceableToRoom(room, roomData.placeablePositions[i], roomData.placeableGUIDs[i]);
                 }
             }
-            ETGModConsole.Log("placeable done");
+            if (RoomUtility.EnableDebugLogging == true)
+            {
+                ETGModConsole.Log("placeable done");
+            }
             if (roomData.nodePositions != null)
             {
 
@@ -173,7 +186,10 @@ namespace Alexandria.DungeonAPI
                     RoomFactory.AddNodeToRoom(room, roomData.nodePositions[stupidJankyPieceOfShit[$"{roomData.nodePaths[j]}{j}"]], roomData.nodeTypes[stupidJankyPieceOfShit[$"{roomData.nodePaths[j]}{j}"]], roomData.nodePaths[stupidJankyPieceOfShit[$"{roomData.nodePaths[j]}{j}"]]);
                 }   
             }
-            ETGModConsole.Log("node done");
+            if (RoomUtility.EnableDebugLogging == true)
+            {
+                ETGModConsole.Log("node done");
+            }
             if (roomData.floors != null)
             {
                 foreach (var floor in roomData.floors)

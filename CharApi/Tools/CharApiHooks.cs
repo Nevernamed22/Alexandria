@@ -201,11 +201,359 @@ namespace Alexandria.CharacterAPI
                     typeof(Hooks).GetMethod("PunchoutUpdateUI")
                 );
 
+                //Resurrection Based Hooks
+                Hook CloneHook = new Hook(
+                    typeof(PlayerController).GetMethod("HandleCloneEffect", BindingFlags.Instance | BindingFlags.NonPublic),
+                    typeof(Hooks).GetMethod("HandleCloneEffectHook", BindingFlags.Static | BindingFlags.Public)
+                );
+
+                Hook DarkSoulsResetHook = new Hook(
+                    typeof(PlayerController).GetMethod("TriggerDarkSoulsReset", BindingFlags.Instance | BindingFlags.Public),
+                    typeof(Hooks).GetMethod("TriggerDarkSoulsResetHook", BindingFlags.Static | BindingFlags.Public)
+                );
+
+                Hook ResetFactorySettingsHook = new Hook(
+                    typeof(PlayerController).GetMethod("ResetToFactorySettings", BindingFlags.Instance | BindingFlags.Public),
+                    typeof(Hooks).GetMethod("ResetToFactorySettingsHook", BindingFlags.Static | BindingFlags.Public)
+                );
+                Hook CoopResurrectInternalHook = new Hook(
+                    typeof(PlayerController).GetMethod("CoopResurrectInternal", BindingFlags.Instance | BindingFlags.NonPublic),
+                    typeof(Hooks).GetMethod("CoopResurrectInternalHook", BindingFlags.Static | BindingFlags.Public)
+                );
+                //======
             }
             catch (Exception e)
             {
                 ToolsCharApi.PrintException(e);
             }
+        }
+
+        public static IEnumerator CoopResurrectInternalHook(Func<PlayerController, Vector3, tk2dSpriteAnimationClip, bool, IEnumerator> orig, PlayerController self, Vector3 targetPosition, tk2dSpriteAnimationClip clipToWaitFor, bool isChest = false)
+        {
+            GameManager.Instance.MainCameraController.IsLerping = true;
+            self.m_cloneWaitingForCoopDeath = false;
+            self.ForceBlank(5f, 0.5f, true, false, new Vector2?(targetPosition.XY()), false, -1f);
+            if (!isChest)
+            {
+                self.IsCurrentlyCoopReviving = true;
+                self.SetInputOverride("revivepause");
+                self.PlayEffectOnActor((GameObject)ResourceCache.Acquire("Global VFX/VFX_GhostRevive"), Vector3.zero, true, true, false);
+                float elapsed = 0f;
+                while (elapsed < 0.75f)
+                {
+                    elapsed += BraveTime.DeltaTime;
+                    yield return null;
+                }
+                self.ClearInputOverride("revivepause");
+                self.IsCurrentlyCoopReviving = false;
+                GameManager.Instance.MainCameraController.OverrideRecoverySpeed = 7.5f;
+                GameManager.Instance.MainCameraController.IsLerping = true;
+            }
+            self.ChangeSpecialShaderFlag(0, 0f);
+            self.IsGhost = false;
+            self.specRigidbody.RemoveCollisionLayerIgnoreOverride(CollisionMask.LayerToMask(CollisionLayer.EnemyHitBox, CollisionLayer.EnemyCollider));
+            self.m_blankCooldownTimer = 0f;
+            GameUIRoot.Instance.TransitionToGhostUI(self);
+            self.CurrentInputState = PlayerInputState.NoInput;
+            self.m_cachedAimDirection = -Vector2.up;
+            GameUIRoot.Instance.ReenableCoopPlayerUI(self);
+            self.stats.RecalculateStats(self, false, false);
+            self.transform.position = targetPosition;
+            self.specRigidbody.CollideWithTileMap = true;
+            self.specRigidbody.CollideWithOthers = true;
+            self.specRigidbody.Reinitialize();
+            self.healthHaver.FullHeal();
+            if (self.ForceZeroHealthState == true)
+            {
+                self.healthHaver.Armor = 6f;
+            }
+            self.DoVibration(Vibration.Time.Normal, Vibration.Strength.Medium);
+            self.m_handlingQueuedAnimation = true;
+            if (clipToWaitFor != null)
+            {
+                self.spriteAnimator.Play(clipToWaitFor);
+                while (self.spriteAnimator.IsPlaying(clipToWaitFor))
+                {
+                    yield return null;
+                }
+            }
+            self.m_handlingQueuedAnimation = false;
+            self.IsVisible = true;
+            if (!SpriteOutlineManager.HasOutline(self.sprite))
+            {
+                SpriteOutlineManager.AddOutlineToSprite(self.sprite, self.outlineColor, 0.1f, 0f, (self.characterIdentity != PlayableCharacters.Eevee) ? SpriteOutlineManager.OutlineType.NORMAL : SpriteOutlineManager.OutlineType.EEVEE);
+            }
+            self.m_hideRenderers.ClearOverrides();
+            self.m_hideGunRenderers.ClearOverrides();
+            self.m_hideHandRenderers.ClearOverrides();
+            self.ToggleShadowVisiblity(true);
+            self.ToggleRenderer(true, string.Empty);
+            self.ToggleRenderer(true, "isVisible");
+            self.ToggleGunRenderers(true, string.Empty);
+            self.ToggleGunRenderers(true, "isVisible");
+            self.ToggleHandRenderers(true, string.Empty);
+            self.ToggleHandRenderers(true, "isVisible");
+            List<SpeculativeRigidbody> overlappingRigidbodies = PhysicsEngine.Instance.GetOverlappingRigidbodies(self.specRigidbody, null, false);
+            for (int i = 0; i < overlappingRigidbodies.Count; i++)
+            {
+                self.specRigidbody.RegisterGhostCollisionException(overlappingRigidbodies[i]);
+                overlappingRigidbodies[i].RegisterGhostCollisionException(self.specRigidbody);
+            }
+            self.m_isFalling = false;
+            self.ClearDodgeRollState();
+            self.previousMineCart = null;
+            self.m_interruptingPitRespawn = false;
+            GameManager.Instance.GetOtherPlayer(self).stats.RecalculateStats(GameManager.Instance.GetOtherPlayer(self), false, false);
+            self.CurrentInputState = PlayerInputState.AllInput;
+            self.healthHaver.IsVulnerable = true;
+            yield break;
+        }
+        public static void ResetToFactorySettingsHook(Action<PlayerController, bool, bool, bool> orig, PlayerController self, bool includeFullHeal = false, bool useFinalFightGuns = false, bool forceAllItems = false)
+        {
+            if (!self.IsDarkSoulsHollow || useFinalFightGuns)
+            {
+                self.inventory.DestroyAllGuns();
+            }
+            if (useFinalFightGuns && self.finalFightGunIds != null && self.finalFightGunIds.Count > 0)
+            {
+                for (int i = 0; i < self.finalFightGunIds.Count; i++)
+                {
+                    if (self.finalFightGunIds[i] >= 0)
+                    {
+                        self.inventory.AddGunToInventory(PickupObjectDatabase.GetById(self.finalFightGunIds[i]) as Gun, true);
+                    }
+                }
+            }
+            else if (self.UsingAlternateStartingGuns)
+            {
+                for (int j = 0; j < self.startingAlternateGunIds.Count; j++)
+                {
+                    Gun gun = PickupObjectDatabase.GetById(self.startingAlternateGunIds[j]) as Gun;
+                    if (forceAllItems || includeFullHeal || useFinalFightGuns || gun.PreventStartingOwnerFromDropping)
+                    {
+                        Gun gun2 = self.inventory.AddGunToInventory(gun, true);
+                    }
+                }
+            }
+            else
+            {
+                for (int k = 0; k < self.startingGunIds.Count; k++)
+                {
+                    Gun gun3 = PickupObjectDatabase.GetById(self.startingGunIds[k]) as Gun;
+                    if (forceAllItems || includeFullHeal || useFinalFightGuns || gun3.PreventStartingOwnerFromDropping)
+                    {
+                        Gun gun4 = self.inventory.AddGunToInventory(gun3, true);
+                    }
+                }
+            }
+            for (int l = 0; l < self.passiveItems.Count; l++)
+            {
+                if (!self.passiveItems[l].PersistsOnDeath)
+                {
+                    DebrisObject debrisObject = self.DropPassiveItem(self.passiveItems[l]);
+                    if (debrisObject != null)
+                    {
+                        UnityEngine.Object.Destroy(debrisObject.gameObject);
+                        l--;
+                    }
+                }
+            }
+            for (int m = 0; m < self.activeItems.Count; m++)
+            {
+                if (!self.activeItems[m].PersistsOnDeath)
+                {
+                    DebrisObject debrisObject2 = self.DropActiveItem(self.activeItems[m], 4f, true);
+                    if (debrisObject2 != null)
+                    {
+                        UnityEngine.Object.Destroy(debrisObject2.gameObject);
+                        m--;
+                    }
+                }
+            }
+            for (int n = 0; n < self.startingActiveItemIds.Count; n++)
+            {
+                PlayerItem playerItem = PickupObjectDatabase.GetById(self.startingActiveItemIds[n]) as PlayerItem;
+                if (forceAllItems || !playerItem.consumable)
+                {
+                    if (!self.HasActiveItem(playerItem.PickupObjectId))
+                    {
+                        if (forceAllItems || includeFullHeal || useFinalFightGuns || playerItem.PreventStartingOwnerFromDropping)
+                        {
+                            EncounterTrackable.SuppressNextNotification = true;
+                            playerItem.Pickup(self);
+                            EncounterTrackable.SuppressNextNotification = false;
+                        }
+                    }
+                }
+            }
+            for (int num = 0; num < self.startingPassiveItemIds.Count; num++)
+            {
+                PassiveItem passiveItem = PickupObjectDatabase.GetById(self.startingPassiveItemIds[num]) as PassiveItem;
+                if (!self.HasPassiveItem(passiveItem.PickupObjectId))
+                {
+                    EncounterTrackable.SuppressNextNotification = true;
+                    LootEngine.GivePrefabToPlayer(passiveItem.gameObject, self);
+                    EncounterTrackable.SuppressNextNotification = false;
+                }
+            }
+            if (self.ownerlessStatModifiers != null)
+            {
+                if (useFinalFightGuns || includeFullHeal)
+                {
+                    self.ownerlessStatModifiers.Clear();
+                }
+                else
+                {
+                    for (int num2 = 0; num2 < self.ownerlessStatModifiers.Count; num2++)
+                    {
+                        if (!self.ownerlessStatModifiers[num2].PersistsOnCoopDeath)
+                        {
+                            self.ownerlessStatModifiers.RemoveAt(num2);
+                            num2--;
+                        }
+                    }
+                }
+            }
+            self.stats.RecalculateStats(self, false, false);
+            if (GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER)
+            {
+                GameManager.Instance.GetOtherPlayer(self).stats.RecalculateStats(GameManager.Instance.GetOtherPlayer(self), false, false);
+            }
+            if (useFinalFightGuns && self.ForceZeroHealthState == true)
+            {
+                self.healthHaver.Armor = 6f;
+            }
+            if (includeFullHeal)
+            {
+                self.healthHaver.FullHeal();
+            }
+        }
+        public static void TriggerDarkSoulsResetHook(Action<PlayerController, bool, int> orig, PlayerController self, bool dropItems = true, int cursedHealthMaximum = 1)
+        {
+            self.IsOnFire = false;
+            self.CurrentFireMeterValue = 0f;
+            self.CurrentPoisonMeterValue = 0f;
+            self.CurrentCurseMeterValue = 0f;
+            self.CurrentDrainMeterValue = 0f;
+            AkSoundEngine.PostEvent("Stop_OBJ_paydaydrill_loop_01", GameManager.Instance.gameObject);
+            if (GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER && !GameManager.Instance.GetOtherPlayer(self).IsGhost)
+            {
+                self.DropPileOfSouls();
+                self.HandleDarkSoulsHollowTransition(true);
+                self.StartCoroutine(self.HandleCoopDeath(self.m_isFalling));
+            }
+            else
+            {
+                self.m_interruptingPitRespawn = true;
+                self.healthHaver.FullHeal();
+                if (self.ForceZeroHealthState == true)
+                {
+                    self.healthHaver.Armor = 2f;
+                }
+                self.specRigidbody.Velocity = Vector2.zero;
+                self.knockbackDoer.TriggerTemporaryKnockbackInvulnerability(1f);
+                if (self.m_returnTeleporter != null)
+                {
+                    self.m_returnTeleporter.ClearReturnActive();
+                    self.m_returnTeleporter = null;
+                }
+                GameManager.Instance.Dungeon.DarkSoulsReset(self, dropItems, cursedHealthMaximum);
+            }
+        }
+        public static IEnumerator HandleCloneEffectHook(Func<PlayerController, IEnumerator> orig, PlayerController self)
+        {
+            Pixelator.Instance.FadeToBlack(0.5f, false, 0f);
+            GameUIRoot.Instance.ToggleUICamera(false);
+            self.healthHaver.FullHeal();
+            self.IsOnFire = false;
+            self.CurrentFireMeterValue = 0f;
+            self.CurrentPoisonMeterValue = 0f;
+            self.CurrentCurseMeterValue = 0f;
+            self.CurrentDrainMeterValue = 0f;
+            if (self.ForceZeroHealthState == true)
+            {
+                self.healthHaver.Armor = 6f;
+            }
+            float ela = 0f;
+            while (ela < 0.5f)
+            {
+                ela += GameManager.INVARIANT_DELTA_TIME;
+                yield return null;
+            }
+            int targetLevelIndex = 1;
+            if (GameManager.Instance.CurrentGameMode == GameManager.GameMode.SHORTCUT)
+            {
+                targetLevelIndex += GameManager.Instance.LastShortcutFloorLoaded;
+            }
+            GameManager.Instance.SetNextLevelIndex(targetLevelIndex);
+            if (GameManager.Instance.CurrentGameMode == GameManager.GameMode.BOSSRUSH)
+            {
+                GameManager.Instance.DelayedLoadBossrushFloor(0.5f);
+            }
+            else
+            {
+                GameManager.Instance.DelayedLoadNextLevel(0.5f);
+            }
+            self.m_cloneWaitingForCoopDeath = false;
+            ExtraLifeItem cloneItem = null;
+            for (int i = 0; i < self.passiveItems.Count; i++)
+            {
+                if (self.passiveItems[i] is ExtraLifeItem)
+                {
+                    ExtraLifeItem extraLifeItem = self.passiveItems[i] as ExtraLifeItem;
+                    if (extraLifeItem.extraLifeMode == ExtraLifeItem.ExtraLifeMode.CLONE)
+                    {
+                        cloneItem = extraLifeItem;
+                    }
+                }
+            }
+            if (cloneItem != null)
+            {
+                self.RemovePassiveItem(cloneItem.PickupObjectId);
+            }
+            if (GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER)
+            {
+                for (int j = 0; j < GameManager.Instance.AllPlayers.Length; j++)
+                {
+                    PlayerController playerController = GameManager.Instance.AllPlayers[j];
+                    if (playerController.IsGhost)
+                    {
+                        playerController.StartCoroutine(playerController.CoopResurrectInternal(playerController.transform.position, null, true));
+                    }
+                    playerController.healthHaver.FullHeal();
+                    playerController.specRigidbody.Velocity = Vector2.zero;
+                    playerController.knockbackDoer.TriggerTemporaryKnockbackInvulnerability(1f);
+                    if (playerController.m_returnTeleporter != null)
+                    {
+                        playerController.m_returnTeleporter.ClearReturnActive();
+                        playerController.m_returnTeleporter = null;
+                    }
+                }
+                Chest.ToggleCoopChests(false);
+            }
+            else
+            {
+                self.healthHaver.FullHeal();
+                self.specRigidbody.Velocity = Vector2.zero;
+                self.knockbackDoer.TriggerTemporaryKnockbackInvulnerability(1f);
+                if (self.m_returnTeleporter != null)
+                {
+                    self.m_returnTeleporter.ClearReturnActive();
+                    self.m_returnTeleporter = null;
+                }
+            }
+            yield return new WaitForSeconds(1f);
+            self.IsOnFire = false;
+            self.CurrentFireMeterValue = 0f;
+            self.CurrentPoisonMeterValue = 0f;
+            self.CurrentCurseMeterValue = 0f;
+            self.CurrentDrainMeterValue = 0f;
+            self.healthHaver.FullHeal();
+            if (self.ForceZeroHealthState == true)
+            {
+                self.healthHaver.Armor = 6f;
+            }
+            yield break;
         }
 
 
@@ -675,7 +1023,7 @@ namespace Alexandria.CharacterAPI
                 {
                     yield return null;
                 }
-                yield break;
+                //yield break;
                 /*
                 IEnumerator origEnum = orig(self, interactor);
                 while (origEnum.MoveNext()) 

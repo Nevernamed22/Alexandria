@@ -58,6 +58,7 @@ namespace Alexandria.CharacterAPI
 
         public CharacterSelectIdleDoer idleDoer;
 
+
         public List<Tuple<GameObject, Vector3>> randomFoyerBullshitNNAskedFor = new List<Tuple<GameObject, Vector3>>();
     }
 

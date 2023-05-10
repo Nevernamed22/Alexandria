@@ -10,6 +10,7 @@ using System;
 using Alexandria.ItemAPI;
 using System.IO;
 using Microsoft.Cci;
+using Pathfinding;
 
 namespace Alexandria.CharacterAPI
 {
@@ -255,8 +256,6 @@ namespace Alexandria.CharacterAPI
 
         public static void SetupLitterallyEverythingForPunchOut(PlayerController player, CustomCharacterData data)
         {
-
-
             Dictionary<string, int> spriteIds = new Dictionary<string, int>();
 
             var libary = ResourceManager.LoadAssetBundle("enemies_base_001").LoadAsset<GameObject>("MetalGearRat").GetComponent<AIActor>().GetComponent<MetalGearRatDeathController>().PunchoutMinigamePrefab.GetComponent<PunchoutController>().Player.gameObject.GetComponent<tk2dSpriteAnimator>().Library;
@@ -326,10 +325,18 @@ namespace Alexandria.CharacterAPI
                 HandleAltAnimations(player, data);
 
 
+
+
+
             if ((data.sprites != null || data.playerSheet != null) && string.IsNullOrEmpty(data.pathForSprites))
                 HandleAnimations(player, data);
 
-            
+            player.primaryHand.sprite.Collection = spr1 ?? data.collection;
+            player.secondaryHand.sprite.Collection = spr2 ?? data.collection;
+
+            player.primaryHand.sprite.SetSprite(player.primaryHand.sprite.Collection.GetSpriteIdByName("hand_001"));
+            player.secondaryHand.sprite.SetSprite(player.secondaryHand.sprite.Collection.GetSpriteIdByName("hand_001"));
+
             if (d2 != null && spr2 != null)
                 SetupLitterallyEverythingPremade(player, spr2, d2, data, data.pathForAltSprites, true, assembly ?? Assembly.GetCallingAssembly());
 
@@ -413,7 +420,6 @@ namespace Alexandria.CharacterAPI
                 uiAtlas.AddNewItemToAtlas(data.coopDeathScreenIcon, $"coop_page_death_{data.nameShort.ToLower()}_001");
                 //ToolsCharApi.ExportTexture(ToolsCharApi.LoadAssetFromAnywhere<GameObject>("Ammonomicon Atlas").GetComponent<dfAtlas>().Texture.GetReadable(), "ihateyou", "YoumadeashitofpiecewithyourtrashMTG");
             }
-
             Default_Punchout_Material = new Material(EnemyDatabase.GetOrLoadByName("GunNut").sprite.renderer.material);
             Default_Punchout_Material.SetColor("_EmissiveColor", new Color32(0, 0, 0, 0));
             Default_Punchout_Material.SetFloat("_EmissiveColorPower", 0f);
@@ -791,6 +797,7 @@ namespace Alexandria.CharacterAPI
                 data.collection = collection;
             }
 
+
             //UnityEngine.Object.DontDestroyOnLoad(data.collection);
             data.animator = player.gameObject.transform.Find("PlayerSprite").gameObject.GetOrAddComponent<tk2dSpriteAnimator>();
             data.animator.Library = libaryObject.AddComponent<tk2dSpriteAnimation>();
@@ -1046,6 +1053,7 @@ namespace Alexandria.CharacterAPI
                         player.primaryHand.sprite.SetSprite(id);
                         player.secondaryHand.sprite.SetSprite(id);
                     }
+
                 }
             }
             if (alt)
@@ -1063,6 +1071,7 @@ namespace Alexandria.CharacterAPI
 
                 //ToolsCharApi.ExportTexture(data.collection.spriteDefinitions[0].material.mainTexture, "SpriteDump/", data.nameShort);
             }
+
 
             //ToolsCharApi.ExportTexture(TextureStitcher.GetReadable(data.collection.textures[0]), "SpriteDump/balls", data.nameShort + UnityEngine.Random.Range(1, 10000));
 
@@ -1237,8 +1246,9 @@ namespace Alexandria.CharacterAPI
             else if (data.sprites != null)
             {
 
-
-                /*var materialsToCopy2 = orig.materials;
+                //God kill me.
+                /*
+                var materialsToCopy2 = orig.materials;
                 copyCollection.materials = new Material[orig.materials.Length];
                 for (int i = 0; i < copyCollection.materials.Length; i++)
                 {
@@ -1260,7 +1270,8 @@ namespace Alexandria.CharacterAPI
                             copyDefinitions[i].materialInst = new Material(mat);
                         }
                     }
-                }*/
+                }
+                */
 
                 if (ToolsCharApi.EnableDebugLogging == true)
                 {
@@ -1333,6 +1344,7 @@ namespace Alexandria.CharacterAPI
                     copyCollection.materialInsts[i] = mat;
 
                 }
+                /*
                 copyCollection.textures = new Texture[] { page.Texture };
                 for (int i = 0; i < copyCollection.spriteDefinitions.Length; i++)
                 {
@@ -1347,6 +1359,7 @@ namespace Alexandria.CharacterAPI
                         }
                     }
                 }
+                */
                 copyCollection.textureFilterMode = FilterMode.Point;
                 for (int i = 0; i < player.sprite.Collection.spriteDefinitions.Length; i++)
                 {
@@ -1398,8 +1411,12 @@ namespace Alexandria.CharacterAPI
 
             copyCollection.name = player.OverrideDisplayName;
 
+            player.primaryHand.sprite.collection = copyCollection;
             player.primaryHand.sprite.Collection = copyCollection;
+
+            player.secondaryHand.sprite.collection = copyCollection;
             player.secondaryHand.sprite.Collection = copyCollection;
+
             player.sprite.Collection = copyCollection;
         }
 

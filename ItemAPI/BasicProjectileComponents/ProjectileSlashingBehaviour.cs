@@ -78,7 +78,11 @@ namespace Alexandria.ItemAPI
         private IEnumerator Suicide()
         {
             yield return null;
-            UnityEngine.Object.Destroy(this.m_projectile.gameObject);
+            if (DestroysOnlyComponentAfterFirstSlash == true) { Destroy(this); }
+            else 
+            {
+                UnityEngine.Object.Destroy(this.m_projectile.gameObject);
+            }
             yield break;
         }
         /// <summary>
@@ -120,6 +124,10 @@ namespace Alexandria.ItemAPI
         /// If true, the base projectile will be erased after performing it's first slash/sequence of slashes.
         /// </summary>
         public bool DestroyBaseAfterFirstSlash;
+        /// <summary>
+        /// If true, the base projectile will only erase the slashing COMPONENT after performing it's first slash/sequence of slashes.
+        /// </summary>
+        public bool DestroysOnlyComponentAfterFirstSlash = false;
         /// <summary>
         /// The data which defines the exact nature of the slash created.
         /// </summary>

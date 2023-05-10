@@ -125,10 +125,15 @@ namespace Alexandria.Misc
                 }
             }
         }
+
+        public HeatIndicatorController ReturnRadialIndicator()
+        {
+            return m_radialIndicator;
+        }
+
+        
         private bool enabled;
         private List<AIActor> actorsInCircle = new List<AIActor>();
         private HeatIndicatorController m_radialIndicator;
-
-
     }
 }

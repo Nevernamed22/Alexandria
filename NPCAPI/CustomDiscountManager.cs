@@ -241,6 +241,16 @@ namespace Alexandria.NPCAPI
             return false;
         }
 
+
+        public ShopItemController ReturnShopItemController()
+        {
+            return shopItemSelf;
+        }
+
+        public float ReturnStartPrice()
+        {
+            return StartPrice;
+        }
         public List<ShopDiscount> discounts = new List<ShopDiscount>();
         private ShopItemController shopItemSelf;
     }

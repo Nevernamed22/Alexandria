@@ -53,7 +53,7 @@ namespace Alexandria.CharacterAPI
         {
             if (!__instance.gameObject.GetComponent<PlayMakerFSM>() || !__instance.gameObject.name.Contains("NPC_Blacksmith")) return;
             foreach (var character in CharacterBuilder.storedCharacters)
-            {                  
+            {
                 if (character.Value.First.hasPast) __instance.gameObject.AddNewCharacter(character.Value.First.nameShort.Replace(" ", ""), character.Value.First.identity);
                 if (ToolsCharApi.EnableDebugLogging)
                 {
@@ -62,7 +62,7 @@ namespace Alexandria.CharacterAPI
             }
 
 
-            foreach(var state in __instance.gameObject.GetComponent<PlayMakerFSM>().FsmStates)
+            foreach (var state in __instance.gameObject.GetComponent<PlayMakerFSM>().FsmStates)
             {
                 foreach (var action in state.actions.Where(x => x is CharacterClassSwitch))
                 {

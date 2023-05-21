@@ -15,90 +15,66 @@ namespace Alexandria.CharacterAPI
         public static void AddNewCharacter(this GameObject blacksmith, string name, PlayableCharacters characterEnum)
         {
 
-            //var forgeDungeon = DungeonDatabase.GetOrLoadByName("Base_Forge");
+            var blacksmithFsm = blacksmith.GetComponentInChildren<PlayMakerFSM>();
 
+            blacksmithFsm.fsm.AddEvent($"Is{name}", false);
 
-            //8084016647973805596
+            foreach (var state in blacksmithFsm.Fsm.States)
+            {
+                foreach (var switcher in state.Actions.Where(action => action is CharacterClassSwitch))
+                {
 
-            //var blacksmith = forgeDungeon.PatternSettings.flows[0].AllNodes.Where(node => node.overrideExactRoom != null && node.overrideExactRoom.name.Contains("Blacksmith_TestRoom")).First().overrideExactRoom.placedObjects
-            //.Where(ppod => ppod != null && ppod.nonenemyBehaviour != null && ppod.nonenemyBehaviour.gameObject.name.Contains("NPC_Blacksmith_Forge")).First().nonenemyBehaviour.gameObject;
+                    if (state.GetTransition(0).EventName.Contains("Coop")) continue;
 
+                    var action = (CharacterClassSwitch)switcher;
 
-            var blacksmithFSM = blacksmith.GetComponentInChildren<PlayMakerFSM>();
+                    var target = state.transitions.First(x => x.EventName == "IsBullet").ToState;
+                    state.AddTransition($"Is{name}", target, false);
 
-            blacksmithFSM.fsm.AddEvent($"Is{name}", false);
-            var stateToEdit = blacksmithFSM.fsm.GetState("Char Swizzlon 4");
-            var stateToEdit2 = blacksmithFSM.fsm.GetState("Char Swizzlon 3");
-            var stateToEdit3 = blacksmithFSM.fsm.GetState("Char Swizzlon 2");
+                    var switchCharacterList = action.compareTo.ToList();
+                    switchCharacterList.Add(characterEnum);
+                    action.compareTo = switchCharacterList.ToArray();
 
-            (stateToEdit.Actions[0] as CharacterClassSwitch).AddCharacterToSwitchClass(name, characterEnum);
-            (stateToEdit2.Actions[0] as CharacterClassSwitch).AddCharacterToSwitchClass(name, characterEnum);
-            (stateToEdit3.Actions[0] as CharacterClassSwitch).AddCharacterToSwitchClass(name, characterEnum);
+                    var switchEventList = action.sendEvent.ToList();
+                    switchEventList.Add(blacksmithFsm.fsm.Events.First(x => x.name == $"Is{name}"));
+                    action.sendEvent = switchEventList.ToArray();
 
-           
+                }
+            }
 
-
-
-
-            stateToEdit.AddTransition($"Is{name}", "Check Items", false);
-            stateToEdit2.AddTransition($"Is{name}", "Finished Bullet?", false);
-            stateToEdit3.AddTransition($"Is{name}", "Do I know you?", false);
-
-            blacksmithFSM.fsm.SaveActions();
-            blacksmithFSM.fsm.InitData();
-
-            //forgeDungeon = null;
+            blacksmithFsm.fsm.SaveActions();
+            blacksmithFsm.fsm.InitData();
 
         }
-
-        public static void AddCharacterToSwitchClass(this CharacterClassSwitch switchClass, string name, PlayableCharacters characterEnum)
-        {
-            var switchCharacterList = switchClass.compareTo.ToList();
-            switchCharacterList.Add(characterEnum);
-            switchClass.compareTo = switchCharacterList.ToArray();
-
-            var switchEventList = switchClass.sendEvent.ToList();
-            switchEventList.Add(new HutongGames.PlayMaker.FsmEvent($"Is{name}"));
-            switchClass.sendEvent = switchEventList.ToArray();
-        }
-
-
-
 
         [HarmonyPatch(typeof(TalkDoerLite), nameof(TalkDoerLite.Start))]
         [HarmonyPrefix]
         public static void BlackSmithFix(TalkDoerLite __instance)
         {
-
-            if (__instance.gameObject.GetComponent<PlayMakerFSM>() && __instance.gameObject.name.Contains("NPC_Blacksmith"))
+            if (!__instance.gameObject.GetComponent<PlayMakerFSM>() || !__instance.gameObject.name.Contains("NPC_Blacksmith")) return;
+            foreach (var character in CharacterBuilder.storedCharacters)
             {
-                foreach (var character in CharacterBuilder.storedCharacters)
-                {                  
-                    if (character.Value.First.hasPast) __instance.gameObject.AddNewCharacter(character.Value.First.nameShort.Replace(" ", ""), character.Value.First.identity);
-                    if (character.Value.First.hasPast) 
+                if (character.Value.First.hasPast) __instance.gameObject.AddNewCharacter(character.Value.First.nameShort.Replace(" ", ""), character.Value.First.identity);
+                if (ToolsCharApi.EnableDebugLogging)
+                {
+                    ETGModConsole.Log($"Added \"{character.Value.First.identity}\" to the blacksmith fsm");
+                }
+            }
+
+
+            foreach (var state in __instance.gameObject.GetComponent<PlayMakerFSM>().FsmStates)
+            {
+                foreach (var action in state.actions.Where(x => x is CharacterClassSwitch))
+                {
+                    var a = action as CharacterClassSwitch;
+                    for (var i = 0; i < a?.sendEvent.Length; i++)
                     {
-                        if (ToolsCharApi.EnableDebugLogging == true)
+                        if (ToolsCharApi.EnableDebugLogging)
                         {
-                            ETGModConsole.Log($"Added \"{character.Value.First.identity}\" to the blacksmith fsm");
+                            ETGModConsole.Log($"{a.sendEvent[i].name} - {a.compareTo[i]} >> {state.Transitions.First(x => x.EventName == a.sendEvent[i].name).toState}");
                         }
                     }
                 }
-
-
-               foreach(var state in __instance.gameObject.GetComponent<PlayMakerFSM>().FsmStates)
-               {
-                    foreach (var action in state.actions.Where(x => x is CharacterClassSwitch))
-                    {
-                        var a = action as CharacterClassSwitch;
-                        for (int i = 0; i < a.sendEvent.Length; i++)
-                        {
-                            if (ToolsCharApi.EnableDebugLogging == true)
-                            {
-                                ETGModConsole.Log($"{a.sendEvent[i].name} - {a.compareTo[i]} >> {state.Transitions.Where(x => x.EventName == a.sendEvent[i].name).First().toState}");
-                            }
-                        }
-                    }
-               }
             }
         }
     }

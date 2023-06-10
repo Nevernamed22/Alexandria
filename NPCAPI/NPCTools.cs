@@ -9,12 +9,14 @@ using UnityEngine;
 
 namespace Alexandria.NPCAPI
 {
-    static class NpcTools
+    public static class NpcTools
     {
         public static void Init()
         {
 
             NPCHooks.Init();
+
+
             //ETGModConsole.Log("AAAAAAAAAAAAAAA 0");
         }
 
@@ -48,29 +50,6 @@ namespace Alexandria.NPCAPI
            
         }*/
 
-        public static byte[] ExtractEmbeddedResource(string filePath)
-        {
-            filePath = filePath.Replace("/", ".");
-            filePath = filePath.Replace("\\", ".");
-            Assembly callingAssembly = Assembly.GetCallingAssembly();
-            byte[] result;
-            using (Stream manifestResourceStream = callingAssembly.GetManifestResourceStream(filePath))
-            {
-                bool flag = manifestResourceStream == null;
-                if (flag)
-                {
-                    result = null;
-                }
-                else
-                {
-                    byte[] array = new byte[manifestResourceStream.Length];
-                    manifestResourceStream.Read(array, 0, array.Length);
-                    result = array;
-                }
-            }
-            return result;
-        }
-
         public static void AddComplex(this StringDBTable stringdb, string key, string value)
         {
             StringTableManager.ComplexStringCollection stringCollection = null;
@@ -86,35 +65,6 @@ namespace Alexandria.NPCAPI
                 stringCollection.AddString(value, 1f);
                 stringdb[key] = stringCollection;
             }
-
-
-        }
-
-        public static Texture2D GetTextureFromResource(string resourceName)
-        {
-            byte[] array = ExtractEmbeddedResource(resourceName);
-            bool flag = array == null;
-            Texture2D result;
-            if (flag)
-            {
-                //Tools.PrintError<string>("No bytes found in " + resourceName, "FF0000");
-                result = null;
-            }
-            else
-            {
-                Texture2D texture2D = new Texture2D(1, 1, TextureFormat.RGBAFloat, false);
-                texture2D.LoadImage(array);
-                texture2D.filterMode = FilterMode.Point;
-                string text = resourceName.Substring(0, resourceName.LastIndexOf('.'));
-                bool flag2 = text.LastIndexOf('.') >= 0;
-                if (flag2)
-                {
-                    text = text.Substring(text.LastIndexOf('.') + 1);
-                }
-                texture2D.name = text;
-                result = texture2D;
-            }
-            return result;
         }
 
 
@@ -225,8 +175,8 @@ namespace Alexandria.NPCAPI
             Vector2Int point = new Vector2Int(0, 0);
             int pointIndex = -1;
             List<RectInt> rects = atlas.GetPixelRegions();
-            float x = 0;
-            float y = 0;
+            //float x = 0;
+            //float y = 0;
 
 
             while (true)
@@ -331,13 +281,14 @@ namespace Alexandria.NPCAPI
 
 
         /// <summary>
-		/// Resizes <paramref name="tex"/> without it losing it's pixel information.
-		/// </summary>
-		/// <param name="tex">The <see cref="Texture2D"/> to resize.</param>
-		/// <param name="width">The <paramref name="tex"/>'s new width.</param>
-		/// <param name="height">The <paramref name="tex"/>'s new height.</param>
-		/// <returns></returns>
-		public static bool ResizeBetter(this Texture2D tex, int width, int height, bool center = false)
+        /// Resizes <paramref name="tex"/> without it losing it's pixel information.
+        /// </summary>
+        /// <param name="tex">The <see cref="Texture2D"/> to resize.</param>
+        /// <param name="width">The <paramref name="tex"/>'s new width.</param>
+        /// <param name="height">The <paramref name="tex"/>'s new height.</param>
+        /// <param name="center">Centers (Default of false).</param>
+        /// <returns></returns>
+        public static bool ResizeBetter(this Texture2D tex, int width, int height, bool center = false)
         {
             if (tex.IsReadable())
             {

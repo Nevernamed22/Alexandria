@@ -43,6 +43,7 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BreakableAPI\BreakableAPIToolbox.cs" />
     <Compile Include="CharApi\CharacterBuilding\CharacterBuilder.cs" />
     <Compile Include="CharApi\CharacterBuilding\CustomCharacter.cs" />
     <Compile Include="CharApi\CharacterBuilding\FoyerCharacterHandler.cs" />
@@ -50,6 +51,7 @@
     <Compile Include="CharApi\CharacterBuilding\SpriteHandler.cs" />
     <Compile Include="CharApi\CharacterBuilding\StringHandler.cs" />
     <Compile Include="CharApi\CharacterSwitcher.cs" />
+    <Compile Include="CharApi\CustomCharacterBlackSmithHandler.cs" />
     <Compile Include="CharApi\CollectionDumper.cs" />
     <Compile Include="CharApi\Tools\CharApiHooks.cs" />
     <Compile Include="CharApi\Tools\HooksToMakeDodgeRollsCodeForRobotGood.cs" />
@@ -57,10 +59,15 @@
     <Compile Include="CharApi\Tools\TextureStitcher.cs" />
     <Compile Include="CharApi\Tools\Tools.cs" />
     <Compile Include="ChestAPI\ChestSpawnHelper.cs" />
+    <Compile Include="ChestAPI\ChestUtility.cs" />
+    <Compile Include="DungeonAPI\BreachExtensions.cs" />
+    <Compile Include="DungeonAPI\MasteryOverrideHandler.cs" />
     <Compile Include="DungeonAPI\RoomUtility.cs" />
+    <Compile Include="DungeonAPI\RuntimeDungeonEditing.cs" />
     <Compile Include="DungeonAPI\SetupExoticObjects.cs" />
     <Compile Include="EnemyAPI\AIActorUtility.cs" />
     <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
+    <Compile Include="EnemyAPI\EnemyBuildingTools.cs" />
     <Compile Include="ItemAPI\AnimationUtility.cs" />
     <Compile Include="ItemAPI\BasicProjectileComponents\AdditionalProjectileTypes\ImprovedHelixProjectile.cs" />
     <Compile Include="ItemAPI\BasicProjectileComponents\AdvancedTransmogrifyBehaviour.cs" />
@@ -68,8 +75,12 @@
     <Compile Include="ItemAPI\BasicProjectileComponents\PreventGunjurerGrabBehaviour.cs" />
     <Compile Include="ItemAPI\BasicProjectileComponents\ProjectileSlashingBehaviour.cs" />
     <Compile Include="ItemAPI\GenericItemAPIHooks.cs" />
+    <Compile Include="ItemAPI\ItemInterfaces\LabelablePlayerItem.cs" />
     <Compile Include="ItemAPI\OrbitalUtility.cs" />
     <Compile Include="ItemAPI\SlashDoer.cs" />
+    <Compile Include="ItemAPI\SynergyTools\AdvancedVolleyModificationSynergy.cs" />
+    <Compile Include="ItemAPI\SynergyTools\AdvancedGunFormeSynergyProcessor.cs" />
+    <Compile Include="ItemAPI\SynergyTools\AdvancedHoveringGunSynergyProcessor.cs" />
     <Compile Include="Misc\AmmoPickupFixer.cs" />
     <Compile Include="Misc\ChamberGunAPI.cs" />
     <Compile Include="EnemyAPI\BossBuilder.cs" />
@@ -93,10 +104,19 @@
     <Compile Include="Misc\Commands.cs" />
     <Compile Include="Misc\CustomActions.cs" />
     <Compile Include="Misc\ExtendedPlayerComponent.cs" />
+    <Compile Include="Misc\GameManagerUtility.cs" />
+    <Compile Include="Misc\GoopUtility.cs" />
+    <Compile Include="Misc\MagicCircleDoer.cs" />
+    <Compile Include="Misc\MiscUtility.cs" />
     <Compile Include="Misc\PickupUtility.cs" />
     <Compile Include="Misc\PlayerUtility.cs" />
+    <Compile Include="Misc\RoomRewardAPI.cs" />
+    <Compile Include="Misc\RuntimeRoomhandlerUtility.cs" />
     <Compile Include="Misc\ShadowBulletDoer.cs" />
+    <Compile Include="Misc\SupplyDropDoer.cs" />
+    <Compile Include="Misc\Tk2dSpriteAnimatorUtility.cs" />
     <Compile Include="NPCAPI\BreachShopTools.cs" />
+    <Compile Include="NPCAPI\CustomDiscountManager.cs" />
     <Compile Include="NPCAPI\PlayMakerExtensions.cs" />
     <Compile Include="NPCAPI\NpcAPI.cs" />
     <Compile Include="PrefabAPI\AssetBundleBuilder.cs" />
@@ -181,6 +201,9 @@
     <Compile Include="NPCAPI\NPCTools.cs" />
     <Compile Include="NPCAPI\ShopAPI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VisualAPI\AnimationBuilder.cs" />
+    <Compile Include="VisualAPI\ImprovedAfterImageControllers.cs" />
+    <Compile Include="VisualAPI\VFXBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -395,6 +418,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />
+    <EmbeddedResource Include="NativeResources\debugfloor.png" />
+    <EmbeddedResource Include="NativeResources\debugnorthwall.png" />
+    <EmbeddedResource Include="NativeResources\debugwalls.png" />
+    <EmbeddedResource Include="Misc\mdl_os.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

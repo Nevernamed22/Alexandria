@@ -12,6 +12,7 @@ using FloorType = Dungeonator.CellVisualData.CellFloorType;
 using Random = UnityEngine.Random;
 using Newtonsoft.Json.Linq;
 using Gungeon;
+using Microsoft.Cci;
 
 namespace Alexandria.DungeonAPI
 {
@@ -24,19 +25,34 @@ namespace Alexandria.DungeonAPI
         private static RoomEventDefinition sealOnEnterWithEnemies = new RoomEventDefinition(RoomEventTriggerCondition.ON_ENTER_WITH_ENEMIES, RoomEventTriggerAction.SEAL_ROOM);
         private static RoomEventDefinition unsealOnRoomClear = new RoomEventDefinition(RoomEventTriggerCondition.ON_ENEMIES_CLEARED, RoomEventTriggerAction.UNSEAL_ROOM);
 
-        public static Dictionary<string, RoomData> LoadRoomsFromRoomDirectory(string modPrefix, string roomDirectory, string unzippedDirectory)
+        public static Dictionary<string, RoomData> LoadRoomsFromRoomDirectory(string modPrefix, string roomDirectory)
         {
 
             var loadedRooms = new Dictionary<string, RoomData>();
 
-            Directory.CreateDirectory(unzippedDirectory);
-            foreach (string g in Directory.GetFiles(unzippedDirectory, "*", SearchOption.AllDirectories))
+            Directory.CreateDirectory(roomDirectory);
+            foreach (string g in Directory.GetFiles(roomDirectory, "*", SearchOption.AllDirectories))
             {
                 if (g.EndsWith(".room", StringComparison.OrdinalIgnoreCase))
                 {
-                    string name = Path.GetFullPath(g).RemovePrefix(unzippedDirectory).RemoveSuffix(".room");
-                    //Tools.PrintNoID($"Found room: \"{name}\"");
+                    string name = Path.GetFullPath(g).RemovePrefix(roomDirectory).RemoveSuffix(".room");
+                    if (RoomUtility.EnableDebugLogging == true) 
+                    {
+                        ETGModConsole.Log($"Found room: \"{name}\"");
+                    }
                     var roomData = BuildFromRoomFile(g);
+                    DungeonHandler.Register(roomData);
+                    rooms.Add(modPrefix + ":" + name, roomData);
+                    loadedRooms.Add(name, roomData);
+                }
+                else if (g.EndsWith(".newroom", StringComparison.OrdinalIgnoreCase))
+                {
+                    string name = Path.GetFullPath(g).RemovePrefix(roomDirectory).RemoveSuffix(".newroom");
+                    if (RoomUtility.EnableDebugLogging == true)
+                    {
+                        ETGModConsole.Log($"New Found room: \"{name}\"");
+                    }
+                    var roomData = BuildFromRoomFileWithoutTexture(g);
                     DungeonHandler.Register(roomData);
                     rooms.Add(modPrefix + ":" + name, roomData);
                     loadedRooms.Add(name, roomData);
@@ -55,6 +71,14 @@ namespace Alexandria.DungeonAPI
             return roomData;
         }
 
+        public static RoomData BuildFromRoomFileWithoutTexture(string roomPath)
+        {
+            //ETGModConsole.Log(roomPath);
+            RoomData roomData = ExtractRoomDataFromFile(roomPath);
+            roomData.name = Path.GetFileName(roomPath);
+            roomData.room = Build(roomData);
+            return roomData;
+        }
 
 
         public static RoomData BuildFromResource(string roomPath, Assembly assembly = null)
@@ -64,6 +88,24 @@ namespace Alexandria.DungeonAPI
             RoomData roomData = ExtractRoomDataFromResource(roomPath, assembly ?? Assembly.GetCallingAssembly());
             roomData.room = Build(texture, roomData);
             return roomData;
+        }
+
+        public static PrototypeDungeonRoom Build(RoomData roomData)
+        {
+            try
+            {
+                var room = CreateRoomFromData(roomData);
+                ApplyRoomData(room, roomData);
+                room.UpdatePrecalculatedData();
+                return room;
+            }
+            catch (Exception e)
+            {
+                // Tools.PrintError("Failed to build room!");
+                ShrineTools.PrintException(e);
+            }
+
+            return CreateEmptyRoom(12, 12);
         }
 
         public static PrototypeDungeonRoom Build(Texture2D texture, RoomData roomData)
@@ -112,6 +154,10 @@ namespace Alexandria.DungeonAPI
                     //AddEnemyToRoom(room, roomData.enemyPositions[i], roomData.enemyGUIDs[i], roomData.enemyReinforcementLayers[i], roomData.randomizeEnemyPositions); ///GOES FROM HERE==================================================
                 }
             }
+            if (RoomUtility.EnableDebugLogging == true)
+            {
+                ETGModConsole.Log("enemy done");
+            }
             if (roomData.placeablePositions != null)
             {
                 for (int i = 0; i < roomData.placeablePositions.Length; i++)
@@ -121,12 +167,35 @@ namespace Alexandria.DungeonAPI
                     //AddPlaceableToRoom(room, roomData.placeablePositions[i], roomData.placeableGUIDs[i]);
                 }
             }
-            if (roomData.nodePositions != null)
+
+            if (RoomUtility.EnableDebugLogging == true)
             {
+                ETGModConsole.Log("placeable done");
+            }
+            if (roomData.nodePositions != null && roomData.nodePositions.Length > 0)
+
+            {
+
+                Dictionary<string, int> stupidJankyPieceOfShit = new Dictionary<string, int>();
+
+                for (int j = 0; j < roomData.nodeOrder.Length; j++)
+                {
+
+
+                    ETGModConsole.Log($"{roomData.nodePaths[j]}{roomData.nodeOrder[j]}");
+                    stupidJankyPieceOfShit.Add($"{roomData.nodePaths[j]}{roomData.nodeOrder[j]}", j);
+                }
+
                 for (int j = 0; j < roomData.nodePositions.Length; j++)
                 {
-                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[j], roomData.nodeTypes[j], roomData.nodePaths[j]);
+                    var fuckThisMod = stupidJankyPieceOfShit[$"{roomData.nodePaths[j]}{roomData.nodeOrder[j]}"];
+
+                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[fuckThisMod], roomData.nodeTypes[fuckThisMod], roomData.nodePaths[fuckThisMod]);
                 }   
+            }
+            if (RoomUtility.EnableDebugLogging == true)
+            {
+                ETGModConsole.Log("node done");
             }
             if (roomData.floors != null)
             {
@@ -168,10 +237,16 @@ namespace Alexandria.DungeonAPI
             return ExtractRoomData(stringData);
         }
 
+        public static RoomData ExtractRoomDataFromBytesWithoutHeadder(byte[] data)
+        {
+            string stringData = ResourceExtractor.BytesToString(data);
+            return ExtractRoomDataWithoutHeader(stringData);
+        }
+
         public static RoomData ExtractRoomDataFromFile(string path)
         {
             byte[] data = File.ReadAllBytes(path);
-            return ExtractRoomDataFromBytes(data);
+            return path.EndsWith(".newroom") ? ExtractRoomDataFromBytesWithoutHeadder(data) : ExtractRoomDataFromBytes(data);
         }
 
         public static RoomData ExtractRoomDataFromResource(string path, Assembly assembly = null)
@@ -179,6 +254,12 @@ namespace Alexandria.DungeonAPI
             byte[] data = ResourceExtractor.ExtractEmbeddedResource(path, assembly ?? Assembly.GetCallingAssembly());
             return ExtractRoomDataFromBytes(data);
         }
+
+        public static RoomData ExtractRoomDataWithoutHeader(string data)
+        {
+            return JsonUtility.FromJson<RoomData>(data);
+        }
+
 
         public static RoomData ExtractRoomData(string data)
         {
@@ -191,6 +272,31 @@ namespace Alexandria.DungeonAPI
             }
             ShrineTools.Log($"No room data found at {data}");
             return new RoomData();
+        }
+
+        public static PrototypeDungeonRoom CreateRoomFromData(RoomData data)
+        {
+            
+
+            int width = data.roomSize.x;
+            int height = data.roomSize.y;
+            PrototypeDungeonRoom room = GetNewPrototypeDungeonRoom(width, height);
+            PrototypeDungeonRoomCellData[] cellData = new PrototypeDungeonRoomCellData[width * height];
+            //if (data.tilePositions == null) ETGModConsole.Log($"tilePositions not found for room \"{data.name}\"");
+
+            ETGModConsole.Log($"{data.name}: {data.tileInfo.Length} - {width * height}");
+
+            for (int y = 0; y < data.roomSize.y; y++)
+            {
+                for (int x = 0; x < data.roomSize.x; x++)
+                {
+                    cellData[x + y * width] = CellDataFromNumber(int.Parse(data.tileInfo[x + (y * width)].ToString()));
+                }
+            }
+
+            room.FullCellData = cellData;
+            room.name = data.name;
+            return room;
         }
 
         public static PrototypeDungeonRoom CreateRoomFromTexture(Texture2D texture)
@@ -210,6 +316,29 @@ namespace Alexandria.DungeonAPI
             room.FullCellData = cellData;
             room.name = texture.name;
             return room;
+        }
+
+
+        private static CellType TypeFromNumber(int type)
+        {
+            Dictionary<int, CellType> types = new Dictionary<int, CellType> { { 1, CellType.FLOOR }, { 2, CellType.WALL }, { 3, CellType.PIT } };
+
+            return types[type];
+        }
+
+        public static PrototypeDungeonRoomCellData CellDataFromNumber(int type)
+        {
+            if (type <= 0) return null;
+
+            var data = new PrototypeDungeonRoomCellData();
+            data.state = TypeFromNumber(type);
+            //data.diagonalWallType = DiagonalWallTypeFromColor(color);
+            data.diagonalWallType = DiagonalWallType.NONE;
+            data.appearance = new PrototypeDungeonRoomCellAppearance()
+            {
+                OverrideFloorType = FloorType.Stone
+            };
+            return data;
         }
 
         public static PrototypeDungeonRoomCellData CellDataFromColor(Color32 color)
@@ -435,6 +564,19 @@ namespace Alexandria.DungeonAPI
                             instancePrerequisites = instancePrerequisites,
                             linkedTriggerAreaIDs = new List<int>(),
                             placeableContents = placeableFromBundles
+                        });
+                    }
+                    else if (placeableFromBundles == null && StaticReferences.customPlaceables.ContainsKey(assetPath))
+                    {
+                        DungeonPrerequisite[] instancePrerequisites = new DungeonPrerequisite[0];
+                        room.placedObjectPositions.Add(location);
+                        room.placedObjects.Add(new PrototypePlacedObjectData
+                        {
+                            contentsBasePosition = location,
+                            fieldData = new List<PrototypePlacedObjectFieldData>(),
+                            instancePrerequisites = instancePrerequisites,
+                            linkedTriggerAreaIDs = new List<int>(),
+                            placeableContents = StaticReferences.customPlaceables[assetPath]
                         });
                     }
                     else
@@ -741,12 +883,12 @@ namespace Alexandria.DungeonAPI
             };
             if (layer > 0)
             {
-                ETGModConsole.Log("Adding object to reinforcement layer " + layer, false);
+                //ETGModConsole.Log("Adding object to reinforcement layer " + layer, false);
                 RoomFactory.AddObjectDataToReinforcementLayer(room, prototypePlacedObjectData, layer - 1, location, shuffle);
             }
             else
             {
-                ETGModConsole.Log("Adding object to standard layer.", false);
+                //ETGModConsole.Log("Adding object to standard layer.", false);
                 room.placedObjects.Add(prototypePlacedObjectData);
                 room.placedObjectPositions.Add(location);
             }
@@ -760,7 +902,7 @@ namespace Alexandria.DungeonAPI
             }
         }
 
-        public static void AddEnemyToRoomLegecy(PrototypeDungeonRoom room, Vector2 location, string guid, int layer, bool shuffle) ///TO HERE==================================================
+        public static void AddEnemyToRoomLegecy(PrototypeDungeonRoom room, Vector2 location, string guid, int layer, bool shuffle) //TO HERE==================================================
         {
             DungeonPrerequisite[] emptyReqs = new DungeonPrerequisite[0];
             var placeableContents = ScriptableObject.CreateInstance<DungeonPlaceable>();
@@ -1030,11 +1172,17 @@ namespace Alexandria.DungeonAPI
 
         public struct RoomData
         {
+            public string tileInfo;
+            //public Vector2[] tilePositions;
+
+            public Vector2Int roomSize;
+
             public string[] waveTriggers;
             public string[] nodeTypes;
             public string[] nodeWrapModes;
             public Vector2[] nodePositions;
             public int[] nodePaths;
+            public int[] nodeOrder;
             public string category;
             public string normalSubCategory;
             public string specialSubCategory;
@@ -1056,6 +1204,8 @@ namespace Alexandria.DungeonAPI
             public bool doWallDecoration;
             public bool doLighting;
             public bool darkRoom;
+            [NonSerialized]
+            public string name;
             [NonSerialized]
             public PrototypeDungeonRoom room;
         }

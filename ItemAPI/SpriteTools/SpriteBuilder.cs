@@ -9,9 +9,9 @@ namespace Alexandria.ItemAPI
 {
 	public static class SpriteBuilder
 	{
-		public static tk2dSpriteCollectionData itemCollection = PickupObjectDatabase.GetByEncounterName("singularity").sprite.Collection;
+		public static tk2dSpriteCollectionData itemCollection = PickupObjectDatabase.GetById(155).sprite.Collection;
 		public static tk2dSpriteCollectionData ammonomiconCollection = AmmonomiconController.ForceInstance.EncounterIconCollection;
-		private static tk2dSprite baseSprite = PickupObjectDatabase.GetByEncounterName("singularity").GetComponent<tk2dSprite>();
+		private static tk2dSprite baseSprite = PickupObjectDatabase.GetById(155).GetComponent<tk2dSprite>();
 		public static tk2dSpriteAnimationClip AddAnimation(tk2dSpriteAnimator animator, tk2dSpriteCollectionData collection, List<int> spriteIDs,
 			string clipName, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop, float fps = 15)
 		{
@@ -188,6 +188,9 @@ namespace Alexandria.ItemAPI
 		{
 			//Add definition to collection
 			var defs = collection.spriteDefinitions;
+
+
+
 			var newDefs = defs.Concat(new tk2dSpriteDefinition[] { spriteDefinition }).ToArray();
 			collection.spriteDefinitions = newDefs;
 
@@ -202,8 +205,10 @@ namespace Alexandria.ItemAPI
 		/// Adds a sprite definition to the Ammonomicon sprite collection
 		/// </summary>
 		/// <returns>The spriteID of the defintion in the ammonomicon collection</returns>
-		public static int AddToAmmonomicon(tk2dSpriteDefinition spriteDefinition)
+		public static int AddToAmmonomicon(tk2dSpriteDefinition spriteDefinition, string prefix = "")
 		{
+			//var newDef = spriteDefinition.Copy();
+			//newDef.name = prefix + newDef.name;
 			return AddSpriteToCollection(spriteDefinition, ammonomiconCollection);
 		}
 

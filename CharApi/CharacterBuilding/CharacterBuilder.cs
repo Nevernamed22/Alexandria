@@ -18,11 +18,14 @@ namespace Alexandria.CharacterAPI
     public static class CharacterBuilder
     {
         public static Dictionary<string, Tuple<CustomCharacterData, GameObject>> storedCharacters = new Dictionary<string, Tuple<CustomCharacterData, GameObject>>();
+
+
         //public static Dictionary<string, tk2dSpriteCollectionData> storedCollections = new Dictionary<string, tk2dSpriteCollectionData>();
         public static List<Gun> guns = new List<Gun>();
+        public static Dictionary<string, tk2dSpriteCollectionData> storedCollections = new Dictionary<string, tk2dSpriteCollectionData>();
 
 
-        
+
 
         public static void BuildCharacter(CustomCharacterData data, bool hasAltSkin, bool paradoxUsesSprites, bool removeFoyerExtras, bool hasArmourlessAnimations = false, bool usesArmourNotHealth = false, bool hasCustomPast = false, string customPast = "", int metaCost = 0, bool useGlow = false,
             GlowMatDoer glowVars = null, GlowMatDoer altGlowVars = null, Assembly assembly = null)
@@ -33,10 +36,13 @@ namespace Alexandria.CharacterAPI
                 ToolsCharApi.PrintError("Could not find prefab for: " + data.baseCharacter.ToString());
                 return;
             }
+            if (ToolsCharApi.EnableDebugLogging == true) 
+            {
+                ToolsCharApi.Print("");
+                ToolsCharApi.Print("--Building Character: " + data.nameShort + "--", "0000FF");
+            }
 
-            ToolsCharApi.Print("");
-            ToolsCharApi.Print("--Building Character: " + data.nameShort + "--", "0000FF");
-            
+
             PlayerController playerController;
             GameObject gameObject = GameObject.Instantiate(basePrefab);
 
@@ -114,15 +120,194 @@ namespace Alexandria.CharacterAPI
 
             customCharacter.past = customPast;
             customCharacter.hasPast = hasCustomPast;
-            
+            data.hasPast = hasCustomPast;
 
-           
+            
             gameObject.SetActive(false);
             FakePrefab.MarkAsFakePrefab(gameObject);
+
+            ETGModConsole.Characters.Add(data.nameShort.ToLowerInvariant(), data.nameShort); //Adds characters to MTGAPIs character database
         }
 
 
+        public static void BuildCharacterBundle(CustomCharacterData data, tk2dSpriteCollectionData d1, tk2dSpriteAnimation SteveData1, tk2dSpriteCollectionData d2, tk2dSpriteAnimation SteveData2, bool hasAltSkin, bool paradoxUsesSprites, bool removeFoyerExtras, bool hasArmourlessAnimations = false, bool usesArmourNotHealth = false, bool hasCustomPast = false, string customPast = "", int metaCost = 0, bool useGlow = false,
+    GlowMatDoer glowVars = null, GlowMatDoer altGlowVars = null, Assembly assembly = null)
+        {
+            var basePrefab = GetPlayerPrefab(data.baseCharacter);
+            if (basePrefab == null)
+            {
+                ToolsCharApi.PrintError("Could not find prefab for: " + data.baseCharacter.ToString());
+                return;
+            }
+            if (ToolsCharApi.EnableDebugLogging == true)
+            {
+                ToolsCharApi.Print("");
+                ToolsCharApi.Print("--Building Character: " + data.nameShort + "--", "0000FF");
+            }
 
+
+            PlayerController playerController;
+            GameObject gameObject = GameObject.Instantiate(basePrefab);
+
+            playerController = gameObject.GetComponent<PlayerController>();
+            var customCharacter = gameObject.AddComponent<CustomCharacter>();
+
+            customCharacter.data = data;
+            data.characterID = storedCharacters.Count;
+
+            playerController.AllowZeroHealthState = usesArmourNotHealth;
+            playerController.ForceZeroHealthState = usesArmourNotHealth;
+
+            playerController.hasArmorlessAnimations = hasArmourlessAnimations;
+
+
+            playerController.altHandName = "hand_alt";
+            playerController.SwapHandsOnAltCostume = true;
+
+
+            GameObject.DontDestroyOnLoad(gameObject);
+
+            CustomizeCharacterNoSprites(playerController, data, d1, SteveData1, d2, SteveData2, paradoxUsesSprites, assembly ?? Assembly.GetCallingAssembly());
+
+            data.useGlow = useGlow;
+
+            if (useGlow)
+            {
+                data.emissiveColor = glowVars.emissiveColor;
+                data.emissiveColorPower = glowVars.emissiveColorPower;
+                data.emissivePower = glowVars.emissivePower;
+                data.emissiveThresholdSensitivity = glowVars.emissiveThresholdSensitivity;
+            }
+            data.removeFoyerExtras = removeFoyerExtras;
+            data.metaCost = metaCost;
+
+            if (useGlow)
+            {
+                var material = new Material(EnemyDatabase.GetOrLoadByName("GunNut").sprite.renderer.material);
+                //var material = new Material(ShaderCache.Acquire("Brave/UnlitTintableCutoutEmissive"));
+                material.DisableKeyword("BRIGHTNESS_CLAMP_ON");
+                material.EnableKeyword("BRIGHTNESS_CLAMP_OFF");
+                material.SetTexture("_MainTexture", material.GetTexture("_MainTex"));
+                material.SetColor("_EmissiveColor", glowVars.emissiveColor);
+                material.SetFloat("_EmissiveColorPower", glowVars.emissiveColorPower);
+                material.SetFloat("_EmissivePower", glowVars.emissivePower);
+                material.SetFloat("_EmissiveThresholdSensitivity", glowVars.emissiveThresholdSensitivity);
+
+                data.glowMaterial = material;
+            }
+
+            if (useGlow && hasAltSkin)
+            {
+                var material = new Material(EnemyDatabase.GetOrLoadByName("GunNut").sprite.renderer.material);
+                //var material = new Material(ShaderCache.Acquire("Brave/UnlitTintableCutoutEmissive"));
+                material.DisableKeyword("BRIGHTNESS_CLAMP_ON");
+                material.EnableKeyword("BRIGHTNESS_CLAMP_OFF");
+                material.SetTexture("_MainTexture", material.GetTexture("_MainTex"));
+                material.SetColor("_EmissiveColor", altGlowVars.emissiveColor);
+                material.SetFloat("_EmissiveColorPower", altGlowVars.emissiveColorPower);
+                material.SetFloat("_EmissivePower", altGlowVars.emissivePower);
+                material.SetFloat("_EmissiveThresholdSensitivity", altGlowVars.emissiveThresholdSensitivity);
+
+                data.altGlowMaterial = material;
+            }
+
+            data.normalMaterial = new Material(ShaderCache.Acquire("Brave/PlayerShader"));
+
+
+
+
+
+            basePrefab = null;
+            storedCharacters.Add(data.nameInternal.ToLower(), new Tuple<CustomCharacterData, GameObject>(data, gameObject));
+            //BotsModule.Log("nameInternal: " + data.nameInternal, BotsModule.TEXT_COLOR);
+
+            customCharacter.past = customPast;
+            customCharacter.hasPast = hasCustomPast;
+            data.hasPast = hasCustomPast;
+
+
+            gameObject.SetActive(false);
+            FakePrefab.MarkAsFakePrefab(gameObject);
+
+            ETGModConsole.Characters.Add(data.nameShort.ToLowerInvariant(), data.nameShort); //Adds characters to MTGAPIs character database
+        }
+        public static void CustomizeCharacterNoSprites(PlayerController player, CustomCharacterData data, tk2dSpriteCollectionData d1, tk2dSpriteAnimation tk2DSpriteAnimation1, tk2dSpriteCollectionData d2, tk2dSpriteAnimation tk2DSpriteAnimation2, bool paradoxUsesSprites, Assembly assembly = null)
+        {
+            HandleStrings(player, data);
+
+            ToolsCharApi.StartTimer("    Sprite Handling");
+            SpriteHandler.HandleSpritesBundle(player, tk2DSpriteAnimation1, d1, tk2DSpriteAnimation2, d2, data, assembly ?? Assembly.GetCallingAssembly());
+            ToolsCharApi.StopTimerAndReport("    Sprite Handling");
+
+            if (data.loadout != null)
+                HandleLoadout(player, data.loadout, data.altGun);
+
+            if (data.stats != null)
+                HandleStats(player, data.stats);
+
+            player.healthHaver.ForceSetCurrentHealth(data.health);
+            player.healthHaver.Armor = (int)data.armor;
+
+
+            player.characterIdentity = (PlayableCharacters)data.identity;
+
+            //player.OverridePlayerSwitchState = "Ninja";
+            //AkSoundEngine.switch
+
+            //AkSoundEngine.SetSwitch("CHR_Player", (player.OverridePlayerSwitchState == null) ? data.nameShort : player.OverridePlayerSwitchState, player.gameObject);
+
+
+            //AkSoundEngine.GetSwitch("CHR_Player", player.gameObject, out idk);
+
+
+
+
+            //BotsModule.Log((player.OverridePlayerSwitchState == null) ? data.nameShort : player.OverridePlayerSwitchState);
+
+
+
+            //BotsModule.Strings.Core.Set("#PLAYER_NICK_LOST", "Dead Thing");
+            //BotsModule.Strings.Core.Set("#PLAYER_NAME_LOST", "Lost");
+
+            StringHandler.AddStringDefinition("#PLAYER_NAME_" + player.characterIdentity.ToString().ToUpperInvariant(), data.name);
+            StringHandler.AddStringDefinition("#PLAYER_NICK_" + player.characterIdentity.ToString().ToUpperInvariant(), data.nickname);
+
+            StringHandler.AddDFStringDefinition("#CHAR_" + data.nameShort.ToString().ToUpper(), data.name);
+            StringHandler.AddDFStringDefinition("#CHAR_" + data.nameShort.ToString().ToUpper() + "_SHORT", data.nameShort);
+
+            //BotsModule.Log("Player is: " + data.nameShort.ToString(), BotsModule.LOST_COLOR);
+            //BotsModule.Log("#CHAR_" + data.nameShort.ToUpper(), BotsModule.LOST_COLOR);
+
+            /*if (!hasClearedEeveeAnims)
+            {
+                var eevee = (GameObject)ResourceCache.Acquire("PlayerEevee");
+                if (eevee != null)
+                {
+                    eevee.GetComponent<CharacterAnimationRandomizer>().AnimationLibraries.Clear();
+                }
+                hasClearedEeveeAnims = true;
+            }*/
+
+            if (paradoxUsesSprites)
+            {
+                var eevee = (GameObject)ResourceCache.Acquire("PlayerEevee");
+                if (player.spriteAnimator.Library != null && eevee != null)
+                {
+                    eevee.GetComponent<CharacterAnimationRandomizer>().AddOverrideAnimLibrary(player.spriteAnimator.Library);
+                    //BotsModule.Log("player.spriteAnimator.Library added");
+                }
+                if (player.AlternateCostumeLibrary != null && eevee != null)
+                {
+                    eevee.GetComponent<CharacterAnimationRandomizer>().AddOverrideAnimLibrary(player.AlternateCostumeLibrary);
+                    //BotsModule.Log("AlternateCostumeLibrary added");
+                }
+            }
+
+
+
+            //GameManager.Instance.PrimaryPlayer.GetComponent<CharacterAnimationRandomizer>().AddOverrideAnimLibrary(player.spriteAnimator.Library);
+        }
+        
         public static void CustomizeCharacter(PlayerController player, CustomCharacterData data, bool paradoxUsesSprites, Assembly assembly = null)
         {
             HandleStrings(player, data);
@@ -206,6 +391,7 @@ namespace Alexandria.CharacterAPI
         {
             player.name = data.nameInternal;
             if (data.faceCard != null)
+                //data.faceCard.a
                 player.uiPortraitName = data.nameInternal + "_facecard";
 
             //HandleDictionaries(data);
@@ -228,12 +414,15 @@ namespace Alexandria.CharacterAPI
 
             if (loadout == null)
             {
-                ToolsCharApi.PrintError("loadout is null :((((((((");
+                ToolsCharApi.PrintError("loadout is NULL, please verify it exists!");
+
+                //ToolsCharApi.PrintError("loadout is null :((((((((");
             }
 
             if (altGun == null)
             {
-                ToolsCharApi.PrintError("altGun is null :((((((((");
+                ToolsCharApi.PrintError("altGun is NULL, please verify it exists!");
+                //ToolsCharApi.PrintError("altGun is null :((((((((");
             }
 
             StripPlayer(player);

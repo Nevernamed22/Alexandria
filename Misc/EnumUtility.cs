@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Alexandria.Misc
 {
-    class EnumUtility
+   public static class EnumUtility
     {
         public static string GetFullyQualifiedName(string guid, string value)
         {

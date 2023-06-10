@@ -101,14 +101,14 @@ namespace Alexandria.ItemAPI
         /// <summary>
         /// Returns a list of folders in the ETG resources directory
         /// </summary>
-        public static List<String> GetResourceFolders()
+        public static List<string> GetResourceFolders()
         {
-            List<String> dirs = new List<String>();
+            List<string> dirs = new List<string>();
             string spritesDirectory = Path.Combine(ETGMod.ResourcesDirectory, "sprites");
 
             if (Directory.Exists(spritesDirectory))
             {
-                foreach (String directory in Directory.GetDirectories(spritesDirectory))
+                foreach (string directory in Directory.GetDirectories(spritesDirectory))
                 {
                     dirs.Add(Path.GetFileName(directory));
                 }
@@ -119,20 +119,16 @@ namespace Alexandria.ItemAPI
         /// <summary>
         /// Converts an embedded resource to a byte array
         /// </summary>
-        public static byte[] ExtractEmbeddedResource(String filePath, Assembly assembly = null)
+        public static byte[] ExtractEmbeddedResource(string filePath, Assembly assembly = null)
         {
             filePath = filePath.Replace("/", ".");
             filePath = filePath.Replace("\\", ".");
 
-
-           // ETGModConsole.Log($"{(assembly).FullName}: {filePath}");
-
-            var baseAssembly = assembly;
-
-            //ETGModConsole.Log(assembly.FullName);
+            //ETGModConsole.Log($"[{(assembly ?? Assembly.GetCallingAssembly()).GetName().Name}]: {filePath}");
 
             using (Stream resFilestream = (assembly ?? Assembly.GetCallingAssembly()).GetManifestResourceStream(filePath))
             {
+                
                 if (resFilestream == null)
                 {
                     return null;
@@ -147,23 +143,19 @@ namespace Alexandria.ItemAPI
         /// Converts an embedded resource to a Texture2D object
         /// </summary>
         public static Texture2D GetTextureFromResource(string resourceName, Assembly assembly = null)
-        {
-            
-            string file = resourceName;
+        {          
 
-
-            //ETGModConsole.Log($"{assembly == null}: {resourceName}");
-            byte[] bytes = ExtractEmbeddedResource(file, assembly ?? Assembly.GetCallingAssembly());
+            byte[] bytes = ExtractEmbeddedResource(resourceName, assembly ?? Assembly.GetCallingAssembly());
             if (bytes == null)
             {
-                ETGModConsole.Log("No bytes found in " + file);
+                ETGModConsole.Log("No bytes found in " + resourceName);
                 return null;
             }
             Texture2D texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
             ImageConversion.LoadImage(texture, bytes);
             texture.filterMode = FilterMode.Point;
 
-            string name = file.Substring(0, file.LastIndexOf('.'));
+            string name = resourceName.Substring(0, resourceName.LastIndexOf('.'));
             if (name.LastIndexOf('.') >= 0)
             {
                 name = name.Substring(name.LastIndexOf('.') + 1);
@@ -171,6 +163,29 @@ namespace Alexandria.ItemAPI
             texture.name = name;
 
             return texture;
+        }
+
+        public static List<Texture2D> GetTexturesFromResource(string resourceName, Assembly assembly = null)
+        {
+            string[] resources = GetResourceNames(assembly ?? Assembly.GetCallingAssembly());
+            List<Texture2D> result = new List<Texture2D>();
+
+            for (int i = 0; i < resources.Length; i++)
+            {
+                if (resources[i].StartsWith(resourceName.Replace('/', '.') + ".", StringComparison.OrdinalIgnoreCase))
+                {
+                    ////DebugUtility.PrintError<string>(resourceName, "FF0000");
+                    result.Add(GetTextureFromResource(resources[i], assembly ?? Assembly.GetCallingAssembly()));
+                }
+            }
+
+            if (result.Count == 0)
+            {
+                ETGModConsole.Log("No bytes found in " + resourceName);
+                result = null;
+            }
+
+            return result;
         }
 
 

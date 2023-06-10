@@ -39,7 +39,6 @@ namespace Alexandria.ItemAPI
             Hook hook = new Hook(typeof(EnemyDatabase).GetMethod("GetOrLoadByGuid", BindingFlags.Static | BindingFlags.Public), typeof(CompanionBuilder).GetMethod("GetOrLoadByGuid"));
         }
 
-        // Token: 0x060000BC RID: 188 RVA: 0x00008118 File Offset: 0x00006318
         public static AIActor GetOrLoadByGuid(Func<string, AIActor> orig, string guid)
         {
             foreach (string text in CompanionBuilder.companionDictionary.Keys)
@@ -53,7 +52,6 @@ namespace Alexandria.ItemAPI
             return orig(guid);
         }
 
-        // Token: 0x060000BD RID: 189 RVA: 0x00008198 File Offset: 0x00006398
         public static GameObject BuildPrefab(string name, string guid, string defaultSpritePath, IntVector2 hitboxOffset, IntVector2 hitBoxSize)
         {
             bool flag = CompanionBuilder.companionDictionary.ContainsKey(guid);

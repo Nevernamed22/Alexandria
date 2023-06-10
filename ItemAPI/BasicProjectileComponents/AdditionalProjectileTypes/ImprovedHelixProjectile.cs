@@ -8,7 +8,7 @@ using Alexandria.Misc;
 namespace Alexandria.ItemAPI
 {
     //Includes inbuilt shadow bullet functionality.
-    class ImprovedHelixProjectile : Projectile
+   public class ImprovedHelixProjectile : Projectile
     {
         public ImprovedHelixProjectile()
         {
@@ -21,6 +21,7 @@ namespace Alexandria.ItemAPI
             this.randomChainMin = 1;
             this.randomChainMax = 4;
             this.randomiseChainNum = false;
+            startInverted = false;
         }
         public void AdjustRightVector(float angleDiff)
         {
@@ -56,7 +57,7 @@ namespace Alexandria.ItemAPI
                 this.m_yDisplacement = 0f;
             }
             this.m_timeElapsed += BraveTime.DeltaTime;
-            int num = (!base.Inverted) ? 1 : -1;
+            int num = (!startInverted) ? 1 : -1;
             float num2 = this.m_timeElapsed * this.baseData.speed;
             float num3 = (float)num * this.helixAmplitude * Mathf.Sin(this.m_timeElapsed * 3.1415927f * this.baseData.speed / this.helixWavelength);
             float d = num2 - this.m_displacement;
@@ -100,5 +101,7 @@ namespace Alexandria.ItemAPI
         public bool randomiseChainNum;
         public int randomChainMin;
         public int randomChainMax;
+
+        public bool startInverted;
     }
 }

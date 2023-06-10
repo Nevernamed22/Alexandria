@@ -103,16 +103,16 @@ namespace Alexandria.DungeonAPI
 				{
 					SetupExoticObjects.CouchLeft = transform2.gameObject;
 				}
-				if (transform2.gameObject.name.Contains("Couch (1)"));			
+				if (transform2.gameObject.name.Contains("Couch (1)"))		
 				{
 					SetupExoticObjects.CouchRight = transform2.gameObject;
 				}
 
-				if (transform2.gameObject.name.Contains("FernFriend") && !transform2.gameObject.name.Contains("("));			
+				if (transform2.gameObject.name.Contains("FernFriend") && !transform2.gameObject.name.Contains("("))		
 				{
 					SetupExoticObjects.PottedFern = transform2.gameObject;
 				}
-				if (transform2.gameObject.name.Contains("Henchman") && !transform2.gameObject.name.Contains("("));				
+				if (transform2.gameObject.name.Contains("Henchman") && !transform2.gameObject.name.Contains("("))				
 				{
 					SetupExoticObjects.NPCHenchman = transform2.gameObject;
 				}

@@ -11,6 +11,8 @@ namespace Alexandria.DungeonAPI
 {
     public static class RoomUtility
     {
+        public static bool EnableDebugLogging = false;
+
         public static List<AIActor> GetXEnemiesInRoom(this RoomHandler room, int numOfEnemiesToReturn, bool reqForRoomClear = true, bool canReturnBosses = true)
         {
             if (numOfEnemiesToReturn <= 0) return null;

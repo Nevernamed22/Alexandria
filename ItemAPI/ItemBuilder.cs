@@ -10,6 +10,7 @@ using System.Collections;
 using MonoMod.RuntimeDetour;
 using Alexandria.ItemAPI;
 using Alexandria.Misc;
+using Alexandria.VisualAPI;
 using Gungeon;
 
 namespace Alexandria.ItemAPI
@@ -67,7 +68,25 @@ namespace Alexandria.ItemAPI
         {
             GameObject spriteObject = SpriteBuilder.SpriteFromResource(resourcePath, obj, assembly ?? Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(spriteObject);
-            obj.SetActive(false);
+            spriteObject.SetActive(false);
+
+            spriteObject.name = name;
+            return spriteObject;
+        }
+
+        /// <summary>
+        /// Adds a tk2dSprite component to an object and adds that sprite to the ammonomicon for later use. If obj is null, returns a new GameObject with the sprite
+        /// Capable of taking an additional argument for the sprite's perpendicular state. 'Flat' sprites will always lay down on the floor, like carpets.
+        /// </summary>
+        public static GameObject AddSpriteToObjectPerpendicular(string name, string resourcePath, GameObject obj = null, tk2dBaseSprite.PerpendicularState perpendicular = tk2dBaseSprite.PerpendicularState.UNDEFINED, int? sortingLayer = null, Assembly assembly = null)
+        {
+            GameObject spriteObject = SpriteBuilder.SpriteFromResource(resourcePath, obj, assembly ?? Assembly.GetCallingAssembly());
+            FakePrefab.MarkAsFakePrefab(spriteObject);
+            spriteObject.SetActive(false);
+
+            tk2dSprite sprite = spriteObject.GetComponent<tk2dSprite>();
+            if (sortingLayer != null) { sprite.SortingOrder = (int)sortingLayer; }
+            sprite.CachedPerpState = perpendicular;
 
             spriteObject.name = name;
             return spriteObject;
@@ -84,15 +103,20 @@ namespace Alexandria.ItemAPI
                 item.encounterTrackable = null;
 
                 ETGMod.Databases.Items.SetupItem(item, item.name);
-                SpriteBuilder.AddToAmmonomicon(item.sprite.GetCurrentSpriteDef());
+                SpriteBuilder.AddToAmmonomicon(item.sprite.GetCurrentSpriteDef(), idPool);
+                //item.encounterTrackable.journalData.AmmonomiconSprite = idPool + item.sprite.GetCurrentSpriteDef().name;
                 item.encounterTrackable.journalData.AmmonomiconSprite = item.sprite.GetCurrentSpriteDef().name;
+
+                //item.encounterTrackable.journalData.PrimaryDisplayName = idPool.ToUpper() + "_" + item.encounterTrackable.journalData.PrimaryDisplayName;
+                //item.encounterTrackable.journalData.NotificationPanelDescription = idPool.ToUpper() + "_" + item.encounterTrackable.journalData.NotificationPanelDescription;
+                //item.encounterTrackable.journalData.AmmonomiconFullEntry = idPool.ToUpper() + "_" + item.encounterTrackable.journalData.AmmonomiconFullEntry;
 
                 item.SetName(item.name);
                 item.SetShortDescription(shortDesc);
                 item.SetLongDescription(longDesc);
 
-                if (item is PlayerItem)
-                    (item as PlayerItem).consumable = false;
+                if (item is PlayerItem) (item as PlayerItem).consumable = false;
+
                 Gungeon.Game.Items.Add(idPool + ":" + item.name.ToLower().Replace(" ", "_"), item);
                 ETGMod.Databases.Items.Add(item);
             }
@@ -206,7 +230,7 @@ namespace Alexandria.ItemAPI
 
                 gun.gunClass = gunClass;
 
-                ETGMod.Databases.Items.Add(gun, null, "ANY");
+                ETGMod.Databases.Items.Add(gun, false, "ANY");
 
                 return gun;
             }
@@ -263,7 +287,7 @@ namespace Alexandria.ItemAPI
 
                 gun.gunClass = gunClass;
 
-                ETGMod.Databases.Items.Add(gun, null, "ANY");
+                ETGMod.Databases.Items.Add(gun, false, "ANY");
 
                 return gun;
             }
@@ -276,7 +300,12 @@ namespace Alexandria.ItemAPI
             }
         }
 
-
+        public static VFXPool AddCustomMuzzleflash(this Gun target, string name, List<string> spritePaths, int fps, IntVector2 Dimensions, tk2dBaseSprite.Anchor anchor, bool usesZHeight, float zHeightOffset, bool persist = false, VFXAlignment alignment = VFXAlignment.NormalAligned, float emissivePower = -1, Color? emissiveColour = null)
+        {
+            VFXPool vfx = VFXBuilder.CreateVFXPool(name,spritePaths, fps, Dimensions, anchor, usesZHeight, zHeightOffset, persist, alignment, emissivePower, emissiveColour, Assembly.GetCallingAssembly());
+            target.muzzleFlashEffects = vfx;
+            return vfx;
+        }
         public static Projectile BuildProjectile(int baseProj, string spriteName, IntVector2 spriteSize, bool shouldProjectileSpriteRotate, float damage, float speed, float force, float range)
         {
             try
@@ -359,6 +388,45 @@ namespace Alexandria.ItemAPI
                     break;
             }
         }
+        /// <summary>
+        /// Removes all stat modifiers of the set stat type from a PlayerItem, PassiveItem, or Gun.
+        /// </summary>
+        ///  /// <param name="po">A PassiveItem, PlayerItem, or Gun to add the stat to.</param>
+        ///  /// <param name="statType">The stat to be wiped.</param>
+        public static void RemovePassiveStatModifier(this PickupObject po, PlayerStats.StatType statType)
+        {
+            if (po is PlayerItem)
+            {
+                var item = (po as PlayerItem);
+                if (item.passiveStatModifiers == null) return;
+
+                var list = item.passiveStatModifiers.ToList();
+                for (int i = list.Count() - 1; i >= 0; i--) { if (list[i].statToBoost == statType) { list.RemoveAt(i); } }
+                item.passiveStatModifiers = list.ToArray();
+            }
+            else if (po is PassiveItem)
+            {
+                var item = (po as PassiveItem);
+                if (item.passiveStatModifiers == null) return;
+
+                var list = item.passiveStatModifiers.ToList();
+                for (int i = list.Count() - 1; i >= 0; i--) { if (list[i].statToBoost == statType) { list.RemoveAt(i); } }
+                item.passiveStatModifiers = list.ToArray();
+            }
+            else if (po is Gun)
+            {
+                var item = (po as Gun);
+                if (item.passiveStatModifiers == null) return;
+
+                var list = item.passiveStatModifiers.ToList();
+                for (int i = list.Count() - 1; i >= 0; i--) { if (list[i].statToBoost == statType) { list.RemoveAt(i); } }
+                item.passiveStatModifiers = list.ToArray();
+            }
+            else
+            {
+                throw new NotSupportedException("Object must be of type PlayerItem, PassiveItem, or Gun");
+            }
+        }
 
         /// <summary>
         /// Adds a passive player stat modifier to a PlayerItem or PassiveItem
@@ -372,21 +440,7 @@ namespace Alexandria.ItemAPI
 
             po.AddPassiveStatModifier(modifier);
             return modifier;
-        }
-        public static GameObject InstantiateAndFakeprefab(this GameObject target)
-        {
-            GameObject instantiatedTarget = UnityEngine.Object.Instantiate<GameObject>(target);
-            instantiatedTarget.SetActive(false);
-            FakePrefab.MarkAsFakePrefab(instantiatedTarget);
-            UnityEngine.Object.DontDestroyOnLoad(instantiatedTarget);
-            return instantiatedTarget;
-        }
-        public static void MakeFakePrefab(this GameObject target)
-        {
-            target.SetActive(false);
-            FakePrefab.MarkAsFakePrefab(target);
-            UnityEngine.Object.DontDestroyOnLoad(target);
-        }
+        }        
         public static void AddPassiveStatModifier(this PickupObject po, StatModifier modifier)
         {
             if (po is PlayerItem)
@@ -405,12 +459,19 @@ namespace Alexandria.ItemAPI
                 else
                     item.passiveStatModifiers = item.passiveStatModifiers.Concat(new StatModifier[] { modifier }).ToArray();
             }
+            else if (po is Gun)
+            {
+                var item = (po as Gun);
+                if (item.passiveStatModifiers == null)
+                    item.passiveStatModifiers = new StatModifier[] { modifier };
+                else
+                    item.passiveStatModifiers = item.passiveStatModifiers.Concat(new StatModifier[] { modifier }).ToArray();
+            }
             else
             {
-                throw new NotSupportedException("Object must be of type PlayerItem or PassiveItem");
+                throw new NotSupportedException("Object must be of type PlayerItem, PassiveItem, or Gun");
             }
         }
-
         public static bool RemovePassiveStatModifier(this PickupObject po, StatModifier modifier)
         {
             bool success = false;
@@ -432,14 +493,36 @@ namespace Alexandria.ItemAPI
                 success = list.Remove(modifier);
                 item.passiveStatModifiers = list.ToArray();
             }
+            else if (po is Gun)
+            {
+                var item = (po as Gun);
+                if (item.passiveStatModifiers == null) return false;
+
+                var list = item.passiveStatModifiers.ToList();
+                success = list.Remove(modifier);
+                item.passiveStatModifiers = list.ToArray();
+            }
             else
             {
-                throw new NotSupportedException("Object must be of type PlayerItem or PassiveItem");
+                throw new NotSupportedException("Object must be of type PlayerItem, PassiveItem, or Gun");
             }
             return success;
         }
+        public static void AddCurrentGunDamageTypeModifier(this Gun gun, CoreDamageTypes damageTypes, float damageMultiplier)
+        {
+            gun.currentGunDamageTypeModifiers = gun.currentGunDamageTypeModifiers.Concat(new DamageTypeModifier[] { new DamageTypeModifier { damageType = damageTypes, damageMultiplier = damageMultiplier } }).ToArray();
+        }
 
-
+        public static void AddCurrentGunStatModifier(this Gun gun, PlayerStats.StatType statType, float amount, StatModifier.ModifyMethod modifyMethod)
+        {
+            gun.currentGunStatModifiers = gun.currentGunStatModifiers.Concat(new StatModifier[] { new StatModifier { statToBoost = statType, amount = amount, modifyType = modifyMethod } }).ToArray();
+        }
+        public static void RemoveCurrentGunStatModifier(this Gun gun, PlayerStats.StatType statType)
+        {
+            var newModifiers = new List<StatModifier>();
+            for (int i = 0; i < gun.currentGunStatModifiers.Length; i++) { if (gun.currentGunStatModifiers[i].statToBoost != statType) { newModifiers.Add(gun.currentGunStatModifiers[i]); } }
+            gun.currentGunStatModifiers = newModifiers.ToArray();
+        }
         public static IEnumerator HandleDuration(PlayerItem item, float duration, PlayerController user, Action<PlayerController> OnFinish)
         {
             if (item.IsCurrentlyActive)

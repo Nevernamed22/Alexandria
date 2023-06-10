@@ -22,12 +22,15 @@ namespace Alexandria.CharacterAPI
         public Texture2D faceCard;
         public List<Texture2D> bossCard = new List<Texture2D>();
         public Dictionary<string, Texture2D> punchoutSprites;
+
+        public tk2dSpriteCollectionData punchoutCollection;
+
         public List<Tuple<PickupObject, bool>> loadout, altGun;
         public int characterID, metaCost;
         public float health = 3, armor = 0;
         public tk2dSpriteAnimation AlternateCostumeLibrary;
         public bool removeFoyerExtras;
-        public bool useGlow;
+        public bool useGlow, hasPast;
         public Color emissiveColor;
         public float emissiveColorPower, emissivePower, emissiveThresholdSensitivity;
 
@@ -54,6 +57,7 @@ namespace Alexandria.CharacterAPI
         public tk2dSpriteCollectionData altCollection;
 
         public CharacterSelectIdleDoer idleDoer;
+
 
         public List<Tuple<GameObject, Vector3>> randomFoyerBullshitNNAskedFor = new List<Tuple<GameObject, Vector3>>();
     }
@@ -143,14 +147,21 @@ namespace Alexandria.CharacterAPI
         {
             while (!checkedGuns)
             {
-                ToolsCharApi.Print("    Data check");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("    Data check");
+                }
+
                 if (data == null)
                 {
                     ToolsCharApi.PrintError("Couldn't find a character data object for this player!");
                     yield return new WaitForSeconds(.1f);
                 }
 
-                ToolsCharApi.Print("    Loadout check");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("    Loadout check");
+                }
                 var loadout = data.loadout;
                 if (loadout == null)
                 {
@@ -164,10 +175,17 @@ namespace Alexandria.CharacterAPI
                     ToolsCharApi.PrintError("Player or inventory not found");
                     yield return new WaitForSeconds(.1f);
                 }
-                ToolsCharApi.Print($"Doing infinite gun check on {player.name}");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print($"Doing infinite gun check on {player.name}");
+
+                }
 
                 this.infiniteGunIDs = GetInfiniteGunIDs();
-                ToolsCharApi.Print("    Gun check");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("    Gun check");
+                }
                 foreach (var gun in player.inventory.AllGuns)
                 {
                     if (infiniteGunIDs.Contains(gun.PickupObjectId))

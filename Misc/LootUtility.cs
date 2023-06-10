@@ -108,13 +108,12 @@ namespace Alexandria.Misc
         }
 
         /// <summary>
-        /// Adds an item to a loot table via PickupObject
+        /// Adds an item to a loot table via PickupObject (Will keep weight at 1)
         /// </summary>
         /// <param name="lootTable">The loot table you want to add to</param> 
-        /// <param name="po">The PickupObject you're adding</param>
-        /// <param name="weight">The Weight of the item you're adding (default is 1)</param>
+        /// <param name="items">A list of item IDs you want to add to your loottable</param>
         /// <returns></returns>
-        public static void AddItemToPool(this GenericLootTable lootTable, params int[] items)
+        public static void AddItemsToPool(this GenericLootTable lootTable, params int[] items)
         {
             foreach (int id in items)
             {
@@ -128,7 +127,29 @@ namespace Alexandria.Misc
                     additionalPrerequisites = new DungeonPrerequisite[0]
                 });
             }
+        }
 
+
+        /// <summary>
+        /// Adds an item to a loot table via PickupObject (Will keep weight at 1)
+        /// </summary>
+        /// <param name="lootTable">The loot table you want to add to</param> 
+        /// <param name="items">A dictionary of item IDs and their weights. The FIRST VALUE IS THE ID.</param>
+        /// <returns></returns>
+        public static void AddItemsToPool(this GenericLootTable lootTable, Dictionary<int, float> items)
+        {
+            foreach (var entry in items)
+            {
+                var po = PickupObjectDatabase.GetById(entry.Key);
+                lootTable.defaultItemDrops.Add(new WeightedGameObject()
+                {
+                    pickupId = po.PickupObjectId,
+                    weight = entry.Value,
+                    rawGameObject = po.gameObject,
+                    forceDuplicatesPossible = false,
+                    additionalPrerequisites = new DungeonPrerequisite[0]
+                });
+            }
         }
 
         /// <summary>

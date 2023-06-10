@@ -647,5 +647,7 @@ namespace Alexandria.NPCAPI
 			BLANKS,
 			CUSTOM
 		}
+		public bool ParentShop { get { return m_parentShop; } }
+		public bool BaseParentShop { get { return m_baseParentShop; } }
 	}
 }

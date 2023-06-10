@@ -3,11 +3,14 @@ using System.Linq;
 using System.Reflection;
 
 using UnityEngine;
+using System.Text.RegularExpressions;
 
 
 using System;
 using Alexandria.ItemAPI;
 using System.IO;
+using Microsoft.Cci;
+using Pathfinding;
 
 namespace Alexandria.CharacterAPI
 {
@@ -96,14 +99,14 @@ namespace Alexandria.CharacterAPI
 
             { "run_right_bw", new Tuple<tk2dSpriteAnimationClip.WrapMode, int>( tk2dSpriteAnimationClip.WrapMode.Loop, 9) },
             { "run_right_bw_twohands", new Tuple<tk2dSpriteAnimationClip.WrapMode, int>( tk2dSpriteAnimationClip.WrapMode.Loop, 9) },
-          
+
             { "run_up", new Tuple<tk2dSpriteAnimationClip.WrapMode, int>( tk2dSpriteAnimationClip.WrapMode.Loop, 9) },
             { "run_up_hand", new Tuple<tk2dSpriteAnimationClip.WrapMode, int>( tk2dSpriteAnimationClip.WrapMode.Loop, 9) },
             { "run_up_twohands", new Tuple<tk2dSpriteAnimationClip.WrapMode, int>( tk2dSpriteAnimationClip.WrapMode.Loop, 9) },
 
             { "slide_right", new Tuple<tk2dSpriteAnimationClip.WrapMode, int>( tk2dSpriteAnimationClip.WrapMode.Loop, 2) },
             { "slide_up", new Tuple<tk2dSpriteAnimationClip.WrapMode, int>( tk2dSpriteAnimationClip.WrapMode.Loop, 2) },
-            { "slide_down", new Tuple<tk2dSpriteAnimationClip.WrapMode, int>( tk2dSpriteAnimationClip.WrapMode.Loop, 2) },           
+            { "slide_down", new Tuple<tk2dSpriteAnimationClip.WrapMode, int>( tk2dSpriteAnimationClip.WrapMode.Loop, 2) },
 
             { "spinfall", new Tuple<tk2dSpriteAnimationClip.WrapMode, int>( tk2dSpriteAnimationClip.WrapMode.Loop, 16) },
             { "spit_out", new Tuple<tk2dSpriteAnimationClip.WrapMode, int>( tk2dSpriteAnimationClip.WrapMode.Once, 12) },
@@ -159,6 +162,7 @@ namespace Alexandria.CharacterAPI
                 var libary = player.gameObject.GetComponent<tk2dSpriteAnimator>().Library;
                 var collection = libary.clips[0].frames[0].spriteCollection;
                 var baseName = GetPlayerStringFromIdentity(data.baseCharacter);
+
                 if (data.punchoutFaceCards != null && data.punchoutFaceCards.Count > 0)
                 {
                     for (int i = 0; i < data.punchoutFaceCards.Count; i++)
@@ -166,13 +170,16 @@ namespace Alexandria.CharacterAPI
                         player.PlayerUiSprite.Atlas.AddNewItemToAtlas(data.punchoutFaceCards[i], $"punch_player_health_{data.nameShort.ToLower()}_00{i + 1}");
                     }
                 }
+
                 //ETGModConsole.Log("added to atlas");
                 var defMatches = collection.spriteDefinitions.Where(def => def.name.Contains(baseName) && !def.name.Contains("vfx")).Select(def => def);
                 List<int> ids = new List<int>();
                 //ETGModConsole.Log("pre foreach");
+
                 bool h = false;
                 foreach (var def in defMatches)
                 {
+
                     //.Log(def.name.Replace(baseName, data.nameShort.ToLower()) +": " + data.punchoutSprites.Where(sprite => sprite.Key == (def.name.Replace(baseName, data.nameShort.ToLower()))).Select(sprite => sprite).Count().ToString());
                     /*
                     var sList = data.punchoutSprites.Where(sprite => sprite.Key == (def.name.Replace(baseName, data.nameShort.ToLower()))).ToList();
@@ -181,20 +188,27 @@ namespace Alexandria.CharacterAPI
                         ETGModConsole.Log($"An issue occursed while trying to add the sprite: \"{collection.spriteDefinitions[frame.spriteId].name}\"");
                     }
                     */
+
+
+                    //ETGModConsole.Log(def.name.Replace(baseName, data.nameShort.ToLower()));
+
                     var id = AddSpriteToCollection(data.punchoutSprites.Where(sprite => sprite.Key == (def.name.Replace(baseName, data.nameShort.ToLower()))).First().Value, collection);
                     if (!h)
                     {
+
                         //ToolsCharApi.ExportTexture(collection.spriteDefinitions[id].material.mainTexture.GetReadable(), "ihateyou", "zatherzyoulittlefucker");
                         h = true;
                     }
+
                     collection.spriteDefinitions[id].CopyToSelf(def);
                     //ETGModConsole.Log(collection.spriteDefinitions[id].name);
                     ids.Add(id);
 
                 }
+
                 //ETGModConsole.Log("added to collectiom");
                 var animMatches = libary.clips.Where(clip => clip.name.Contains(baseName) && !clip.name.Contains("vfx")).Select(clip => clip);
-                
+
                 foreach (var clip in animMatches)
                 {
                     var newClip = new tk2dSpriteAnimationClip();
@@ -214,11 +228,10 @@ namespace Alexandria.CharacterAPI
                     //ETGModConsole.Log(newClip.name);
                     libary.clips = libary.clips.Concat(new tk2dSpriteAnimationClip[] { newClip }).ToArray();
                 }
-
-                
             }
-
         }
+
+        public static Material Default_Punchout_Material;
 
         public static string GetPlayerStringFromIdentity(PlayableCharacters identity)
         {
@@ -243,8 +256,6 @@ namespace Alexandria.CharacterAPI
 
         public static void SetupLitterallyEverythingForPunchOut(PlayerController player, CustomCharacterData data)
         {
-
-           
             Dictionary<string, int> spriteIds = new Dictionary<string, int>();
 
             var libary = ResourceManager.LoadAssetBundle("enemies_base_001").LoadAsset<GameObject>("MetalGearRat").GetComponent<AIActor>().GetComponent<MetalGearRatDeathController>().PunchoutMinigamePrefab.GetComponent<PunchoutController>().Player.gameObject.GetComponent<tk2dSpriteAnimator>().Library;
@@ -282,13 +293,13 @@ namespace Alexandria.CharacterAPI
                 }
                 else
                 {
-                    foreach(var key in matches)
+                    foreach (var key in matches)
                     {
                         ids.Add(spriteIds[key]);
                     }
                 }
 
-                
+
                 var anim = SpriteBuilder.AddAnimation(libary, collection, ids, $"{data.nameShort.ToLower()}{info.Key}", info.Value.Item1, info.Value.Item2);
 
                 if (info.Key == "_knockout")
@@ -299,9 +310,70 @@ namespace Alexandria.CharacterAPI
 
             //foreach (var anim in libary.clips)
             //{
-                //ETGModConsole.Log(anim.name);
+            //ETGModConsole.Log(anim.name);
             //}
         }
+        public static void HandleSpritesBundle(PlayerController player, tk2dSpriteAnimation d1, tk2dSpriteCollectionData spr1, tk2dSpriteAnimation d2, tk2dSpriteCollectionData spr2, CustomCharacterData data, Assembly assembly = null)
+        {
+            if (data.minimapIcon != null)
+                HandleMinimapIcons(player, data);
+
+            if (data.bossCard != null)
+                HandleBossCards(player, data);
+
+            if ((data.altSprites != null || data.altPlayerSheet != null) && string.IsNullOrEmpty(data.pathForAltSprites))
+                HandleAltAnimations(player, data);
+
+
+
+
+
+            if ((data.sprites != null || data.playerSheet != null) && string.IsNullOrEmpty(data.pathForSprites))
+                HandleAnimations(player, data);
+
+            player.primaryHand.sprite.Collection = spr1 ?? data.collection;
+            player.secondaryHand.sprite.Collection = spr2 ?? data.collection;
+
+            player.primaryHand.sprite.SetSprite(player.primaryHand.sprite.Collection.GetSpriteIdByName("hand_001"));
+            player.secondaryHand.sprite.SetSprite(player.secondaryHand.sprite.Collection.GetSpriteIdByName("hand_001"));
+
+            if (d2 != null && spr2 != null)
+                SetupLitterallyEverythingPremade(player, spr2, d2, data, data.pathForAltSprites, true, assembly ?? Assembly.GetCallingAssembly());
+
+
+            if (d1 != null && spr1 != null)
+                SetupLitterallyEverythingPremade(player, spr1, d1, data, data.pathForSprites, false, assembly ?? Assembly.GetCallingAssembly());
+            
+
+
+            //face card stuff
+            uiAtlas = GameUIRoot.Instance.ConversationBar.portraitSprite.Atlas;
+            if (data.faceCard != null)
+                HandleFacecards(player, data);
+
+            if (data.punchoutSprites != null && data.punchoutSprites.Count > 0)
+            {
+                //ETGModConsole.Log("pre punchout setup");
+                SetupLitterallyEverythingForPunchOut2(data);
+            }
+
+
+            if (data.loadoutSprites != null)
+                HandleLoudoutSprites(player, data);
+
+            if (data.coopDeathScreenIcon != null)
+            {
+                //ETGModConsole.Log($"\"coop_page_death_{data.nameShort.ToLower()}_001\" added");
+                uiAtlas.AddNewItemToAtlas(data.coopDeathScreenIcon, $"coop_page_death_{data.nameShort.ToLower()}_001");
+                //ToolsCharApi.ExportTexture(ToolsCharApi.LoadAssetFromAnywhere<GameObject>("Ammonomicon Atlas").GetComponent<dfAtlas>().Texture.GetReadable(), "ihateyou", "YoumadeashitofpiecewithyourtrashMTG");
+            }
+
+            Default_Punchout_Material = new Material(EnemyDatabase.GetOrLoadByName("GunNut").sprite.renderer.material);
+            Default_Punchout_Material.SetColor("_EmissiveColor", new Color32(0, 0, 0, 0));
+            Default_Punchout_Material.SetFloat("_EmissiveColorPower", 0f);
+            Default_Punchout_Material.SetFloat("_EmissivePower", 0);
+        }
+
 
         public static void HandleSprites(PlayerController player, CustomCharacterData data, Assembly assembly = null)
         {
@@ -325,7 +397,7 @@ namespace Alexandria.CharacterAPI
             if (!string.IsNullOrEmpty(data.pathForSprites))
                 SetupLitterallyEverything(player, data, data.pathForSprites, false, assembly ?? Assembly.GetCallingAssembly());
 
-            
+
 
             //face card stuff
             uiAtlas = GameUIRoot.Instance.ConversationBar.portraitSprite.Atlas;
@@ -337,7 +409,7 @@ namespace Alexandria.CharacterAPI
                 //ETGModConsole.Log("pre punchout setup");
                 SetupLitterallyEverythingForPunchOut2(data);
             }
-                
+
 
             if (data.loadoutSprites != null)
                 HandleLoudoutSprites(player, data);
@@ -348,11 +420,12 @@ namespace Alexandria.CharacterAPI
                 uiAtlas.AddNewItemToAtlas(data.coopDeathScreenIcon, $"coop_page_death_{data.nameShort.ToLower()}_001");
                 //ToolsCharApi.ExportTexture(ToolsCharApi.LoadAssetFromAnywhere<GameObject>("Ammonomicon Atlas").GetComponent<dfAtlas>().Texture.GetReadable(), "ihateyou", "YoumadeashitofpiecewithyourtrashMTG");
             }
-                
-
-
+            Default_Punchout_Material = new Material(EnemyDatabase.GetOrLoadByName("GunNut").sprite.renderer.material);
+            Default_Punchout_Material.SetColor("_EmissiveColor", new Color32(0, 0, 0, 0));
+            Default_Punchout_Material.SetFloat("_EmissiveColorPower", 0f);
+            Default_Punchout_Material.SetFloat("_EmissivePower", 0);
         }
-        private static tk2dSpriteCollectionData itemCollection = PickupObjectDatabase.GetByEncounterName("singularity").sprite.Collection;
+        private static tk2dSpriteCollectionData itemCollection = PickupObjectDatabase.GetById(155).sprite.Collection;
         /// <summary>
         /// Returns an object with a tk2dSprite component with the texture provided
         /// </summary>
@@ -379,13 +452,13 @@ namespace Alexandria.CharacterAPI
         {
             //var UIRootPrefab = AmmonomiconAPI.Tools.LoadAssetFromAnywhere<GameObject>("UI Root").GetComponent<GameUIRoot>();
 
-           
+
 
             for (int i = 0; i < data.loadoutSprites.Count; i++)
             {
-                var sprite = uiAtlas.AddNewItemToAtlas(AddOutlineToTexture(data.loadoutSprites[i], Color.white), data.loadoutSprites[i].name.Replace(" ","_"));
-                
-                
+                var sprite = uiAtlas.AddNewItemToAtlas(AddOutlineToTexture(data.loadoutSprites[i], Color.white), data.loadoutSprites[i].name.Replace(" ", "_"));
+
+
                 data.loadoutSpriteNames.Add(data.loadoutSprites[i].name.Replace(" ", "_"));
             }
 
@@ -407,7 +480,7 @@ namespace Alexandria.CharacterAPI
             else
             {
                 material = new Material(ShaderCache.Acquire(PlayerController.DefaultShaderName));
-            }        
+            }
             material.mainTexture = ras.texture;
             //material.mainTexture = texture;
 
@@ -481,13 +554,13 @@ namespace Alexandria.CharacterAPI
                 {
                     x = 0;
                     y++;
-                    
+
                 }
                 //BotsModule.Log($"{sprite.name} ({x}, {y})");
                 var pixel = sprite.GetPixel(x, y);
                 if (pixel.a > 0 && pixel != Color.white)
                 {
-                    for(int i = 0; i < 4; i++)
+                    for (int i = 0; i < 4; i++)
                     {
                         var pixel1 = sprite.GetPixel(x + posList[i].x, y + posList[i].y);
                         if (pixel1.a == 0)
@@ -577,7 +650,129 @@ namespace Alexandria.CharacterAPI
             return tex.Resize(width, height);
         }
 
-        
+        public static void SetupLitterallyEverythingPremade(PlayerController player, tk2dSpriteCollectionData SpriteData, tk2dSpriteAnimation d1, CustomCharacterData data, string path, bool alt, Assembly assembly = null)
+        {
+
+            GameObject libaryObject = new GameObject((data.nameShort + "Animator").Replace(" ", "_") + (alt ? "_alt" : ""));
+
+            FakePrefab.MarkAsFakePrefab(libaryObject);
+            var collection = d1;
+
+            if (alt)
+            {
+                data.altCollection = SpriteData;
+            }
+            else
+            {
+                data.collection = SpriteData;
+            }
+
+
+            data.animator = player.gameObject.transform.Find("PlayerSprite").gameObject.GetOrAddComponent<tk2dSpriteAnimator>();
+            data.animator.Library = d1;
+
+            foreach (var anim in data.animator.Library.clips)
+            {
+                for (int i = 0; i <= anim.frames.Length; i++)
+                {
+                    if (anim.name.Contains("run_"))
+                    {
+                        if (i == 2 || i == 5)
+                        {
+                            anim.frames[i].eventAudio = "Play_FS";
+                            anim.frames[i].triggerEvent = true;
+                        }
+                    }
+                    if (anim.name == "pitfall" || anim.name == "pitfall_down")
+                    {
+                        if (i == 0)
+                        {
+                            anim.frames[i].eventAudio = "Play_Fall";
+                            anim.frames[i].triggerEvent = true;
+                        }
+                    }
+                    if (anim.name == "pitfall_return")
+                    {
+                        if (i == 0)
+                        {
+                            anim.frames[i].eventAudio = "Play_Respawn";
+                            anim.frames[i].triggerEvent = true;
+                        }
+                    }
+
+                    if (anim.name.Contains("dodge"))
+                    {
+                        if (i == 0)
+                        {
+                            anim.frames[i].eventAudio = "Play_Leap";
+                            anim.frames[i].triggerEvent = true;
+                        }
+                        if (i == 5)
+                        {
+                            anim.frames[i].eventAudio = "Play_Roll";
+                            anim.frames[i].triggerEvent = true;
+                        }
+                    }
+
+                    if (anim.name == "doorway")
+                    {
+                        if (i == 0)
+                        {
+                            anim.frames[i].eventAudio = "Play_CHR_boot_stairs_01";
+                            anim.frames[i].triggerEvent = true;
+                        }
+                    }
+
+                    if (anim.name == "pet")
+                    {
+                        if (i == 0)
+                        {
+                            anim.frames[i].eventAudio = "Play_CHR_fool_voice_01";
+                            anim.frames[i].triggerEvent = true;
+                        }
+                    }
+                }
+
+                if (anim.name.Contains("dodge"))
+                {
+                    for (int i = 0; i <= (anim.frames.Length / 2); i++)
+                    {
+                        anim.frames[i].invulnerableFrame = true;
+                        anim.frames[i].groundedFrame = false;
+                    }
+                }
+
+                if (anim.name.Contains("tablekick"))
+                {
+                    for (int i = 0; i < (anim.frames.Length); i++)
+                    {
+                        anim.frames[i].invulnerableFrame = true;
+                    }
+                }
+
+                if (anim.name.Contains("slide"))
+                {
+                    for (int i = 0; i < (anim.frames.Length); i++)
+                    {
+                        anim.frames[i].invulnerableFrame = true;
+                    }
+                }
+            }
+
+           
+
+            if (alt)
+            {
+                player.AlternateCostumeLibrary = data.animator.Library;
+            }
+            else
+            {
+                player.spriteAnimator.Library = data.animator.Library;
+                player.sprite.Collection = data.collection;
+                player.sprite.spriteId = data.collection.GetSpriteIdByName($"{data.nameShort}_idle0");
+            }
+        }
+
 
         public static void SetupLitterallyEverything(PlayerController player, CustomCharacterData data, string path, bool alt, Assembly assembly = null)
         {
@@ -602,6 +797,7 @@ namespace Alexandria.CharacterAPI
                 data.collection = collection;
             }
 
+
             //UnityEngine.Object.DontDestroyOnLoad(data.collection);
             data.animator = player.gameObject.transform.Find("PlayerSprite").gameObject.GetOrAddComponent<tk2dSpriteAnimator>();
             data.animator.Library = libaryObject.AddComponent<tk2dSpriteAnimation>();
@@ -609,7 +805,7 @@ namespace Alexandria.CharacterAPI
             data.animator.Library.enabled = true;
 
 
-            foreach (var file in ToolsCharApi.GetResourceNames(assembly ?? Assembly.GetCallingAssembly()))
+            foreach (var file in ResourceExtractor.GetResourceNames(assembly ?? Assembly.GetCallingAssembly()))
             {
                 var splitPath = file.Split('.');
 
@@ -640,7 +836,7 @@ namespace Alexandria.CharacterAPI
 
                     if (!file.Contains("cc_sprite_placeholder"))
                     {
-                        textures = ToolsCharApi.GetTexturesFromResource($"{path}.{dirName}", assembly ?? Assembly.GetCallingAssembly());
+                        textures = ResourceExtractor.GetTexturesFromResource($"{path}.{dirName}", assembly ?? Assembly.GetCallingAssembly());
                     }
 
                     if (dirName.Contains("custom"))
@@ -652,7 +848,7 @@ namespace Alexandria.CharacterAPI
                         var customDirName = splitPath[splitPath.Count() - 3];
                         //BotsModule.Log($"Custom animation found \"{customDirName}\"");
                         animName = data.nameShort + "_" + customDirName;
-                        textures = ToolsCharApi.GetTexturesFromResource($"{path}.{dirName}.{customDirName}", assembly ?? Assembly.GetCallingAssembly());
+                        textures = ResourceExtractor.GetTexturesFromResource($"{path}.{dirName}.{customDirName}", assembly ?? Assembly.GetCallingAssembly());
 
                         for (int i = 0; i < textures.Count; i++)
                         {
@@ -672,7 +868,7 @@ namespace Alexandria.CharacterAPI
                         var customDirName = splitPath[splitPath.Count() - 3];
                         //BotsModule.Log($"Custom breach animation found \"{customDirName}\"");
                         animName = data.nameShort + "_" + customDirName;
-                        textures = ToolsCharApi.GetTexturesFromResource($"{path}.{dirName}.{customDirName}", assembly ?? Assembly.GetCallingAssembly());
+                        textures = ResourceExtractor.GetTexturesFromResource($"{path}.{dirName}.{customDirName}", assembly ?? Assembly.GetCallingAssembly());
 
                         for (int i = 0; i < textures.Count; i++)
                         {
@@ -688,7 +884,7 @@ namespace Alexandria.CharacterAPI
                             var customDirName = customDir.Replace(file, "").Replace(".", "");
                             BotsModule.Log($"Breach Idle animation found \"{customDirName}\"");
                             animName = data.nameShort + "_" + customDirName;
-                            textures = ToolsCharApi.GetTexturesFromResource(customDir);
+                            textures = ResourceExtractor.GetTexturesFromResource(customDir);
 
                             for (int i = 1; i < textures.Count; i++)
                             {
@@ -706,12 +902,12 @@ namespace Alexandria.CharacterAPI
                         if (((dirName.EndsWith("_hand") || dirName.EndsWith("_twohands"))) && file.Contains("cc_sprite_placeholder"))//textures.Count <= 0)
                         {
                             //BotsModule.Log($"hands located! lethal force engaged against {dirName}");
-                            textures = ToolsCharApi.GetTexturesFromResource((path + "." + dirName).Replace("_twohands", "").Replace("_hand", ""), assembly ?? Assembly.GetCallingAssembly());
+                            textures = ResourceExtractor.GetTexturesFromResource((path + "." + dirName).Replace("_twohands", "").Replace("_hand", ""), assembly ?? Assembly.GetCallingAssembly());
                         }
                         if (dirName.EndsWith("death_coop") && file.Contains("cc_sprite_placeholder"))//textures.Count <= 0)
                         {
                             //BotsModule.Log($"hands located! lethal force engaged against {dirName}");
-                            textures = ToolsCharApi.GetTexturesFromResource((path + "." + dirName).Replace("_coop", ""), assembly ?? Assembly.GetCallingAssembly());
+                            textures = ResourceExtractor.GetTexturesFromResource((path + "." + dirName).Replace("_coop", ""), assembly ?? Assembly.GetCallingAssembly());
                         }
                         if (textures.Count > 0)
                         {
@@ -734,7 +930,7 @@ namespace Alexandria.CharacterAPI
                                     {
                                         if (i == 2 || i == 5)
                                         {
-                                           // ETGModConsole.Log($"({anim.frames.Length}){anim.name} [{i}]: Play_FS");
+                                            // ETGModConsole.Log($"({anim.frames.Length}){anim.name} [{i}]: Play_FS");
                                             anim.frames[i].eventAudio = "Play_FS";
                                             anim.frames[i].triggerEvent = true;
                                         }
@@ -743,7 +939,7 @@ namespace Alexandria.CharacterAPI
                                     {
                                         if (i == 0)
                                         {
-                                           // ETGModConsole.Log($"({anim.frames.Length}){anim.name} [{i}]: Play_Fall");
+                                            // ETGModConsole.Log($"({anim.frames.Length}){anim.name} [{i}]: Play_Fall");
                                             anim.frames[i].eventAudio = "Play_Fall";
                                             anim.frames[i].triggerEvent = true;
                                         }
@@ -752,7 +948,7 @@ namespace Alexandria.CharacterAPI
                                     {
                                         if (i == 0)
                                         {
-                                           // ETGModConsole.Log($"({anim.frames.Length}){anim.name} [{i}]: Play_Respawn");
+                                            // ETGModConsole.Log($"({anim.frames.Length}){anim.name} [{i}]: Play_Respawn");
                                             anim.frames[i].eventAudio = "Play_Respawn";
                                             anim.frames[i].triggerEvent = true;
                                         }
@@ -762,13 +958,13 @@ namespace Alexandria.CharacterAPI
                                     {
                                         if (i == 0)
                                         {
-                                           // ETGModConsole.Log($"({anim.frames.Length}){anim.name} [{i}]: Play_Leap");
+                                            // ETGModConsole.Log($"({anim.frames.Length}){anim.name} [{i}]: Play_Leap");
                                             anim.frames[i].eventAudio = "Play_Leap";
                                             anim.frames[i].triggerEvent = true;
                                         }
                                         if (i == 5)
                                         {
-                                           // ETGModConsole.Log($"({anim.frames.Length}){anim.name} [{i}]: Play_Roll");
+                                            // ETGModConsole.Log($"({anim.frames.Length}){anim.name} [{i}]: Play_Roll");
                                             anim.frames[i].eventAudio = "Play_Roll";
                                             anim.frames[i].triggerEvent = true;
                                         }
@@ -778,7 +974,7 @@ namespace Alexandria.CharacterAPI
                                     {
                                         if (i == 0)
                                         {
-                                           // ETGModConsole.Log($"({anim.frames.Length}){anim.name} [{i}]: Play_CHR_boot_stairs_01");
+                                            // ETGModConsole.Log($"({anim.frames.Length}){anim.name} [{i}]: Play_CHR_boot_stairs_01");
                                             anim.frames[i].eventAudio = "Play_CHR_boot_stairs_01";
                                             anim.frames[i].triggerEvent = true;
                                         }
@@ -786,11 +982,11 @@ namespace Alexandria.CharacterAPI
 
                                     if (anim.name == "pet")
                                     {
-                                        
 
-                                        if (i == 0)                                            
+
+                                        if (i == 0)
                                         {
-                                           // ETGModConsole.Log($"({anim.frames.Length}){anim.name} [{i}]: Play_CHR_fool_voice_01");
+                                            // ETGModConsole.Log($"({anim.frames.Length}){anim.name} [{i}]: Play_CHR_fool_voice_01");
                                             anim.frames[i].eventAudio = "Play_CHR_fool_voice_01";
                                             anim.frames[i].triggerEvent = true;
                                         }
@@ -824,18 +1020,26 @@ namespace Alexandria.CharacterAPI
                             }
                             else
                             {
-                                ETGModConsole.Log($"No Anim data found for \"{dirName}\"! please double check animation folder names");
+                                Debug.LogWarning($"No Anim data found for \"{dirName}\"! DOUBLE-CHECK animation folder names!");
+                                if (ToolsCharApi.EnableDebugLogging == true)
+                                {
+                                    ETGModConsole.Log($"No Anim data found for \"{dirName}\"! DOUBLE-CHECK animation folder names!");
+                                }
                             }
                         }
                         else
                         {
-                            ETGModConsole.Log($"No sprites found in {dirName} please make sure youve actually put sprites in that folder");
+                            Debug.LogWarning($"No sprites found in {dirName}, MAKE SURE youve actually put sprites in that folder!");
+                            if (ToolsCharApi.EnableDebugLogging == true)
+                            {
+                                ETGModConsole.Log($"No sprites found in {dirName}, MAKE SURE youve actually put sprites in that folder!");
+                            }
                         }
                     }
                 }
                 else if (splitPath[splitPath.Count() - 2] == (alt ? "hand_alt_001" : "hand_001"))
                 {
-                    var texture = ToolsCharApi.GetTextureFromResource($"{path}.{(alt ? "hand_alt_001" : "hand_001")}.png", assembly ?? Assembly.GetCallingAssembly());
+                    var texture = ResourceExtractor.GetTextureFromResource($"{path}.{(alt ? "hand_alt_001" : "hand_001")}.png", assembly ?? Assembly.GetCallingAssembly());
                     var id = AddSpriteToCollection(texture, collection, "hand" + (alt ? "_alt" : ""));
                     collection.spriteDefinitions[id].position0 = new Vector3(-0.125f, -0.125f, 0);
                     collection.spriteDefinitions[id].position1 = new Vector3(0.125f, -0.125f, 0);
@@ -849,6 +1053,7 @@ namespace Alexandria.CharacterAPI
                         player.primaryHand.sprite.SetSprite(id);
                         player.secondaryHand.sprite.SetSprite(id);
                     }
+
                 }
             }
             if (alt)
@@ -866,6 +1071,7 @@ namespace Alexandria.CharacterAPI
 
                 //ToolsCharApi.ExportTexture(data.collection.spriteDefinitions[0].material.mainTexture, "SpriteDump/", data.nameShort);
             }
+
 
             //ToolsCharApi.ExportTexture(TextureStitcher.GetReadable(data.collection.textures[0]), "SpriteDump/balls", data.nameShort + UnityEngine.Random.Range(1, 10000));
 
@@ -997,7 +1203,7 @@ namespace Alexandria.CharacterAPI
 
 
 
-            
+
             tk2dSpriteDefinition[] copyDefinitions = new tk2dSpriteDefinition[orig.spriteDefinitions.Length];
             for (int i = 0; i < copyCollection.spriteDefinitions.Length; i++)
             {
@@ -1005,10 +1211,13 @@ namespace Alexandria.CharacterAPI
             }
             copyCollection.spriteDefinitions = copyDefinitions;
             //ToolsCharApi.ExportTexture(TextureStitcher.GetReadable(copyCollection.textures[0]), "SpriteDump/balls", TextureStitcher.GetReadable(copyCollection.textures[0]).name + UnityEngine.Random.Range(1, 10000));
-            
+
             if (data.playerSheet != null)
             {
-                ToolsCharApi.Print("        Using sprite sheet replacement.", "FFBB00");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("        Using sprite sheet replacement.", "FFBB00");
+                }
                 var materialsToCopy = orig.materials;
                 copyCollection.materials = new Material[orig.materials.Length];
                 for (int i = 0; i < copyCollection.materials.Length; i++)
@@ -1037,8 +1246,9 @@ namespace Alexandria.CharacterAPI
             else if (data.sprites != null)
             {
 
-
-                /*var materialsToCopy2 = orig.materials;
+                //God kill me.
+                /*
+                var materialsToCopy2 = orig.materials;
                 copyCollection.materials = new Material[orig.materials.Length];
                 for (int i = 0; i < copyCollection.materials.Length; i++)
                 {
@@ -1060,9 +1270,13 @@ namespace Alexandria.CharacterAPI
                             copyDefinitions[i].materialInst = new Material(mat);
                         }
                     }
-                }*/
+                }
+                */
 
-                ToolsCharApi.Print("        Using individual sprite replacement.", "FFBB00");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("        Using individual sprite replacement.", "FFBB00");
+                }
                 bool notSlinger = data.baseCharacter != PlayableCharacters.Gunslinger;
 
                 RuntimeAtlasPage page = new RuntimeAtlasPage();
@@ -1079,7 +1293,7 @@ namespace Alexandria.CharacterAPI
 
                         if (notSlinger && def.boundsDataCenter != Vector3.zero)
                         {
-                            
+
                             var ras = page.Pack(tex);
 
                             //def.material = mat;
@@ -1110,7 +1324,7 @@ namespace Alexandria.CharacterAPI
                     }
                 }
 
-                
+
 
 
                 page.Apply();
@@ -1128,8 +1342,9 @@ namespace Alexandria.CharacterAPI
                     mat.name = materialsToCopy[i].name;
                     copyCollection.materials[i] = mat;
                     copyCollection.materialInsts[i] = mat;
-                    
+
                 }
+                /*
                 copyCollection.textures = new Texture[] { page.Texture };
                 for (int i = 0; i < copyCollection.spriteDefinitions.Length; i++)
                 {
@@ -1140,10 +1355,11 @@ namespace Alexandria.CharacterAPI
                             copyDefinitions[i].material = copyCollection.materials[0];
                             copyDefinitions[i].materialInst = new Material(copyCollection.materials[0]);
 
-                            
+
                         }
                     }
                 }
+                */
                 copyCollection.textureFilterMode = FilterMode.Point;
                 for (int i = 0; i < player.sprite.Collection.spriteDefinitions.Length; i++)
                 {
@@ -1157,16 +1373,16 @@ namespace Alexandria.CharacterAPI
                 ToolsCharApi.Print("        Not replacing sprites.", "FFFF00");
             }
 
-            
+
 
             player.spriteAnimator.Library = GameObject.Instantiate(player.spriteAnimator.Library);
             GameObject.DontDestroyOnLoad(player.spriteAnimator.Library);
 
-           
+
 
             foreach (var clip in player.spriteAnimator.Library.clips)
             {
-                if(clip.fps != 12)
+                if (clip.fps != 12)
                 {
                     //BotsModule.Log($"{clip.name}: {clip.fps}");
                 }
@@ -1189,14 +1405,18 @@ namespace Alexandria.CharacterAPI
 
             foreach (var sdef in copyCollection.materialInsts)
             {
-               // BotsModule.Log("Inst: " + sdef.mainTexture.ToString());
+                // BotsModule.Log("Inst: " + sdef.mainTexture.ToString());
                 //BotsModule.Log("Inst: " + sdef.ToString());
             }
 
             copyCollection.name = player.OverrideDisplayName;
 
+            player.primaryHand.sprite.collection = copyCollection;
             player.primaryHand.sprite.Collection = copyCollection;
+
+            player.secondaryHand.sprite.collection = copyCollection;
             player.secondaryHand.sprite.Collection = copyCollection;
+
             player.sprite.Collection = copyCollection;
         }
 
@@ -1211,8 +1431,8 @@ namespace Alexandria.CharacterAPI
             {
                 orig = player.sprite.Collection;
             }
-            
-            
+
+
 
             var copyCollection = GameObject.Instantiate(orig);
             GameObject.DontDestroyOnLoad(copyCollection);
@@ -1228,7 +1448,10 @@ namespace Alexandria.CharacterAPI
 
             if (data.altPlayerSheet != null)
             {
-                ToolsCharApi.Print("        Using sprite sheet replacement.", "FFBB00");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("        Using sprite sheet replacement.", "FFBB00");
+                }
                 var materialsToCopy = orig.materials;
                 copyCollection.materials = new Material[orig.materials.Length];
                 for (int i = 0; i < copyCollection.materials.Length; i++)
@@ -1253,11 +1476,14 @@ namespace Alexandria.CharacterAPI
                     }
                 }
             }
-            
+
             else if (data.altSprites != null)
             {
                 //BotsModule.Log("altSprites arent null thank god!");
-                ToolsCharApi.Print("        Using individual sprite replacement.", "FFBB00");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("        Using individual sprite replacement.", "FFBB00");
+                }
                 bool notSlinger = data.baseCharacter != PlayableCharacters.Gunslinger;
 
                 RuntimeAtlasPage page = new RuntimeAtlasPage();
@@ -1394,7 +1620,7 @@ namespace Alexandria.CharacterAPI
         {
 
 
-            
+
 
             /*var atlas = uiAtlas;
             var atlasTex = atlas.Texture;
@@ -1438,7 +1664,10 @@ namespace Alexandria.CharacterAPI
             var atlasTex = atlas.Texture;
             if (data.punchoutFaceCards != null)
             {
-                ToolsCharApi.Print("Adding punchout facecards");
+                if (ToolsCharApi.EnableDebugLogging == true)
+                {
+                    ToolsCharApi.Print("Adding punchout facecards");
+                }
                 int count = Mathf.Min(data.punchoutFaceCards.Count, 3);
                 for (int i = 0; i < count; i++)
                 {
@@ -1456,7 +1685,10 @@ namespace Alexandria.CharacterAPI
 
         public static void HandlePunchoutAnimations(PunchoutPlayerController player, CustomCharacterData data)
         {
-            ToolsCharApi.Print("Replacing punchout sprites...");
+            if (ToolsCharApi.EnableDebugLogging == true)
+            {
+                ToolsCharApi.Print("Replacing punchout sprites...");
+            }
 
             var orig = player.sprite.Collection;
             var copyCollection = GameObject.Instantiate(orig);
@@ -1493,7 +1725,10 @@ namespace Alexandria.CharacterAPI
             copyCollection.name = data.nameShort + " Punchout Collection";
             //CharacterBuilder.storedCollections.Add(data.nameInternal, copyCollection);
             player.sprite.Collection = copyCollection;
-            ToolsCharApi.Print("Punchout sprites successfully replaced");
+            if (ToolsCharApi.EnableDebugLogging == true)
+            {
+                ToolsCharApi.Print("Punchout sprites successfully replaced");
+            }
         }
 
         public static void SetMinimapIconSpriteID(int key, int value)
@@ -1604,7 +1839,7 @@ namespace Alexandria.CharacterAPI
 
     public sealed class Tuple<T1, T2, T3, T4>
     {
-        
+
         public Tuple(T1 item1, T2 item2, T3 item3, T4 item4)
         {
             Item1 = item1;

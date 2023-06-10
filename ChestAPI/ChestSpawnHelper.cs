@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Alexandria.ChestApi
+namespace Alexandria.ChestAPI
 {
 	public static class ChestSpawnHelper
 	{

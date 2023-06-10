@@ -14,11 +14,13 @@ namespace Alexandria.DungeonAPI
 {
     public static class StaticReferences
     {
+
         public static Dictionary<string, AssetBundle> AssetBundles;
         public static Dictionary<string, GenericRoomTable> RoomTables;
         public static SharedInjectionData subShopTable;
 
         public static Dictionary<string, GameObject> customObjects = new Dictionary<string, GameObject>();
+        public static Dictionary<string, DungeonPlaceable> customPlaceables = new Dictionary<string, DungeonPlaceable>();
 
         public static Dictionary<string, string> roomTableMap = new Dictionary<string, string>()
         {
@@ -528,7 +530,13 @@ namespace Alexandria.DungeonAPI
             return goopDefinition;
         }
 
+        /// <summary>
+        /// LEGACY VERSION, use customObjects instead.
+        /// </summary>
         public static Dictionary<string, GameObject> StoredRoomObjects = new Dictionary<string, GameObject>(){};
+        /// <summary>
+        /// LEGACY VERSION, use customPlaceables instead.
+        /// </summary>
         public static Dictionary<string, DungeonPlaceable> StoredDungeonPlaceables = new Dictionary<string, DungeonPlaceable>() {};
 
 

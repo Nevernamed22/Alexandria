@@ -9,28 +9,30 @@ using Alexandria.EnemyAPI;
 using Alexandria.DungeonAPI;
 using Alexandria.ItemAPI;
 using Alexandria.Misc;
-using Alexandria.ChestApi;
+using Alexandria.ChestAPI;
 using BepInEx;
 using Alexandria.CharacterAPI;
 using System.Collections;
+using HarmonyLib;
+using System.Reflection;
 
 namespace Alexandria
 {
-
-
     [BepInDependency("etgmodding.etg.mtgapi")]
     [BepInPlugin(GUID, NAME, VERSION)]
     public class Alexandria : BaseUnityPlugin
     {
 
-
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
-        public const string VERSION = "0.2.3";
 
+        public const string VERSION = "0.3.7";
 
         public void Start()
         {
+            var harmony = new Harmony(GUID);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
+
             ETGModMainBehaviour.WaitForGameManagerStart(GMStart);
         }
 
@@ -53,7 +55,10 @@ namespace Alexandria
                 BossBuilder.Init();
                 NPCAPI.NPCHooks.Init();
                 EnemyAPI.Hooks.Init();
+                CustomDiscountManager.Init();
+                GoopUtility.Init();
 
+               
                 //Low Priority
                 CustomClipAmmoTypeToolbox.Init();
                 ChamberGunAPI.Init();
@@ -63,13 +68,16 @@ namespace Alexandria
                 Commands.Init();
                 BreachShopTools.Init();
                 AmmoPickupFixer.Init();
+                LabelablePlayerItemSetup.InitLabelHook();
+                MasteryOverrideHandler.Init();
+                RoomRewardAPI.Init();
 
                 //Character API
                 CharacterAPI.Hooks.Init();
                 ToolsCharApi.Init();
 
                 ETGMod.StartGlobalCoroutine(this.delayedstarthandler());
-                ETGModConsole.Log("AlexandriaLib started correctly.");
+                ETGModConsole.Log("AlexandriaLib started correctly. Ver. : "+VERSION);
             }
             catch (Exception e)
             {

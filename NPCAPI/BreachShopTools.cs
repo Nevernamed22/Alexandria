@@ -14,7 +14,7 @@ namespace Alexandria.NPCAPI
 {
     class BreachShopTools
     {
-
+        public static bool BreachShopDebugLogging = false;
 
         public static void Init()
         {
@@ -41,7 +41,10 @@ namespace Alexandria.NPCAPI
         {
             foreach (BreachShopComp customShrineController in UnityEngine.Object.FindObjectsOfType<BreachShopComp>())
             {
-                DebugUtility.Print<string>("removed shop " + customShrineController.gameObject.name, "FFFFFF", true);
+                if (BreachShopDebugLogging == true)
+                {
+                    DebugUtility.Print<string>("removed shop " + customShrineController.gameObject.name, "FFFFFF", true);
+                }
                 bool flag = !FakePrefab.IsFakePrefab(customShrineController);
                 if (flag)
                 {
@@ -59,8 +62,11 @@ namespace Alexandria.NPCAPI
         public static void PlaceBreachShops()
         {
             BreachShopTools.CleanupBreachShops();
-            DebugUtility.Print<string>("Placing breach shops: ", "FFFFFF", true);
-            DebugUtility.Print<string>(BreachShopTools.registeredShops.Count.ToString(), "FFFFFF", true);
+            if (BreachShopDebugLogging == true)
+            {
+                DebugUtility.Print<string>("Placing breach shops: ", "FFFFFF", true);
+                DebugUtility.Print<string>(BreachShopTools.registeredShops.Count.ToString(), "FFFFFF", true);
+            }
             foreach (GameObject gameObject in BreachShopTools.registeredShops.Values)
             {
                 try
@@ -68,7 +74,10 @@ namespace Alexandria.NPCAPI
                    
                     if (gameObject.GetComponent<BreachShopComp>() != null)
                     {
-                        DebugUtility.Print<string>("    " + gameObject.name, "FFFFFF", true);
+                        if (BreachShopDebugLogging == true)
+                        {
+                            DebugUtility.Print<string>("    " + gameObject.name, "FFFFFF", true);
+                        }
                         var shop = UnityEngine.Object.Instantiate<GameObject>(gameObject);
                         var comp = gameObject.GetComponent<BreachShopComp>();
                         shop.SetActive(true);

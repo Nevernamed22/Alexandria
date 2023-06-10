@@ -129,7 +129,7 @@ namespace Alexandria.ItemAPI
             this.CheckStatus();
         }
 
-        private void DisableEffect()
+        public void DisableEffect()
         {
             if (this.m_isCurrentlyActive)
             {

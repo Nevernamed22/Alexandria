@@ -128,8 +128,9 @@ namespace Alexandria.EnemyAPI
             else
             {
                 AIBulletBank aibulletBank = prefab.AddComponent<AIBulletBank>();
+                aibulletBank.Bullets = new List<AIBulletBank.Entry>();
             }
- 
+
             //Add to enemy database
             EnemyDatabaseEntry enemyDatabaseEntry = new EnemyDatabaseEntry()
             {
@@ -146,6 +147,8 @@ namespace Alexandria.EnemyAPI
             GameObject.DontDestroyOnLoad(prefab);
             FakePrefab.MarkAsFakePrefab(prefab);
             prefab.SetActive(false);
+
+            StaticReferenceManager.AllHealthHavers.Remove(healthHaver);
 
             return prefab;
         }

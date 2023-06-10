@@ -158,9 +158,7 @@ namespace Alexandria.EnemyAPI
 
         public static AIActor GetAttackBehaviourOwner(this BehaviorBase behav)
         {
-            AIActor actor = null;
-            actor = ReflectionUtility.ReflectGetField<AIActor>(typeof(BehaviorBase), "m_aiActor", behav);
-            return actor;
+            return behav.m_aiActor;
         }
     }
 }

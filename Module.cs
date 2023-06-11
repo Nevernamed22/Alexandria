@@ -32,6 +32,7 @@ namespace Alexandria
         {
             var harmony = new Harmony(GUID);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
+            EasyEnumExtender.ExtendEnumsInAssembly(GUID);
 
             ETGModMainBehaviour.WaitForGameManagerStart(GMStart);
         }

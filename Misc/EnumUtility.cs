@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace Alexandria.Misc
 {
+	[Obsolete("EnumUtility is broken and doesn't work, use ETGModCompatibility.ExtendEnum instead.")]
    public static class EnumUtility
     {
         public static string GetFullyQualifiedName(string guid, string value)

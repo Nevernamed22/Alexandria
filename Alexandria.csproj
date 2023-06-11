@@ -13,6 +13,7 @@
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <LangVersion>9.0</LangVersion>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
@@ -103,6 +104,7 @@
     <Compile Include="ItemAPI\CompanionBuilder.cs" />
     <Compile Include="Misc\Commands.cs" />
     <Compile Include="Misc\CustomActions.cs" />
+    <Compile Include="Misc\EasyEnumExtender.cs" />
     <Compile Include="Misc\ExtendedPlayerComponent.cs" />
     <Compile Include="Misc\GameManagerUtility.cs" />
     <Compile Include="Misc\GoopUtility.cs" />
@@ -182,6 +184,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="StatAPI\CustomStatValues.cs" />
+    <Compile Include="StatAPI\ExtendedPlayerStats.cs" />
+    <Compile Include="StatAPI\ModifyMethodE.cs" />
+    <Compile Include="StatAPI\StatAPIManager.cs" />
     <Compile Include="TranslationAPI\CustomStringDBTable.cs" />
     <Compile Include="TranslationAPI\StringTableType.cs" />
     <Compile Include="TranslationAPI\Translation.cs" />
@@ -423,6 +429,7 @@
     <EmbeddedResource Include="NativeResources\debugwalls.png" />
     <EmbeddedResource Include="Misc\mdl_os.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
   </PropertyGroup>

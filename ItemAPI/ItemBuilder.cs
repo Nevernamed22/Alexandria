@@ -12,6 +12,8 @@ using Alexandria.ItemAPI;
 using Alexandria.Misc;
 using Alexandria.VisualAPI;
 using Gungeon;
+using Alexandria.StatAPI;
+using HarmonyLib;
 
 namespace Alexandria.ItemAPI
 {
@@ -391,7 +393,7 @@ namespace Alexandria.ItemAPI
         /// <summary>
         /// Removes all stat modifiers of the set stat type from a PlayerItem, PassiveItem, or Gun.
         /// </summary>
-        ///  /// <param name="po">A PassiveItem, PlayerItem, or Gun to add the stat to.</param>
+        ///  /// <param name="po">A PassiveItem, PlayerItem, or Gun to remove the stat from.</param>
         ///  /// <param name="statType">The stat to be wiped.</param>
         public static void RemovePassiveStatModifier(this PickupObject po, PlayerStats.StatType statType)
         {
@@ -429,7 +431,42 @@ namespace Alexandria.ItemAPI
         }
 
         /// <summary>
-        /// Adds a passive player stat modifier to a PlayerItem or PassiveItem
+        /// Removes all stat modifiers of the set stat type from a PlayerItem, PassiveItem, or Gun.
+        /// </summary>
+        ///  /// <param name="po">A PassiveItem, PlayerItem, or Gun to remove the stat from.</param>
+        ///  /// <param name="modPrefix">The prefix of the mod the custom stat is from.</param>
+        ///  /// <param name="customStat">The custom stat to be wiped.</param>
+        public static void RemovePassiveCustomStatModifier(this PickupObject po, string modPrefix, string customStat)
+        {
+            if (po is PlayerItem)
+            {
+                var item = (po as PlayerItem);
+                if (item.passiveStatModifiers == null) return;
+
+                item.passiveStatModifiers = item.passiveStatModifiers.Where(x => x == null || x.statToBoost.ToString() != $"{modPrefix}.{customStat}").ToArray();
+            }
+            else if (po is PassiveItem)
+            {
+                var item = (po as PassiveItem);
+                if (item.passiveStatModifiers == null) return;
+
+                item.passiveStatModifiers = item.passiveStatModifiers.Where(x => x == null || x.statToBoost.ToString() != $"{modPrefix}.{customStat}").ToArray();
+            }
+            else if (po is Gun)
+            {
+                var item = (po as Gun);
+                if (item.passiveStatModifiers == null) return;
+
+                item.passiveStatModifiers = item.passiveStatModifiers.Where(x => x == null || x.statToBoost.ToString() != $"{modPrefix}.{customStat}").ToArray();
+            }
+            else
+            {
+                throw new NotSupportedException("Object must be of type PlayerItem, PassiveItem, or Gun");
+            }
+        }
+
+        /// <summary>
+        /// Adds a passive player stat modifier to a PlayerItem, PassiveItem or Gun
         /// </summary>
         public static StatModifier AddPassiveStatModifier(this PickupObject po, PlayerStats.StatType statType, float amount, StatModifier.ModifyMethod method = StatModifier.ModifyMethod.ADDITIVE)
         {
@@ -440,7 +477,18 @@ namespace Alexandria.ItemAPI
 
             po.AddPassiveStatModifier(modifier);
             return modifier;
-        }        
+        }
+
+        /// <summary>
+        /// Adds a passive player stat modifier with a custom stat to a PlayerItem, PassiveItem or Gun
+        /// </summary>
+        public static StatModifier AddPassiveCustomStatModifier(this PickupObject po, string modPrefix, string customStatType, float amount, StatModifier.ModifyMethod method = StatModifier.ModifyMethod.ADDITIVE)
+        {
+            var modifier = StatAPIManager.CreateCustomStatModifier(modPrefix, customStatType, amount, method);
+            po.AddPassiveStatModifier(modifier);
+            return modifier;
+        }
+
         public static void AddPassiveStatModifier(this PickupObject po, StatModifier modifier)
         {
             if (po is PlayerItem)
@@ -517,11 +565,22 @@ namespace Alexandria.ItemAPI
         {
             gun.currentGunStatModifiers = gun.currentGunStatModifiers.Concat(new StatModifier[] { new StatModifier { statToBoost = statType, amount = amount, modifyType = modifyMethod } }).ToArray();
         }
+
+        public static void AddCurrentGunCustomStatModifier(this Gun gun, string modPrefix, string customStat, float amount, StatModifier.ModifyMethod modifyMethod)
+        {
+            gun.currentGunStatModifiers = gun.currentGunStatModifiers.AddToArray(StatAPIManager.CreateCustomStatModifier(modPrefix, customStat, amount, modifyMethod));
+        }
+
         public static void RemoveCurrentGunStatModifier(this Gun gun, PlayerStats.StatType statType)
         {
             var newModifiers = new List<StatModifier>();
             for (int i = 0; i < gun.currentGunStatModifiers.Length; i++) { if (gun.currentGunStatModifiers[i].statToBoost != statType) { newModifiers.Add(gun.currentGunStatModifiers[i]); } }
             gun.currentGunStatModifiers = newModifiers.ToArray();
+        }
+
+        public static void RemoveCurrentGunCustomStatModifier(this Gun gun, string modPrefix, string customStat)
+        {
+            gun.currentGunStatModifiers = gun.currentGunStatModifiers.Where(x => x == null || x.statToBoost.ToString() != $"{modPrefix}.{customStat}").ToArray();
         }
         public static IEnumerator HandleDuration(PlayerItem item, float duration, PlayerController user, Action<PlayerController> OnFinish)
         {

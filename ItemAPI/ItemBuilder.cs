@@ -76,6 +76,30 @@ namespace Alexandria.ItemAPI
             return spriteObject;
         }
 
+        public static GameObject AddSpriteToObjectAssetbundle(string name, int CollectionID, tk2dSpriteCollectionData data, GameObject obj = null)
+        {
+            GameObject spriteObject = SpriteFromBundle(name, CollectionID, data, obj);
+            spriteObject.name = name;
+            return spriteObject;
+        }
+
+        public static GameObject SpriteFromBundle(string spriteName, int CollectionID, tk2dSpriteCollectionData data, GameObject obj = null)
+        {
+            if (obj == null)
+            {
+                obj = new GameObject();
+            }
+            tk2dSprite sprite;
+            sprite = obj.AddComponent<tk2dSprite>();
+            sprite.SetSprite(data, CollectionID);
+            sprite.SortingOrder = 0;
+            sprite.IsPerpendicular = true;
+
+            obj.GetComponent<BraveBehaviour>().sprite = sprite;
+
+            return obj;
+        }
+
         /// <summary>
         /// Adds a tk2dSprite component to an object and adds that sprite to the ammonomicon for later use. If obj is null, returns a new GameObject with the sprite
         /// Capable of taking an additional argument for the sprite's perpendicular state. 'Flat' sprites will always lay down on the floor, like carpets.

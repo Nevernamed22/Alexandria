@@ -29,8 +29,8 @@ namespace Alexandria.Misc
             if (player != null)
             {
                 if (CustomActions.OnNewPlayercontrollerSpawned != null) CustomActions.OnNewPlayercontrollerSpawned(player);
+                if (player.GetComponent<ExtendedPlayerComponent>() == null) player.gameObject.AddComponent<ExtendedPlayerComponent>();
             }
-            if (player.GetComponent<ExtendedPlayerComponent>() == null) player.gameObject.AddComponent<ExtendedPlayerComponent>();
         }
 
         #endregion

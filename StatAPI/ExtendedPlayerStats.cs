@@ -24,24 +24,26 @@ namespace Alexandria.StatAPI
 
 		internal void InternalRecalculateStats(PlayerController owner, PlayerStats ogstats, ref float healAmount)
 		{
+
 			if (statKeys == null)
 			{
 				statKeys = new();
 				statValues = new();
 			}
-			statValues.Clear();
-			statKeys.Clear();
-			var vals = new CustomStatValues(statKeys, statValues);
-			for (int i = 0; i < baseValueKeys.Count; i++)
+            statValues.Clear();
+            statKeys.Clear();
+			if (baseValueKeys == null){this.Awake();} // Force Reboot
+            var vals = new CustomStatValues(statKeys, statValues);
+            for (int i = 0; i < baseValueKeys.Count; i++)
 			{
-				vals.SetWithoutPrefix(baseValueKeys[i], baseValueValues[i]);
-			}
-			StatAPIManager.PreCustomStatModification?.Invoke(ogstats, owner, vals, ref healAmount);
+                vals.SetWithoutPrefix(baseValueKeys[i], baseValueValues[i]);
+            }
+            StatAPIManager.PreCustomStatModification?.Invoke(ogstats, owner, vals, ref healAmount);
 			Dictionary<string, float> additive = new();
 			Dictionary<string, float> multiplicative = new();
 			Dictionary<string, float> tmultiplicative = new();
 			Dictionary<string, float> exponent = new();
-			foreach (var s in owner.ActiveExtraSynergies)
+            foreach (var s in owner.ActiveExtraSynergies)
 			{
 				if (s >= GameManager.Instance.SynergyManager.synergies.Length)
 				{
@@ -60,14 +62,14 @@ namespace Alexandria.StatAPI
 					}
 				}
 			}
-			foreach (var mod in owner.ownerlessStatModifiers)
+            foreach (var mod in owner.ownerlessStatModifiers)
 			{
 				if (mod != null && StatAPIManager.addedCustomStats.Contains(mod.statToBoost))
 				{
 					ProcessMod(mod, additive, multiplicative, tmultiplicative, exponent);
 				}
 			}
-			foreach (var passive in owner.passiveItems)
+            foreach (var passive in owner.passiveItems)
 			{
 				if (passive.passiveStatModifiers != null && passive.passiveStatModifiers.Length > 0)
 				{
@@ -100,7 +102,7 @@ namespace Alexandria.StatAPI
 					}
 				}
 			}
-			if (owner.inventory != null && owner.inventory.AllGuns != null)
+            if (owner.inventory != null && owner.inventory.AllGuns != null)
 			{
 				if (owner.inventory.CurrentGun != null && owner.inventory.CurrentGun.currentGunStatModifiers != null && owner.inventory.CurrentGun.currentGunStatModifiers.Length > 0)
 				{
@@ -126,7 +128,7 @@ namespace Alexandria.StatAPI
 					}
 				}
 			}
-			foreach (var active in owner.activeItems)
+            foreach (var active in owner.activeItems)
 			{
 				if (active.passiveStatModifiers != null && active.passiveStatModifiers.Length > 0)
 				{
@@ -150,7 +152,7 @@ namespace Alexandria.StatAPI
 					}
 				}
 			}
-			var currentItem = owner.CurrentItem;
+            var currentItem = owner.CurrentItem;
 			if (currentItem && currentItem is ActiveBasicStatItem activestat && currentItem.IsActive)
 			{
 				foreach (var mod in activestat.modifiers)
@@ -161,27 +163,27 @@ namespace Alexandria.StatAPI
 					}
 				}
 			}
-			StatAPIManager.PreModifiers?.Invoke(ogstats, owner, vals, ref healAmount);
+            StatAPIManager.PreModifiers?.Invoke(ogstats, owner, vals, ref healAmount);
 			foreach (var kvp in multiplicative)
 			{
 				vals.SetWithoutPrefix(kvp.Key, vals.GetWithoutPrefix(kvp.Key) * kvp.Value);
 			}
-			StatAPIManager.AfterMultiplicative?.Invoke(ogstats, owner, vals, ref healAmount);
+            StatAPIManager.AfterMultiplicative?.Invoke(ogstats, owner, vals, ref healAmount);
 			foreach (var kvp in additive)
 			{
 				vals.SetWithoutPrefix(kvp.Key, vals.GetWithoutPrefix(kvp.Key) + kvp.Value);
 			}
-			StatAPIManager.AfterAdditive?.Invoke(ogstats, owner, vals, ref healAmount);
+            StatAPIManager.AfterAdditive?.Invoke(ogstats, owner, vals, ref healAmount);
 			foreach (var kvp in tmultiplicative)
 			{
 				vals.SetWithoutPrefix(kvp.Key, vals.GetWithoutPrefix(kvp.Key) * kvp.Value);
 			}
-			StatAPIManager.AfterTrueMultiplicative?.Invoke(ogstats, owner, vals, ref healAmount);
+            StatAPIManager.AfterTrueMultiplicative?.Invoke(ogstats, owner, vals, ref healAmount);
 			foreach (var kvp in exponent)
 			{
 				vals.SetWithoutPrefix(kvp.Key, Mathf.Pow(vals.GetWithoutPrefix(kvp.Key), kvp.Value));
-			}
-			StatAPIManager.AfterExponent?.Invoke(ogstats, owner, vals, ref healAmount);
+            }
+            StatAPIManager.AfterExponent?.Invoke(ogstats, owner, vals, ref healAmount);
 			var mults = trueMultiplicativeMults;
 			var exps = exponentMods;
 			healAmount -= unprocessedHealthDecrement;
@@ -197,7 +199,7 @@ namespace Alexandria.StatAPI
 					}
 				}
 			}
-			healAmount += oghealth * (unprocessedHealthMult - 1) + Mathf.Max(Mathf.Pow(oghealth, unprocessedHealthExp) - oghealth, 0f);
+            healAmount += oghealth * (unprocessedHealthMult - 1) + Mathf.Max(Mathf.Pow(oghealth, unprocessedHealthExp) - oghealth, 0f);
 			if (exps != null)
 			{
 				for (int i = 0; i < ogstats.StatValues.Count && i < exps.Length; i++)
@@ -205,18 +207,19 @@ namespace Alexandria.StatAPI
 					ogstats.StatValues[i] = Mathf.Pow(ogstats.StatValues[i], exps[i]);
 				}
 			}
-			StatAPIManager.FinalPostProcessing?.Invoke(ogstats, owner, vals, ref healAmount);
+
+            StatAPIManager.FinalPostProcessing?.Invoke(ogstats, owner, vals, ref healAmount);
 			ogstats.StatValues[(int)PlayerStats.StatType.Health] = Mathf.Round(ogstats.StatValues[(int)PlayerStats.StatType.Health] * 2) / 2;
 			healAmount = Mathf.Round(healAmount * 2) / 2;
-		}
+        }
 
-		/// <summary>
-		/// Returns the current value of a custom stat from a mod with the prefix modPrefix and name statName.
-		/// </summary>
-		/// <param name="modPrefix">The prefix of the mod that adds the stat.</param>
-		/// <param name="statName">The name of the stat.</param>
-		/// <returns></returns>
-		public float GetStatValue(string modPrefix, string statName)
+        /// <summary>
+        /// Returns the current value of a custom stat from a mod with the prefix modPrefix and name statName.
+        /// </summary>
+        /// <param name="modPrefix">The prefix of the mod that adds the stat.</param>
+        /// <param name="statName">The name of the stat.</param>
+        /// <returns></returns>
+        public float GetStatValue(string modPrefix, string statName)
 		{
 			if (!statKeys.Contains($"{modPrefix}.{statName}"))
 			{

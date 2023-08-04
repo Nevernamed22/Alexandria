@@ -44,6 +44,10 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Assetbundle\BeamBuilders.cs" />
+    <Compile Include="Assetbundle\GunInt.cs" />
+    <Compile Include="Assetbundle\JsonEmbedder.cs" />
+    <Compile Include="Assetbundle\ProjectileBuilders.cs" />
     <Compile Include="BreakableAPI\BreakableAPIToolbox.cs" />
     <Compile Include="CharApi\CharacterBuilding\CharacterBuilder.cs" />
     <Compile Include="CharApi\CharacterBuilding\CustomCharacter.cs" />

@@ -26,7 +26,7 @@ namespace Alexandria
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
 
-        public const string VERSION = "0.3.7";
+        public const string VERSION = "0.3.11";
 
         public void Start()
         {
@@ -42,11 +42,13 @@ namespace Alexandria
 
             try
             {
+
                 //The Most important classes, which must be initialised first
                 StaticReferences.Init();
                 DungeonHandler.Init();
                 FakePrefabHooks.Init();
                 ItemBuilder.Init();
+
 
                 //Medium Priority
                 CustomActions.InitHooks();
@@ -59,7 +61,6 @@ namespace Alexandria
                 CustomDiscountManager.Init();
                 GoopUtility.Init();
 
-               
                 //Low Priority
                 CustomClipAmmoTypeToolbox.Init();
                 ChamberGunAPI.Init();
@@ -73,9 +74,11 @@ namespace Alexandria
                 MasteryOverrideHandler.Init();
                 RoomRewardAPI.Init();
 
+
                 //Character API
                 CharacterAPI.Hooks.Init();
                 ToolsCharApi.Init();
+
 
                 ETGMod.StartGlobalCoroutine(this.delayedstarthandler());
                 ETGModConsole.Log("AlexandriaLib started correctly. Ver. : "+VERSION);

@@ -13,6 +13,7 @@ using Random = UnityEngine.Random;
 using Newtonsoft.Json.Linq;
 using Gungeon;
 using Microsoft.Cci;
+using System.Linq;
 
 namespace Alexandria.DungeonAPI
 {
@@ -150,7 +151,18 @@ namespace Alexandria.DungeonAPI
             {
                 for (int i = 0; i < roomData.enemyPositions.Length; i++)
                 {
-                    AddEnemyToRoom(room, roomData.enemyPositions[i], roomData.enemyGUIDs[i], (roomData.enemyAttributes != null && roomData.enemyAttributes.Length > 0 ? roomData.enemyAttributes[i] : ""), roomData.enemyReinforcementLayers[i], roomData.randomizeEnemyPositions);
+                    RoomEventTriggerCondition COND = RoomEventTriggerCondition.ON_ENEMIES_CLEARED;
+                    if (roomData.waveTriggers != null)
+                    {
+                        if (roomData.waveTriggers[i] != null)
+                        {
+                            COND = ReturnTrigger(roomData.waveTriggers[i]);
+                        }
+                    }
+                    
+
+                    //ETGModConsole.Log("Trigger "+ roomData.waveTriggers[i]);
+                    AddEnemyToRoom(room, roomData.enemyPositions[i], roomData.enemyGUIDs[i], (roomData.enemyAttributes != null && roomData.enemyAttributes.Length > 0 ? roomData.enemyAttributes[i] : ""), roomData.enemyReinforcementLayers[i], roomData.randomizeEnemyPositions, COND);
                     //AddEnemyToRoom(room, roomData.enemyPositions[i], roomData.enemyGUIDs[i], roomData.enemyReinforcementLayers[i], roomData.randomizeEnemyPositions); ///GOES FROM HERE==================================================
                 }
             }
@@ -175,23 +187,37 @@ namespace Alexandria.DungeonAPI
             if (roomData.nodePositions != null && roomData.nodePositions.Length > 0)
 
             {
-
+                ETGModConsole.Log("1");
                 Dictionary<string, int> stupidJankyPieceOfShit = new Dictionary<string, int>();
+                ETGModConsole.Log("2");
+                ETGModConsole.Log(roomData.nodeOrder != null ? "Count: " + roomData.nodeOrder.Count() : "NULL");
 
                 for (int j = 0; j < roomData.nodeOrder.Length; j++)
                 {
 
+                    ETGModConsole.Log("3");
 
                     ETGModConsole.Log($"{roomData.nodePaths[j]}{roomData.nodeOrder[j]}");
                     stupidJankyPieceOfShit.Add($"{roomData.nodePaths[j]}{roomData.nodeOrder[j]}", j);
                 }
+                ETGModConsole.Log("4");
 
                 for (int j = 0; j < roomData.nodePositions.Length; j++)
                 {
                     var fuckThisMod = stupidJankyPieceOfShit[$"{roomData.nodePaths[j]}{roomData.nodeOrder[j]}"];
+                    SerializedPath.SerializedPathWrapMode wrap = SerializedPath.SerializedPathWrapMode.Loop;
+                    if (roomData.nodeWrapModes != null)
+                    {
+                        if (roomData.nodeWrapModes[fuckThisMod] != null)
+                        {
+                            wrap = ReturnWrap(roomData.nodeWrapModes[fuckThisMod]);
+                        }
+                    }
 
-                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[fuckThisMod], roomData.nodeTypes[fuckThisMod], roomData.nodePaths[fuckThisMod]);
-                }   
+                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[fuckThisMod], roomData.nodeTypes[fuckThisMod], roomData.nodePaths[fuckThisMod], wrap);
+                }
+                ETGModConsole.Log("5");
+
             }
             if (RoomUtility.EnableDebugLogging == true)
             {
@@ -224,7 +250,21 @@ namespace Alexandria.DungeonAPI
                 room.roomEvents.Add(new RoomEventDefinition(RoomEventTriggerCondition.ON_ENEMIES_CLEARED, RoomEventTriggerAction.END_TERRIFYING_AND_DARK));
             }
         }
+        public static SerializedPath.SerializedPathWrapMode ReturnWrap(string s)
+        {
+            switch (s)
+            {
+                case "LOOP":
+                    return SerializedPath.SerializedPathWrapMode.Loop;
+                case "PINGPONG":
+                    return SerializedPath.SerializedPathWrapMode.PingPong;
+                case "ONCE":
+                    return SerializedPath.SerializedPathWrapMode.Once;
+                default:
+                    return SerializedPath.SerializedPathWrapMode.Loop;
 
+            }
+        }
 
         public static GameObject Minimap_Maintenance_Icon;
         public static AssetBundle sharedAssets2;
@@ -815,7 +855,7 @@ namespace Alexandria.DungeonAPI
         }
 
 
-        public static void AddNodeToRoom(PrototypeDungeonRoom room, Vector2 location, string guid, int layer)
+        public static void AddNodeToRoom(PrototypeDungeonRoom room, Vector2 location, string guid, int layer, SerializedPath.SerializedPathWrapMode wrapMode)
         {
             IntVector2 intLocation = location.ToIntVector2();
             SerializedPath serializedPath = null;
@@ -831,7 +871,7 @@ namespace Alexandria.DungeonAPI
                 //serializedPath.nodes[0] = node;
 
                 room.paths.Add(serializedPath);
-                serializedPath.wrapMode = SerializedPath.SerializedPathWrapMode.Loop;
+                serializedPath.wrapMode = wrapMode;//SerializedPath.SerializedPathWrapMode.Loop;
                 serializedPath.tilesetPathGrid = 0;
 
             }
@@ -839,13 +879,59 @@ namespace Alexandria.DungeonAPI
             {
                 serializedPath = room.paths[layer];
                 var node = new SerializedPathNode(intLocation);
+                serializedPath.wrapMode = wrapMode;
                 node.placement = (SerializedPathNode.SerializedNodePlacement)Enum.Parse(typeof(SerializedPathNode.SerializedNodePlacement), guid);
                 serializedPath.nodes.Add(node);
             }
 
         }
 
-        public static void AddEnemyToRoom(PrototypeDungeonRoom room, Vector2 location, string guid, string attributes, int layer, bool shuffle)
+
+        public static RoomEventTriggerCondition ReturnTrigger(string s)
+        {
+            switch (s)
+            {
+                case "ON_ENEMIES_CLEARED":
+                    return RoomEventTriggerCondition.ON_ENEMIES_CLEARED;
+                case "ENEMY_BEHAVIOR":
+                    return RoomEventTriggerCondition.ENEMY_BEHAVIOR;
+                case "NPC_TRIGGER_A":
+                    return RoomEventTriggerCondition.NPC_TRIGGER_A;
+                case "ON_HALF_ENEMY_HP_DEPLETED":
+                    return RoomEventTriggerCondition.ON_HALF_ENEMY_HP_DEPLETED;
+                case "ON_ONE_QUARTER_ENEMY_HP_DEPLETED":
+                    return RoomEventTriggerCondition.ON_ONE_QUARTER_ENEMY_HP_DEPLETED;
+                case "ON_THREE_QUARTERS_ENEMY_HP_DEPLETED":
+                    return RoomEventTriggerCondition.ON_THREE_QUARTERS_ENEMY_HP_DEPLETED;
+                case "SEQUENTIAL_WAVE_TRIGGER":
+                    return RoomEventTriggerCondition.SEQUENTIAL_WAVE_TRIGGER;
+                case "SHRINE_WAVE_A":
+                    return RoomEventTriggerCondition.SHRINE_WAVE_A;
+                case "SHRINE_WAVE_B":
+                    return RoomEventTriggerCondition.SHRINE_WAVE_B;
+                case "SHRINE_WAVE_C":
+                    return RoomEventTriggerCondition.SHRINE_WAVE_C;
+                case "NPC_TRIGGER_B":
+                    return RoomEventTriggerCondition.NPC_TRIGGER_B;
+                case "NPC_TRIGGER_C":
+                    return RoomEventTriggerCondition.NPC_TRIGGER_C;
+                case "ON_ENTER":
+                    return RoomEventTriggerCondition.ON_ENTER;
+                case "ON_ENTER_WITH_ENEMIES":
+                    return RoomEventTriggerCondition.ON_ENTER_WITH_ENEMIES;
+                case "ON_EXIT":
+                    return RoomEventTriggerCondition.ON_EXIT;
+                case "ON_NINETY_PERCENT_ENEMY_HP_DEPLETED":
+                    return RoomEventTriggerCondition.ON_NINETY_PERCENT_ENEMY_HP_DEPLETED;
+                case "TIMER":
+                    return RoomEventTriggerCondition.TIMER;
+                default:
+                    return RoomEventTriggerCondition.ON_ENEMIES_CLEARED;
+
+            }
+        }
+
+        public static void AddEnemyToRoom(PrototypeDungeonRoom room, Vector2 location, string guid, string attributes, int layer, bool shuffle, RoomEventTriggerCondition reinforcementType)
         {
             DungeonPrerequisite[] array = new DungeonPrerequisite[0];
 
@@ -884,7 +970,7 @@ namespace Alexandria.DungeonAPI
             if (layer > 0)
             {
                 //ETGModConsole.Log("Adding object to reinforcement layer " + layer, false);
-                RoomFactory.AddObjectDataToReinforcementLayer(room, prototypePlacedObjectData, layer - 1, location, shuffle);
+                RoomFactory.AddObjectDataToReinforcementLayer(room, prototypePlacedObjectData, layer - 1, location, shuffle, reinforcementType);
             }
             else
             {
@@ -931,7 +1017,7 @@ namespace Alexandria.DungeonAPI
 
 
             if (layer > 0)
-                AddObjectDataToReinforcementLayer(room, objectData, layer - 1, location, shuffle); //GOES FROM HERE
+                AddObjectDataToReinforcementLayer(room, objectData, layer - 1, location, shuffle, RoomEventTriggerCondition.ON_ENEMIES_CLEARED); //GOES FROM HERE
             else
             {
                 room.placedObjects.Add(objectData);
@@ -944,7 +1030,7 @@ namespace Alexandria.DungeonAPI
                 room.roomEvents.Add(unsealOnRoomClear);
         }
 
-        public static void AddObjectDataToReinforcementLayer(PrototypeDungeonRoom room, PrototypePlacedObjectData objectData, int layer, Vector2 location, bool shuffle) //TO HERE
+        public static void AddObjectDataToReinforcementLayer(PrototypeDungeonRoom room, PrototypePlacedObjectData objectData, int layer, Vector2 location, bool shuffle, RoomEventTriggerCondition reinforcementType) //TO HERE
         {
             if (room.additionalObjectLayers.Count <= layer)
             {
@@ -956,7 +1042,7 @@ namespace Alexandria.DungeonAPI
                         placedObjects = new List<PrototypePlacedObjectData>(),
                         placedObjectBasePositions = new List<Vector2>(),
                         shuffle = shuffle,
-                        //reinforcementTriggerCondition = RoomEventTriggerCondition.ON_HALF_ENEMY_HP_DEPLETED
+                        reinforcementTriggerCondition = reinforcementType
                     };
                     room.additionalObjectLayers.Add(newLayer);
 

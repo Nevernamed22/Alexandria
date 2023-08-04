@@ -332,8 +332,14 @@ namespace Alexandria.CharacterAPI
                 HandleAnimations(player, data);
 
             player.primaryHand.sprite.Collection = spr1 ?? data.collection;
-            player.secondaryHand.sprite.Collection = spr2 ?? data.collection;
+            player.secondaryHand.sprite.Collection = spr1 ?? data.collection;
 
+            if (data.altHandName != null)
+            {
+                player.altHandName  = data.altHandName;
+            }
+
+           
             player.primaryHand.sprite.SetSprite(player.primaryHand.sprite.Collection.GetSpriteIdByName("hand_001"));
             player.secondaryHand.sprite.SetSprite(player.secondaryHand.sprite.Collection.GetSpriteIdByName("hand_001"));
 

@@ -79,6 +79,8 @@ namespace Alexandria.ItemAPI
         public static GameObject AddSpriteToObjectAssetbundle(string name, int CollectionID, tk2dSpriteCollectionData data, GameObject obj = null)
         {
             GameObject spriteObject = SpriteFromBundle(name, CollectionID, data, obj);
+            FakePrefab.MarkAsFakePrefab(spriteObject);
+            spriteObject.SetActive(false);
             spriteObject.name = name;
             return spriteObject;
         }

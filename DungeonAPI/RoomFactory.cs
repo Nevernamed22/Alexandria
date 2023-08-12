@@ -14,6 +14,10 @@ using Newtonsoft.Json.Linq;
 using Gungeon;
 using Microsoft.Cci;
 using System.Linq;
+using static Alexandria.DungeonAPI.RoomFactory;
+using System.Runtime.Remoting.Lifetime;
+using static ShrineCost;
+using static Alexandria.DungeonAPI.SpecialComponents;
 
 namespace Alexandria.DungeonAPI
 {
@@ -130,14 +134,54 @@ namespace Alexandria.DungeonAPI
 
 
 
+        private static DungeonData.Direction DetermineDirectionType(string data, PrototypeRoomExit.ExitType exitType)
+        {
+            if (data.ToLower().Contains("west"))
+            {
+                return exitType == PrototypeRoomExit.ExitType.ENTRANCE_ONLY ? DungeonData.Direction.EAST : DungeonData.Direction.WEST;
+            }
+            if (data.ToLower().Contains("east"))
+            {
+                return exitType == PrototypeRoomExit.ExitType.ENTRANCE_ONLY ? DungeonData.Direction.WEST : DungeonData.Direction.EAST;
+            }
+            if (data.ToLower().Contains("north"))
+            {
+                return exitType == PrototypeRoomExit.ExitType.ENTRANCE_ONLY ? DungeonData.Direction.SOUTH : DungeonData.Direction.NORTH;
+            }
+            if (data.ToLower().Contains("south"))
+            {
+                return exitType == PrototypeRoomExit.ExitType.ENTRANCE_ONLY ? DungeonData.Direction.NORTH : DungeonData.Direction.SOUTH;
+            }
+            Debug.LogError("[Alexandria] Somehow failed to get direction of EXIT??? Returning SOUTH and praying shit don't break");
+            return DungeonData.Direction.SOUTH;
+        }
+
+        private static PrototypeRoomExit.ExitType DetermineExitType(string data)
+        {
+            if (data.ToLower().Contains("exitonly"))
+            {
+                ETGModConsole.Log("EXIT");
+                return PrototypeRoomExit.ExitType.EXIT_ONLY;
+            }
+            else if (data.ToLower().Contains("entryonly"))
+            {
+                ETGModConsole.Log("ENTRY");
+                return PrototypeRoomExit.ExitType.ENTRANCE_ONLY;
+            }
+            return PrototypeRoomExit.ExitType.NO_RESTRICTION;
+        }
+
+
+
         public static void ApplyRoomData(PrototypeDungeonRoom room, RoomData roomData)
         {
             if (roomData.exitPositions != null)
             {
                 for (int i = 0; i < roomData.exitPositions.Length; i++)
                 {
-                    DungeonData.Direction dir = (DungeonData.Direction)Enum.Parse(typeof(DungeonData.Direction), roomData.exitDirections[i].ToUpper());
-                    AddExit(room, roomData.exitPositions[i], dir);
+                    string ext = roomData.exitDirections[i].ToUpper();
+                    var exitType = DetermineExitType(ext);
+                    AddExit(room, roomData.exitPositions[i], DetermineDirectionType(ext, exitType), exitType);
                 }
             }
             else
@@ -187,20 +231,20 @@ namespace Alexandria.DungeonAPI
             if (roomData.nodePositions != null && roomData.nodePositions.Length > 0)
 
             {
-                ETGModConsole.Log("1");
+                //ETGModConsole.Log("1");
                 Dictionary<string, int> stupidJankyPieceOfShit = new Dictionary<string, int>();
-                ETGModConsole.Log("2");
-                ETGModConsole.Log(roomData.nodeOrder != null ? "Count: " + roomData.nodeOrder.Count() : "NULL");
+                //ETGModConsole.Log("2");
+                //ETGModConsole.Log(roomData.nodeOrder != null ? "Count: " + roomData.nodeOrder.Count() : "NULL");
 
                 for (int j = 0; j < roomData.nodeOrder.Length; j++)
                 {
 
-                    ETGModConsole.Log("3");
+                    //ETGModConsole.Log("3");
 
-                    ETGModConsole.Log($"{roomData.nodePaths[j]}{roomData.nodeOrder[j]}");
+                    //ETGModConsole.Log($"{roomData.nodePaths[j]}{roomData.nodeOrder[j]}");
                     stupidJankyPieceOfShit.Add($"{roomData.nodePaths[j]}{roomData.nodeOrder[j]}", j);
                 }
-                ETGModConsole.Log("4");
+                //ETGModConsole.Log("4");
 
                 for (int j = 0; j < roomData.nodePositions.Length; j++)
                 {
@@ -216,7 +260,7 @@ namespace Alexandria.DungeonAPI
 
                     RoomFactory.AddNodeToRoom(room, roomData.nodePositions[fuckThisMod], roomData.nodeTypes[fuckThisMod], roomData.nodePaths[fuckThisMod], wrap);
                 }
-                ETGModConsole.Log("5");
+                //ETGModConsole.Log("5");
 
             }
             if (RoomUtility.EnableDebugLogging == true)
@@ -323,14 +367,16 @@ namespace Alexandria.DungeonAPI
             PrototypeDungeonRoom room = GetNewPrototypeDungeonRoom(width, height);
             PrototypeDungeonRoomCellData[] cellData = new PrototypeDungeonRoomCellData[width * height];
             //if (data.tilePositions == null) ETGModConsole.Log($"tilePositions not found for room \"{data.name}\"");
-
-            ETGModConsole.Log($"{data.name}: {data.tileInfo.Length} - {width * height}");
+            if (RoomUtility.EnableDebugLogging == true)
+            {
+                ETGModConsole.Log($"{data.name}: {width} x - { height} y");
+            }
 
             for (int y = 0; y < data.roomSize.y; y++)
             {
                 for (int x = 0; x < data.roomSize.x; x++)
                 {
-                    cellData[x + y * width] = CellDataFromNumber(int.Parse(data.tileInfo[x + (y * width)].ToString()));
+                    cellData[x + y * width] = CellDataFromNumber(data.tileInfo[x + (y * width)].ToString());
                 }
             }
 
@@ -359,16 +405,29 @@ namespace Alexandria.DungeonAPI
         }
 
 
-        private static CellType TypeFromNumber(int type)
+        private static CellType TypeFromNumber(string type)
         {
-            Dictionary<int, CellType> types = new Dictionary<int, CellType> { { 1, CellType.FLOOR }, { 2, CellType.WALL }, { 3, CellType.PIT } };
+            switch (type)
+            {
+                case "1":
+                    return CellType.FLOOR;
+                case "2":
+                    return CellType.WALL;
+                case "3":
+                    return CellType.PIT;
+                case "4":
+                    return CellType.FLOOR;
+                case "5":
+                    return CellType.FLOOR;
+                default:
+                    return CellType.WALL;
 
-            return types[type];
+            }
         }
 
-        public static PrototypeDungeonRoomCellData CellDataFromNumber(int type)
+        public static PrototypeDungeonRoomCellData CellDataFromNumber(string type)
         {
-            if (type <= 0) return null;
+            if (type == null) return null;
 
             var data = new PrototypeDungeonRoomCellData();
             data.state = TypeFromNumber(type);
@@ -376,9 +435,85 @@ namespace Alexandria.DungeonAPI
             data.diagonalWallType = DiagonalWallType.NONE;
             data.appearance = new PrototypeDungeonRoomCellAppearance()
             {
-                OverrideFloorType = FloorType.Stone
+                overrideDungeonMaterialIndex = -1,
+                OverrideFloorType = ReturnCellFloorType(data, type),
+                IsPhantomCarpet = false,
+                ForceDisallowGoop = false,
+                globalOverrideIndices = new PrototypeIndexOverrideData() { indices = new List<int>(0) }
             };
             return data;
+        }
+
+
+        public static CellVisualData.CellFloorType ReturnCellFloorType(PrototypeDungeonRoomCellData cell, string type)
+        {
+            switch (type)
+            {
+                case "1":
+                    return FloorType.Stone;
+                case "2":
+                    return FloorType.Stone;
+                case "3":
+                    return FloorType.Stone;
+                case "4":
+                    cell.ForceTileNonDecorated = true;
+                    return FloorType.Ice;
+                case "5":
+                    cell.ForceTileNonDecorated = true;
+                    cell.doesDamage = true;
+                    
+                    cell.damageDefinition = new CellDamageDefinition()
+                    {
+                        damageTypes = CoreDamageTypes.Fire,
+                        damageToPlayersPerTick = 0.5f,
+                        damageToEnemiesPerTick = 0,
+                        tickFrequency = 1,
+                        respectsFlying = true,
+                        isPoison = false
+                    };
+                    return FloorType.ThickGoop;
+                default:
+                    return FloorType.Stone;
+
+            }
+        }
+
+
+        public static void ApplyExtraFloorCellData(PrototypeDungeonRoomCellData cellData, CoreDamageTypes DamageType, FloorType FloorType, float DamageToPlayersPerTick = 0, float DamageToEnemiesPerTick = 0, float TickFrequency = 0, bool RespectsFlying = true, bool DoesDamage = false, bool IsPoison = false)
+        {
+            cellData.doesDamage = DoesDamage;
+            cellData.damageDefinition = new CellDamageDefinition()
+            {
+                damageTypes = DamageType,
+                damageToPlayersPerTick = DamageToPlayersPerTick,
+                damageToEnemiesPerTick = DamageToEnemiesPerTick,
+                tickFrequency = TickFrequency,
+                respectsFlying = RespectsFlying,
+                isPoison = IsPoison
+            };
+            if (cellData.appearance == null)
+            {
+                cellData.appearance = new PrototypeDungeonRoomCellAppearance()
+                {
+                    overrideDungeonMaterialIndex = -1,
+                    IsPhantomCarpet = false,
+                    ForceDisallowGoop = false,
+                    globalOverrideIndices = new PrototypeIndexOverrideData() { indices = new List<int>(0) }
+                };
+            }
+            if (DamageType == CoreDamageTypes.Poison)
+            {
+                cellData.ForceTileNonDecorated = true;
+                // cellData.appearance.OverrideFloorType = FloorType.Stone;
+                cellData.damageDefinition.damageTypes = CoreDamageTypes.Poison;
+            }
+            else if (DamageType == CoreDamageTypes.Fire)
+            {
+                cellData.ForceTileNonDecorated = true;
+                // cellData.appearance.OverrideFloorType = FloorType.Stone;
+                cellData.damageDefinition.damageTypes = CoreDamageTypes.Fire;
+            }
+            cellData.appearance.OverrideFloorType = FloorType;
         }
 
         public static PrototypeDungeonRoomCellData CellDataFromColor(Color32 color)
@@ -522,12 +657,80 @@ namespace Alexandria.DungeonAPI
                         JToken value2;
                         float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
                         float timeToMaxSpeed = jobject.TryGetValue("tTMS", out value2) ? ((float)value2) : 1.5f;
+                        string storedBody = jobject.TryGetValue("storedBodyMC", out value2) ? ((string)value2) : "None";
+                        ETGModConsole.Log(storedBody);
 
-                        gameObject = StaticReferences.DefineMinecartFromValues(maxSpeed, timeToMaxSpeed);
+                        string storedGUID = jobject.TryGetValue("storedenemyBodyMC", out value2) ? ((string)value2) : "None";
+                        ETGModConsole.Log(storedGUID);
+
+                        gameObject = StaticReferences.DefineMinecartFromValues("minecart_pathing", maxSpeed, timeToMaxSpeed, storedBody, storedGUID, room, location);
+
                     }
+                    if (assetPath == "turretminecart_pathing")
+                    {
+                        JToken value2;
+                        float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
+                        float timeToMaxSpeed = jobject.TryGetValue("tTMS", out value2) ? ((float)value2) : 1.5f;
+                        gameObject = StaticReferences.DefineMinecartFromValues("turretminecart_pathing", maxSpeed, timeToMaxSpeed, null, null, room, location);
+                    }
+                    if (assetPath == "explosivebarrelminecart_pathing")
+                    {
+                        JToken value2;
+                        float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
+                        float timeToMaxSpeed = jobject.TryGetValue("tTMS", out value2) ? ((float)value2) : 1.5f;
+                        gameObject = StaticReferences.DefineMinecartFromValues("explosivebarrelminecart_pathing", maxSpeed, timeToMaxSpeed, null, null, room, location);          
+                    }
+                    if (assetPath == "CustomlightSource")
+                    {
+                        JToken value2;
+                        float radius = jobject.TryGetValue("lightRad", out value2) ? ((float)value2) : 3f;
+                        float intens = jobject.TryGetValue("lightInt", out value2) ? ((float)value2) : 3;
+                        float Red = jobject.TryGetValue("lightColorR", out value2) ? ((float)value2) : 1;
+                        float Green = jobject.TryGetValue("lightColorG", out value2) ? ((float)value2) : 1;
+                        float Blue = jobject.TryGetValue("lightColorB", out value2) ? ((float)value2) : 1;
 
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject("CustomlightSource"));
+                        var lightComp = gameObject.GetComponentInChildren<AdditionalBraveLight>();
+                        lightComp.LightIntensity = intens;
+                        lightComp.LightRadius = radius;
+                        lightComp.LightColor = new Color(Red, Green, Blue);
+                    }
+                    if (assetPath == "bossPedestal")
+                    {
+                        JToken value2;
+                        int id = jobject.TryGetValue("bossPdstlItmID", out value2) ? ((int)value2) : -1;
+                        string Tag = jobject.TryGetValue("bossPdstlItmStringID", out value2) ? ((string)value2) : "None.";
+
+                        var r = FakePrefab.Clone(RoomFactory.GetCustomDungeonPlaceableObject("bossPedestal").variantTiers[0].nonDatabasePlaceable);
+                        var pedestal = r.GetComponent<RewardPedestal>();
+                        var thing  = r.AddComponent<PedestalSetter>();
+
+                        if (Tag != null && Tag != "None.")
+                        {
+                            if (StaticReferences.storedItemIDs.ContainsKey(Tag))
+                            {
+                                pedestal.pickedUp = false;
+                                thing.Help = StaticReferences.storedItemIDs.Where(self => self.Key == Tag).First().Value;
+     
+                            }
+                            else
+                            {
+                                pedestal.pickedUp = true;
+                            }
+                        }
+                        else if (id != -1)
+                        {
+                            pedestal.pickedUp = false;
+                            thing.Help = id;
+
+                        }
+                        else
+                        {
+                            pedestal.pickedUp = true;
+                        }
+                        gameObject = r;
+                    }
                 }
-                
                 if (!gameObject && StaticReferences.customObjects.ContainsKey(assetPath))
                 {
                     gameObject = RoomFactory.GetCustomGameObject(assetPath);
@@ -560,11 +763,14 @@ namespace Alexandria.DungeonAPI
                         }
                     };
                     int path = 0;
+                    int startNode = 0;
 
                     if (assetPath.Contains("_pathing") && jobject != null)
                     {
                         JToken value;
                         path = jobject.TryGetValue("tSP", out value) ? ((int)value) : 0;
+                        startNode = jobject.TryGetValue("nSP_O", out value) ? ((int)value) : 0;
+
                         ETGModConsole.Log($"[{assetPath}]");
                         room.placedObjects.Add(new PrototypePlacedObjectData
                         {
@@ -573,7 +779,8 @@ namespace Alexandria.DungeonAPI
                             instancePrerequisites = array,
                             linkedTriggerAreaIDs = new List<int>(),
                             placeableContents = dungeonPlaceable,
-                            assignedPathIDx = path
+                            assignedPathIDx = path,
+                            assignedPathStartNode = startNode
                         });
                     }
                     else
@@ -854,7 +1061,16 @@ namespace Alexandria.DungeonAPI
             return result;
         }
 
-
+        public static DungeonPlaceable GetCustomDungeonPlaceableObject(string assetPath)
+        {
+            DungeonPlaceable result = null;
+            DungeonPlaceable gameObject;
+            if (StaticReferences.customPlaceables.TryGetValue(assetPath, out gameObject))
+            {
+                result = gameObject;
+            }
+            return result;
+        }
         public static void AddNodeToRoom(PrototypeDungeonRoom room, Vector2 location, string guid, int layer, SerializedPath.SerializedPathWrapMode wrapMode)
         {
             IntVector2 intLocation = location.ToIntVector2();
@@ -1052,7 +1268,7 @@ namespace Alexandria.DungeonAPI
             room.additionalObjectLayers[layer].placedObjectBasePositions.Add(location);
         }
 
-        public static void AddExit(PrototypeDungeonRoom room, Vector2 location, DungeonData.Direction direction)
+        public static void AddExit(PrototypeDungeonRoom room, Vector2 location, DungeonData.Direction direction, PrototypeRoomExit.ExitType exitType = PrototypeRoomExit.ExitType.NO_RESTRICTION)
         {
             if (room.exitData == null)
                 room.exitData = new PrototypeRoomExitData();
@@ -1060,7 +1276,7 @@ namespace Alexandria.DungeonAPI
                 room.exitData.exits = new List<PrototypeRoomExit>();
 
             PrototypeRoomExit exit = new PrototypeRoomExit(direction, location);
-            exit.exitType = PrototypeRoomExit.ExitType.NO_RESTRICTION;
+            exit.exitType = exitType;
             Vector2 margin = (direction == DungeonData.Direction.EAST || direction == DungeonData.Direction.WEST) ? new Vector2(0, 1) : new Vector2(1, 0);
             exit.containedCells.Add(location + margin);
             room.exitData.exits.Add(exit);

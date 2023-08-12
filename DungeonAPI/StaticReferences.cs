@@ -21,6 +21,8 @@ namespace Alexandria.DungeonAPI
 
         public static Dictionary<string, GameObject> customObjects = new Dictionary<string, GameObject>();
         public static Dictionary<string, DungeonPlaceable> customPlaceables = new Dictionary<string, DungeonPlaceable>();
+        public static Dictionary<string, int> storedItemIDs = new Dictionary<string, int>();
+
 
         public static Dictionary<string, string> roomTableMap = new Dictionary<string, string>()
         {
@@ -311,37 +313,14 @@ namespace Alexandria.DungeonAPI
                 }
             }
             sewerDungeon = null;
-            PrototypeDungeonRoom asset = null;
-            foreach (var bundle in StaticReferences.AssetBundles.Values)
-            {
-                asset = bundle.LoadAsset<PrototypeDungeonRoom>("ChallengeShrine_Gungeon_002");
-                if (asset)
-                    break;
-            }
-            GameObject ChallengeShrine = FakePrefab.Clone(asset.placedObjects[0].nonenemyBehaviour.gameObject);
-            if (ChallengeShrine.GetComponentInChildren<ChallengeShrineController>() == null) { ETGModConsole.Log("HOW THE *FUCK* IS THIS NULL??"); }
-            FoolproofedChallengeShrineController newController = ChallengeShrine.AddComponent<FoolproofedChallengeShrineController>();
-            ChallengeShrineController baseController = ChallengeShrine.GetComponentInChildren<ChallengeShrineController>();
-            newController.acceptOptionKey = baseController.acceptOptionKey;
-            newController.AlternativeOutlineTarget = baseController.AlternativeOutlineTarget;
-            newController.CustomChestTable = baseController.CustomChestTable;
-            newController.declineOptionKey = baseController.declineOptionKey;
-            newController.difficulty = baseController.difficulty;
-            newController.displayTextKey = baseController.displayTextKey;
-            newController.isPassable = baseController.isPassable;
-            newController.onPlayerVFX = baseController.onPlayerVFX;
-            newController.placeableHeight = baseController.placeableHeight;
-            newController.placeableWidth = baseController.placeableWidth;
-            newController.playerVFXOffset = baseController.playerVFXOffset;
-            newController.talkPoint = baseController.talkPoint;
-            newController.usesCustomChestTable = baseController.usesCustomChestTable;
-            if (ChallengeShrine.GetComponentInChildren<ChallengeShrineController>()) UnityEngine.Object.Destroy(ChallengeShrine.GetComponentInChildren<ChallengeShrineController>());
-            StoredRoomObjects.Add("ChallengeShrine", ChallengeShrine);           
+           
         }
 
-        public static GameObject DefineMinecartFromValues(float maxSpeed, float timeToMaxSpeed)
+
+
+        public static GameObject DefineMinecartFromValues(string cartType, float maxSpeed, float timeToMaxSpeed, string storedBody, string StoredGUID, PrototypeDungeonRoom room, Vector2 location)
         {
-            GameObject asset = RoomFactory.GetExoticGameObject("minecart_pathing");
+            GameObject asset = RoomFactory.GetExoticGameObject(cartType);
             GameObject gameObject = FakePrefab.Clone(asset);
             MineCartController component = gameObject.GetComponent<MineCartController>();
             GameObject result;
@@ -353,9 +332,106 @@ namespace Alexandria.DungeonAPI
             {
                 component.MaxSpeed = maxSpeed;
                 component.TimeToMaxSpeed = timeToMaxSpeed;
+                
+                if (StoredGUID != null && StoredGUID != "None")
+                {
+                    /*
+                    var enemy = EnemyDatabase.GetOrLoadByGuid(StoredGUID);
+
+                    DungeonPrerequisite[] array = new DungeonPrerequisite[0];
+                    DungeonPlaceable dungeonPlaceable = ScriptableObject.CreateInstance<DungeonPlaceable>();
+                    dungeonPlaceable.width = 0;
+                    dungeonPlaceable.height = 0;
+                    dungeonPlaceable.respectsEncounterableDifferentiator = true;
+                    dungeonPlaceable.variantTiers = new List<DungeonPlaceableVariant>
+                        {
+                        new DungeonPlaceableVariant
+                        {
+                            percentChance = 1f,
+                            nonDatabasePlaceable = enemy.gameObject,
+                            enemyPlaceableGuid = null,
+                            prerequisites = array,
+                            materialRequirements = new DungeonPlaceableRoomMaterialRequirement[0]
+                        }
+                        };
+                    enemy.transform.parent = component.attachTransform.transform;
+                    enemy.MovementSpeed = 0;
+                    //component.occupation = MineCartController.CartOccupationState.CARGO;
+                    //component.MoveCarriedCargoIntoCart = true;
+                    component.carriedCargo = dungeonPlaceable.variantTiers[0].nonDatabasePlaceable.GetComponent<SpeculativeRigidbody>();
+                    */
+
+                }
+                else if (storedBody != "None")
+                {
+                    var rider = LoadMinecartRider(storedBody);
+                    if (rider != null)
+                    {
+                        DungeonPrerequisite[] array = new DungeonPrerequisite[0];
+                        DungeonPlaceable dungeonPlaceable = ScriptableObject.CreateInstance<DungeonPlaceable>();
+                        dungeonPlaceable.width = 0;
+                        dungeonPlaceable.height = 0;
+                        dungeonPlaceable.respectsEncounterableDifferentiator = true;
+                        dungeonPlaceable.variantTiers = new List<DungeonPlaceableVariant>
+                        {
+                        new DungeonPlaceableVariant
+                        {
+                            percentChance = 1f,
+                            nonDatabasePlaceable = rider,
+                            enemyPlaceableGuid = null,
+                            prerequisites = array,
+                            materialRequirements = new DungeonPlaceableRoomMaterialRequirement[0]
+                        }
+                        };
+                        room.placedObjectPositions.Add(location);
+                        room.placedObjects.Add(new PrototypePlacedObjectData
+                        {
+                            contentsBasePosition = location,
+                            fieldData = new List<PrototypePlacedObjectFieldData>(),
+                            instancePrerequisites = array,
+                            linkedTriggerAreaIDs = new List<int>(),
+                            placeableContents = dungeonPlaceable,
+                        });
+                        //component.occupation = MineCartController.CartOccupationState.CARGO;
+                        component.MoveCarriedCargoIntoCart = true;
+
+                        component.carriedCargo = rider.GetComponent<SpeculativeRigidbody>();//rider.GetComponent<SpeculativeRigidbody>();
+                        component.occupation = MineCartController.CartOccupationState.CARGO;
+
+                    }
+                }
                 result = gameObject;
             }
             return result;
+        }
+
+        private class MineCartStickOn : MonoBehaviour
+        {
+            public MineCartController cart;
+            public string enemyGUID = null;
+            public string obj = null;
+            public void Start()
+            {
+                if (cart)
+                {
+                    if (enemyGUID != null)
+                    {
+                        var enemy = EnemyDatabase.GetOrLoadByGuid(enemyGUID);
+                    }
+                }
+            }
+
+        }
+
+        public static GameObject LoadMinecartRider(string rider)
+        {
+            switch (rider)
+            {
+                case "ExplosiveBarrel":
+                    return LoadHelper.LoadAssetFromAnywhere<GameObject>("Red Barrel");
+                default:
+                    return null;
+            }
         }
 
 

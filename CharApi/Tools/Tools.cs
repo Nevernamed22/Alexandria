@@ -570,13 +570,13 @@ namespace Alexandria.CharacterAPI
 
         public static void LogPropertiesAndFields<T>(T obj, string header = "")
         {
-            Log(header);
-            Log("=======================");
-            if (obj == null) { Log("LogPropertiesAndFields: Null object"); return; }
+            Print(header, "FFFFFF", true);
+            Print("=======================");
+            if (obj == null) { Print("LogPropertiesAndFields: Null object", "FFFFFF", true); return; }
             Type type = obj.GetType();
-            Log($"Type: {type}");
+            Print($"Type: {type}", "FFFFFF", true);
             PropertyInfo[] pinfos = type.GetProperties();
-            Log($"{typeof(T)} Properties: ");
+            Print($"{typeof(T)} Properties: ", "FFFFFF", true);
             foreach (var pinfo in pinfos)
             {
                 try
@@ -593,15 +593,15 @@ namespace Alexandria.CharacterAPI
                             valueString += "\n\t\t" + subval.ToString();
                         }
                     }
-                    Log($"\t{pinfo.Name}: {valueString}");
+                    Print($"\t{pinfo.Name}: {valueString}", "FFFFFF", true);
                 }
                 catch { }
             }
-            Log($"{typeof(T)} Fields: ");
+            Print($"{typeof(T)} Fields: ", "FFFFFF", true);
             FieldInfo[] finfos = type.GetFields();
             foreach (var finfo in finfos)
             {
-                Log($"\t{finfo.Name}: {finfo.GetValue(obj)}");
+                Print($"\t{finfo.Name}: {finfo.GetValue(obj)}", "FFFFFF", true);
             }
         }
 

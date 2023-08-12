@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Alexandria.ItemAPI;
 using Dungeonator;
+using Planetside;
 using UnityEngine;
 namespace Alexandria.DungeonAPI
 {
@@ -24,7 +25,38 @@ namespace Alexandria.DungeonAPI
 			Dungeon dungeon11 = DungeonDatabase.GetOrLoadByName("finalscenario_convict");
 			Dungeon dungeon12 = DungeonDatabase.GetOrLoadByName("finalscenario_soldier");
 			Dungeon dungeon13 = DungeonDatabase.GetOrLoadByName("finalscenario_guide");
-			foreach (WeightedRoom weightedRoom in dungeon.PatternSettings.flows[0].fallbackRoomTable.includedRooms.elements)
+
+            //            //ExplosiveBarrelMinecart
+
+            foreach (WeightedRoom weightedRoom in dungeon3.PatternSettings.flows[0].fallbackRoomTable.includedRooms.elements)
+            {
+                if (weightedRoom.room != null && !string.IsNullOrEmpty(weightedRoom.room.name))
+                {
+                    if (weightedRoom.room.name.ToLower().StartsWith("mines_ign_normal_shelleton_01_b"))
+                    {
+						foreach (var placed in weightedRoom.room.placedObjects)
+						{
+							if (placed.nonenemyBehaviour != null)
+							{
+								ExplosiveBarrelMinecart = placed.nonenemyBehaviour.gameObject.GetComponent<MineCartFactory>().MineCartPrefab.gameObject;
+								ExplosiveBarrelMinecart.GetComponent<MineCartController>().MoveCarriedCargoIntoCart = true;
+								/*
+									int i = 0;
+                                foreach (var comp in placed.nonenemyBehaviour.gameObject.GetComponents<Component>())
+								{
+                                    CharacterAPI.ToolsCharApi.LogPropertiesAndFields(comp, "components: " + i);
+                                    //ETGModConsole.Log(placed.nonenemyBehaviour.gameObject.name  + "[" + i + "]");
+                                    i++;
+                                }
+								*/
+
+                            }
+						}
+                        //SetupExoticObjects.HorizontalCrusher = weightedRoom.room.placedObjects[0].nonenemyBehaviour.gameObject;
+                    }
+                }
+            }
+            foreach (WeightedRoom weightedRoom in dungeon.PatternSettings.flows[0].fallbackRoomTable.includedRooms.elements)
 			{
 				if (weightedRoom.room != null && !string.IsNullOrEmpty(weightedRoom.room.name))
 				{
@@ -439,7 +471,201 @@ namespace Alexandria.DungeonAPI
 
 			SetupExoticObjects.SawBlade = ((DungeonPlaceable)BraveResources.Load("RobotDaveTraps", ".asset")).variantTiers[0].nonDatabasePlaceable;
 			SetupExoticObjects.Minecart = ((DungeonPlaceable)BraveResources.Load("RobotDaveTraps", ".asset")).variantTiers[6].nonDatabasePlaceable;
-			SetupExoticObjects.objects = new Dictionary<string, GameObject>
+            SetupExoticObjects.TurretMinecart = ((DungeonPlaceable)BraveResources.Load("RobotDaveTraps", ".asset")).variantTiers[11].nonDatabasePlaceable;
+
+			SetupExoticObjects.KeepSconce = LoadHelper.LoadAssetFromAnywhere<GameObject>("sconce_light");
+            SetupExoticObjects.KeepSconceSideLeft = LoadHelper.LoadAssetFromAnywhere<GameObject>("sconce_light_side");
+			SetupExoticObjects.KeepSconceSideRight = FakePrefabExtensions.InstantiateAndFakeprefab(LoadHelper.LoadAssetFromAnywhere<GameObject>("sconce_light_side")).gameObject;
+			SetupExoticObjects.KeepSconceSideRight.GetComponent<tk2dBaseSprite>().FlipX = true;
+
+            SetupExoticObjects.BasicTorch = LoadHelper.LoadAssetFromAnywhere<GameObject>("defaulttorch");
+            SetupExoticObjects.BasicTorchSideLeft = LoadHelper.LoadAssetFromAnywhere<GameObject>("defaulttorchside");
+            SetupExoticObjects.BasicTorchSideRight = FakePrefabExtensions.InstantiateAndFakeprefab(LoadHelper.LoadAssetFromAnywhere<GameObject>("defaulttorchside")).gameObject;
+            SetupExoticObjects.BasicTorchSideRight.GetComponent<tk2dBaseSprite>().FlipX = true;
+
+
+            SetupExoticObjects.CandleabraHorizontal = dungeon2.roomMaterialDefinitions[0].facewallLightStamps[0].objectReference;
+            SetupExoticObjects.CandleabraLeft = dungeon2.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference;
+            SetupExoticObjects.CandleabraRight = FakePrefabExtensions.InstantiateAndFakeprefab(dungeon2.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference).gameObject;
+            SetupExoticObjects.CandleabraRight.GetComponent<tk2dBaseSprite>().FlipX = true;
+
+            SetupExoticObjects.MineLanternHorizontal = dungeon3.roomMaterialDefinitions[0].facewallLightStamps[0].objectReference;
+            SetupExoticObjects.MineLanternLeft = dungeon3.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference;
+            SetupExoticObjects.MineLanternRight = FakePrefabExtensions.InstantiateAndFakeprefab(dungeon3.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference).gameObject;
+            SetupExoticObjects.MineLanternRight.GetComponent<tk2dBaseSprite>().FlipX = true;
+
+
+            //abbeyDungeon.roomMaterialDefinitions[0].facewallLightStamps[0].objectReference;
+
+            // Graves
+            SetupExoticObjects.TombStone_N = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_bot");
+
+            SetupExoticObjects.TombStone_NE = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_bot_left");
+            SetupExoticObjects.TombStone_NW = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_bot_right");
+
+            SetupExoticObjects.TombStone_E = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_left");
+            SetupExoticObjects.TombStone_W = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_right");
+
+            SetupExoticObjects.TombStone_S = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_top");
+
+            SetupExoticObjects.TombStone_SE = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_top_left");
+
+            //SetupExoticObjects.TombStone_N = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_bot");
+            //
+
+			SetupExoticObjects.LostAdventurer = LoadHelper.LoadAssetFromAnywhere<GameObject>("npc_lostadventurer");
+
+            SetupExoticObjects.BlobulordGrate = LoadHelper.LoadAssetFromAnywhere<GameObject>("blobulordgrate");
+            SetupExoticObjects.TreadnoughtPillar = LoadHelper.LoadAssetFromAnywhere<GameObject>("breakablecolumn");
+            SetupExoticObjects.TreadnoughtPillarDestroyed = LoadHelper.LoadAssetFromAnywhere<GameObject>("brokencolumn");
+
+			SetupExoticObjects.MedievalCrate = LoadHelper.LoadAssetFromAnywhere<GameObject>("medieval_crate_001");
+            SetupExoticObjects.GoldArmor = LoadHelper.LoadAssetFromAnywhere<GameObject>("suit_of_armor_002");
+			SetupExoticObjects.TanPot = dungeon2.stampData.objectStamps[14].objectReference;
+
+
+            StaticReferences.customPlaceables.Add("bossPedestal", new DungeonPlaceable()
+            {
+                height = 2,
+                width = 2,
+                variantTiers = new List<DungeonPlaceableVariant>()
+                {
+                   new DungeonPlaceableVariant()
+                   {
+                       nonDatabasePlaceable = LoadHelper.LoadAssetFromAnywhere<GameObject>("boss_reward_pedestal"),
+                       prerequisites = new DungeonPrerequisite[0],
+                   },
+                },
+            });
+
+
+
+            var lightObject = FakePrefabExtensions.InstantiateAndFakeprefab(new GameObject("RAT Light Object"));
+			var childObject = new GameObject("ChildLight");
+            childObject.GetOrAddComponent<AdditionalBraveLight>();
+			childObject.transform.parent = lightObject.transform;
+			childObject.transform.localPosition = new Vector3(0.5f, 0.5f, 1);
+			SetupExoticObjects.GungeonLightSource = lightObject;
+
+
+            PrototypeDungeonRoom asset = null;
+            foreach (var bundle in StaticReferences.AssetBundles.Values)
+            {
+                asset = bundle.LoadAsset<PrototypeDungeonRoom>("ChallengeShrine_Gungeon_002");
+                if (asset)
+                    break;
+            }
+            GameObject ChallengeShrine = FakePrefab.Clone(asset.placedObjects[0].nonenemyBehaviour.gameObject);
+            if (ChallengeShrine.GetComponentInChildren<ChallengeShrineController>() == null) { ETGModConsole.Log("HOW THE *FUCK* IS THIS NULL??"); }
+            FoolproofedChallengeShrineController newController = ChallengeShrine.AddComponent<FoolproofedChallengeShrineController>();
+            ChallengeShrineController baseController = ChallengeShrine.GetComponentInChildren<ChallengeShrineController>();
+            newController.acceptOptionKey = baseController.acceptOptionKey;
+            newController.AlternativeOutlineTarget = baseController.AlternativeOutlineTarget;
+            newController.CustomChestTable = baseController.CustomChestTable;
+            newController.declineOptionKey = baseController.declineOptionKey;
+            newController.difficulty = baseController.difficulty;
+            newController.displayTextKey = baseController.displayTextKey;
+            newController.isPassable = baseController.isPassable;
+            newController.onPlayerVFX = baseController.onPlayerVFX;
+            newController.placeableHeight = baseController.placeableHeight;
+            newController.placeableWidth = baseController.placeableWidth;
+            newController.playerVFXOffset = baseController.playerVFXOffset;
+            newController.talkPoint = baseController.talkPoint;
+            newController.usesCustomChestTable = baseController.usesCustomChestTable;
+            if (ChallengeShrine.GetComponentInChildren<ChallengeShrineController>()) UnityEngine.Object.Destroy(ChallengeShrine.GetComponentInChildren<ChallengeShrineController>());
+            StaticReferences.StoredRoomObjects.Add("ChallengeShrine", ChallengeShrine);
+            StaticReferences.customObjects.Add("ChallengeShrine", ChallengeShrine);
+
+
+            StaticReferences.customPlaceables.Add("FlowerTile", new DungeonPlaceable()
+            {
+                height = 1,
+                width = 1,
+                variantTiers = new List<DungeonPlaceableVariant>()
+                {
+                   new DungeonPlaceableVariant()
+                   {
+                       nonDatabasePlaceable = LoadHelper.LoadAssetFromAnywhere<GameObject>("flower_floor_001"),
+                       prerequisites = new DungeonPrerequisite[0],
+                   },
+                   new DungeonPlaceableVariant()
+                   {
+                       nonDatabasePlaceable = LoadHelper.LoadAssetFromAnywhere<GameObject>("flower_floor_002"),
+                       prerequisites = new DungeonPrerequisite[0],
+                   },
+                   new DungeonPlaceableVariant()
+                   {
+                       nonDatabasePlaceable = LoadHelper.LoadAssetFromAnywhere<GameObject>("flower_floor_003"),
+                       prerequisites = new DungeonPrerequisite[0],
+                   },
+                   new DungeonPlaceableVariant()
+                   {
+                       nonDatabasePlaceable = LoadHelper.LoadAssetFromAnywhere<GameObject>("flower_floor_004"),
+                       prerequisites = new DungeonPrerequisite[0],
+                   },
+                   new DungeonPlaceableVariant()
+                   {
+                       nonDatabasePlaceable = LoadHelper.LoadAssetFromAnywhere<GameObject>("flower_floor_005"),
+                       prerequisites = new DungeonPrerequisite[0],
+                   },
+                },
+            });
+
+
+            StaticReferences.customPlaceables.Add("GorgunStatueBulletKin", new DungeonPlaceable()
+            {
+                height = 1,
+                width = 1,
+                variantTiers = new List<DungeonPlaceableVariant>()
+                {
+                   new DungeonPlaceableVariant()
+                   {
+                       nonDatabasePlaceable = LoadHelper.LoadAssetFromAnywhere<GameObject>("gungeon_stone_bullet_001"),
+                       prerequisites = new DungeonPrerequisite[0],
+                   },
+                   new DungeonPlaceableVariant()
+                   {
+                       nonDatabasePlaceable = LoadHelper.LoadAssetFromAnywhere<GameObject>("gungeon_stone_bullet_002"),
+                       prerequisites = new DungeonPrerequisite[0],
+                   },
+                   new DungeonPlaceableVariant()
+                   {
+                       nonDatabasePlaceable = LoadHelper.LoadAssetFromAnywhere<GameObject>("gungeon_stone_bullet_003"),
+                       prerequisites = new DungeonPrerequisite[0],
+                   },
+                },
+            });
+            StaticReferences.customPlaceables.Add("GorgunStatueShotgunKin", new DungeonPlaceable()
+            {
+                height = 1,
+                width = 1,
+                variantTiers = new List<DungeonPlaceableVariant>()
+                {
+                   new DungeonPlaceableVariant()
+                   {
+                       nonDatabasePlaceable = LoadHelper.LoadAssetFromAnywhere<GameObject>("gungeon_stone_shotgun_001"),
+                       prerequisites = new DungeonPrerequisite[0],
+                   },
+                   new DungeonPlaceableVariant()
+                   {
+                       nonDatabasePlaceable = LoadHelper.LoadAssetFromAnywhere<GameObject>("gungeon_stone_shotgun_002"),
+                       prerequisites = new DungeonPrerequisite[0],
+                   },
+                   new DungeonPlaceableVariant()
+                   {
+                       nonDatabasePlaceable = LoadHelper.LoadAssetFromAnywhere<GameObject>("gungeon_stone_shotgun_003"),
+                       prerequisites = new DungeonPrerequisite[0],
+                   },
+                   new DungeonPlaceableVariant()
+                   {
+                       nonDatabasePlaceable = LoadHelper.LoadAssetFromAnywhere<GameObject>("gungeon_stone_shotgun_004"),
+                       prerequisites = new DungeonPrerequisite[0],
+                   },
+                },
+            });
+
+
+            SetupExoticObjects.objects = new Dictionary<string, GameObject>
 			{
 				{
 					"npc_blacksmith",
@@ -1041,8 +1267,92 @@ namespace Alexandria.DungeonAPI
 					"minecart_pathing",
 					SetupExoticObjects.Minecart
 				},
-			};
-			dungeon = null;
+                {
+                    "turretminecart_pathing",
+                    SetupExoticObjects.TurretMinecart
+                },
+                {
+                    "explosivebarrelminecart_pathing",
+                    SetupExoticObjects.ExplosiveBarrelMinecart
+                },
+                {
+                    "sconce_horizontal",
+                    SetupExoticObjects.KeepSconce
+                },
+                {
+                    "sconce_left_",
+                    SetupExoticObjects.KeepSconceSideLeft
+                },
+                {
+                    "sconce_right_",
+                    SetupExoticObjects.KeepSconceSideRight
+                },
+                {
+                    "basictorch_h",
+                    SetupExoticObjects.BasicTorch
+                },
+                {
+                    "basictorch_l",
+                    SetupExoticObjects.BasicTorchSideLeft
+                },
+                {
+                    "basictorch_r",
+                    SetupExoticObjects.BasicTorchSideRight
+                },
+                {
+                    "breakablePillarTreadnought",
+                    SetupExoticObjects.TreadnoughtPillar
+                },
+                {
+                    "brokenPillarTreadnought",
+                    SetupExoticObjects.TreadnoughtPillarDestroyed
+                },
+                {
+                    "BlobulordGrateFloorDecal",
+                    SetupExoticObjects.BlobulordGrate
+                },
+                {
+                    "CustomlightSource",
+                    SetupExoticObjects.GungeonLightSource
+                },
+                {
+                    "medievalCrate",
+                    SetupExoticObjects.MedievalCrate
+                },
+                {
+                    "suitofarmorGold",
+                    SetupExoticObjects.GoldArmor
+                },
+                {
+                    "tanPotAbbey",
+                    SetupExoticObjects.TanPot
+                },
+                {
+                    "candlabra_horiz",
+                    SetupExoticObjects.CandleabraHorizontal
+                },
+                {
+                    "candlabra_left",
+                    SetupExoticObjects.CandleabraLeft
+                },
+                {
+                    "candlabra_right",
+                    SetupExoticObjects.CandleabraRight
+                },
+                {
+                    "minelantern_horiz",
+                    SetupExoticObjects.MineLanternHorizontal
+                },
+                {
+                    "minelantern_left",
+                    SetupExoticObjects.MineLanternLeft
+                },
+                {
+                    "minelantern_right",
+                    SetupExoticObjects.MineLanternRight
+                },
+            };
+            dungeon = null;
 			dungeon2 = null;
 			dungeon3 = null;
 			dungeon4 = null;
@@ -1057,8 +1367,8 @@ namespace Alexandria.DungeonAPI
 			dungeon13 = null;
 		}
 
-		
-		public static GameObject NPCBlacksmith;
+        //ExplosiveBarrelMinecart
+        public static GameObject NPCBlacksmith;
 		public static GameObject NPCHenchman;
 		public static GameObject NPCTootsCraze;
 		public static GameObject NPCDyingScientist;
@@ -1212,6 +1522,42 @@ namespace Alexandria.DungeonAPI
 		public static GameObject SawBlade;
 		public static GameObject BloodySawBlade;
 		public static GameObject Minecart;
-		public static Dictionary<string, GameObject> objects = new Dictionary<string, GameObject>();
+        public static GameObject TurretMinecart;
+        public static GameObject ExplosiveBarrelMinecart;
+
+		public static GameObject KeepSconce;
+        public static GameObject KeepSconceSideLeft;
+        public static GameObject KeepSconceSideRight;
+
+        public static GameObject TombStone_N;
+        public static GameObject TombStone_NE;
+        public static GameObject TombStone_E;
+        public static GameObject TombStone_SE;
+        public static GameObject TombStone_S;
+        public static GameObject TombStone_SW;
+        public static GameObject TombStone_W;
+        public static GameObject TombStone_NW;
+
+        public static GameObject BasicTorch;
+        public static GameObject BasicTorchSideLeft;
+        public static GameObject BasicTorchSideRight;
+        public static GameObject LostAdventurer;
+        public static GameObject BlobulordGrate;
+        public static GameObject TreadnoughtPillar;
+        public static GameObject TreadnoughtPillarDestroyed;
+        public static GameObject GungeonLightSource;
+        public static GameObject MedievalCrate;
+        public static GameObject GoldArmor;
+
+        public static GameObject TanPot;
+
+        public static GameObject CandleabraHorizontal;
+        public static GameObject CandleabraLeft;
+        public static GameObject CandleabraRight;
+
+        public static GameObject MineLanternHorizontal;
+        public static GameObject MineLanternLeft;
+        public static GameObject MineLanternRight;
+        public static Dictionary<string, GameObject> objects = new Dictionary<string, GameObject>();
 	}
 }

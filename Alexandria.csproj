@@ -70,6 +70,7 @@
     <Compile Include="DungeonAPI\RoomUtility.cs" />
     <Compile Include="DungeonAPI\RuntimeDungeonEditing.cs" />
     <Compile Include="DungeonAPI\SetupExoticObjects.cs" />
+    <Compile Include="DungeonAPI\SpecialComponents.cs" />
     <Compile Include="EnemyAPI\AIActorUtility.cs" />
     <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
     <Compile Include="EnemyAPI\EnemyBuildingTools.cs" />
@@ -192,6 +193,7 @@
     <Compile Include="StatAPI\ExtendedPlayerStats.cs" />
     <Compile Include="StatAPI\ModifyMethodE.cs" />
     <Compile Include="StatAPI\StatAPIManager.cs" />
+    <Compile Include="Storage\EnemyGUIDs.cs" />
     <Compile Include="TranslationAPI\CustomStringDBTable.cs" />
     <Compile Include="TranslationAPI\StringTableType.cs" />
     <Compile Include="TranslationAPI\Translation.cs" />

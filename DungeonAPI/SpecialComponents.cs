@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Dungeonator;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +10,95 @@ namespace Alexandria.DungeonAPI
 {
     public class SpecialComponents
     {
+
+        public class ForceNearestToRide : MonoBehaviour
+        {
+            private MineCartController self;
+            public void Start()
+            {
+                self = this.GetComponent<MineCartController>();
+                var room = this.transform.position.GetAbsoluteRoom();
+                if (self != null && room != null)
+                {
+                    var c = room.GetActiveEnemies(RoomHandler.ActiveEnemyType.All);
+                    if (c != null && c.Count() > 0)
+                    {
+                        var enemy = GetClosestEnemy(c);
+                        if (enemy)
+                        {
+                            self.BecomeOccupied(enemy);
+                            enemy.MovementSpeed = 0;
+                        }
+                    }
+                }
+            }
+            AIActor GetClosestEnemy(List<AIActor> enemies)
+            {
+                AIActor bestTarget = null;
+                float closestDistanceSqr = Mathf.Infinity;
+                Vector3 currentPosition = transform.position;
+                foreach (var potentialTarget in enemies)
+                {
+                    Vector3 directionToTarget = potentialTarget.transform.position - currentPosition;
+                    float dSqrToTarget = directionToTarget.sqrMagnitude;
+                    if (dSqrToTarget < closestDistanceSqr)
+                    {
+                        closestDistanceSqr = dSqrToTarget;
+                        bestTarget = potentialTarget;
+                    }
+                }
+
+                return bestTarget;
+            }
+        }
+
+
+        public class WinchesterCameraHelper : MonoBehaviour
+        {
+            private ArtfulDodgerRoomController m_dodgerRoom;
+            private SpeculativeRigidbody body;
+
+            protected RoomHandler m_room;
+            private void Start()
+            {
+                this.StartCoroutine(waitFrame());
+            }
+
+            private IEnumerator waitFrame()
+            {
+                yield return null;
+                this.body = this.GetComponent<SpeculativeRigidbody>();
+                this.m_room = this.transform.position.GetAbsoluteRoom();
+                if (m_room != null && body != null)
+                {
+                    this.m_dodgerRoom = this.m_room.GetComponentsAbsoluteInRoom<ArtfulDodgerRoomController>()[0];
+                    body.OnEnterTrigger += OnEnterTrigger;
+                    body.OnExitTrigger += OnExitTrigger;
+                    body.OnTriggerCollision += OnEnterTrigger;
+                }
+                yield break;
+            }
+
+            private void OnEnterTrigger(SpeculativeRigidbody mySpecRigidbody, SpeculativeRigidbody sourceSpecRigidbody, CollisionData collisionData)
+            {
+                foreach (var cameras in m_dodgerRoom.m_cameraZones)
+                {
+                    if (m_dodgerRoom.m_rewardHandled == false)
+                    {
+                        cameras.Trigger(1);
+                    }
+                }
+            }
+            private void OnExitTrigger(SpeculativeRigidbody obj, SpeculativeRigidbody source)
+            {
+                foreach (var cameras in m_dodgerRoom.m_cameraZones)
+                {
+                    cameras.m_triggeredFrame = false;
+                }
+            }
+        }
+        public class WinchesterAlterer : MonoBehaviour { public Vector2 movement = new Vector2(0,0); public float goneTime = 1; }
+
         public class PedestalSetter : MonoBehaviour
         {
             public int Help =-1;

@@ -1,16 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Alexandria.ItemAPI;
 using Dungeonator;
+using FullInspector;
 using Planetside;
 using UnityEngine;
+using static Alexandria.DungeonAPI.SpecialComponents;
+
 namespace Alexandria.DungeonAPI
 {
+	public static class aa
+	{
+        public static void LogRoomSubtypes(this Dungeon self)
+        {
+			Debug.Log(self.DungeonShortName + " : " + self.roomMaterialDefinitions.Count());
+
+        }
+    }
 	public class SetupExoticObjects
 	{
+
 		public static void InitialiseObjects()
 		{
 			Dungeon orLoadByName = DungeonDatabase.GetOrLoadByName("base_castle");
+
+
 			Dungeon dungeon = DungeonDatabase.GetOrLoadByName("base_sewer");
 			Dungeon orLoadByName2 = DungeonDatabase.GetOrLoadByName("base_gungeon");
 			Dungeon dungeon2 = DungeonDatabase.GetOrLoadByName("base_cathedral");
@@ -25,6 +40,7 @@ namespace Alexandria.DungeonAPI
 			Dungeon dungeon11 = DungeonDatabase.GetOrLoadByName("finalscenario_convict");
 			Dungeon dungeon12 = DungeonDatabase.GetOrLoadByName("finalscenario_soldier");
 			Dungeon dungeon13 = DungeonDatabase.GetOrLoadByName("finalscenario_guide");
+
 
             //            //ExplosiveBarrelMinecart
 
@@ -493,37 +509,38 @@ namespace Alexandria.DungeonAPI
             SetupExoticObjects.MineLanternLeft = dungeon3.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference;
             SetupExoticObjects.MineLanternRight = FakePrefabExtensions.InstantiateAndFakeprefab(dungeon3.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference).gameObject;
             SetupExoticObjects.MineLanternRight.GetComponent<tk2dBaseSprite>().FlipX = true;
+            
+			SetupExoticObjects.BurningSkeleton_Horizontal = dungeon8.roomMaterialDefinitions[0].facewallLightStamps[0].objectReference;
+            SetupExoticObjects.BurningSkeleton_Left = dungeon8.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference;
+            SetupExoticObjects.BurningSkeleton_Right = FakePrefabExtensions.InstantiateAndFakeprefab(dungeon8.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference).gameObject;
+            SetupExoticObjects.BurningSkeleton_Right.GetComponent<tk2dBaseSprite>().FlipX = true;
+            
+			SetupExoticObjects.LavaLight_Horizontal = dungeon7.roomMaterialDefinitions[0].facewallLightStamps[0].objectReference;
+            SetupExoticObjects.LavaLight_Left = dungeon7.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference;
+            SetupExoticObjects.LavaLight_Right = FakePrefabExtensions.InstantiateAndFakeprefab(dungeon7.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference).gameObject;
+            SetupExoticObjects.LavaLight_Right.GetComponent<tk2dBaseSprite>().FlipX = true;
 
+            SetupExoticObjects.OfficeLight_Horizontal = dungeon6.roomMaterialDefinitions[0].facewallLightStamps[0].objectReference;
+            SetupExoticObjects.OfficeLight_Left = dungeon6.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference;
+            SetupExoticObjects.OfficeLight_Right = FakePrefabExtensions.InstantiateAndFakeprefab(dungeon6.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference.gameObject);
+            SetupExoticObjects.OfficeLight_Right.GetComponent<tk2dBaseSprite>().FlipX = true;
+
+            SetupExoticObjects.WeirdGreenLight_Horizontal = dungeon6.roomMaterialDefinitions[7].facewallLightStamps[0].objectReference;
+            SetupExoticObjects.WeirdGreenLight_Left = dungeon6.roomMaterialDefinitions[7].sidewallLightStamps[0].objectReference;
+            SetupExoticObjects.WeirdGreenLight_Right = FakePrefabExtensions.InstantiateAndFakeprefab(dungeon6.roomMaterialDefinitions[7].sidewallLightStamps[0].objectReference);
+            SetupExoticObjects.WeirdGreenLight_Right.GetComponent<tk2dBaseSprite>().FlipX = true;
 
             //abbeyDungeon.roomMaterialDefinitions[0].facewallLightStamps[0].objectReference;
 
-            // Graves
-            SetupExoticObjects.TombStone_N = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_bot");
 
-            SetupExoticObjects.TombStone_NE = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_bot_left");
-            SetupExoticObjects.TombStone_NW = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_bot_right");
-
-            SetupExoticObjects.TombStone_E = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_left");
-            SetupExoticObjects.TombStone_W = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_right");
-
-            SetupExoticObjects.TombStone_S = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_top");
-
-            SetupExoticObjects.TombStone_SE = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_top_left");
-
-            //SetupExoticObjects.TombStone_N = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_bot");
-            //
 
 			SetupExoticObjects.LostAdventurer = LoadHelper.LoadAssetFromAnywhere<GameObject>("npc_lostadventurer");
-
             SetupExoticObjects.BlobulordGrate = LoadHelper.LoadAssetFromAnywhere<GameObject>("blobulordgrate");
             SetupExoticObjects.TreadnoughtPillar = LoadHelper.LoadAssetFromAnywhere<GameObject>("breakablecolumn");
             SetupExoticObjects.TreadnoughtPillarDestroyed = LoadHelper.LoadAssetFromAnywhere<GameObject>("brokencolumn");
-
 			SetupExoticObjects.MedievalCrate = LoadHelper.LoadAssetFromAnywhere<GameObject>("medieval_crate_001");
             SetupExoticObjects.GoldArmor = LoadHelper.LoadAssetFromAnywhere<GameObject>("suit_of_armor_002");
 			SetupExoticObjects.TanPot = dungeon2.stampData.objectStamps[14].objectReference;
-
-
             StaticReferences.customPlaceables.Add("bossPedestal", new DungeonPlaceable()
             {
                 height = 2,
@@ -537,17 +554,12 @@ namespace Alexandria.DungeonAPI
                    },
                 },
             });
-
-
-
             var lightObject = FakePrefabExtensions.InstantiateAndFakeprefab(new GameObject("RAT Light Object"));
 			var childObject = new GameObject("ChildLight");
             childObject.GetOrAddComponent<AdditionalBraveLight>();
 			childObject.transform.parent = lightObject.transform;
 			childObject.transform.localPosition = new Vector3(0.5f, 0.5f, 1);
 			SetupExoticObjects.GungeonLightSource = lightObject;
-
-
             PrototypeDungeonRoom asset = null;
             foreach (var bundle in StaticReferences.AssetBundles.Values)
             {
@@ -575,8 +587,6 @@ namespace Alexandria.DungeonAPI
             if (ChallengeShrine.GetComponentInChildren<ChallengeShrineController>()) UnityEngine.Object.Destroy(ChallengeShrine.GetComponentInChildren<ChallengeShrineController>());
             StaticReferences.StoredRoomObjects.Add("ChallengeShrine", ChallengeShrine);
             StaticReferences.customObjects.Add("ChallengeShrine", ChallengeShrine);
-
-
             StaticReferences.customPlaceables.Add("FlowerTile", new DungeonPlaceable()
             {
                 height = 1,
@@ -610,8 +620,6 @@ namespace Alexandria.DungeonAPI
                    },
                 },
             });
-
-
             StaticReferences.customPlaceables.Add("GorgunStatueBulletKin", new DungeonPlaceable()
             {
                 height = 1,
@@ -663,11 +671,384 @@ namespace Alexandria.DungeonAPI
                    },
                 },
             });
+			SetupExoticObjects.PitfallTrap = LoadHelper.LoadAssetFromAnywhere<GameObject>("trap_pit_gungeon_trigger_2x2");
+            SetupExoticObjects.Spike_trap = LoadHelper.LoadAssetFromAnywhere<GameObject>("trap_spike_gungeon_2x2");
+            SetupExoticObjects.Flame_Trap = LoadHelper.LoadAssetFromAnywhere<GameObject>("trap_flame_poofy_gungeon_1x1");
+            SetupExoticObjects.HighPriestBossRoomFloor = LoadHelper.LoadAssetFromAnywhere<GameObject>("highpriestplaceable");
+            SetupExoticObjects.LichBossRoomFloor = LoadHelper.LoadAssetFromAnywhere<GameObject>("lichroomplaceable");
+			SetupExoticObjects.GunslingKing_NPC = LoadHelper.LoadAssetFromAnywhere<GameObject>("npc_gunslingking");
+			SetupExoticObjects.Manservantes_NPC = LoadHelper.LoadAssetFromAnywhere<GameObject>("npc_manservantes");
+
+            SetupExoticObjects.Winchester_NPC = LoadHelper.LoadAssetFromAnywhere<GameObject>("npc_artful_dodger");
+            SetupExoticObjects.Winchester_BlueBlock = LoadHelper.LoadAssetFromAnywhere<GameObject>("artfuldodger_bumper_blue");
+            SetupExoticObjects.Winchester_RedBlock = LoadHelper.LoadAssetFromAnywhere<GameObject>("artfuldodger_bumper_red");
+            SetupExoticObjects.Winchester_GreenBlock = LoadHelper.LoadAssetFromAnywhere<GameObject>("artfuldodger_bumper_green");
+            SetupExoticObjects.Winchester_BlueBlock_Corner_BL = LoadHelper.LoadAssetFromAnywhere<GameObject>("artfuldodger_bumper_blue_corner_topright");
+            SetupExoticObjects.Winchester_BlueBlock_Corner_BR = LoadHelper.LoadAssetFromAnywhere<GameObject>("artfuldodger_bumper_blue_corner_topleft");
+            SetupExoticObjects.Winchester_BlueBlock_Corner_TL = LoadHelper.LoadAssetFromAnywhere<GameObject>("artfuldodger_bumper_blue_corner_bottomright");
+            SetupExoticObjects.Winchester_BlueBlock_Corner_TR = LoadHelper.LoadAssetFromAnywhere<GameObject>("artfuldodger_bumper_blue_corner_bottomleft");
+            SetupExoticObjects.Winchester_BlueBlock_Moving_1x3 = LoadHelper.LoadAssetFromAnywhere<GameObject>("artfuldodger_bumper_blue_1x3");
+            SetupExoticObjects.Winchester_BlueBlock_Moving_2x2 = LoadHelper.LoadAssetFromAnywhere<GameObject>("artfuldodger_bumper_blue_2x2");
+            SetupExoticObjects.Winchester_NeonSign = LoadHelper.LoadAssetFromAnywhere<GameObject>("artfuldodger_neonsign");
+            SetupExoticObjects.Winchester_MovingTarget = LoadHelper.LoadAssetFromAnywhere<GameObject>("artfuldodger_target");
+            SetupExoticObjects.Winchester_CameraPoint = LoadHelper.LoadAssetFromAnywhere<GameObject>("artfuldodger_camerapoint");
+			SetupExoticObjects.Winchester_CameraPanController = FakePrefabExtensions.InstantiateAndFakeprefab(new GameObject("Decoy CamerapanObjects"));
+			SetupExoticObjects.Winchester_CameraPanController.AddComponent<WinchesterCameraHelper>();
+            var winchesterRoomObject = FakePrefabExtensions.InstantiateAndFakeprefab(new GameObject("Decoy WinchesterRoomController"));
+			var art = winchesterRoomObject.AddComponent<ArtfulDodgerRoomController>();
+			art.NumberShots = 4;
+			art.NumberBounces = 1;
+            SetupExoticObjects.Winchester_RoomController = winchesterRoomObject;
+
+            SetupExoticObjects.Skeleton_Standing_Left = dungeon5.stampData.objectStamps[1].objectReference;
+            SetupExoticObjects.Skeleton_Standing_Right = dungeon5.stampData.objectStamps[0].objectReference;
+            SetupExoticObjects.Skeleton_Hanging_Left = dungeon5.stampData.objectStamps[6].objectReference;
+            SetupExoticObjects.Skeleton_Hanging_Right = dungeon5.stampData.objectStamps[7].objectReference;
+			var dragunSkull =EnemyDatabase.GetOrLoadByGuid("465da2bb086a4a88a803f79fe3a27677").GetComponent<DraGunDeathController>().skullDebris.InstantiateAndFakeprefab();
+			UnityEngine.Object.Destroy(dragunSkull.GetComponent<DebrisObject>());
+			dragunSkull.GetComponent<MajorBreakable>().SpawnItemOnBreak = false;
+			SetupExoticObjects.Dragun_Skull = dragunSkull;
+            var dragunvertabra = EnemyDatabase.GetOrLoadByGuid("465da2bb086a4a88a803f79fe3a27677").GetComponent<DraGunDeathController>().neckDebris.InstantiateAndFakeprefab();
+			UnityEngine.Object.Destroy(dragunvertabra.GetComponent<DebrisObject>());
+			SetupExoticObjects.Dragun_Vertebra = dragunvertabra;
+
+			SetupExoticObjects.Conveyor_Horizontal = LoadHelper.LoadAssetFromAnywhere<GameObject>("conveyor_horizontal");
+            SetupExoticObjects.Conveyor_Vertical = LoadHelper.LoadAssetFromAnywhere<GameObject>("conveyor_vertical");
+
+            GameObject skeletonNote = LoadHelper.LoadAssetFromAnywhere<GameObject>("assets/data/prefabs/interactable objects/notes/skeleton_note_001.prefab");
+
+            SetupExoticObjects.Floor_Skeleton = skeletonNote.transform.Find("skleleton").gameObject.InstantiateAndFakeprefab();
+
+			SetupExoticObjects.Floor_Skeleton_Note = LoadHelper.LoadAssetFromAnywhere<GameObject>("assets/data/prefabs/interactable objects/notes/skeleton_note_001.prefab").InstantiateAndFakeprefab();
+			var f = SetupExoticObjects.Floor_Skeleton_Note.transform.Find("skleleton").gameObject;
+			f.transform.parent = null;
+            UnityEngine.Object.Destroy(f);
+			SetupExoticObjects.Floor_Skeleton_Note.transform.localPosition -= new Vector3(1, 0);
+
+
+			SetupExoticObjects.Switch_Chandelier = LoadHelper.LoadAssetFromAnywhere<GameObject>("hanging_chain_attach_wallswitch");
+			SetupExoticObjects.Chandelier_Drop = LoadHelper.LoadAssetFromAnywhere<GameObject>("Hanging_Chandelier");
+
+			SetupExoticObjects.Mine_CaveIn = LoadHelper.LoadAssetFromAnywhere<GameObject>("mines_cave_in");
+            SetupExoticObjects.Mine_CaveIn_Switch = LoadHelper.LoadAssetFromAnywhere<GameObject>("mines_plunger");
+
+			SetupExoticObjects.BulletPast_PitfallTrap = dungeon9.PatternSettings.flows[0].AllNodes[3].overrideExactRoom.placedObjects[1].nonenemyBehaviour.gameObject;
+
+            SetupExoticObjects.ForgeGunTrap_North = LoadHelper.LoadAssetFromAnywhere<GameObject>("forge_face_shootssouth");
+            SetupExoticObjects.ForgeGunTrap_East = LoadHelper.LoadAssetFromAnywhere<GameObject>("forge_face_shootswest");
+            SetupExoticObjects.ForgeGunTrap_West = LoadHelper.LoadAssetFromAnywhere<GameObject>("forge_face_shootseast");
+
+            SetupExoticObjects.MouseTrap_North = EnemyDatabase.GetOrLoadByGuid("6868795625bd46f3ae3e4377adce288b").GetComponent<ResourcefulRatController>().MouseTraps[0];
+            SetupExoticObjects.MouseTrap_East = EnemyDatabase.GetOrLoadByGuid("6868795625bd46f3ae3e4377adce288b").GetComponent<ResourcefulRatController>().MouseTraps[1];
+            SetupExoticObjects.MouseTrap_West = EnemyDatabase.GetOrLoadByGuid("6868795625bd46f3ae3e4377adce288b").GetComponent<ResourcefulRatController>().MouseTraps[2];
+
+
+            SetupExoticObjects.Spinning_Log_Horizontal = ((DungeonPlaceable)BraveResources.Load("RobotDaveTraps", ".asset")).variantTiers[5].nonDatabasePlaceable;
+            SetupExoticObjects.Spinning_Log_Vertical = ((DungeonPlaceable)BraveResources.Load("RobotDaveTraps", ".asset")).variantTiers[4].nonDatabasePlaceable;
+
+            SetupExoticObjects.Spinning_Ice_Log_Horizontal = ((DungeonPlaceable)BraveResources.Load("RobotDaveTraps", ".asset")).variantTiers[13].nonDatabasePlaceable;
+            SetupExoticObjects.Spinning_Ice_Log_Vertical = ((DungeonPlaceable)BraveResources.Load("RobotDaveTraps", ".asset")).variantTiers[12].nonDatabasePlaceable;
+
+            // Graves
+            SetupExoticObjects.TombStone_N = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_top");
+            SetupExoticObjects.TombStone_S = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_bot");
+            SetupExoticObjects.TombStone_E = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_left");
+            SetupExoticObjects.TombStone_W = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_right");
+            SetupExoticObjects.TombStone_SE = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_bot_right");
+            SetupExoticObjects.TombStone_SW = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_bot_left");
+            SetupExoticObjects.TombStone_NW = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_top_right");
+            SetupExoticObjects.TombStone_NE = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_top_left");
 
 
             SetupExoticObjects.objects = new Dictionary<string, GameObject>
 			{
 				{
+                    "TombStone_N",
+                    SetupExoticObjects.TombStone_N
+                },
+                {
+                    "TombStone_NE",
+                    SetupExoticObjects.TombStone_NE
+                },
+                {
+                    "TombStone_NW",
+                    SetupExoticObjects.TombStone_NW
+                },
+                {
+                    "TombStone_E",
+                    SetupExoticObjects.TombStone_E
+                },
+                {
+                    "TombStone_W",
+                    SetupExoticObjects.TombStone_W
+                },
+                {
+                    "TombStone_SE",
+                    SetupExoticObjects.TombStone_SE
+                },
+                {
+                    "TombStone_S",
+                    SetupExoticObjects.TombStone_S
+                },
+                {
+                    "TombStone_SW",
+                    SetupExoticObjects.TombStone_SW
+                },
+
+
+                {
+                    "rollingIceLogHorizontal_pathing",
+                    SetupExoticObjects.Spinning_Ice_Log_Horizontal
+                },
+                {
+                    "rollingIceLogVertical_pathing",
+                    SetupExoticObjects.Spinning_Ice_Log_Vertical
+                },
+
+                {
+                    "rollingLogHorizontal_pathing",
+                    SetupExoticObjects.Spinning_Log_Horizontal
+                },
+                {
+                    "rollingLogVertical_pathing",
+                    SetupExoticObjects.Spinning_Log_Vertical
+                },
+
+                {
+                    "MouseTrap_North",
+                    SetupExoticObjects.MouseTrap_North
+                },
+                {
+                    "MouseTrap_East",
+                    SetupExoticObjects.MouseTrap_East
+                },
+                {
+                    "MouseTrap_West",
+                    SetupExoticObjects.MouseTrap_West
+                },
+
+                {
+                    "forge_face_shootssouth",
+                    SetupExoticObjects.ForgeGunTrap_North
+                },
+                {
+                    "forge_face_shootswest",
+                    SetupExoticObjects.ForgeGunTrap_East
+                },
+                {
+                    "forge_face_shootseast",
+                    SetupExoticObjects.ForgeGunTrap_West
+                },
+
+                {
+                    "bulletPastPitfalltrap",
+                    SetupExoticObjects.BulletPast_PitfallTrap
+                },
+                {
+                    "caveInTrap_DropDowntrap",
+                    SetupExoticObjects.Mine_CaveIn
+                },
+                {
+                    "caveInTrap_DropDownswitch",
+                    SetupExoticObjects.Mine_CaveIn_Switch
+                },
+
+                {
+                    "chandelierSwitch_trigger_DropDownswitch",
+                    SetupExoticObjects.Switch_Chandelier
+                },
+                {
+                    "chandelierDropTrap_DropDowntrap",
+                    SetupExoticObjects.Chandelier_Drop
+                },
+
+                {
+                    "FloorSkeleton_Flop",
+                    SetupExoticObjects.Floor_Skeleton
+                },
+                {
+                    "FloorSkeleton_Note",
+                    SetupExoticObjects.Floor_Skeleton_Note
+                },
+
+                {
+                    "ConveyorHorizontal",
+                    SetupExoticObjects.Conveyor_Horizontal
+                },
+                {
+                    "ConveyorVertical",
+                    SetupExoticObjects.Conveyor_Vertical
+                },
+
+                {
+                    "weirdGreenLight_Front",
+                    SetupExoticObjects.WeirdGreenLight_Horizontal
+                },
+                {
+                    "weirdGreenLight_left",
+                    SetupExoticObjects.WeirdGreenLight_Left
+                },
+
+                {
+                    "weirdGreenLight_right",
+                    SetupExoticObjects.WeirdGreenLight_Right
+                },
+
+                {
+                    "OfficeLight_Front",
+                    SetupExoticObjects.OfficeLight_Horizontal
+                },
+                {
+                    "OfficeLight_Left",
+                    SetupExoticObjects.OfficeLight_Left
+                },
+                {
+                    "OfficeLight_Right",
+                    SetupExoticObjects.OfficeLight_Right
+                },
+
+                {
+                    "LavaLight_Front",
+                    SetupExoticObjects.LavaLight_Horizontal
+                },
+                {
+                    "LavaLight_Left",
+                    SetupExoticObjects.LavaLight_Left
+                },
+                {
+                    "LavaLight_Right",
+                    SetupExoticObjects.LavaLight_Right
+                },
+                {
+                    "BurningSkeletonLight_Front",
+                    SetupExoticObjects.BurningSkeleton_Horizontal
+                },
+                {
+                    "BurningSkeletonLight_Left",
+                    SetupExoticObjects.BurningSkeleton_Left
+                },
+                {
+                    "BurningSkeletonLight_Right",
+                    SetupExoticObjects.BurningSkeleton_Right
+                },
+
+                {
+                    "DragunSkull",
+                    SetupExoticObjects.Dragun_Skull
+                },
+                {
+                    "DraunVertabrae",
+                    SetupExoticObjects.Dragun_Vertebra
+                },
+                {
+                    "basicSkeletonStandingLeft",
+                    SetupExoticObjects.Skeleton_Standing_Left
+                },
+                {
+                    "basicSkeletonStandingRight",
+                    SetupExoticObjects.Skeleton_Standing_Right
+                },
+                {
+                    "basicSkeletonHangingLeft",
+                    SetupExoticObjects.Skeleton_Hanging_Left
+                },
+                {
+                    "basicSkeletonHangingRight",
+                    SetupExoticObjects.Skeleton_Hanging_Right
+                },
+
+                {
+                    "winchesterCameraPanPlacer",
+                    SetupExoticObjects.Winchester_CameraPanController
+                },
+                {
+                    "WinchesterNPC",
+                    SetupExoticObjects.Winchester_NPC
+                },
+                {
+                    "WinchesterBlueBumper",
+                    SetupExoticObjects.Winchester_BlueBlock
+                },
+                {
+                    "WinchesterGreenBumper",
+                    SetupExoticObjects.Winchester_GreenBlock
+                },
+                {
+                    "WinchesterRedBumper",
+                    SetupExoticObjects.Winchester_RedBlock
+                },
+
+                {
+                    "WinchesterBlueBumperDiagonal_BL",
+                    SetupExoticObjects.Winchester_BlueBlock_Corner_BL
+                },
+                {
+                    "WinchesterBlueBumperDiagonal_BR",
+                    SetupExoticObjects.Winchester_BlueBlock_Corner_BR
+                },
+                {
+                    "WinchesterBlueBumperDiagonal_TL",
+                    SetupExoticObjects.Winchester_BlueBlock_Corner_TL
+                },
+                {
+                    "WinchesterBlueBumperDiagonal_TR",
+                    SetupExoticObjects.Winchester_BlueBlock_Corner_TR
+                },
+                {
+                    "WinchesterNeonSign",
+                    SetupExoticObjects.Winchester_NeonSign
+                },
+
+                {
+                    "WinchesterRoomController",
+                    SetupExoticObjects.Winchester_RoomController
+                },
+                {
+                    "WinchesterCameraController",
+                    SetupExoticObjects.Winchester_CameraPoint
+                },
+                {
+                    "winchesterShootyTarget_pathing",
+                    SetupExoticObjects.Winchester_MovingTarget
+                },
+                {
+                    "WinchesterMovingBumper1x3_pathing",
+                    SetupExoticObjects.Winchester_BlueBlock_Moving_1x3
+                },
+                {
+                    "WinchesterMovingBumper2x2_pathing",
+                    SetupExoticObjects.Winchester_BlueBlock_Moving_2x2
+                },
+
+                {
+                    "GunslingKingNPC",
+                    SetupExoticObjects.GunslingKing_NPC
+                },
+                {
+                    "ManservantesNPC",
+                    SetupExoticObjects.Manservantes_NPC
+                },
+                {
+                    "HighPriestBossRoomFloorDecal",
+                    SetupExoticObjects.HighPriestBossRoomFloor
+                },
+                {
+                    "LichBossRoomFloorDecal",
+                    SetupExoticObjects.LichBossRoomFloor
+                },
+                {
+                    "trap_pit_gungeon_trigger_2x2",
+                    SetupExoticObjects.PitfallTrap
+                },
+                {
+                    "trap_spike_gungeon_2x2",
+                    SetupExoticObjects.Spike_trap
+                },
+                {
+                    "trap_flame_poofy_gungeon_1x1",
+                    SetupExoticObjects.Flame_Trap
+                },
+                {
 					"npc_blacksmith",
 					SetupExoticObjects.NPCBlacksmith
 				},
@@ -1367,6 +1748,13 @@ namespace Alexandria.DungeonAPI
 			dungeon13 = null;
 		}
 
+		public static List<string> allBasictrapControllerAssetNames = new List<string>()
+		{
+            "trap_flame_poofy_gungeon_1x1",
+            "trap_pit_gungeon_trigger_2x2",
+            "trap_spike_gungeon_2x2"
+        };
+
         //ExplosiveBarrelMinecart
         public static GameObject NPCBlacksmith;
 		public static GameObject NPCHenchman;
@@ -1548,16 +1936,89 @@ namespace Alexandria.DungeonAPI
         public static GameObject GungeonLightSource;
         public static GameObject MedievalCrate;
         public static GameObject GoldArmor;
-
         public static GameObject TanPot;
-
         public static GameObject CandleabraHorizontal;
         public static GameObject CandleabraLeft;
         public static GameObject CandleabraRight;
-
         public static GameObject MineLanternHorizontal;
         public static GameObject MineLanternLeft;
         public static GameObject MineLanternRight;
+        public static GameObject Flame_Trap;
+        public static GameObject Spike_trap;
+        public static GameObject PitfallTrap;
+        public static GameObject LichBossRoomFloor;
+        public static GameObject HighPriestBossRoomFloor;
+        public static GameObject GunslingKing_NPC;
+        public static GameObject Manservantes_NPC;
+
+        //MM yess winchester time
+        public static GameObject Winchester_NPC;
+        public static GameObject Winchester_BlueBlock;
+        public static GameObject Winchester_RedBlock;
+        public static GameObject Winchester_GreenBlock;
+        public static GameObject Winchester_BlueBlock_Corner_BL;
+        public static GameObject Winchester_BlueBlock_Corner_BR;
+        public static GameObject Winchester_BlueBlock_Corner_TL;
+        public static GameObject Winchester_BlueBlock_Corner_TR;
+        public static GameObject Winchester_BlueBlock_Moving_1x3;
+        public static GameObject Winchester_BlueBlock_Moving_2x2;
+        public static GameObject Winchester_NeonSign;
+        public static GameObject Winchester_MovingTarget;
+        public static GameObject Winchester_CameraPoint;
+        public static GameObject Winchester_RoomController;
+        public static GameObject Winchester_CameraPanController;
+
+        public static GameObject Skeleton_Standing_Left;
+        public static GameObject Skeleton_Standing_Right;
+        public static GameObject Skeleton_Hanging_Left;
+        public static GameObject Skeleton_Hanging_Right;
+        public static GameObject Dragun_Skull;
+        public static GameObject Dragun_Vertebra;
+
+        public static GameObject BurningSkeleton_Horizontal;
+        public static GameObject BurningSkeleton_Left;
+        public static GameObject BurningSkeleton_Right;
+
+        public static GameObject LavaLight_Horizontal;
+        public static GameObject LavaLight_Left;
+        public static GameObject LavaLight_Right;
+
+        public static GameObject OfficeLight_Horizontal;
+        public static GameObject OfficeLight_Left;
+        public static GameObject OfficeLight_Right;
+
+        public static GameObject WeirdGreenLight_Horizontal;
+        public static GameObject WeirdGreenLight_Left;
+        public static GameObject WeirdGreenLight_Right;
+
+        public static GameObject Conveyor_Horizontal;
+        public static GameObject Conveyor_Vertical;
+
+        public static GameObject Floor_Skeleton;
+        public static GameObject Floor_Skeleton_Note;
+
+        public static GameObject Switch_Chandelier;
+        public static GameObject Chandelier_Drop;
+
+        public static GameObject Mine_CaveIn;
+        public static GameObject Mine_CaveIn_Switch;
+
+        public static GameObject BulletPast_PitfallTrap;
+
+        public static GameObject ForgeGunTrap_North;
+        public static GameObject ForgeGunTrap_East;
+        public static GameObject ForgeGunTrap_West;
+
+        public static GameObject MouseTrap_North;
+        public static GameObject MouseTrap_East;
+        public static GameObject MouseTrap_West;
+
+        public static GameObject Spinning_Log_Horizontal;
+        public static GameObject Spinning_Log_Vertical;
+
+        public static GameObject Spinning_Ice_Log_Horizontal;
+        public static GameObject Spinning_Ice_Log_Vertical;
+
         public static Dictionary<string, GameObject> objects = new Dictionary<string, GameObject>();
 	}
 }

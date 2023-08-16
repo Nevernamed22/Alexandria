@@ -43,8 +43,10 @@ namespace Alexandria.DungeonAPI
         {
             { "special", "basic special rooms (shrines, etc)" },
             { "shop", "Shop Room Table" },
-            { "secret", "secret_room_table_01" }
+            { "secret", "secret_room_table_01" },
+            { "winchester", "WinchesterRoomTable" }
         };
+
 
 
         //=================== LIST OF BOSS ROOM POOLS 
@@ -162,6 +164,12 @@ namespace Alexandria.DungeonAPI
                     ShrineTools.PrintError($"Failed to load special room table: {entry.Key}:{entry.Value}");
                     ShrineTools.PrintException(e);
                 }
+            }
+
+            var t = GetAsset<GenericRoomTable>("basic special rooms (shrines, etc)");
+            foreach (var entry in t.includedRooms.elements)
+            {
+                ETGModConsole.Log(entry.room.name);
             }
 
             //================================ Adss Boss Rooms into RoomTables
@@ -318,7 +326,7 @@ namespace Alexandria.DungeonAPI
 
 
 
-        public static GameObject DefineMinecartFromValues(string cartType, float maxSpeed, float timeToMaxSpeed, string storedBody, string StoredGUID, PrototypeDungeonRoom room, Vector2 location)
+        public static GameObject DefineMinecartFromValues(string cartType, float maxSpeed, float timeToMaxSpeed, string storedBody, bool NearestInCart, PrototypeDungeonRoom room, Vector2 location)
         {
             GameObject asset = RoomFactory.GetExoticGameObject(cartType);
             GameObject gameObject = FakePrefab.Clone(asset);
@@ -332,74 +340,11 @@ namespace Alexandria.DungeonAPI
             {
                 component.MaxSpeed = maxSpeed;
                 component.TimeToMaxSpeed = timeToMaxSpeed;
-                
-                if (StoredGUID != null && StoredGUID != "None")
+                if (NearestInCart == true)
                 {
-                    /*
-                    var enemy = EnemyDatabase.GetOrLoadByGuid(StoredGUID);
-
-                    DungeonPrerequisite[] array = new DungeonPrerequisite[0];
-                    DungeonPlaceable dungeonPlaceable = ScriptableObject.CreateInstance<DungeonPlaceable>();
-                    dungeonPlaceable.width = 0;
-                    dungeonPlaceable.height = 0;
-                    dungeonPlaceable.respectsEncounterableDifferentiator = true;
-                    dungeonPlaceable.variantTiers = new List<DungeonPlaceableVariant>
-                        {
-                        new DungeonPlaceableVariant
-                        {
-                            percentChance = 1f,
-                            nonDatabasePlaceable = enemy.gameObject,
-                            enemyPlaceableGuid = null,
-                            prerequisites = array,
-                            materialRequirements = new DungeonPlaceableRoomMaterialRequirement[0]
-                        }
-                        };
-                    enemy.transform.parent = component.attachTransform.transform;
-                    enemy.MovementSpeed = 0;
-                    //component.occupation = MineCartController.CartOccupationState.CARGO;
-                    //component.MoveCarriedCargoIntoCart = true;
-                    component.carriedCargo = dungeonPlaceable.variantTiers[0].nonDatabasePlaceable.GetComponent<SpeculativeRigidbody>();
-                    */
-
+                    gameObject.AddComponent<SpecialComponents.ForceNearestToRide>();
                 }
-                else if (storedBody != "None")
-                {
-                    var rider = LoadMinecartRider(storedBody);
-                    if (rider != null)
-                    {
-                        DungeonPrerequisite[] array = new DungeonPrerequisite[0];
-                        DungeonPlaceable dungeonPlaceable = ScriptableObject.CreateInstance<DungeonPlaceable>();
-                        dungeonPlaceable.width = 0;
-                        dungeonPlaceable.height = 0;
-                        dungeonPlaceable.respectsEncounterableDifferentiator = true;
-                        dungeonPlaceable.variantTiers = new List<DungeonPlaceableVariant>
-                        {
-                        new DungeonPlaceableVariant
-                        {
-                            percentChance = 1f,
-                            nonDatabasePlaceable = rider,
-                            enemyPlaceableGuid = null,
-                            prerequisites = array,
-                            materialRequirements = new DungeonPlaceableRoomMaterialRequirement[0]
-                        }
-                        };
-                        room.placedObjectPositions.Add(location);
-                        room.placedObjects.Add(new PrototypePlacedObjectData
-                        {
-                            contentsBasePosition = location,
-                            fieldData = new List<PrototypePlacedObjectFieldData>(),
-                            instancePrerequisites = array,
-                            linkedTriggerAreaIDs = new List<int>(),
-                            placeableContents = dungeonPlaceable,
-                        });
-                        //component.occupation = MineCartController.CartOccupationState.CARGO;
-                        component.MoveCarriedCargoIntoCart = true;
 
-                        component.carriedCargo = rider.GetComponent<SpeculativeRigidbody>();//rider.GetComponent<SpeculativeRigidbody>();
-                        component.occupation = MineCartController.CartOccupationState.CARGO;
-
-                    }
-                }
                 result = gameObject;
             }
             return result;

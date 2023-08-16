@@ -88,6 +88,9 @@ namespace Alexandria
                 {
                 });
                 ETGModConsole.Commands.GetGroup("alex").AddUnit("roomname", Lock);
+                ETGModConsole.Commands.GetGroup("alex").AddUnit("subtype", Lock2);
+                ETGModConsole.Commands.GetGroup("alex").AddUnit("npcparadisce", Lock3);
+
             }
             catch (Exception e)
             {
@@ -99,6 +102,15 @@ namespace Alexandria
         {
             RoomHandler currentRoom = GameManager.Instance.PrimaryPlayer.CurrentRoom;
             ETGModConsole.Log(currentRoom.GetRoomName());
+        }
+        public static void Lock2(string[] s)
+        {
+            RoomHandler currentRoom = GameManager.Instance.PrimaryPlayer.CurrentRoom;
+            ETGModConsole.Log(currentRoom.RoomVisualSubtype);
+        }
+        public static void Lock3(string[] s)
+        {
+            GameManager.Instance.LoadCustomFlowForDebug("NPCParadise", "Base_Castle", "tt_castle");
         }
 
         public IEnumerator delayedstarthandler()

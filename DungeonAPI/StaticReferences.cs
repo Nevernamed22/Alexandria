@@ -8,7 +8,7 @@ using Alexandria.ItemAPI;
 using Planetside;
 using System.Reflection;
 using MonoMod.RuntimeDetour;
-
+using System.Collections;
 
 namespace Alexandria.DungeonAPI
 {
@@ -202,13 +202,13 @@ namespace Alexandria.DungeonAPI
             //{
             //    Tools.LogPropertiesAndFields(data, data.annotation);
             //}
-
+                
 
             RoomIcons.LoadRoomIcons();
 
             RoomIcons.WinchesterRoomIcon = RoomTables["winchester"].includedRooms.elements[0].room.associatedMinimapIcon;
 
-
+            
             Dungeon keep_ = DungeonDatabase.GetOrLoadByName("base_castle");
             Dungeon sewer_ = DungeonDatabase.GetOrLoadByName("base_sewer");
             Dungeon proper_ = DungeonDatabase.GetOrLoadByName("base_gungeon");
@@ -216,7 +216,7 @@ namespace Alexandria.DungeonAPI
             Dungeon hollow_ = DungeonDatabase.GetOrLoadByName("base_catacombs");
             Dungeon hell_ = DungeonDatabase.GetOrLoadByName("base_bullethell");
 
-            StaticInjections.Keep_Injections_Sewer = keep_.PatternSettings.flows[0].sharedInjectionData[1];
+            StaticInjections.Keep_Injections_Sewer = keep_.PatternSettings.flows[1].sharedInjectionData[1];
             StaticInjections.Sewer_Injections = sewer_.PatternSettings.flows[0].sharedInjectionData[1];
             StaticInjections.Proper_Injections = proper_.PatternSettings.flows[0].sharedInjectionData[1];
             StaticInjections.Abbey_Injections = abbey_.PatternSettings.flows[0].sharedInjectionData[1];
@@ -224,18 +224,16 @@ namespace Alexandria.DungeonAPI
             StaticInjections.Hell_Injections = hell_.PatternSettings.flows[0].sharedInjectionData[0];
 
 
-            RoomTables.Add("sewerentrace", ProcessRoomTableThing(StaticInjections.Keep_Injections_Sewer.InjectionData[0]).roomTable);
+            RoomTables.Add("sewerentrace", ProcessRoomTableThing(StaticInjections.Keep_Injections_Sewer.InjectionData[0], 1).roomTable);
+
             RoomTables.Add("fireplace", keep_.PatternSettings.flows[0].sharedInjectionData[1].InjectionData[1].roomTable);
             RoomTables.Add("miscreward", keep_.PatternSettings.flows[0].sharedInjectionData[0].InjectionData[1].roomTable);
 
+
             RoomTables.Add("crestroom", ProcessRoomTableThing(StaticInjections.Sewer_Injections.InjectionData[1]).roomTable);
-
             RoomTables.Add("abbeyentrance", ProcessRoomTableThing(StaticInjections.Proper_Injections.InjectionData[0]).roomTable);
-
             RoomTables.Add("abbeyextrasecret", ProcessRoomTableThing(StaticInjections.Abbey_Injections.InjectionData[0]).roomTable);
-
             RoomTables.Add("rng_entry", ProcessRoomTableThing(StaticInjections.Hollow_Injections.InjectionData[1]).roomTable);
-
             RoomTables.Add("bullet_hell_secret", ProcessRoomTableThing(StaticInjections.Hell_Injections.InjectionData[0]).roomTable);
 
             keep_ = null;
@@ -244,18 +242,19 @@ namespace Alexandria.DungeonAPI
             abbey_ = null;
             hollow_ = null;
             hell_ = null;
-
-
+            
             ShrineTools.Print("Static references initialized.");
         }
 
-        /*
-         * 		Abbey_Entrance,
-		
-		Abbey_Extra_Secret,
+        public static IEnumerator DelayRemoveRoom(ProceduralFlowModifierData data)
+        {
+            yield return null;
+            yield return null;
 
-		Bullet_Hell_Secret,
-        */
+            data.exactRoom = null;
+            yield break;
+        }
+
         public static ProceduralFlowModifierData ProcessRoomTableThing(ProceduralFlowModifierData data, float defaultWeight = 1)
         {
             data.roomTable = ScriptableObject.CreateInstance<GenericRoomTable>();
@@ -273,7 +272,7 @@ namespace Alexandria.DungeonAPI
             };
             data.roomTable.includedRoomTables = new List<GenericRoomTable>() { };
             data.roomTable.name = ":)";
-            data.exactRoom = null;
+            GameManager.Instance.StartCoroutine(DelayRemoveRoom(data));
             return data;
         }
 

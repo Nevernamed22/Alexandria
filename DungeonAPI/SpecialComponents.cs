@@ -11,6 +11,19 @@ namespace Alexandria.DungeonAPI
     public class SpecialComponents
     {
 
+        public class Repositioner : MonoBehaviour
+        {
+            public Vector3 reposition = Vector3.zero;
+            public void Start()
+            {
+                this.transform.position += reposition;
+                var body = this.GetComponent<SpeculativeRigidbody>();
+                if (body != null)
+                {
+                    body.Reinitialize();
+                }
+            }
+        }
         public class ForceNearestToRide : MonoBehaviour
         {
             private MineCartController self;

@@ -84,12 +84,8 @@ namespace Alexandria
                 ETGMod.StartGlobalCoroutine(this.delayedstarthandler());
                 ETGModConsole.Log("AlexandriaLib started correctly. Ver. : "+VERSION);
 
-                ETGModConsole.Commands.AddGroup("alex", args =>
-                {
-                });
-                ETGModConsole.Commands.GetGroup("alex").AddUnit("roomname", Lock);
-                ETGModConsole.Commands.GetGroup("alex").AddUnit("subtype", Lock2);
-                ETGModConsole.Commands.GetGroup("alex").AddUnit("npcparadisce", Lock3);
+                //DungeonAPI.RoomFactory.BuildNewRoomFromResource("Alexandria/Testing/testMegaFinale.newroom");
+                //DungeonAPI.RoomFactory.BuildNewRoomFromResource("Alexandria/Testing/KP-Manuel.newroom");
 
             }
             catch (Exception e)
@@ -98,20 +94,7 @@ namespace Alexandria
             }
             
         }
-        public static void Lock(string[] s)
-        {
-            RoomHandler currentRoom = GameManager.Instance.PrimaryPlayer.CurrentRoom;
-            ETGModConsole.Log(currentRoom.GetRoomName());
-        }
-        public static void Lock2(string[] s)
-        {
-            RoomHandler currentRoom = GameManager.Instance.PrimaryPlayer.CurrentRoom;
-            ETGModConsole.Log(currentRoom.RoomVisualSubtype);
-        }
-        public static void Lock3(string[] s)
-        {
-            GameManager.Instance.LoadCustomFlowForDebug("NPCParadise", "Base_Castle", "tt_castle");
-        }
+
 
         public IEnumerator delayedstarthandler()
         {

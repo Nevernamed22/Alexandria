@@ -67,10 +67,12 @@
     <Compile Include="ChestAPI\ChestUtility.cs" />
     <Compile Include="DungeonAPI\BreachExtensions.cs" />
     <Compile Include="DungeonAPI\MasteryOverrideHandler.cs" />
+    <Compile Include="DungeonAPI\RoomIcons.cs" />
     <Compile Include="DungeonAPI\RoomUtility.cs" />
     <Compile Include="DungeonAPI\RuntimeDungeonEditing.cs" />
     <Compile Include="DungeonAPI\SetupExoticObjects.cs" />
     <Compile Include="DungeonAPI\SpecialComponents.cs" />
+    <Compile Include="DungeonAPI\StaticInjections.cs" />
     <Compile Include="EnemyAPI\AIActorUtility.cs" />
     <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
     <Compile Include="EnemyAPI\EnemyBuildingTools.cs" />
@@ -220,6 +222,8 @@
   <ItemGroup>
     <None Include=".editorconfig" />
     <None Include="packages.config" />
+    <EmbeddedResource Include="Testing\testMegaFinale.newroom" />
+    <EmbeddedResource Include="Testing\KP-Manuel.newroom" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

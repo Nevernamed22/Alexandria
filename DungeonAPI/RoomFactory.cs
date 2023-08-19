@@ -35,9 +35,7 @@ namespace Alexandria.DungeonAPI
 
         public static Dictionary<string, RoomData> LoadRoomsFromRoomDirectory(string modPrefix, string roomDirectory)
         {
-
             var loadedRooms = new Dictionary<string, RoomData>();
-
             Directory.CreateDirectory(roomDirectory);
             foreach (string g in Directory.GetFiles(roomDirectory, "*", SearchOption.AllDirectories))
             {
@@ -70,33 +68,55 @@ namespace Alexandria.DungeonAPI
             return loadedRooms;
         }
 
-        public static RoomData BuildFromRoomFile(string roomPath)
+        private static RoomData BuildFromRoomFile(string roomPath)
         {
             var texture = ResourceExtractor.GetTextureFromFile(roomPath, ".room");
             texture.name = Path.GetFileName(roomPath);
             RoomData roomData = ExtractRoomDataFromFile(roomPath);
             roomData.room = Build(texture, roomData);
+            rooms.Add(roomData.room.name, roomData);
+
             return roomData;
         }
 
-        public static RoomData BuildFromRoomFileWithoutTexture(string roomPath)
+
+        private static RoomData BuildFromRoomFileWithoutTexture(string roomPath)
         {
             //ETGModConsole.Log(roomPath);
             RoomData roomData = ExtractRoomDataFromFile(roomPath);
             roomData.name = Path.GetFileName(roomPath);
             roomData.room = Build(roomData);
+            rooms.Add(roomData.room.name, roomData);
             return roomData;
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="roomPath"></param>
+        /// <param name="assembly"></param>
+        /// <returns></returns>
         public static RoomData BuildFromResource(string roomPath, Assembly assembly = null)
         {
             var texture = ResourceExtractor.GetTextureFromResource(roomPath, assembly ?? Assembly.GetCallingAssembly());
             texture.name = Path.GetFileName(roomPath);
             RoomData roomData = ExtractRoomDataFromResource(roomPath, assembly ?? Assembly.GetCallingAssembly());
             roomData.room = Build(texture, roomData);
+            rooms.Add(roomData.room.name, roomData);
+            DungeonHandler.Register(roomData);
             return roomData;
         }
+
+        public static RoomData BuildNewRoomFromResource(string roomPath, Assembly assembly = null)
+        {
+            RoomData roomData = ExtractRoomDataFromResource(roomPath, assembly ?? Assembly.GetCallingAssembly());
+            roomData.name = Path.GetFileName(roomPath);
+            roomData.room = Build(roomData);
+            rooms.Add(roomData.room.name, roomData);
+            DungeonHandler.Register(roomData);
+            return roomData;
+        }
+
 
         public static PrototypeDungeonRoom Build(RoomData roomData)
         {
@@ -350,7 +370,7 @@ namespace Alexandria.DungeonAPI
         public static RoomData ExtractRoomDataFromResource(string path, Assembly assembly = null)
         {
             byte[] data = ResourceExtractor.ExtractEmbeddedResource(path, assembly ?? Assembly.GetCallingAssembly());
-            return ExtractRoomDataFromBytes(data);
+            return path.EndsWith(".newroom") ? ExtractRoomDataFromBytesWithoutHeadder(data) : ExtractRoomDataFromBytes(data);
         }
 
         public static RoomData ExtractRoomDataWithoutHeader(string data)
@@ -827,7 +847,7 @@ namespace Alexandria.DungeonAPI
                         JToken value2;
                         float speed = jobject.TryGetValue("WinchestTargetSpeed", out value2) ? ((float)value2) : 6;
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
-                        gameObject.GetComponent<PathMover>().PathSpeed = speed;
+                        gameObject.GetComponent<PathMover>().OriginalPathSpeed = speed;
                     }
                     if (assetPath == "ConveyorHorizontal" | assetPath == "ConveyorVertical")
                     {
@@ -915,6 +935,7 @@ namespace Alexandria.DungeonAPI
                             else if(type == "Grenade.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("grenade").BulletObject.GetComponent<Projectile>(); } //Dragun Bouncy
                             else if(type == "Molotov.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("molotov").BulletObject.GetComponent<Projectile>(); }
                             else if (type == "Goblet.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("ffca09398635467da3b1f4a54bcfda80").bulletBank.GetBullet("goblet").BulletObject.GetComponent<Projectile>(); }
+
                         }
                     }
                     if (assetPath == "pew")
@@ -940,8 +961,12 @@ namespace Alexandria.DungeonAPI
                     {
                         JToken value2;
                         int lentgh = jobject.TryGetValue("logLength", out value2) ? ((int)value2) : 4;
+                        float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
+
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
                         var collider = gameObject.GetComponent<ResizableCollider>();
+                        var path = gameObject.GetComponent<PathMover>();
+                        path.OriginalPathSpeed = maxSpeed;
                         collider.NumTiles = lentgh;
                         collider.IsHorizontal = true;
                     }
@@ -949,13 +974,51 @@ namespace Alexandria.DungeonAPI
                     {
                         JToken value2;
                         int lentgh = jobject.TryGetValue("logHeight", out value2) ? ((int)value2) : 4;
+                        float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
+
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
                         var collider = gameObject.GetComponent<ResizableCollider>();
+
+                        var path = gameObject.GetComponent<PathMover>();
+                        path.OriginalPathSpeed = maxSpeed;
                         collider.NumTiles = lentgh;
                         collider.IsHorizontal = false;
                     }
-                }
+                    if (assetPath == "lonk_NPC_pathing")
+                    {
+                        JToken value2;
+                        float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var path = gameObject.GetComponent<PathMover>();
+                        path.OriginalPathSpeed = maxSpeed;
+                    }
+                    if (assetPath == "flame_pipe_north" | assetPath == "flame_pipe_west" | assetPath == "flame_pipe_east")
+                    {
+                        JToken value2;
+                        float lifetime = jobject.TryGetValue("lf_pipe", out value2) ? ((float)value2) : 10f;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var collider = gameObject.GetComponent<ForgeFlamePipeController>();
+                        collider.TimeToSpew = lifetime;
+                    }
+                    if (assetPath == "OmniMovingPlatform_pathing" | assetPath == "OmniMovingPlatformMines_pathing" | assetPath == "OmniMovingPlatformSewer_pathing" | assetPath == "OmniMovingPlatformHollow_pathing" | assetPath == "OmniMovingPlatformForge_pathing")
+                    {
+                        JToken value2;
+                        float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
+                        int X = jobject.TryGetValue("TileSizeX_", out value2) ? ((int)value2) : 3;
+                        int Y = jobject.TryGetValue("TileSizeY_", out value2) ? ((int)value2) : 3;
 
+
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var path = gameObject.GetComponent<PathMover>();
+                        path.OriginalPathSpeed = maxSpeed;
+
+                        var mover = gameObject.GetComponent<MovingPlatform>();
+                        mover.UsesDwarfConfigurableSize = true;
+                        mover.DwarfConfigurableWidth = X;
+                        mover.DwarfConfigurableHeight = Y;
+
+                    }
+                }
 
                 if (!gameObject && StaticReferences.customObjects.ContainsKey(assetPath))
                 {
@@ -1113,10 +1176,6 @@ namespace Alexandria.DungeonAPI
             }
         }
 
-        private static IEnumerator WinchesterTime()
-        {
-            yield break;
-        }
         public static void AddPlaceableToRoomLegecy(PrototypeDungeonRoom room, Vector2 location, string assetPath)
         {
             try
@@ -1791,8 +1850,7 @@ namespace Alexandria.DungeonAPI
             public PrototypeDungeonRoom room;
             public int visualSubtype;
 
-            public string bossPool;
-            public bool isWinchester;
+            public string superSpecialRoomType;
 
             public float AmbientLight_R;
             public float AmbientLight_G;

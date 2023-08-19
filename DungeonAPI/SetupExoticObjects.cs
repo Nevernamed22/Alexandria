@@ -39,10 +39,35 @@ namespace Alexandria.DungeonAPI
 			Dungeon dungeon10 = DungeonDatabase.GetOrLoadByName("finalscenario_robot");
 			Dungeon dungeon11 = DungeonDatabase.GetOrLoadByName("finalscenario_convict");
 			Dungeon dungeon12 = DungeonDatabase.GetOrLoadByName("finalscenario_soldier");
-			Dungeon dungeon13 = DungeonDatabase.GetOrLoadByName("finalscenario_guide");
+			Dungeon dungeon13 = DungeonDatabase.GetOrLoadByName("finalscenario_guide");	
 
 
             //            //ExplosiveBarrelMinecart
+
+            foreach (WeightedRoom weightedRoom in dungeon7.PatternSettings.flows[0].fallbackRoomTable.includedRooms.elements)
+            {
+                if (weightedRoom.room != null && !string.IsNullOrEmpty(weightedRoom.room.name))
+                {
+                    if (weightedRoom.room.name.ToLower().StartsWith("forge_joe_hot_fire_004"))
+                    {
+                        Moving_Platform_Forge = weightedRoom.room.placedObjects[0].nonenemyBehaviour.gameObject;
+
+                        //Moving_Platform_Hollow = weightedRoom.room.placedObjects[6].nonenemyBehaviour.gameObject;
+                    }
+                }
+            }
+
+
+            foreach (WeightedRoom weightedRoom in dungeon5.PatternSettings.flows[0].fallbackRoomTable.includedRooms.elements)
+			{
+				if (weightedRoom.room != null && !string.IsNullOrEmpty(weightedRoom.room.name))
+				{
+					if (weightedRoom.room.name.ToLower().StartsWith("hollow_joeki_004"))
+					{
+                        Moving_Platform_Hollow = weightedRoom.room.placedObjects[6].nonenemyBehaviour.gameObject;               
+                    }
+				}
+			}
 
             foreach (WeightedRoom weightedRoom in dungeon3.PatternSettings.flows[0].fallbackRoomTable.includedRooms.elements)
             {
@@ -62,7 +87,7 @@ namespace Alexandria.DungeonAPI
 								{
                                     CharacterAPI.ToolsCharApi.LogPropertiesAndFields(comp, "components: " + i);
                                     //ETGModConsole.Log(placed.nonenemyBehaviour.gameObject.name  + "[" + i + "]");
-                                    i++;
+                                    i++;	
                                 }
 								*/
 
@@ -70,6 +95,24 @@ namespace Alexandria.DungeonAPI
 						}
                         //SetupExoticObjects.HorizontalCrusher = weightedRoom.room.placedObjects[0].nonenemyBehaviour.gameObject;
                     }
+					
+					if (weightedRoom.room.name.ToLower().StartsWith("mines_trap_dart_room_001"))
+					{
+                        Moving_Platform_Mines = weightedRoom.room.placedObjects[0].nonenemyBehaviour.gameObject;
+
+						/*
+                        int i = 0;
+                        foreach (var placed in weightedRoom.room.placedObjects)
+                        {
+                            if (placed.nonenemyBehaviour != null)
+                            {
+                                ETGModConsole.Log(placed.nonenemyBehaviour.name + " : " + i);
+                            }
+                            i++;
+                        }
+						*/
+                    }
+					
                 }
             }
             foreach (WeightedRoom weightedRoom in dungeon.PatternSettings.flows[0].fallbackRoomTable.includedRooms.elements)
@@ -80,8 +123,12 @@ namespace Alexandria.DungeonAPI
 					{
 						SetupExoticObjects.HorizontalCrusher = weightedRoom.room.placedObjects[0].nonenemyBehaviour.gameObject;
 					}
-				}
-			}
+                    if (weightedRoom.room.name.ToLower().StartsWith("sewer_trap_room_001"))
+					{
+                        Moving_Platform_Sewer = weightedRoom.room.placedObjects[0].nonenemyBehaviour.gameObject;
+                    }
+                }
+            }
 			foreach (WeightedRoom weightedRoom2 in dungeon7.PatternSettings.flows[0].fallbackRoomTable.includedRooms.elements)
 			{
 				if (weightedRoom2.room != null && !string.IsNullOrEmpty(weightedRoom2.room.name))
@@ -759,10 +806,116 @@ namespace Alexandria.DungeonAPI
             SetupExoticObjects.TombStone_NW = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_top_right");
             SetupExoticObjects.TombStone_NE = LoadHelper.LoadAssetFromAnywhere<GameObject>("tombstone_top_left");
 
+			SetupExoticObjects.Sewer_Entrance = orLoadByName.PatternSettings.flows[0].sharedInjectionData[1].InjectionData[0].exactRoom.placedObjects[0].nonenemyBehaviour.gameObject;
+            SetupExoticObjects.Sewer_Entrace_Angry_Button = orLoadByName.PatternSettings.flows[0].sharedInjectionData[1].InjectionData[0].exactRoom.placedObjects[1].nonenemyBehaviour.gameObject;
+            SetupExoticObjects.Keep_Fireplace = LoadHelper.LoadAssetFromAnywhere<GameObject>("fireplace");
+
+			SetupExoticObjects.Moving_Platform_Proper = LoadHelper.LoadAssetFromAnywhere<GameObject>("default_platform_3x3");
+
+
+
+            /*
+			        public static GameObject Moving_Platform_Sewer;
+        public static GameObject Moving_Platform_Mines;
+        public static GameObject Moving_Platform_Hollow;
+        public static GameObject Moving_Platform_Forge;
+			*/
+
+            SetupExoticObjects.Bullet_King_Arena_Floor = LoadHelper.LoadAssetFromAnywhere<GameObject>("bulletkingdiasandwall");
+            SetupExoticObjects.Bullet_King_Arena_MainWall = LoadHelper.LoadAssetFromAnywhere<GameObject>("bulletkingwall_layer_003").InstantiateAndFakeprefab();
+            SetupExoticObjects.Bullet_King_Arena_MainWall.AddComponent<Repositioner>().reposition = new Vector3(-7, -5);
+            SetupExoticObjects.Bullet_King_Arena_SideWall_1 = LoadHelper.LoadAssetFromAnywhere<GameObject>("bulletkingwall_layer_001");
+            SetupExoticObjects.Bullet_King_Arena_SideWall_2 = LoadHelper.LoadAssetFromAnywhere<GameObject>("bulletkingwall_layer_002").InstantiateAndFakeprefab();
+            SetupExoticObjects.Bullet_King_Arena_SideWall_2.AddComponent<Repositioner>().reposition = new Vector3(-4, -4);
+
+            SetupExoticObjects.Wallmonger_Arena_Floor = LoadHelper.LoadAssetFromAnywhere<GameObject>("demonwallroomplaceable");
+
+            SetupExoticObjects.Old_King_Arena_Floor = LoadHelper.LoadAssetFromAnywhere<GameObject>("bulletkingolddiasandwall");
+            SetupExoticObjects.Old_King_Arena_MainWall = LoadHelper.LoadAssetFromAnywhere<GameObject>("bulletkingoldwall_layer_003").InstantiateAndFakeprefab();
+            SetupExoticObjects.Old_King_Arena_MainWall.AddComponent<Repositioner>().reposition = new Vector3(-7, -5);
+
+            SetupExoticObjects.Old_King_Arena_SideWall_1 = LoadHelper.LoadAssetFromAnywhere<GameObject>("bulletkingoldwall_layer_001");
+            SetupExoticObjects.Old_King_Arena_SideWall_2 = LoadHelper.LoadAssetFromAnywhere<GameObject>("bulletkingoldwall_layer_002").InstantiateAndFakeprefab();
+			SetupExoticObjects.Old_King_Arena_SideWall_2.AddComponent<Repositioner>().reposition = new Vector3(-4, -4);
+
 
             SetupExoticObjects.objects = new Dictionary<string, GameObject>
 			{
-				{
+
+                {
+                    "OmniMovingPlatform_pathing",
+                    SetupExoticObjects.Moving_Platform_Proper
+                },
+                {
+                    "OmniMovingPlatformMines_pathing",
+                    SetupExoticObjects.Moving_Platform_Mines
+                },
+                {
+                    "OmniMovingPlatformSewer_pathing",
+                    SetupExoticObjects.Moving_Platform_Sewer
+                },
+                {
+                    "OmniMovingPlatformHollow_pathing",
+                    SetupExoticObjects.Moving_Platform_Hollow
+                },
+                {
+                    "OmniMovingPlatformForge_pathing",
+                    SetupExoticObjects.Moving_Platform_Forge
+                },
+                {
+                    "Old_King_Arena_Floor",
+                    SetupExoticObjects.Old_King_Arena_Floor
+                },
+                {
+                    "Old_King_Arena_MainWall",
+                    SetupExoticObjects.Old_King_Arena_MainWall
+                },
+                {
+                    "Old_King_Arena_SideWall_1",
+                    SetupExoticObjects.Old_King_Arena_SideWall_1
+                },
+                {
+                    "Old_King_Arena_SideWall_2",
+                    SetupExoticObjects.Old_King_Arena_SideWall_2
+                },
+
+
+                {
+                    "Wallmonger_Arena_Floor",
+                    SetupExoticObjects.Wallmonger_Arena_Floor
+                },
+
+                {
+                    "Bullet_King_Arena_Floor",
+                    SetupExoticObjects.Bullet_King_Arena_Floor
+                },
+                {
+                    "Bullet_King_Arena_MainWall",
+                    SetupExoticObjects.Bullet_King_Arena_MainWall
+                },
+                {
+                    "Bullet_King_Arena_SideWall_1",
+                    SetupExoticObjects.Bullet_King_Arena_SideWall_1
+                },
+                {
+                    "Bullet_King_Arena_SideWall_2",
+                    SetupExoticObjects.Bullet_King_Arena_SideWall_2
+                },
+
+                {
+                    "Keep_Fireplace",
+                    SetupExoticObjects.Keep_Fireplace
+                },
+                {
+                    "Sewer_Entrace_Angry_Button",
+                    SetupExoticObjects.Sewer_Entrace_Angry_Button
+                },
+                {
+                    "Sewer_Entrance",
+                    SetupExoticObjects.Sewer_Entrance
+                },
+
+                {
                     "TombStone_N",
                     SetupExoticObjects.TombStone_N
                 },
@@ -2018,6 +2171,30 @@ namespace Alexandria.DungeonAPI
 
         public static GameObject Spinning_Ice_Log_Horizontal;
         public static GameObject Spinning_Ice_Log_Vertical;
+
+        public static GameObject Sewer_Entrance;
+        public static GameObject Sewer_Entrace_Angry_Button;
+        public static GameObject Keep_Fireplace;
+
+        public static GameObject Moving_Platform_Proper;
+        public static GameObject Moving_Platform_Sewer;
+        public static GameObject Moving_Platform_Mines;
+        public static GameObject Moving_Platform_Hollow;
+        public static GameObject Moving_Platform_Forge;
+
+
+        public static GameObject Bullet_King_Arena_Floor;
+        public static GameObject Bullet_King_Arena_MainWall;
+        public static GameObject Bullet_King_Arena_SideWall_1;
+        public static GameObject Bullet_King_Arena_SideWall_2;
+
+        public static GameObject Wallmonger_Arena_Floor;
+
+
+        public static GameObject Old_King_Arena_Floor;
+        public static GameObject Old_King_Arena_MainWall;
+        public static GameObject Old_King_Arena_SideWall_1;
+        public static GameObject Old_King_Arena_SideWall_2;
 
         public static Dictionary<string, GameObject> objects = new Dictionary<string, GameObject>();
 	}

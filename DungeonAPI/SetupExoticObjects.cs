@@ -39,10 +39,13 @@ namespace Alexandria.DungeonAPI
 			Dungeon dungeon10 = DungeonDatabase.GetOrLoadByName("finalscenario_robot");
 			Dungeon dungeon11 = DungeonDatabase.GetOrLoadByName("finalscenario_convict");
 			Dungeon dungeon12 = DungeonDatabase.GetOrLoadByName("finalscenario_soldier");
-			Dungeon dungeon13 = DungeonDatabase.GetOrLoadByName("finalscenario_guide");	
+			Dungeon dungeon13 = DungeonDatabase.GetOrLoadByName("finalscenario_guide");
 
 
-            //            //ExplosiveBarrelMinecart
+
+            SetupExoticObjects.ForgeGunTrap_North = LoadHelper.LoadAssetFromAnywhere<GameObject>("forge_face_shootssouth");
+            SetupExoticObjects.ForgeGunTrap_East = LoadHelper.LoadAssetFromAnywhere<GameObject>("forge_face_shootswest");
+            SetupExoticObjects.ForgeGunTrap_West = LoadHelper.LoadAssetFromAnywhere<GameObject>("forge_face_shootseast");
 
             foreach (WeightedRoom weightedRoom in dungeon7.PatternSettings.flows[0].fallbackRoomTable.includedRooms.elements)
             {
@@ -66,21 +69,47 @@ namespace Alexandria.DungeonAPI
 					{
                         Moving_Platform_Hollow = weightedRoom.room.placedObjects[6].nonenemyBehaviour.gameObject;               
                     }
-				}
+                    if (weightedRoom.room.name.ToLower().StartsWith("hollow_turret_line_001"))
+                    {
+						HollowGunTrap_North = weightedRoom.room.placedObjects[3].nonenemyBehaviour.gameObject;
+                        HollowGunTrap_East = weightedRoom.room.placedObjects[2].nonenemyBehaviour.gameObject;
+                        HollowGunTrap_West = weightedRoom.room.placedObjects[0].nonenemyBehaviour.gameObject;
+                    }
+                }
 			}
 
             foreach (WeightedRoom weightedRoom in dungeon3.PatternSettings.flows[0].fallbackRoomTable.includedRooms.elements)
             {
                 if (weightedRoom.room != null && !string.IsNullOrEmpty(weightedRoom.room.name))
                 {
+                    if (weightedRoom.room.name.ToLower().StartsWith("mines_trap_dart_room_001"))
+					{
+                        MinesGunTrap_North = weightedRoom.room.placedObjects[3].nonenemyBehaviour.gameObject;
+                        MinesGunTrap_East = weightedRoom.room.placedObjects[7].nonenemyBehaviour.gameObject;
+                        MinesGunTrap_West = weightedRoom.room.placedObjects[8].nonenemyBehaviour.gameObject;
+                        /*
+                        int i = 0;
+                        foreach (var placed in weightedRoom.room.placedObjects)
+                        {
+                            if (placed.nonenemyBehaviour != null)
+                            {
+                                ETGModConsole.Log(placed.nonenemyBehaviour.name + " : " + i);
+                            }
+                            i++;
+                        }
+						*/
+                    }
+
                     if (weightedRoom.room.name.ToLower().StartsWith("mines_ign_normal_shelleton_01_b"))
                     {
 						foreach (var placed in weightedRoom.room.placedObjects)
 						{
 							if (placed.nonenemyBehaviour != null)
 							{
-								ExplosiveBarrelMinecart = placed.nonenemyBehaviour.gameObject.GetComponent<MineCartFactory>().MineCartPrefab.gameObject;
+								ExplosiveBarrelMinecart = placed.nonenemyBehaviour.gameObject.GetComponent<MineCartFactory>().MineCartPrefab.gameObject.InstantiateAndFakeprefab();
 								ExplosiveBarrelMinecart.GetComponent<MineCartController>().MoveCarriedCargoIntoCart = true;
+
+								MinecarftFactory_Object = placed.nonenemyBehaviour.gameObject.InstantiateAndFakeprefab();
 								/*
 									int i = 0;
                                 foreach (var comp in placed.nonenemyBehaviour.gameObject.GetComponents<Component>())
@@ -93,6 +122,15 @@ namespace Alexandria.DungeonAPI
 
                             }
 						}
+                        int i = 0;
+                        foreach (var placed in weightedRoom.room.placedObjects)
+                        {
+                            if (placed.nonenemyBehaviour != null)
+                            {
+                                ETGModConsole.Log(placed.nonenemyBehaviour.name + " : " + i);
+                            }
+                            i++;
+                        }
                         //SetupExoticObjects.HorizontalCrusher = weightedRoom.room.placedObjects[0].nonenemyBehaviour.gameObject;
                     }
 					
@@ -540,48 +578,58 @@ namespace Alexandria.DungeonAPI
             SetupExoticObjects.KeepSconceSideLeft = LoadHelper.LoadAssetFromAnywhere<GameObject>("sconce_light_side");
 			SetupExoticObjects.KeepSconceSideRight = FakePrefabExtensions.InstantiateAndFakeprefab(LoadHelper.LoadAssetFromAnywhere<GameObject>("sconce_light_side")).gameObject;
 			SetupExoticObjects.KeepSconceSideRight.GetComponent<tk2dBaseSprite>().FlipX = true;
+            SetupExoticObjects.KeepSconceSideRight.AddComponent<Repositioner>().reposition = new Vector3(-1, 0);
+
+            
 
             SetupExoticObjects.BasicTorch = LoadHelper.LoadAssetFromAnywhere<GameObject>("defaulttorch");
             SetupExoticObjects.BasicTorchSideLeft = LoadHelper.LoadAssetFromAnywhere<GameObject>("defaulttorchside");
             SetupExoticObjects.BasicTorchSideRight = FakePrefabExtensions.InstantiateAndFakeprefab(LoadHelper.LoadAssetFromAnywhere<GameObject>("defaulttorchside")).gameObject;
             SetupExoticObjects.BasicTorchSideRight.GetComponent<tk2dBaseSprite>().FlipX = true;
+            SetupExoticObjects.BasicTorchSideRight.AddComponent<Repositioner>().reposition = new Vector3(-1, 0);
 
 
             SetupExoticObjects.CandleabraHorizontal = dungeon2.roomMaterialDefinitions[0].facewallLightStamps[0].objectReference;
             SetupExoticObjects.CandleabraLeft = dungeon2.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference;
             SetupExoticObjects.CandleabraRight = FakePrefabExtensions.InstantiateAndFakeprefab(dungeon2.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference).gameObject;
             SetupExoticObjects.CandleabraRight.GetComponent<tk2dBaseSprite>().FlipX = true;
+            SetupExoticObjects.CandleabraRight.AddComponent<Repositioner>().reposition = new Vector3(-1, 0);
 
             SetupExoticObjects.MineLanternHorizontal = dungeon3.roomMaterialDefinitions[0].facewallLightStamps[0].objectReference;
             SetupExoticObjects.MineLanternLeft = dungeon3.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference;
             SetupExoticObjects.MineLanternRight = FakePrefabExtensions.InstantiateAndFakeprefab(dungeon3.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference).gameObject;
             SetupExoticObjects.MineLanternRight.GetComponent<tk2dBaseSprite>().FlipX = true;
-            
-			SetupExoticObjects.BurningSkeleton_Horizontal = dungeon8.roomMaterialDefinitions[0].facewallLightStamps[0].objectReference;
+            SetupExoticObjects.MineLanternRight.AddComponent<Repositioner>().reposition = new Vector3(-1, 0);
+
+            SetupExoticObjects.BurningSkeleton_Horizontal = dungeon8.roomMaterialDefinitions[0].facewallLightStamps[0].objectReference;
             SetupExoticObjects.BurningSkeleton_Left = dungeon8.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference;
             SetupExoticObjects.BurningSkeleton_Right = FakePrefabExtensions.InstantiateAndFakeprefab(dungeon8.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference).gameObject;
             SetupExoticObjects.BurningSkeleton_Right.GetComponent<tk2dBaseSprite>().FlipX = true;
-            
-			SetupExoticObjects.LavaLight_Horizontal = dungeon7.roomMaterialDefinitions[0].facewallLightStamps[0].objectReference;
+            SetupExoticObjects.BurningSkeleton_Right.AddComponent<Repositioner>().reposition = new Vector3(-1, 0);
+
+            SetupExoticObjects.LavaLight_Horizontal = dungeon7.roomMaterialDefinitions[0].facewallLightStamps[0].objectReference;
             SetupExoticObjects.LavaLight_Left = dungeon7.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference;
             SetupExoticObjects.LavaLight_Right = FakePrefabExtensions.InstantiateAndFakeprefab(dungeon7.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference).gameObject;
             SetupExoticObjects.LavaLight_Right.GetComponent<tk2dBaseSprite>().FlipX = true;
+            SetupExoticObjects.LavaLight_Right.AddComponent<Repositioner>().reposition = new Vector3(-1, 0);
 
             SetupExoticObjects.OfficeLight_Horizontal = dungeon6.roomMaterialDefinitions[0].facewallLightStamps[0].objectReference;
             SetupExoticObjects.OfficeLight_Left = dungeon6.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference;
             SetupExoticObjects.OfficeLight_Right = FakePrefabExtensions.InstantiateAndFakeprefab(dungeon6.roomMaterialDefinitions[0].sidewallLightStamps[0].objectReference.gameObject);
             SetupExoticObjects.OfficeLight_Right.GetComponent<tk2dBaseSprite>().FlipX = true;
+            SetupExoticObjects.OfficeLight_Right.AddComponent<Repositioner>().reposition = new Vector3(-1, 0);
 
             SetupExoticObjects.WeirdGreenLight_Horizontal = dungeon6.roomMaterialDefinitions[7].facewallLightStamps[0].objectReference;
             SetupExoticObjects.WeirdGreenLight_Left = dungeon6.roomMaterialDefinitions[7].sidewallLightStamps[0].objectReference;
             SetupExoticObjects.WeirdGreenLight_Right = FakePrefabExtensions.InstantiateAndFakeprefab(dungeon6.roomMaterialDefinitions[7].sidewallLightStamps[0].objectReference);
             SetupExoticObjects.WeirdGreenLight_Right.GetComponent<tk2dBaseSprite>().FlipX = true;
+            SetupExoticObjects.WeirdGreenLight_Right.AddComponent<Repositioner>().reposition = new Vector3(-1, 0);
 
             //abbeyDungeon.roomMaterialDefinitions[0].facewallLightStamps[0].objectReference;
 
 
 
-			SetupExoticObjects.LostAdventurer = LoadHelper.LoadAssetFromAnywhere<GameObject>("npc_lostadventurer");
+            SetupExoticObjects.LostAdventurer = LoadHelper.LoadAssetFromAnywhere<GameObject>("npc_lostadventurer");
             SetupExoticObjects.BlobulordGrate = LoadHelper.LoadAssetFromAnywhere<GameObject>("blobulordgrate");
             SetupExoticObjects.TreadnoughtPillar = LoadHelper.LoadAssetFromAnywhere<GameObject>("breakablecolumn");
             SetupExoticObjects.TreadnoughtPillarDestroyed = LoadHelper.LoadAssetFromAnywhere<GameObject>("brokencolumn");
@@ -781,10 +829,6 @@ namespace Alexandria.DungeonAPI
 
 			SetupExoticObjects.BulletPast_PitfallTrap = dungeon9.PatternSettings.flows[0].AllNodes[3].overrideExactRoom.placedObjects[1].nonenemyBehaviour.gameObject;
 
-            SetupExoticObjects.ForgeGunTrap_North = LoadHelper.LoadAssetFromAnywhere<GameObject>("forge_face_shootssouth");
-            SetupExoticObjects.ForgeGunTrap_East = LoadHelper.LoadAssetFromAnywhere<GameObject>("forge_face_shootswest");
-            SetupExoticObjects.ForgeGunTrap_West = LoadHelper.LoadAssetFromAnywhere<GameObject>("forge_face_shootseast");
-
             SetupExoticObjects.MouseTrap_North = EnemyDatabase.GetOrLoadByGuid("6868795625bd46f3ae3e4377adce288b").GetComponent<ResourcefulRatController>().MouseTraps[0];
             SetupExoticObjects.MouseTrap_East = EnemyDatabase.GetOrLoadByGuid("6868795625bd46f3ae3e4377adce288b").GetComponent<ResourcefulRatController>().MouseTraps[1];
             SetupExoticObjects.MouseTrap_West = EnemyDatabase.GetOrLoadByGuid("6868795625bd46f3ae3e4377adce288b").GetComponent<ResourcefulRatController>().MouseTraps[2];
@@ -839,8 +883,53 @@ namespace Alexandria.DungeonAPI
 			SetupExoticObjects.Old_King_Arena_SideWall_2.AddComponent<Repositioner>().reposition = new Vector3(-4, -4);
 
 
+
+
             SetupExoticObjects.objects = new Dictionary<string, GameObject>
 			{
+                {
+                    "minecartFactory",
+                    SetupExoticObjects.MinecarftFactory_Object
+                },
+
+                {
+                    "forge_face_shootssouth",
+                    SetupExoticObjects.ForgeGunTrap_North
+                },
+                {
+                    "forge_face_shootswest",
+                    SetupExoticObjects.ForgeGunTrap_East
+                },
+                {
+                    "forge_face_shootseast",
+                    SetupExoticObjects.ForgeGunTrap_West
+                },
+                {
+                    "mines_face_shootssouth",
+                    SetupExoticObjects.MinesGunTrap_North
+                },
+                {
+                    "mines_face_shootswest",
+                    SetupExoticObjects.MinesGunTrap_East
+                },
+                {
+                    "mines_face_shootseast",
+                    SetupExoticObjects.MinesGunTrap_West
+                },
+
+                {
+                    "hollow_face_shootssouth",
+                    SetupExoticObjects.HollowGunTrap_North
+                },
+                {
+                    "hollow_face_shootswest",
+                    SetupExoticObjects.HollowGunTrap_East
+                },
+                {
+                    "hollow_face_shootseast",
+                    SetupExoticObjects.HollowGunTrap_West
+                },
+
 
                 {
                     "OmniMovingPlatform_pathing",
@@ -980,18 +1069,7 @@ namespace Alexandria.DungeonAPI
                     SetupExoticObjects.MouseTrap_West
                 },
 
-                {
-                    "forge_face_shootssouth",
-                    SetupExoticObjects.ForgeGunTrap_North
-                },
-                {
-                    "forge_face_shootswest",
-                    SetupExoticObjects.ForgeGunTrap_East
-                },
-                {
-                    "forge_face_shootseast",
-                    SetupExoticObjects.ForgeGunTrap_West
-                },
+               
 
                 {
                     "bulletPastPitfalltrap",
@@ -2158,9 +2236,6 @@ namespace Alexandria.DungeonAPI
 
         public static GameObject BulletPast_PitfallTrap;
 
-        public static GameObject ForgeGunTrap_North;
-        public static GameObject ForgeGunTrap_East;
-        public static GameObject ForgeGunTrap_West;
 
         public static GameObject MouseTrap_North;
         public static GameObject MouseTrap_East;
@@ -2195,6 +2270,21 @@ namespace Alexandria.DungeonAPI
         public static GameObject Old_King_Arena_MainWall;
         public static GameObject Old_King_Arena_SideWall_1;
         public static GameObject Old_King_Arena_SideWall_2;
+
+        public static GameObject ForgeGunTrap_North;
+        public static GameObject ForgeGunTrap_East;
+        public static GameObject ForgeGunTrap_West;
+
+        public static GameObject HollowGunTrap_North;
+        public static GameObject HollowGunTrap_East;
+        public static GameObject HollowGunTrap_West;
+
+        public static GameObject MinesGunTrap_North;
+        public static GameObject MinesGunTrap_East;
+        public static GameObject MinesGunTrap_West;
+
+        public static GameObject MinecarftFactory_Object;
+
 
         public static Dictionary<string, GameObject> objects = new Dictionary<string, GameObject>();
 	}

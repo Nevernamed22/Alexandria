@@ -9,6 +9,7 @@ using Planetside;
 using System.Reflection;
 using MonoMod.RuntimeDetour;
 using System.Collections;
+using HarmonyLib;
 
 namespace Alexandria.DungeonAPI
 {
@@ -223,19 +224,19 @@ namespace Alexandria.DungeonAPI
             StaticInjections.Hollow_Injections = hollow_.PatternSettings.flows[0].sharedInjectionData[1];
             StaticInjections.Hell_Injections = hell_.PatternSettings.flows[0].sharedInjectionData[0];
 
-
-            RoomTables.Add("sewerentrace", ProcessRoomTableThing(StaticInjections.Keep_Injections_Sewer.InjectionData[0], 1).roomTable);
+            
+            RoomTables.Add("sewerentrace", ProcessRoomTableThing(StaticInjections.Keep_Injections_Sewer, StaticInjections.Keep_Injections_Sewer.InjectionData[0], 1).roomTable);
 
             RoomTables.Add("fireplace", keep_.PatternSettings.flows[0].sharedInjectionData[1].InjectionData[1].roomTable);
             RoomTables.Add("miscreward", keep_.PatternSettings.flows[0].sharedInjectionData[0].InjectionData[1].roomTable);
 
 
-            RoomTables.Add("crestroom", ProcessRoomTableThing(StaticInjections.Sewer_Injections.InjectionData[1]).roomTable);
-            RoomTables.Add("abbeyentrance", ProcessRoomTableThing(StaticInjections.Proper_Injections.InjectionData[0]).roomTable);
-            RoomTables.Add("abbeyextrasecret", ProcessRoomTableThing(StaticInjections.Abbey_Injections.InjectionData[0]).roomTable);
-            RoomTables.Add("rng_entry", ProcessRoomTableThing(StaticInjections.Hollow_Injections.InjectionData[1]).roomTable);
-            RoomTables.Add("bullet_hell_secret", ProcessRoomTableThing(StaticInjections.Hell_Injections.InjectionData[0]).roomTable);
-
+            RoomTables.Add("crestroom", ProcessRoomTableThing(StaticInjections.Sewer_Injections, StaticInjections.Sewer_Injections.InjectionData[1]).roomTable);
+            RoomTables.Add("abbeyentrance", ProcessRoomTableThing(StaticInjections.Proper_Injections, StaticInjections.Proper_Injections.InjectionData[0]).roomTable);
+            RoomTables.Add("abbeyextrasecret", ProcessRoomTableThing(StaticInjections.Abbey_Injections, StaticInjections.Abbey_Injections.InjectionData[0]).roomTable);
+            RoomTables.Add("rng_entry", ProcessRoomTableThing(StaticInjections.Hollow_Injections, StaticInjections.Hollow_Injections.InjectionData[1]).roomTable);
+            RoomTables.Add("bullet_hell_secret", ProcessRoomTableThing(StaticInjections.Hell_Injections, StaticInjections.Hell_Injections.InjectionData[0]).roomTable);
+            
             keep_ = null;
             sewer_ = null;
             proper_ = null;
@@ -255,25 +256,54 @@ namespace Alexandria.DungeonAPI
             yield break;
         }
 
-        public static ProceduralFlowModifierData ProcessRoomTableThing(ProceduralFlowModifierData data, float defaultWeight = 1)
+        private class Nope : DungeonPrerequisite
         {
-            data.roomTable = ScriptableObject.CreateInstance<GenericRoomTable>();
-            data.roomTable.includedRooms = new WeightedRoomCollection()
+            public virtual new bool CheckConditionsFulfilled()
             {
-                elements = new List<WeightedRoom>()
+                return false;
+            }
+        }
+
+        public static ProceduralFlowModifierData ProcessRoomTableThing(SharedInjectionData shared , ProceduralFlowModifierData data, float defaultWeight = 1)
+        {
+            ProceduralFlowModifierData modifierData = new ProceduralFlowModifierData()
+            {
+                annotation = data.annotation,
+                CanBeForcedSecret = data.CanBeForcedSecret,
+                chanceToLock = data.chanceToLock,
+                chanceToSpawn = data.chanceToSpawn,
+                DEBUG_FORCE_SPAWN = data.DEBUG_FORCE_SPAWN,
+                exactRoom = null,
+                exactSecondaryRoom = data.exactSecondaryRoom,
+                framedCombatNodes = data.framedCombatNodes,
+                IsWarpWing = data.IsWarpWing,
+                OncePerRun = data.OncePerRun,
+                placementRules = data.placementRules,
+                prerequisites = data.prerequisites.ToArray(),
+                RandomNodeChildMinDistanceFromEntrance = data.RandomNodeChildMinDistanceFromEntrance,
+                RequiredValidPlaceable = data.RequiredValidPlaceable,
+                RequiresMasteryToken = data.RequiresMasteryToken,
+                roomTable = new()
+                {
+                    includedRooms = new WeightedRoomCollection()
                     {
-                        new WeightedRoom()
+                        elements = new()
                         {
-                            additionalPrerequisites = data.exactRoom.prerequisites != null ? data.exactRoom.prerequisites.ToArray() : new DungeonPrerequisite[0],
-                            room =  data.exactRoom,
-                            weight = defaultWeight,
+                            new WeightedRoom()
+                            {
+                                room = data.exactRoom,
+                                additionalPrerequisites = data.exactRoom.prerequisites != null ? data.exactRoom.prerequisites.ToArray() : new DungeonPrerequisite[0],
+                                weight = defaultWeight
+                            }
                         }
+                        
                     },
+                    includedRoomTables = new List<GenericRoomTable>() { },
+                }
             };
-            data.roomTable.includedRoomTables = new List<GenericRoomTable>() { };
-            data.roomTable.name = ":)";
-            GameManager.Instance.StartCoroutine(DelayRemoveRoom(data));
-            return data;
+            data.chanceToSpawn = 0;
+            shared.InjectionData.Add(modifierData);
+            return modifierData;
         }
 
 
@@ -391,7 +421,7 @@ namespace Alexandria.DungeonAPI
 
 
 
-        public static GameObject DefineMinecartFromValues(string cartType, float maxSpeed, float timeToMaxSpeed, string storedBody, bool NearestInCart, PrototypeDungeonRoom room, Vector2 location)
+        public static GameObject DefineMinecartFromValues(string cartType, float maxSpeed, float timeToMaxSpeed, string storedBody, bool NearestInCart, bool forceActive)
         {
             GameObject asset = RoomFactory.GetExoticGameObject(cartType);
             GameObject gameObject = FakePrefab.Clone(asset);
@@ -405,6 +435,7 @@ namespace Alexandria.DungeonAPI
             {
                 component.MaxSpeed = maxSpeed;
                 component.TimeToMaxSpeed = timeToMaxSpeed;
+                component.ForceActive = forceActive;
                 if (NearestInCart == true)
                 {
                     gameObject.AddComponent<SpecialComponents.ForceNearestToRide>();

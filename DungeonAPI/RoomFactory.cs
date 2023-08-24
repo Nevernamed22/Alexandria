@@ -21,6 +21,7 @@ using static Alexandria.DungeonAPI.SpecialComponents;
 using HutongGames.PlayMaker.Actions;
 using Alexandria.NPCAPI;
 using System.Collections;
+using static PrototypeRoomExit;
 
 namespace Alexandria.DungeonAPI
 {
@@ -74,7 +75,6 @@ namespace Alexandria.DungeonAPI
             texture.name = Path.GetFileName(roomPath);
             RoomData roomData = ExtractRoomDataFromFile(roomPath);
             roomData.room = Build(texture, roomData);
-            rooms.Add(roomData.room.name, roomData);
 
             return roomData;
         }
@@ -86,7 +86,6 @@ namespace Alexandria.DungeonAPI
             RoomData roomData = ExtractRoomDataFromFile(roomPath);
             roomData.name = Path.GetFileName(roomPath);
             roomData.room = Build(roomData);
-            rooms.Add(roomData.room.name, roomData);
             return roomData;
         }
 
@@ -183,12 +182,10 @@ namespace Alexandria.DungeonAPI
         {
             if (data.ToLower().Contains("exitonly"))
             {
-                ETGModConsole.Log("EXIT");
                 return PrototypeRoomExit.ExitType.EXIT_ONLY;
             }
             else if (data.ToLower().Contains("entryonly"))
             {
-                ETGModConsole.Log("ENTRY");
                 return PrototypeRoomExit.ExitType.ENTRANCE_ONLY;
             }
             return PrototypeRoomExit.ExitType.NO_RESTRICTION;
@@ -204,6 +201,8 @@ namespace Alexandria.DungeonAPI
                 {
                     string ext = roomData.exitDirections[i].ToUpper();
                     var exitType = DetermineExitType(ext);
+
+
                     AddExit(room, roomData.exitPositions[i], DetermineDirectionType(ext, exitType), exitType);
                 }
             }
@@ -686,9 +685,9 @@ namespace Alexandria.DungeonAPI
                         //ETGModConsole.Log(storedBody);
 
                         bool storedGUID = jobject.TryGetValue("storedenemyBodyMC", out value2) ? ((bool)value2) : false;
-                        //ETGModConsole.Log(storedGUID);
+                        bool forceActive = jobject.TryGetValue("cartActive", out value2) ? ((bool)value2) : false;
 
-                        gameObject = StaticReferences.DefineMinecartFromValues("minecart_pathing", maxSpeed, timeToMaxSpeed, "", storedGUID, room, location);
+                        gameObject = StaticReferences.DefineMinecartFromValues("minecart_pathing", maxSpeed, timeToMaxSpeed, "", storedGUID, forceActive);
 
                     }
                     if (assetPath == "turretminecart_pathing")
@@ -699,8 +698,9 @@ namespace Alexandria.DungeonAPI
 
                         float initialWait = jobject.TryGetValue("InitialtrapDelay", out value2) ? ((float)value2) : 3;
                         float cooldown = jobject.TryGetValue("TrapTriggerDelay", out value2) ? ((float)value2) : 0.5f;
+                        bool forceActive = jobject.TryGetValue("cartActive", out value2) ? ((bool)value2) : false;
 
-                        gameObject = StaticReferences.DefineMinecartFromValues("turretminecart_pathing", maxSpeed, timeToMaxSpeed, null, false, room, location);
+                        gameObject = StaticReferences.DefineMinecartFromValues("turretminecart_pathing", maxSpeed, timeToMaxSpeed, null, false, forceActive);
 
 
                         var c = gameObject.GetComponentInChildren<CartTurretController>();
@@ -712,7 +712,9 @@ namespace Alexandria.DungeonAPI
                         JToken value2;
                         float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
                         float timeToMaxSpeed = jobject.TryGetValue("tTMS", out value2) ? ((float)value2) : 1.5f;
-                        gameObject = StaticReferences.DefineMinecartFromValues("explosivebarrelminecart_pathing", maxSpeed, timeToMaxSpeed, null, false, room, location);          
+                        bool forceActive = jobject.TryGetValue("cartActive", out value2) ? ((bool)value2) : false;
+
+                        gameObject = StaticReferences.DefineMinecartFromValues("explosivebarrelminecart_pathing", maxSpeed, timeToMaxSpeed, null, false, forceActive);          
                     }
                     if (assetPath == "CustomlightSource")
                     {
@@ -734,32 +736,30 @@ namespace Alexandria.DungeonAPI
                         JToken value2;
                         int id = jobject.TryGetValue("bossPdstlItmID", out value2) ? ((int)value2) : -1;
                         string Tag = jobject.TryGetValue("bossPdstlItmStringID", out value2) ? ((string)value2) : "None.";
+                        string lootType = jobject.TryGetValue("bossPdstOverrideLootType", out value2) ? ((string)value2) : "N/A";
+
+
                         var r = FakePrefab.Clone(RoomFactory.GetCustomDungeonPlaceableObject("bossPedestal").variantTiers[0].nonDatabasePlaceable);
                         var pedestal = r.GetComponent<RewardPedestal>();
                         var thing  = r.AddComponent<PedestalSetter>();
-
+                        if (lootType == "Fully Random") {thing.myLootType = PedestalSetter.LootType.RANDOM; }
+                        else if (lootType == "Random Gun") { thing.myLootType = PedestalSetter.LootType.RANDOM_GUN; }
+                        else if(lootType == "Random Item") { thing.myLootType = PedestalSetter.LootType.RANDOM_ITEM; }
+                        else if(lootType == "Crest") { thing.myLootType = PedestalSetter.LootType.CREST; }
+                        else if (lootType == "Set ID / Tag") { thing.myLootType = PedestalSetter.LootType.SET; }
+                        else { thing.myLootType = PedestalSetter.LootType.N_A; }
+                        pedestal.pickedUp = false;
                         if (Tag != null && Tag != "None.")
                         {
                             if (StaticReferences.storedItemIDs.ContainsKey(Tag))
                             {
-                                pedestal.pickedUp = false;
                                 thing.Help = StaticReferences.storedItemIDs.Where(self => self.Key == Tag).First().Value;
-     
-                            }
-                            else
-                            {
-                                pedestal.pickedUp = true;
                             }
                         }
                         else if (id != -1)
                         {
-                            pedestal.pickedUp = false;
                             thing.Help = id;
 
-                        }
-                        else
-                        {
-                            pedestal.pickedUp = true;
                         }
                         gameObject = r;
                     }
@@ -848,6 +848,8 @@ namespace Alexandria.DungeonAPI
                         float speed = jobject.TryGetValue("WinchestTargetSpeed", out value2) ? ((float)value2) : 6;
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
                         gameObject.GetComponent<PathMover>().OriginalPathSpeed = speed;
+                        gameObject.GetComponent<PathMover>().PathSpeed = speed;
+
                     }
                     if (assetPath == "ConveyorHorizontal" | assetPath == "ConveyorVertical")
                     {
@@ -901,8 +903,11 @@ namespace Alexandria.DungeonAPI
                         trapComp.triggerOnBlank = trapTriggerOnBlank; //trapTriggerOnBlank
                         trapComp.triggerDelay = AttackDelay; //Attack Delay
                     }
+                    //mines_face_shootssouth-mines_face_shootswest-mines_face_shootseast---mines_face_shootseast-hollow_face_shootssouth-hollow_face_shootswest
 
-                    if (assetPath == "forge_face_shootswest" | assetPath == "forge_face_shootssouth" | assetPath == "forge_face_shootseast")
+                    if (assetPath == "forge_face_shootswest" | assetPath == "forge_face_shootssouth" | assetPath == "forge_face_shootseast" 
+                        | assetPath == "mines_face_shootssouth" | assetPath == "mines_face_shootswest" | assetPath == "mines_face_shootseast"
+                        | assetPath == "hollow_face_shootseast" | assetPath == "hollow_face_shootssouth" | assetPath == "hollow_face_shootswest")
                     {
                         JToken value2;
                         float cooldown = jobject.TryGetValue("TrapTriggerDelay", out value2) ? ((float)value2) : 1;
@@ -930,12 +935,11 @@ namespace Alexandria.DungeonAPI
                             //yes i CAN DO this much better but im fucking lazy
                             if (type == "Bouncy.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("1a4872dafdb34fd29fe8ac90bd2cea67").bulletBank.GetBullet("default").BulletObject.GetComponent<Projectile>(); } //Bouncy
                             else if (type == "Explosive.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("b4666cb6ef4f4b038ba8924fd8adf38f").bulletBank.GetBullet("self").BulletObject.GetComponent<Projectile>(); } // Small grenade
-                            else if(type == "Tank Shell.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("fa76c8cfdf1c4a88b55173666b4bc7fb").bulletBank.GetBullet("fastBullet").BulletObject.GetComponent<Projectile>();} // Bullet King Goblets
+                            else if(type == "Tank Shell.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("fa76c8cfdf1c4a88b55173666b4bc7fb").bulletBank.GetBullet("fastBullet").BulletObject.GetComponent<Projectile>(); } // Bullet King Goblets
                             else if(type == "Bouncy Bullet Kin.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("465da2bb086a4a88a803f79fe3a27677").bulletBank.GetBullet("ricochet").BulletObject.GetComponent<Projectile>(); } //Tank Shell
                             else if(type == "Grenade.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("grenade").BulletObject.GetComponent<Projectile>(); } //Dragun Bouncy
                             else if(type == "Molotov.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("molotov").BulletObject.GetComponent<Projectile>(); }
                             else if (type == "Goblet.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("ffca09398635467da3b1f4a54bcfda80").bulletBank.GetBullet("goblet").BulletObject.GetComponent<Projectile>(); }
-
                         }
                     }
                     if (assetPath == "pew")
@@ -967,6 +971,8 @@ namespace Alexandria.DungeonAPI
                         var collider = gameObject.GetComponent<ResizableCollider>();
                         var path = gameObject.GetComponent<PathMover>();
                         path.OriginalPathSpeed = maxSpeed;
+                        path.PathSpeed = maxSpeed;
+
                         collider.NumTiles = lentgh;
                         collider.IsHorizontal = true;
                     }
@@ -981,6 +987,8 @@ namespace Alexandria.DungeonAPI
 
                         var path = gameObject.GetComponent<PathMover>();
                         path.OriginalPathSpeed = maxSpeed;
+                        path.PathSpeed = maxSpeed;
+
                         collider.NumTiles = lentgh;
                         collider.IsHorizontal = false;
                     }
@@ -991,6 +999,8 @@ namespace Alexandria.DungeonAPI
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
                         var path = gameObject.GetComponent<PathMover>();
                         path.OriginalPathSpeed = maxSpeed;
+                        path.PathSpeed = maxSpeed;
+
                     }
                     if (assetPath == "flame_pipe_north" | assetPath == "flame_pipe_west" | assetPath == "flame_pipe_east")
                     {
@@ -1011,12 +1021,65 @@ namespace Alexandria.DungeonAPI
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
                         var path = gameObject.GetComponent<PathMover>();
                         path.OriginalPathSpeed = maxSpeed;
+                        path.PathSpeed = maxSpeed;
 
                         var mover = gameObject.GetComponent<MovingPlatform>();
                         mover.UsesDwarfConfigurableSize = true;
                         mover.DwarfConfigurableWidth = X;
                         mover.DwarfConfigurableHeight = Y;
 
+                    }
+                    if (assetPath == "minecartFactory")
+                    {
+                        JToken value2;
+                        int maxCarts = jobject.TryGetValue("mCSpawner_amount", out value2) ? ((int)value2) : 5;
+                        float delayBetweenCarts = jobject.TryGetValue("mCSpawner_cartDelay", out value2) ? ((float)value2) : 3f;
+                        float delayDestory = jobject.TryGetValue("mCSpawner_destroyDelay", out value2) ? ((float)value2) : 1f;
+                        bool forceActive = jobject.TryGetValue("cartActive", out value2) ? ((bool)value2) : false;
+                        string cartType = jobject.TryGetValue("mCSpawner_cartType", out value2) ? ((string)value2) : "Explosive Barrel";
+                        bool cartCopy = jobject.TryGetValue("mCSpawner_cartCopy", out value2) ? ((bool)value2) : false;
+                        bool cartCopyDestroy = jobject.TryGetValue("mCSpawner_cartDestroyCopy", out value2) ? ((bool)value2) : true;
+                        
+                        int path = jobject.TryGetValue("tSP", out value2) ? ((int)value2) : 0;
+                        int startNode = jobject.TryGetValue("nSP_O", out value2) ? ((int)value2) : 0;
+
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        gameObject.SetActive(false);
+
+                        var factory = gameObject.GetComponent<MineCartFactory>();
+                        factory.MaxCarts = maxCarts;
+                        factory.DelayBetweenCarts = delayBetweenCarts;
+                        factory.DelayUponDestruction = delayDestory;
+                        factory.ForceCartActive = forceActive;
+                        factory.TargetPathIndex = path;
+                        factory.TargetPathNodeIndex = startNode;
+
+                        
+                        if (cartCopy == true)
+                        {
+                            var grabber = gameObject.AddComponent<MineCart_Proximity_Grabber>();
+                            grabber.DestroyAfterCopy = cartCopyDestroy;
+                            if (cartType == "Explosive Barrel") { grabber.fallBackCart = SetupExoticObjects.ExplosiveBarrelMinecart.GetComponent<MineCartController>(); }
+                            else if (cartType == "Default") { grabber.fallBackCart = SetupExoticObjects.Minecart.GetComponent<MineCartController>(); }
+                            else if (cartType == "Turret")
+                            {
+                                var cart = SetupExoticObjects.TurretMinecart.InstantiateAndFakeprefab();
+                                cart.gameObject.AddComponent<TurretCartReboot>();
+                                grabber.fallBackCart = cart.GetComponent<MineCartController>(); 
+                            }
+                        }
+                        else
+                        {
+                            if (cartType == "Explosive Barrel") { factory.MineCartPrefab = SetupExoticObjects.ExplosiveBarrelMinecart.GetComponent<MineCartController>(); }
+                            else if (cartType == "Default") { factory.MineCartPrefab = SetupExoticObjects.Minecart.GetComponent<MineCartController>(); }
+                            else if (cartType == "Turret")
+                            {
+                                var cart = SetupExoticObjects.TurretMinecart.InstantiateAndFakeprefab();
+                                cart.gameObject.AddComponent<TurretCartReboot>();
+                                factory.MineCartPrefab = cart.GetComponent<MineCartController>();
+                            }
+                        }
+                        
                     }
                 }
 
@@ -1291,33 +1354,50 @@ namespace Alexandria.DungeonAPI
         {
             GameObject gameObject = asset;
             JToken jtoken;
-            bool flag = attributes.TryGetValue("dI", out jtoken) && !string.IsNullOrEmpty(jtoken.ToObject<string>());
-            if (flag)
+            Chest component = gameObject.GetComponent<Chest>();
+            if (component)
             {
+                gameObject = FakePrefab.Clone(asset);
+                bool flag = attributes.TryGetValue("dI", out jtoken) && !string.IsNullOrEmpty(jtoken.ToObject<string>());
+                if (flag)
+                {
+                    bool flag2 = Game.Items.ContainsID(jtoken.ToObject<string>());
+                    if (flag2)
+                    {
+                        component.forceContentIds = new List<int>
+                        {
+                            Game.Items[jtoken.ToObject<string>()].PickupObjectId
+                        };
+                    }
+                }
                 JToken value = null;
-                string text = attributes.TryGetValue("jI", out value) ? ((string)value) : "";
+
+                bool junkie = attributes.TryGetValue("jI", out jtoken) && !string.IsNullOrEmpty(jtoken.ToObject<string>());
+                if (junkie)
+                {
+                    string text = attributes.TryGetValue("jI", out value) ? ((string)value) : "";
+                    bool flag3 = Game.Items.ContainsID(text);
+                    if (flag3)
+                    {
+                        component.overrideJunkId = Game.Items[text].PickupObjectId;
+                    }
+                }
+
                 float overrideMimicChance = attributes.TryGetValue("mC", out value) ? ((float)value) : 0f;
                 bool isLocked = !attributes.TryGetValue("cL", out value) || (bool)value;
                 bool preventFuse = attributes.TryGetValue("pV", out value) && (bool)value;
-                gameObject = FakePrefab.Clone(asset);
-                Chest component = gameObject.GetComponent<Chest>();
-                bool flag2 = Game.Items.ContainsID(jtoken.ToObject<string>());
-                if (flag2)
-                {
-                    component.forceContentIds = new List<int>
-                    {
-                        Game.Items[jtoken.ToObject<string>()].PickupObjectId
-                    };
-                }
-                bool flag3 = Game.Items.ContainsID(text);
-                if (flag3)
-                {
-                    component.overrideJunkId = Game.Items[text].PickupObjectId;
-                }
+                bool isGlitched = attributes.TryGetValue("isGlitched", out value) && (bool)value;
                 component.overrideMimicChance = overrideMimicChance;
                 component.IsLocked = isLocked;
                 component.PreventFuse = preventFuse;
+                if (isGlitched == true)
+                {
+                    component.m_isGlitchChest = true;
+                    component.gameObject.AddComponent<Glitchinator>();
+                }
             }
+
+           
             return gameObject;
         }
 

@@ -18,5 +18,8 @@ namespace Alexandria.DungeonAPI
         public static SharedInjectionData Forge_Injections;
         public static SharedInjectionData Hell_Injections;
 
+        public static DungeonFlow GlitchFlow;
+        public static DungeonFlowNode Node;
+
     }
 }

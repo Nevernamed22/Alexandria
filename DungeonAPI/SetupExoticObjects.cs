@@ -102,26 +102,12 @@ namespace Alexandria.DungeonAPI
 
                     if (weightedRoom.room.name.ToLower().StartsWith("mines_ign_normal_shelleton_01_b"))
                     {
-						foreach (var placed in weightedRoom.room.placedObjects)
-						{
-							if (placed.nonenemyBehaviour != null)
-							{
-								ExplosiveBarrelMinecart = placed.nonenemyBehaviour.gameObject.GetComponent<MineCartFactory>().MineCartPrefab.gameObject.InstantiateAndFakeprefab();
-								ExplosiveBarrelMinecart.GetComponent<MineCartController>().MoveCarriedCargoIntoCart = true;
 
-								MinecarftFactory_Object = placed.nonenemyBehaviour.gameObject.InstantiateAndFakeprefab();
-								/*
-									int i = 0;
-                                foreach (var comp in placed.nonenemyBehaviour.gameObject.GetComponents<Component>())
-								{
-                                    CharacterAPI.ToolsCharApi.LogPropertiesAndFields(comp, "components: " + i);
-                                    //ETGModConsole.Log(placed.nonenemyBehaviour.gameObject.name  + "[" + i + "]");
-                                    i++;	
-                                }
-								*/
+                        ExplosiveBarrelMinecart = weightedRoom.room.placedObjects[0].nonenemyBehaviour.gameObject.GetComponent<MineCartFactory>().MineCartPrefab.gameObject.InstantiateAndFakeprefab();
+                        ExplosiveBarrelMinecart.GetComponent<MineCartController>().MoveCarriedCargoIntoCart = true;
 
-                            }
-						}
+                        MinecarftFactory_Object = weightedRoom.room.placedObjects[0].nonenemyBehaviour.gameObject.InstantiateAndFakeprefab();
+                        /*
                         int i = 0;
                         foreach (var placed in weightedRoom.room.placedObjects)
                         {
@@ -131,6 +117,7 @@ namespace Alexandria.DungeonAPI
                             }
                             i++;
                         }
+						*/
                         //SetupExoticObjects.HorizontalCrusher = weightedRoom.room.placedObjects[0].nonenemyBehaviour.gameObject;
                     }
 					
@@ -818,7 +805,7 @@ namespace Alexandria.DungeonAPI
 			var f = SetupExoticObjects.Floor_Skeleton_Note.transform.Find("skleleton").gameObject;
 			f.transform.parent = null;
             UnityEngine.Object.Destroy(f);
-			SetupExoticObjects.Floor_Skeleton_Note.transform.localPosition -= new Vector3(1, 0);
+			SetupExoticObjects.Floor_Skeleton_Note.gameObject.AddComponent<Repositioner>().reposition = new Vector3(-1, 0);
 
 
 			SetupExoticObjects.Switch_Chandelier = LoadHelper.LoadAssetFromAnywhere<GameObject>("hanging_chain_attach_wallswitch");
@@ -856,15 +843,6 @@ namespace Alexandria.DungeonAPI
 
 			SetupExoticObjects.Moving_Platform_Proper = LoadHelper.LoadAssetFromAnywhere<GameObject>("default_platform_3x3");
 
-
-
-            /*
-			        public static GameObject Moving_Platform_Sewer;
-        public static GameObject Moving_Platform_Mines;
-        public static GameObject Moving_Platform_Hollow;
-        public static GameObject Moving_Platform_Forge;
-			*/
-
             SetupExoticObjects.Bullet_King_Arena_Floor = LoadHelper.LoadAssetFromAnywhere<GameObject>("bulletkingdiasandwall");
             SetupExoticObjects.Bullet_King_Arena_MainWall = LoadHelper.LoadAssetFromAnywhere<GameObject>("bulletkingwall_layer_003").InstantiateAndFakeprefab();
             SetupExoticObjects.Bullet_King_Arena_MainWall.AddComponent<Repositioner>().reposition = new Vector3(-7, -5);
@@ -883,10 +861,25 @@ namespace Alexandria.DungeonAPI
 			SetupExoticObjects.Old_King_Arena_SideWall_2.AddComponent<Repositioner>().reposition = new Vector3(-4, -4);
 
 
+			SetupExoticObjects.GatlingGull_Valid_Leap_Position = new GameObject("Gull_Leap_Point").InstantiateAndFakeprefab();
+			SetupExoticObjects.GatlingGull_Valid_Leap_Position.AddComponent<GatlingGullLeapPoint>().ForReposition = true;
+
+
+            SetupExoticObjects.Glitched_Boss_Modifier = new GameObject("Glitch_Boss_Modifier").InstantiateAndFakeprefab();
+			SetupExoticObjects.Glitched_Boss_Modifier.AddComponent<Glitched_Boss_Modifier>();
 
 
             SetupExoticObjects.objects = new Dictionary<string, GameObject>
 			{
+                {
+                    "glitch_floor_properties",
+                    SetupExoticObjects.Glitched_Boss_Modifier
+                },
+                {
+                    "gullLeapPoint",
+                    SetupExoticObjects.GatlingGull_Valid_Leap_Position
+                },
+
                 {
                     "minecartFactory",
                     SetupExoticObjects.MinecarftFactory_Object
@@ -1311,7 +1304,7 @@ namespace Alexandria.DungeonAPI
 					"vertical_crusher",
 					SetupExoticObjects.VerticalCrusher
 				},
-				{
+                {
 					"flameburst_trap",
 					SetupExoticObjects.FlameburstTrap
 				},
@@ -2285,6 +2278,8 @@ namespace Alexandria.DungeonAPI
 
         public static GameObject MinecarftFactory_Object;
 
+		public static GameObject GatlingGull_Valid_Leap_Position;
+        public static GameObject Glitched_Boss_Modifier;
 
         public static Dictionary<string, GameObject> objects = new Dictionary<string, GameObject>();
 	}

@@ -151,7 +151,12 @@ namespace Alexandria.DungeonAPI
                         room.category = RoomCategory.SECRET;
                         StaticReferences.RoomTables["bullet_hell_secret"].includedRooms.Add(wRoom);
                         break;
-
+                    case "glitched_boss":
+                        room.category = RoomCategory.BOSS;
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.GlitchBossNames.Add(wRoom.room.name);
+                        StaticReferences.RoomTables["glitchedBoss"].includedRooms.Add(wRoom);
+                        break;
                     case "gatling_gull":
                         room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
                         StaticReferences.RoomTables["gull"].includedRooms.Add(wRoom);

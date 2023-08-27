@@ -22,6 +22,7 @@ using HutongGames.PlayMaker.Actions;
 using Alexandria.NPCAPI;
 using System.Collections;
 using static PrototypeRoomExit;
+using Alexandria.EnemyAPI;
 
 namespace Alexandria.DungeonAPI
 {
@@ -291,7 +292,7 @@ namespace Alexandria.DungeonAPI
                         }
                     }
 
-                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[fuckThisMod], roomData.nodeTypes[fuckThisMod], roomData.nodePaths[fuckThisMod], wrap);
+                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[fuckThisMod], roomData.nodeTypes[fuckThisMod], roomData.nodePaths[fuckThisMod], wrap, roomData.nodePathVisible[fuckThisMod]);
                 }
                 //ETGModConsole.Log("5");
 
@@ -689,6 +690,8 @@ namespace Alexandria.DungeonAPI
 
                         gameObject = StaticReferences.DefineMinecartFromValues("minecart_pathing", maxSpeed, timeToMaxSpeed, "", storedGUID, forceActive);
 
+
+
                     }
                     if (assetPath == "turretminecart_pathing")
                     {
@@ -700,7 +703,76 @@ namespace Alexandria.DungeonAPI
                         float cooldown = jobject.TryGetValue("TrapTriggerDelay", out value2) ? ((float)value2) : 0.5f;
                         bool forceActive = jobject.TryGetValue("cartActive", out value2) ? ((bool)value2) : false;
 
+                        string type = jobject.TryGetValue("projectileTypeTurret", out value2) ? ((string)value2) : "None.";
+
+                        float projSpeed = jobject.TryGetValue("trapProjSpeed", out value2) ? ((float)value2) : -1f;
+                        float range = jobject.TryGetValue("trapProjRange", out value2) ? ((float)value2) : 1000f;
+
+                        bool jammed = jobject.TryGetValue("j", out value2) ? ((bool)value2) : false;
+
                         gameObject = StaticReferences.DefineMinecartFromValues("turretminecart_pathing", maxSpeed, timeToMaxSpeed, null, false, forceActive);
+
+                        var turretComp = gameObject.GetComponentInChildren<CartTurretController>();
+
+                        if (type != null && turretComp != null)
+                        {
+
+                            var b = turretComp.bulletBank;
+                            if (type == "Bouncy.")
+                            {
+                                b.Bullets = new List<AIBulletBank.Entry>();
+                                b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("1a4872dafdb34fd29fe8ac90bd2cea67").bulletBank.GetBullet("default"), "default", "DNC"));
+                            }
+                            else if (type == "Explosive.")
+                            {
+                                b.Bullets = new List<AIBulletBank.Entry>();
+                                b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("b4666cb6ef4f4b038ba8924fd8adf38f").bulletBank.GetBullet("self"), "default", "DNC"));
+                            }
+                            else if (type == "Tank Shell.")
+                            {
+                                b.Bullets = new List<AIBulletBank.Entry>();
+                                b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("fa76c8cfdf1c4a88b55173666b4bc7fb").bulletBank.GetBullet("fastBullet"), "default", "DNC"));
+                            }
+                            else if (type == "Bouncy Bullet Kin.")
+                            {
+                                b.Bullets = new List<AIBulletBank.Entry>();
+                                b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("465da2bb086a4a88a803f79fe3a27677").bulletBank.GetBullet("ricochet"), "default", "DNC"));
+                            } //Tank Shell
+                            else if (type == "Grenade.")
+                            {
+                                b.Bullets = new List<AIBulletBank.Entry>();
+                                b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("grenade"), "default", "DNC"));
+                            } //Dragun Bouncy
+                            else if (type == "Molotov.")
+                            {
+                                b.Bullets = new List<AIBulletBank.Entry>();
+                                b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("molotov"), "default", "DNC"));
+                            }
+                            else if (type == "Goblet.") 
+                            {
+                                b.Bullets = new List<AIBulletBank.Entry>();
+                                b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("ffca09398635467da3b1f4a54bcfda80").bulletBank.GetBullet("goblet"), "default", "DNC"));
+                            }
+                            else 
+                            {
+                                var bulletCopy = turretComp.bulletBank.Bullets[0];
+                                b.Bullets = new List<AIBulletBank.Entry>();
+                                b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(bulletCopy, "default", "DNC"));
+                                //trapComp.projectileModule.projectiles[0] = trapComp.projectileModule.projectiles[0].gameObject.InstantiateAndFakeprefab().GetComponent<Projectile>();
+                            }
+
+                            foreach (var entry in b.Bullets)
+                            {
+                                if (entry.Name == "default")
+                                {
+                                    var p = entry.BulletObject.GetComponent<Projectile>();
+                                    p.baseData.speed = projSpeed != -1f ? projSpeed : p.baseData.speed;
+                                    p.baseData.range = range;
+                                    if (jammed == true) { p.gameObject.AddComponent<ProjectileJammer>(); }
+                                }
+                            }
+                        }
+ 
 
 
                         var c = gameObject.GetComponentInChildren<CartTurretController>();
@@ -916,6 +988,7 @@ namespace Alexandria.DungeonAPI
                         float range = jobject.TryGetValue("trapProjRange", out value2) ? ((float)value2) : 1000f;
                         string Direction = jobject.TryGetValue("DirectionShoot", out value2) ? ((string)value2) : "SOUTH";
                         string type = jobject.TryGetValue("projectileTypeTurret", out value2) ? ((string)value2) : "None.";
+                        bool jammed = jobject.TryGetValue("j", out value2) ? ((bool)value2) : false;
 
 
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
@@ -930,16 +1003,30 @@ namespace Alexandria.DungeonAPI
                         var data = trapComp.overrideProjectileData;
                         data.speed = projSpeed;
                         data.range = range;
+                        
                         if (type != null)
                         {
                             //yes i CAN DO this much better but im fucking lazy
-                            if (type == "Bouncy.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("1a4872dafdb34fd29fe8ac90bd2cea67").bulletBank.GetBullet("default").BulletObject.GetComponent<Projectile>(); } //Bouncy
-                            else if (type == "Explosive.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("b4666cb6ef4f4b038ba8924fd8adf38f").bulletBank.GetBullet("self").BulletObject.GetComponent<Projectile>(); } // Small grenade
-                            else if(type == "Tank Shell.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("fa76c8cfdf1c4a88b55173666b4bc7fb").bulletBank.GetBullet("fastBullet").BulletObject.GetComponent<Projectile>(); } // Bullet King Goblets
-                            else if(type == "Bouncy Bullet Kin.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("465da2bb086a4a88a803f79fe3a27677").bulletBank.GetBullet("ricochet").BulletObject.GetComponent<Projectile>(); } //Tank Shell
-                            else if(type == "Grenade.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("grenade").BulletObject.GetComponent<Projectile>(); } //Dragun Bouncy
-                            else if(type == "Molotov.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("molotov").BulletObject.GetComponent<Projectile>(); }
-                            else if (type == "Goblet.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("ffca09398635467da3b1f4a54bcfda80").bulletBank.GetBullet("goblet").BulletObject.GetComponent<Projectile>(); }
+                            if (type == "Bouncy.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("1a4872dafdb34fd29fe8ac90bd2cea67").bulletBank.GetBullet("default").BulletObject.InstantiateAndFakeprefab().GetComponent<Projectile>(); } //Bouncy
+                            else if (type == "Explosive.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("b4666cb6ef4f4b038ba8924fd8adf38f").bulletBank.GetBullet("self").BulletObject.InstantiateAndFakeprefab().GetComponent<Projectile>(); } // Small grenade
+                            else if(type == "Tank Shell.")
+                            {
+                                trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("fa76c8cfdf1c4a88b55173666b4bc7fb").bulletBank.GetBullet("fastBullet").BulletObject.InstantiateAndFakeprefab().GetComponent<Projectile>();
+                                trapComp.projectileModule.projectiles[0].gameObject.AddComponent<ProjectileWallUnfuckinator>();
+                            } // Bullet King Goblets
+                            else if(type == "Bouncy Bullet Kin.") 
+                            {
+                                trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("465da2bb086a4a88a803f79fe3a27677").bulletBank.GetBullet("ricochet").BulletObject.InstantiateAndFakeprefab().GetComponent<Projectile>();
+                                trapComp.projectileModule.projectiles[0].gameObject.AddComponent<ProjectileWallUnfuckinator>();
+                            } //Tank Shell
+                            else if(type == "Grenade.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("grenade").BulletObject.InstantiateAndFakeprefab().GetComponent<Projectile>(); } //Dragun Bouncy
+                            else if(type == "Molotov.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("molotov").BulletObject.InstantiateAndFakeprefab().GetComponent<Projectile>(); }
+                            else if (type == "Goblet.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("ffca09398635467da3b1f4a54bcfda80").bulletBank.GetBullet("goblet").BulletObject.InstantiateAndFakeprefab().GetComponent<Projectile>(); }
+                            else { trapComp.projectileModule.projectiles[0] = trapComp.projectileModule.projectiles[0].gameObject.InstantiateAndFakeprefab().GetComponent<Projectile>(); }
+                        }
+                        if (jammed == true)
+                        {
+                            trapComp.projectileModule.projectiles[0].gameObject.AddComponent<ProjectileJammer>();
                         }
                     }
                     if (assetPath == "pew")
@@ -1081,6 +1168,128 @@ namespace Alexandria.DungeonAPI
                         }
                         
                     }
+                    if (assetPath == "gullLeapPoint")
+                    {
+                        JToken value2;
+                        bool repos = jobject.TryGetValue("gullleap_Repos", out value2) ? ((bool)value2) : true;
+                        bool missile = jobject.TryGetValue("gullleap_Missile", out value2) ? ((bool)value2) : true;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var leaper = gameObject.GetComponent<GatlingGullLeapPoint>();
+                        leaper.ForReposition = repos;
+                        leaper.ForRockets = missile;
+                    }
+                    if (assetPath == "glitch_floor_properties")
+                    {
+                        JToken value2;
+
+                        float hpMult = jobject.TryGetValue("glitchHpMult", out value2) ? ((int)value2) : 0.7f;
+                        float timeScale = jobject.TryGetValue("glitchtimescaleMult", out value2) ? ((float)value2) : 1f;
+                        float Speed = jobject.TryGetValue("glitchspeedMult", out value2) ? ((float)value2) : 1f;
+                        bool fly = jobject.TryGetValue("forceFly", out value2) ? ((bool)value2) : false;
+
+                        
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var leaper = gameObject.GetComponent<Glitched_Boss_Modifier>();
+                        leaper.DamageMultiplier = hpMult;
+                        leaper.TimeScale = timeScale;
+                        leaper.MovementSpeed = Speed;
+                        leaper.ForceSlight = fly;
+
+                    }
+                    if (assetPath == "vertical_crusher"| assetPath == "horizontal_crusher")
+                    {
+                        JToken value2;
+
+                        float delay = jobject.TryGetValue("crushTrapDelay", out value2) ? ((int)value2) : 0.25f;
+                        float crushTrapCloseTime = jobject.TryGetValue("crushTrapCloseTime", out value2) ? ((float)value2) : 1f;
+                        float cooldown = jobject.TryGetValue("TrapTriggerDelay", out value2) ? ((float)value2) : 3f;
+                        float enemyDamage = jobject.TryGetValue("crushTrapEnemyDamage", out value2) ? ((float)value2) : 30f;
+                        float PlayerForce = jobject.TryGetValue("crushTrapPlayerKnockbackForce", out value2) ? ((float)value2) : 50f;
+                        float EnemyForce = jobject.TryGetValue("crushTrapEnemyKnockbackForce", out value2) ? ((float)value2) : 50f;
+
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var crusher = gameObject.GetComponent<ForgeCrushDoorController>();
+                        crusher.CooldownTime = cooldown;
+                        crusher.DelayTime = delay;
+                        crusher.TimeClosed = crushTrapCloseTime;
+                        crusher.DamageToEnemies = enemyDamage;
+                        crusher.KnockbackForcePlayers = PlayerForce;
+                        crusher.KnockbackForceEnemies = EnemyForce;
+
+                    }
+                    if (assetPath == "firebar_trap")
+                    {
+                        JToken value2;
+                        bool jammed = jobject.TryGetValue("j", out value2) ? ((bool)value2) : false;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var bulletBank = gameObject.GetComponent<AIBulletBank>();
+                        var newBank = EnemyBuildingTools.CopyBulletBankEntry(bulletBank.Bullets[0], "default", "DNC");
+                        bulletBank.Bullets.Clear();
+                        bulletBank.Bullets = new List<AIBulletBank.Entry>() { newBank };
+                        if (jammed == true)
+                        {
+                            bulletBank.Bullets[0].BulletObject.GetComponent<Projectile>().gameObject.AddComponent<ProjectileJammer>(); ;
+                        }
+                    }
+                    if (assetPath == "flameburst_trap")
+                    {
+                        JToken value2;
+                        bool jammed = jobject.TryGetValue("j", out value2) ? ((bool)value2) : false;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var bulletBank = gameObject.GetComponent<AIBulletBank>();
+                        string type = jobject.TryGetValue("projectileTypeTurret", out value2) ? ((string)value2) : "None.";
+
+                        var b = bulletBank;
+                        if (type == "Bouncy.")
+                        {
+                            b.Bullets = new List<AIBulletBank.Entry>();
+                            b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("1a4872dafdb34fd29fe8ac90bd2cea67").bulletBank.GetBullet("default"), "default", "DNC"));
+                        }
+                        else if (type == "Explosive.")
+                        {
+                            b.Bullets = new List<AIBulletBank.Entry>();
+                            b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("b4666cb6ef4f4b038ba8924fd8adf38f").bulletBank.GetBullet("self"), "default", "DNC"));
+                        }
+                        else if (type == "Tank Shell.")
+                        {
+                            b.Bullets = new List<AIBulletBank.Entry>();
+                            b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("fa76c8cfdf1c4a88b55173666b4bc7fb").bulletBank.GetBullet("fastBullet"), "default", "DNC"));
+                        }
+                        else if (type == "Bouncy Bullet Kin.")
+                        {
+                            b.Bullets = new List<AIBulletBank.Entry>();
+                            b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("465da2bb086a4a88a803f79fe3a27677").bulletBank.GetBullet("ricochet"), "default", "DNC"));
+                        } //Tank Shell
+                        else if (type == "Grenade.")
+                        {
+                            b.Bullets = new List<AIBulletBank.Entry>();
+                            b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("grenade"), "default", "DNC"));
+                        } //Dragun Bouncy
+                        else if (type == "Molotov.")
+                        {
+                            b.Bullets = new List<AIBulletBank.Entry>();
+                            b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("molotov"), "default", "DNC"));
+                        }
+                        else if (type == "Goblet.")
+                        {
+                            b.Bullets = new List<AIBulletBank.Entry>();
+                            b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("ffca09398635467da3b1f4a54bcfda80").bulletBank.GetBullet("goblet"), "default", "DNC"));
+                        }
+                        else
+                        {
+                            var bulletCopy = b.Bullets[0];
+                            b.Bullets = new List<AIBulletBank.Entry>();
+                            b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(bulletCopy, "default", "DNC"));
+                            //trapComp.projectileModule.projectiles[0] = trapComp.projectileModule.projectiles[0].gameObject.InstantiateAndFakeprefab().GetComponent<Projectile>();
+                        }
+
+                        float range = jobject.TryGetValue("trapProjRange", out value2) ? ((float)value2) : 1000f;
+                        bulletBank.Bullets[0].BulletObject.GetComponent<Projectile>().baseData.range = range;
+                        if (jammed == true)
+                        {
+                            bulletBank.Bullets[0].BulletObject.GetComponent<Projectile>().gameObject.AddComponent<ProjectileJammer>(); ;
+                        }
+                    }
                 }
 
                 if (!gameObject && StaticReferences.customObjects.ContainsKey(assetPath))
@@ -1107,6 +1316,7 @@ namespace Alexandria.DungeonAPI
                         {
                             percentChance = 1f,
                             nonDatabasePlaceable = gameObject,
+                            
                             prerequisites = array,
                             materialRequirements = new DungeonPlaceableRoomMaterialRequirement[0]
                         }
@@ -1182,6 +1392,18 @@ namespace Alexandria.DungeonAPI
                         });
                         
                     }
+                    else if (assetPath.Contains("gullLeapPoint") || assetPath.Contains("_dungeonPlaceable"))
+                    {
+                        room.placedObjects.Add(new PrototypePlacedObjectData
+                        {
+                            contentsBasePosition = location,
+                            fieldData = new List<PrototypePlacedObjectFieldData>(),
+                            instancePrerequisites = array,
+                            linkedTriggerAreaIDs = new List<int>(),
+                            assignedPathIDx = -1,
+                            nonenemyBehaviour = gameObject.GetComponent<DungeonPlaceableBehaviour>() 
+                        });;
+                    }
                     else
                     {
                         room.placedObjects.Add(new PrototypePlacedObjectData
@@ -1192,11 +1414,8 @@ namespace Alexandria.DungeonAPI
                             linkedTriggerAreaIDs = new List<int>(),
                             placeableContents = dungeonPlaceable,
                             assignedPathIDx = -1,
-
-
                         });
                     }
-
                 }
                 else
                 {
@@ -1489,7 +1708,7 @@ namespace Alexandria.DungeonAPI
             }
             return result;
         }
-        public static void AddNodeToRoom(PrototypeDungeonRoom room, Vector2 location, string guid, int layer, SerializedPath.SerializedPathWrapMode wrapMode)
+        public static void AddNodeToRoom(PrototypeDungeonRoom room, Vector2 location, string guid, int layer, SerializedPath.SerializedPathWrapMode wrapMode, bool modifyTilemap)
         {
             IntVector2 intLocation = location.ToIntVector2();
             SerializedPath serializedPath = null;
@@ -1506,7 +1725,7 @@ namespace Alexandria.DungeonAPI
 
                 room.paths.Add(serializedPath);
                 serializedPath.wrapMode = wrapMode;//SerializedPath.SerializedPathWrapMode.Loop;
-                serializedPath.tilesetPathGrid = 0;
+                serializedPath.tilesetPathGrid = modifyTilemap ? 0 : -1;
 
             }
             else
@@ -1516,6 +1735,7 @@ namespace Alexandria.DungeonAPI
                 serializedPath.wrapMode = wrapMode;
                 node.placement = (SerializedPathNode.SerializedNodePlacement)Enum.Parse(typeof(SerializedPathNode.SerializedNodePlacement), guid);
                 serializedPath.nodes.Add(node);
+                serializedPath.tilesetPathGrid = modifyTilemap ? 0 : -1;
             }
 
         }
@@ -1590,6 +1810,7 @@ namespace Alexandria.DungeonAPI
                     prerequisites = array,
                     forceBlackPhantom = forceBlackPhantom,
                     enemyPlaceableGuid = guid,
+                    
                     materialRequirements = new DungeonPlaceableRoomMaterialRequirement[0]
                 }
             };
@@ -1936,6 +2157,8 @@ namespace Alexandria.DungeonAPI
             public float AmbientLight_G;
             public float AmbientLight_B;
             public bool usesAmbientLight;
+            public bool[] nodePathVisible;
+
         }
     }
 }

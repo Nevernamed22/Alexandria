@@ -10,12 +10,56 @@ using System.Reflection;
 using MonoMod.RuntimeDetour;
 using System.Collections;
 using HarmonyLib;
+using Alexandria.Misc;
+using System.ComponentModel;
 
 namespace Alexandria.DungeonAPI
 {
+
+    [HarmonyPatch(typeof(DungeonFlowNode))]
+    [HarmonyPatch("UsesGlobalBossData", MethodType.Getter)]
+    class TablePatch
+    {
+        [HarmonyPrefix]
+        public static bool Postfix(ref bool __result, DungeonFlowNode __instance)
+        {
+            bool isGlitchedTable = __instance.overrideRoomTable != null ? __instance.overrideRoomTable.name == "alexandriaGlitchTable" : false;
+            return GameManager.Instance.CurrentGameMode != GameManager.GameMode.BOSSRUSH && GameManager.Instance.CurrentGameMode != GameManager.GameMode.SUPERBOSSRUSH && __instance.overrideExactRoom == null  && __instance.roomCategory == PrototypeDungeonRoom.RoomCategory.BOSS && isGlitchedTable == false;
+        }
+    }
+
+
+    [HarmonyPatch(typeof(RoomHandler))]
+    [HarmonyPatch("HandleBossClearReward", MethodType.Normal)]
+    class PedestalPatch
+    {
+        [HarmonyPrefix]
+        public static void Postfix(RoomHandler __instance)
+        {
+            var name = __instance.GetRoomName();
+            if (name != null && StaticReferences.GlitchBossNames.Contains(name))
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    GameObject gameObject = GameManager.Instance.Dungeon.sharedSettingsPrefab.ChestsForBosses.SelectByWeight();
+                    RewardPedestal component = gameObject.GetComponent<RewardPedestal>();
+                    DungeonData data = GameManager.Instance.Dungeon.data;
+                    IntVector2 centeredVisibleClearSpot = __instance.GetCenteredVisibleClearSpot(2, 2);
+                    RewardPedestal rewardPedestal2 = RewardPedestal.Spawn(component, centeredVisibleClearSpot, __instance);
+                    rewardPedestal2.IsBossRewardPedestal = true;
+                    rewardPedestal2.lootTable.lootTable = __instance.OverrideBossRewardTable;
+                    data[centeredVisibleClearSpot].isOccupied = true;
+                    data[centeredVisibleClearSpot + IntVector2.Right].isOccupied = true;
+                    data[centeredVisibleClearSpot + IntVector2.Up].isOccupied = true;
+                    data[centeredVisibleClearSpot + IntVector2.One].isOccupied = true;
+                }
+            }
+        }
+    }
+
     public static class StaticReferences
     {
-
+        public static List<string> GlitchBossNames = new List<string>();
         public static Dictionary<string, AssetBundle> AssetBundles;
         public static Dictionary<string, GenericRoomTable> RoomTables;
         public static SharedInjectionData subShopTable;
@@ -243,25 +287,47 @@ namespace Alexandria.DungeonAPI
             abbey_ = null;
             hollow_ = null;
             hell_ = null;
-            
+
+
+            //FlowDatabase.GetOrLoadByName("Secret_DoubleBeholster_Flow");
+
+            var glitchedFlow = ResourceManager.LoadAssetBundle("flows_base_001").LoadAsset<DungeonFlow>("Secret_DoubleBeholster_Flow");
+            StaticInjections.GlitchFlow = glitchedFlow;
+            StaticInjections.Node = glitchedFlow.AllNodes[2];
+            RoomTables.Add("glitchedBoss", ConvertNodeToRoomTable(StaticInjections.Node).overrideRoomTable);
+
             ShrineTools.Print("Static references initialized.");
         }
 
-        public static IEnumerator DelayRemoveRoom(ProceduralFlowModifierData data)
-        {
-            yield return null;
-            yield return null;
 
-            data.exactRoom = null;
-            yield break;
+
+
+        public static DungeonFlowNode ConvertNodeToRoomTable(DungeonFlowNode node, float overrideWeight = 1)
+        {
+            node.overrideRoomTable = ScriptableObject.CreateInstance<GenericRoomTable>();
+            node.overrideRoomTable.includedRooms = new WeightedRoomCollection()
+            {
+                elements = new List<WeightedRoom>()
+                {
+                    new WeightedRoom()
+                    {
+                        room = node.overrideExactRoom,
+                        weight = overrideWeight,
+                        additionalPrerequisites = node.overrideExactRoom.prerequisites != null ? node.overrideExactRoom.prerequisites.ToArray() : new DungeonPrerequisite[0],  
+                    }
+                }
+            };
+            node.overrideRoomTable.name = "alexandriaGlitchTable";
+            node.overrideRoomTable.includedRoomTables = new List<GenericRoomTable>() { };
+            ETGMod.StartGlobalCoroutine(Delay(node));
+            return node;
         }
 
-        private class Nope : DungeonPrerequisite
+        public static IEnumerator Delay(DungeonFlowNode flow)
         {
-            public virtual new bool CheckConditionsFulfilled()
-            {
-                return false;
-            }
+            yield return null;
+            flow.overrideExactRoom = null;
+            yield break;
         }
 
         public static ProceduralFlowModifierData ProcessRoomTableThing(SharedInjectionData shared , ProceduralFlowModifierData data, float defaultWeight = 1)
@@ -283,24 +349,25 @@ namespace Alexandria.DungeonAPI
                 RandomNodeChildMinDistanceFromEntrance = data.RandomNodeChildMinDistanceFromEntrance,
                 RequiredValidPlaceable = data.RequiredValidPlaceable,
                 RequiresMasteryToken = data.RequiresMasteryToken,
-                roomTable = new()
+                roomTable = ScriptableObject.CreateInstance<GenericRoomTable>(),
+               
+            };
+
+            modifierData.roomTable.includedRooms = new WeightedRoomCollection()
+            {
+                elements = new()
                 {
-                    includedRooms = new WeightedRoomCollection()
-                    {
-                        elements = new()
-                        {
                             new WeightedRoom()
                             {
                                 room = data.exactRoom,
                                 additionalPrerequisites = data.exactRoom.prerequisites != null ? data.exactRoom.prerequisites.ToArray() : new DungeonPrerequisite[0],
                                 weight = defaultWeight
                             }
-                        }
-                        
-                    },
-                    includedRoomTables = new List<GenericRoomTable>() { },
                 }
+
             };
+            modifierData.roomTable.includedRoomTables = new List<GenericRoomTable>() { };
+
             data.chanceToSpawn = 0;
             shared.InjectionData.Add(modifierData);
             return modifierData;

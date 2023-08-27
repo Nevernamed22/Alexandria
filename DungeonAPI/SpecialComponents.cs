@@ -12,6 +12,78 @@ namespace Alexandria.DungeonAPI
 {
     public class SpecialComponents
     {
+
+        public class ProjectileJammer : MonoBehaviour
+        {
+            public void Start()
+            {
+                var proj = this.GetComponent<Projectile>();
+                if (proj != null)
+                {
+                    if (proj.BulletScriptSettings != null)
+                    {
+                        proj.BulletScriptSettings.preventPooling = true;
+                    }
+                    proj.BecomeBlackBullet();
+                }
+            }
+        }
+
+        public class ProjectileWallUnfuckinator : MonoBehaviour
+        {
+            public void Start()
+            {
+                var proj = this.GetComponent<Projectile>();
+                if (proj != null)
+                {
+                    proj.IgnoreTileCollisionsFor(1 / proj.baseData.speed);
+                    proj.UpdateCollisionMask();
+                }
+            }
+        }
+
+        public class Glitched_Boss_Modifier : MonoBehaviour
+        {
+            public float TimeScale = 1;
+            public float DamageMultiplier = 1;
+            public float MovementSpeed = 1;
+            public bool ForceSlight = false;
+
+
+            public IEnumerator Start()
+            {
+                yield return null;
+                var room = this.transform.position.GetAbsoluteRoom();
+                if (room != null)
+                {
+                    GameManager.Instance.Dungeon.IsGlitchDungeon = true;
+                    
+                    var enemies = room.GetActiveEnemies(RoomHandler.ActiveEnemyType.All);
+                    if (enemies == null) { yield break; }
+                    for (int i = 0; i < enemies.Count; i++)
+                    {
+                        var enemy = enemies[i];
+                        if (enemy != null)
+                        {
+                            enemy.sprite.usesOverrideMaterial = true;
+                            enemy.sprite.renderer.material.shader = ShaderCache.Acquire("Brave/Internal/Glitch");
+
+                            enemy.healthHaver.AllDamageMultiplier *= DamageMultiplier;
+
+                            enemy.LocalTimeScale *= TimeScale;
+                            enemy.MovementSpeed *= MovementSpeed;
+                            if (ForceSlight == true)
+                            {
+                                enemy.SetIsFlying(true, "Glitch_", true, true);
+                            }
+                        }
+                    }              
+                }
+                yield break;
+            }
+        }
+
+
         public class TurretCartReboot : MonoBehaviour
         {
             public IEnumerator Start()
@@ -66,7 +138,7 @@ namespace Alexandria.DungeonAPI
                                 enemy.MovementSpeed = enemy.BaseMovementSpeed;
                                 enemy.specRigidbody.Reinitialize();
                             }
-                            Destroy(selectedCart.gameObject);
+                            Destroy(selectedCart.gameObject, 0.1f);
                         }
                         var copiedCartComponent = MineCartFactory.MineCartPrefab.GetComponent<ForceNearestToRide>();
                         if (copiedCartComponent != null)

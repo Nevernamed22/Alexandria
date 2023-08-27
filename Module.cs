@@ -15,6 +15,7 @@ using Alexandria.CharacterAPI;
 using System.Collections;
 using HarmonyLib;
 using System.Reflection;
+using Dungeonator;
 
 namespace Alexandria
 {
@@ -26,7 +27,7 @@ namespace Alexandria
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
 
-        public const string VERSION = "0.3.12";
+        public const string VERSION = "0.3.21";
 
         public void Start()
         {
@@ -82,6 +83,10 @@ namespace Alexandria
 
                 ETGMod.StartGlobalCoroutine(this.delayedstarthandler());
                 ETGModConsole.Log("AlexandriaLib started correctly. Ver. : "+VERSION);
+
+                //DungeonAPI.RoomFactory.BuildNewRoomFromResource("Alexandria/Testing/testMegaFinale.newroom");
+                //DungeonAPI.RoomFactory.BuildNewRoomFromResource("Alexandria/Testing/KP-Manuel.newroom");
+
             }
             catch (Exception e)
             {
@@ -89,6 +94,7 @@ namespace Alexandria
             }
             
         }
+
 
         public IEnumerator delayedstarthandler()
         {

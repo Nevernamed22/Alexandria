@@ -96,190 +96,276 @@ namespace Alexandria.DungeonAPI
                 weight = roomData.weight
             };
 
-            AssetBundle shared_auto_001 = ResourceManager.LoadAssetBundle("shared_auto_001");
-
-            GameObject iconPrefab = RoomFactory.MinimapIconPrefab ?? (shared_auto_001.LoadAsset("assets/data/prefabs/room icons/minimap_boss_icon.prefab") as GameObject);
             //bool success = false;
-            switch (room.category)
+            if (roomData.usesAmbientLight == true)
             {
-                case RoomCategory.SPECIAL:
-                    switch (room.subCategorySpecial)
-                    {
-                        case RoomSpecialSubCategory.STANDARD_SHOP:  //shops
-                            StaticReferences.RoomTables["shop"].includedRooms.Add(wRoom);
-                           // Tools.Print($"Registering {roomData.room.name} with weight {wRoom.weight} as {roomData.category}:{roomData.specialSubCategory}");
-                         //   success = true;
-                            break;
-                        case RoomSpecialSubCategory.WEIRD_SHOP:    //subshops
-                            StaticReferences.subShopTable.InjectionData.AddRange(GetFlowModifier(roomData));
-                           // Tools.Print($"Registering {roomData.room.name} with weight {wRoom.weight} as {roomData.category}:{roomData.specialSubCategory}");
-                           // success = true;
-                            break;
-                        default:
-                            StaticReferences.RoomTables["special"].includedRooms.Add(wRoom);
-                            //Tools.Print($"Registering {roomData.room.name} with weight {wRoom.weight} as {roomData.category}:{roomData.specialSubCategory}");
-                           // success = true;
-                            break;
-                    }
-                    break;
-                case RoomCategory.SECRET:
-                    StaticReferences.RoomTables["secret"].includedRooms.Add(wRoom);
-                    //success = true;
-                    break;
+                room.usesCustomAmbientLight = true;
+                room.customAmbientLight = new Color(roomData.AmbientLight_R, roomData.AmbientLight_G, roomData.AmbientLight_B);           
+            }
+
+            if (roomData.superSpecialRoomType != null && roomData.superSpecialRoomType.ToLower() != "none")
+            {
+                switch (roomData.superSpecialRoomType.ToLower())
+                {
+                    case "blockner_miniboss":
+                        StaticReferences.RoomTables["blockner"].includedRooms.Add(wRoom);
+                        break;
+                    case "shadow_magician":
+                        StaticReferences.RoomTables["shadeagunim"].includedRooms.Add(wRoom);
+                        break;
+                    case "winchester":
+                        room.associatedMinimapIcon = RoomIcons.WinchesterRoomIcon;
+                        StaticReferences.RoomTables["winchester"].includedRooms.Add(wRoom);
+                        break;
+                    case "misc_reward":
+                        StaticReferences.RoomTables["miscreward"].includedRooms.Add(wRoom);
+                        break;
+                    case "fireplace":
+                        StaticReferences.RoomTables["fireplace"].includedRooms.Add(wRoom);
+                        break;
+
+                    case "sewer_entrance":
+                        if (!room.name.Contains("SewersEntrance"))
+                        {
+                            room.name += "_SewersEntrance";
+                        }
+                        room.category = RoomCategory.SECRET;
+                        StaticReferences.RoomTables["sewerentrace"].includedRooms.Add(wRoom);
+                        break;
+                    case "crest_room":
+                        room.associatedMinimapIcon = RoomIcons.CrestRoomIcon;
+                        StaticReferences.RoomTables["crestroom"].includedRooms.Add(wRoom);
+                        break;
+
+                    case "abbey_entrance":
+                        StaticReferences.RoomTables["abbeyentrance"].includedRooms.Add(wRoom);
+                        break;
+                    case "abbey_extra_secret":
+                        room.category = RoomCategory.SECRET;
+                        StaticReferences.RoomTables["abbeyextrasecret"].includedRooms.Add(wRoom);
+                        break;
+                    case "hollow_sell_creep":
+                        StaticReferences.RoomTables["rng_entry"].includedRooms.Add(wRoom);
+                        break;
+                    case "bullet_hell_secret":
+                        room.category = RoomCategory.SECRET;
+                        StaticReferences.RoomTables["bullet_hell_secret"].includedRooms.Add(wRoom);
+                        break;
+                    case "glitched_boss":
+                        room.category = RoomCategory.BOSS;
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.GlitchBossNames.Add(wRoom.room.name);
+                        StaticReferences.RoomTables["glitchedBoss"].includedRooms.Add(wRoom);
+                        break;
+                    case "gatling_gull":
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.RoomTables["gull"].includedRooms.Add(wRoom);
+                        break;
+                    case "bullet_king":
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.RoomTables["bulletking"].includedRooms.Add(wRoom);
+                        break;
+                    case "trigger_twins":
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.RoomTables["triggertwins"].includedRooms.Add(wRoom);
+                        break;
+                    case "blobulord":
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.RoomTables["blobby"].includedRooms.Add(wRoom);
+                        break;
+                    case "gorgun":
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.RoomTables["gorgun"].includedRooms.Add(wRoom);
+                        break;
+                    case "beholster":
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.RoomTables["beholster"].includedRooms.Add(wRoom);
+                        break;
+                    case "ammoconda":
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.RoomTables["ammoconda"].includedRooms.Add(wRoom);
+                        break;
+                    case "old_king":
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.RoomTables["oldking"].includedRooms.Add(wRoom);
+                        break;
+                    case "treadnaught":
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.RoomTables["tank"].includedRooms.Add(wRoom);
+                        break;
+                    case "cannonbalrog":
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.RoomTables["cannonballrog"].includedRooms.Add(wRoom);
+                        break;
+                    case "mine_flayer":
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.RoomTables["flayer"].includedRooms.Add(wRoom);
+                        break;
+                    case "high_priest":
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.RoomTables["pillars"].includedRooms.Add(wRoom);
+                        break;
+                    case "kill_pillars":
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.RoomTables["priest"].includedRooms.Add(wRoom);
+                        break;
+                    case "wallmonger":
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.RoomTables["monger"].includedRooms.Add(wRoom);
+                        break;
+                    case "door_lord":
+                        room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                        StaticReferences.RoomTables["doorlord"].includedRooms.Add(wRoom);
+                        break;
+                }
+            }
+            else
+            {
+                switch (room.category)
+                {
+                    case RoomCategory.SPECIAL:
+                        switch (room.subCategorySpecial)
+                        {
+                            case RoomSpecialSubCategory.STANDARD_SHOP:  //shops
+                                StaticReferences.RoomTables["shop"].includedRooms.Add(wRoom);
+                                // Tools.Print($"Registering {roomData.room.name} with weight {wRoom.weight} as {roomData.category}:{roomData.specialSubCategory}");
+                                //   success = true;
+                                break;
+                            case RoomSpecialSubCategory.WEIRD_SHOP:    //subshops
+                                StaticReferences.subShopTable.InjectionData.AddRange(GetFlowModifier(roomData));
+                                room.doorTopDecorable = (ResourceCache.Acquire("Global Prefabs/Purple_Lantern") as GameObject);
+                                // Tools.Print($"Registering {roomData.room.name} with weight {wRoom.weight} as {roomData.category}:{roomData.specialSubCategory}");
+                                // success = true;
+                                break;
+
+                            default:
+                                StaticReferences.RoomTables["special"].includedRooms.Add(wRoom);
+                                room.doorTopDecorable = (ResourceCache.Acquire("Global Prefabs/Shrine_Lantern") as GameObject);
+                                //Tools.Print($"Registering {roomData.room.name} with weight {wRoom.weight} as {roomData.category}:{roomData.specialSubCategory}");
+                                // success = true;
+                                break;
+                        }
+                        break;
+                    case RoomCategory.SECRET:
+                        StaticReferences.RoomTables["secret"].includedRooms.Add(wRoom);
+                        //success = true;
+                        break;
                     //===========================PUTS YOUR BOSS ROOMS IN THE POOLS DEFINED IN STATICREFERENCES ====================
-                case RoomCategory.BOSS:
-                    switch (room.subCategoryBoss)
-                    {
-                        case RoomBossSubCategory.FLOOR_BOSS:  
-                            foreach (var p in room.prerequisites)
+                    case RoomCategory.BOSS:
+                        switch (room.subCategoryBoss)
+                        {
+                            case RoomBossSubCategory.FLOOR_BOSS:
+                                foreach (var p in room.prerequisites)
 
-                               
-                                
-                                if (p.requiredTileset == GlobalDungeonData.ValidTilesets.CASTLEGEON)
-                                {
-                                    foreach (var Entries in SpecificBossKeys)
+                                    if (p.requiredTileset == GlobalDungeonData.ValidTilesets.CASTLEGEON)
                                     {
-                                        if (room.name.ToLower().Contains(Entries.Key))
-                                        {
-                                            StaticReferences.RoomTables[Entries.Key].includedRooms.Add(wRoom);
-                                        }
-                                        else
-                                        {
-                                            StaticReferences.RoomTables["gull"].includedRooms.Add(wRoom);
-                                            StaticReferences.RoomTables["triggertwins"].includedRooms.Add(wRoom);
-                                            StaticReferences.RoomTables["bulletking"].includedRooms.Add(wRoom);
-                                        }
+                                        StaticReferences.RoomTables["gull"].includedRooms.Add(wRoom);
+                                        StaticReferences.RoomTables["triggertwins"].includedRooms.Add(wRoom);
+                                        StaticReferences.RoomTables["bulletking"].includedRooms.Add(wRoom);
+
                                     }
-                                   
-                                }
-                                else if (p.requiredTileset == GlobalDungeonData.ValidTilesets.SEWERGEON)
-                                {
-                                    StaticReferences.RoomTables["blobby"].includedRooms.Add(wRoom);
-                                }
-                                else if (p.requiredTileset == GlobalDungeonData.ValidTilesets.GUNGEON)
-                                {
-                                    foreach (var Entries in SpecificBossKeys)
+                                    else if (p.requiredTileset == GlobalDungeonData.ValidTilesets.SEWERGEON)
                                     {
-                                        if (room.name.ToLower().Contains(Entries.Key))
-                                        {
-                                            StaticReferences.RoomTables[Entries.Key].includedRooms.Add(wRoom);
-                                        }
-                                        else
-                                        {
-                                            StaticReferences.RoomTables["gorgun"].includedRooms.Add(wRoom);
-                                            StaticReferences.RoomTables["beholster"].includedRooms.Add(wRoom);
-                                            StaticReferences.RoomTables["ammoconda"].includedRooms.Add(wRoom);
-                                        }
+                                        StaticReferences.RoomTables["blobby"].includedRooms.Add(wRoom);
                                     }
-                                }
-                                else if (p.requiredTileset == GlobalDungeonData.ValidTilesets.CATHEDRALGEON)
-                                {
-                                    StaticReferences.RoomTables["oldking"].includedRooms.Add(wRoom);
-                                }
-                                else if (p.requiredTileset == GlobalDungeonData.ValidTilesets.MINEGEON)
-                                {
-                                    foreach (var Entries in SpecificBossKeys)
+                                    else if (p.requiredTileset == GlobalDungeonData.ValidTilesets.GUNGEON)
                                     {
-                                        if (room.name.ToLower().Contains(Entries.Key))
-                                        {
-                                            StaticReferences.RoomTables[Entries.Key].includedRooms.Add(wRoom);
-                                        }
-                                        else
-                                        {
-                                            StaticReferences.RoomTables["tank"].includedRooms.Add(wRoom);
-                                            StaticReferences.RoomTables["cannonballrog"].includedRooms.Add(wRoom);
-                                            StaticReferences.RoomTables["flayer"].includedRooms.Add(wRoom);
-                                        }
+                                        StaticReferences.RoomTables["gorgun"].includedRooms.Add(wRoom);
+                                        StaticReferences.RoomTables["beholster"].includedRooms.Add(wRoom);
+                                        StaticReferences.RoomTables["ammoconda"].includedRooms.Add(wRoom);
                                     }
-                                }
-                                else if (p.requiredTileset == GlobalDungeonData.ValidTilesets.CATHEDRALGEON)
-                                {
-                                    foreach (var Entries in SpecificBossKeys)
+                                    else if (p.requiredTileset == GlobalDungeonData.ValidTilesets.CATHEDRALGEON)
                                     {
-                                        if (room.name.ToLower().Contains(Entries.Key))
-                                        {
-                                            StaticReferences.RoomTables[Entries.Key].includedRooms.Add(wRoom);
-                                        }
-                                        else
-                                        {
-                                            StaticReferences.RoomTables["pillars"].includedRooms.Add(wRoom);
-                                            StaticReferences.RoomTables["priest"].includedRooms.Add(wRoom);
-                                            StaticReferences.RoomTables["monger"].includedRooms.Add(wRoom);
-                                        }
+                                        StaticReferences.RoomTables["oldking"].includedRooms.Add(wRoom);
                                     }
-                                }
-                                else
-                                {
-                                    //StaticReferences.RoomTables["doorlord"].includedRooms.Add(wRoom);
-                                }
-                            room.associatedMinimapIcon = iconPrefab;
-
-                            break;
-                        case RoomBossSubCategory.MINI_BOSS:
-                            if (room.name.ToLower().Contains("blockner"))
-                            {
-                                StaticReferences.RoomTables["blockner"].includedRooms.Add(wRoom);
-
-                            }
-                            else if (room.name.ToLower().Contains("agunim"))
-                            {
-                                StaticReferences.RoomTables["shadeagunim"].includedRooms.Add(wRoom);
-                            }
-                            else
-                            {
-                                StaticReferences.RoomTables["blockner"].includedRooms.Add(wRoom);
-                                StaticReferences.RoomTables["shadeagunim"].includedRooms.Add(wRoom);
-                            }
-                            //StaticReferences.RoomTables["fuselier"].includedRooms.Add(wRoom);
-                            room.associatedMinimapIcon = iconPrefab;
-                            break;
-                        default:
-                            //StaticReferences.RoomTables["doorlord"].includedRooms.Add(wRoom);
-                           // room.associatedMinimapIcon = iconPrefab;
-                            break;
-                    }
-                    break;
-
-
-                //===============================================
-                default:
-                    foreach (var p in room.prerequisites)
-                        if (p.requireTileset)
-                            try
-                            {
-                                if (p.requiredTileset == GlobalDungeonData.ValidTilesets.RATGEON)
-                                {
-                                    if (wRoom.room.Height == 24 && wRoom.room.Width == 34)
+                                    else if (p.requiredTileset == GlobalDungeonData.ValidTilesets.MINEGEON)
                                     {
-                                        wRoom.room.IsLostWoodsRoom = true;
-                                        wRoom.room.subCategorySpecial = PrototypeDungeonRoom.RoomSpecialSubCategory.NPC_STORY;
-                                        StaticReferences.GetRoomTable(p.requiredTileset).includedRooms.Add(wRoom);
+                                        StaticReferences.RoomTables["tank"].includedRooms.Add(wRoom);
+                                        StaticReferences.RoomTables["cannonballrog"].includedRooms.Add(wRoom);
+                                        StaticReferences.RoomTables["flayer"].includedRooms.Add(wRoom);
+                                    }
+                                    else if (p.requiredTileset == GlobalDungeonData.ValidTilesets.CATHEDRALGEON)
+                                    {
+                                        StaticReferences.RoomTables["pillars"].includedRooms.Add(wRoom);
+                                        StaticReferences.RoomTables["priest"].includedRooms.Add(wRoom);
+                                        StaticReferences.RoomTables["monger"].includedRooms.Add(wRoom);
                                     }
                                     else
                                     {
-                                        ShrineTools.PrintError($"Room name: " + wRoom.room.name.ToString() + " is of an INVALID height/width, and will NOT be added to the pool! Rat floor rooms should always be 34x | 24y to prevent issues!");
+                                        //StaticReferences.RoomTables["doorlord"].includedRooms.Add(wRoom);
                                     }
+                                room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+
+                                break;
+                            case RoomBossSubCategory.MINI_BOSS:
+                                StaticReferences.RoomTables["blockner"].includedRooms.Add(wRoom);
+                                StaticReferences.RoomTables["shadeagunim"].includedRooms.Add(wRoom);
+                                /*
+                                if (room.name.ToLower().Contains("blockner"))
+                                {
+                                    StaticReferences.RoomTables["blockner"].includedRooms.Add(wRoom);
+
+                                }
+                                else if (room.name.ToLower().Contains("agunim"))
+                                {
+                                    StaticReferences.RoomTables["shadeagunim"].includedRooms.Add(wRoom);
                                 }
                                 else
                                 {
-                                    StaticReferences.GetRoomTable(p.requiredTileset).includedRooms.Add(wRoom);
+                                    StaticReferences.RoomTables["blockner"].includedRooms.Add(wRoom);
+                                    StaticReferences.RoomTables["shadeagunim"].includedRooms.Add(wRoom);
                                 }
-                            }
-                            catch (Exception e)
-                            {
-                                ETGModConsole.Log(e.ToString());
-                                ETGModConsole.Log("This Room fucks it up:" + room.name);
-                            }
-                    //   success = true;
-                    break;
+                                */
+                                //StaticReferences.RoomTables["fuselier"].includedRooms.Add(wRoom);
+                                room.associatedMinimapIcon = RoomIcons.BossRoomIcon;
+                                break;
+                            default:
+                                //StaticReferences.RoomTables["doorlord"].includedRooms.Add(wRoom);
+                                // room.associatedMinimapIcon = iconPrefab;
+                                break;
+                        }
+                        break;
+
+
+                    //===============================================
+                    default:
+                        foreach (var p in room.prerequisites)
+                            if (p.requireTileset)
+                                try
+                                {
+                                    if (p.requiredTileset == GlobalDungeonData.ValidTilesets.RATGEON)
+                                    {
+                                        if (wRoom.room.Height == 24 && wRoom.room.Width == 34)
+                                        {
+                                            wRoom.room.IsLostWoodsRoom = true;
+                                            wRoom.room.subCategorySpecial = PrototypeDungeonRoom.RoomSpecialSubCategory.NPC_STORY;
+                                            StaticReferences.GetRoomTable(p.requiredTileset).includedRooms.Add(wRoom);
+                                        }
+                                        else
+                                        {
+                                            ShrineTools.PrintError($"Room name: " + wRoom.room.name.ToString() + " is of an INVALID height/width, and will NOT be added to the pool! Rat floor rooms should always be 34x | 24y to prevent issues!");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        StaticReferences.GetRoomTable(p.requiredTileset).includedRooms.Add(wRoom);
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    ETGModConsole.Log(e.ToString());
+                                    ETGModConsole.Log("This Room fucks it up:" + room.name);
+                                }
+                        //   success = true;
+                        break;
+                }
+
             }
-
             RemoveTilesetPrereqs(room);
-
-           
         }
         public static GameObject MinimapShrineIconPrefab;
 
+        /*
         public static Dictionary<string, string> SpecificBossKeys = new Dictionary<string, string>()
         {
             {"bulletking","bulletking"},
@@ -298,7 +384,7 @@ namespace Alexandria.DungeonAPI
             {"highpriest","priest"},
             {"wallmonger","monger"},
         };
-
+        */
 
 
 

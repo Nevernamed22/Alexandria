@@ -14,6 +14,15 @@ using Newtonsoft.Json.Linq;
 using Gungeon;
 using Microsoft.Cci;
 using System.Linq;
+using static Alexandria.DungeonAPI.RoomFactory;
+using System.Runtime.Remoting.Lifetime;
+using static ShrineCost;
+using static Alexandria.DungeonAPI.SpecialComponents;
+using HutongGames.PlayMaker.Actions;
+using Alexandria.NPCAPI;
+using System.Collections;
+using static PrototypeRoomExit;
+using Alexandria.EnemyAPI;
 
 namespace Alexandria.DungeonAPI
 {
@@ -28,9 +37,7 @@ namespace Alexandria.DungeonAPI
 
         public static Dictionary<string, RoomData> LoadRoomsFromRoomDirectory(string modPrefix, string roomDirectory)
         {
-
             var loadedRooms = new Dictionary<string, RoomData>();
-
             Directory.CreateDirectory(roomDirectory);
             foreach (string g in Directory.GetFiles(roomDirectory, "*", SearchOption.AllDirectories))
             {
@@ -63,16 +70,18 @@ namespace Alexandria.DungeonAPI
             return loadedRooms;
         }
 
-        public static RoomData BuildFromRoomFile(string roomPath)
+        private static RoomData BuildFromRoomFile(string roomPath)
         {
             var texture = ResourceExtractor.GetTextureFromFile(roomPath, ".room");
             texture.name = Path.GetFileName(roomPath);
             RoomData roomData = ExtractRoomDataFromFile(roomPath);
             roomData.room = Build(texture, roomData);
+
             return roomData;
         }
 
-        public static RoomData BuildFromRoomFileWithoutTexture(string roomPath)
+
+        private static RoomData BuildFromRoomFileWithoutTexture(string roomPath)
         {
             //ETGModConsole.Log(roomPath);
             RoomData roomData = ExtractRoomDataFromFile(roomPath);
@@ -81,15 +90,33 @@ namespace Alexandria.DungeonAPI
             return roomData;
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="roomPath"></param>
+        /// <param name="assembly"></param>
+        /// <returns></returns>
         public static RoomData BuildFromResource(string roomPath, Assembly assembly = null)
         {
             var texture = ResourceExtractor.GetTextureFromResource(roomPath, assembly ?? Assembly.GetCallingAssembly());
             texture.name = Path.GetFileName(roomPath);
             RoomData roomData = ExtractRoomDataFromResource(roomPath, assembly ?? Assembly.GetCallingAssembly());
             roomData.room = Build(texture, roomData);
+            rooms.Add(roomData.room.name, roomData);
+            DungeonHandler.Register(roomData);
             return roomData;
         }
+
+        public static RoomData BuildNewRoomFromResource(string roomPath, Assembly assembly = null)
+        {
+            RoomData roomData = ExtractRoomDataFromResource(roomPath, assembly ?? Assembly.GetCallingAssembly());
+            roomData.name = Path.GetFileName(roomPath);
+            roomData.room = Build(roomData);
+            rooms.Add(roomData.room.name, roomData);
+            DungeonHandler.Register(roomData);
+            return roomData;
+        }
+
 
         public static PrototypeDungeonRoom Build(RoomData roomData)
         {
@@ -130,14 +157,54 @@ namespace Alexandria.DungeonAPI
 
 
 
+        private static DungeonData.Direction DetermineDirectionType(string data, PrototypeRoomExit.ExitType exitType)
+        {
+            if (data.ToLower().Contains("west"))
+            {
+                return exitType == PrototypeRoomExit.ExitType.ENTRANCE_ONLY ? DungeonData.Direction.EAST : DungeonData.Direction.WEST;
+            }
+            if (data.ToLower().Contains("east"))
+            {
+                return exitType == PrototypeRoomExit.ExitType.ENTRANCE_ONLY ? DungeonData.Direction.WEST : DungeonData.Direction.EAST;
+            }
+            if (data.ToLower().Contains("north"))
+            {
+                return exitType == PrototypeRoomExit.ExitType.ENTRANCE_ONLY ? DungeonData.Direction.SOUTH : DungeonData.Direction.NORTH;
+            }
+            if (data.ToLower().Contains("south"))
+            {
+                return exitType == PrototypeRoomExit.ExitType.ENTRANCE_ONLY ? DungeonData.Direction.NORTH : DungeonData.Direction.SOUTH;
+            }
+            Debug.LogError("[Alexandria] Somehow failed to get direction of EXIT??? Returning SOUTH and praying shit don't break");
+            return DungeonData.Direction.SOUTH;
+        }
+
+        private static PrototypeRoomExit.ExitType DetermineExitType(string data)
+        {
+            if (data.ToLower().Contains("exitonly"))
+            {
+                return PrototypeRoomExit.ExitType.EXIT_ONLY;
+            }
+            else if (data.ToLower().Contains("entryonly"))
+            {
+                return PrototypeRoomExit.ExitType.ENTRANCE_ONLY;
+            }
+            return PrototypeRoomExit.ExitType.NO_RESTRICTION;
+        }
+
+
+
         public static void ApplyRoomData(PrototypeDungeonRoom room, RoomData roomData)
         {
             if (roomData.exitPositions != null)
             {
                 for (int i = 0; i < roomData.exitPositions.Length; i++)
                 {
-                    DungeonData.Direction dir = (DungeonData.Direction)Enum.Parse(typeof(DungeonData.Direction), roomData.exitDirections[i].ToUpper());
-                    AddExit(room, roomData.exitPositions[i], dir);
+                    string ext = roomData.exitDirections[i].ToUpper();
+                    var exitType = DetermineExitType(ext);
+
+
+                    AddExit(room, roomData.exitPositions[i], DetermineDirectionType(ext, exitType), exitType);
                 }
             }
             else
@@ -174,7 +241,18 @@ namespace Alexandria.DungeonAPI
             {
                 for (int i = 0; i < roomData.placeablePositions.Length; i++)
                 {
-                    
+                    /*
+                    if (roomData.placeableGUIDs[i] == "RoomEventTrigger_Placeable")
+                    {
+                        var t = roomData.placeablePositions[i];
+                        
+                        if (room.eventTriggerAreas == null) { room.eventTriggerAreas = new List<PrototypeEventTriggerArea>(); }
+                        room.AddEventTriggerArea(new List<IntVector2>() { new IntVector2((int)t.x, (int)t.y) });
+                    }
+                    else
+                    {
+                    }
+                    */
                     AddPlaceableToRoom(room, roomData.placeablePositions[i], roomData.placeableGUIDs[i], (roomData.placeableAttributes != null && roomData.placeableAttributes.Length > 0 ? roomData.placeableAttributes[i] : ""));
                     //AddPlaceableToRoom(room, roomData.placeablePositions[i], roomData.placeableGUIDs[i]);
                 }
@@ -187,20 +265,20 @@ namespace Alexandria.DungeonAPI
             if (roomData.nodePositions != null && roomData.nodePositions.Length > 0)
 
             {
-                ETGModConsole.Log("1");
+                //ETGModConsole.Log("1");
                 Dictionary<string, int> stupidJankyPieceOfShit = new Dictionary<string, int>();
-                ETGModConsole.Log("2");
-                ETGModConsole.Log(roomData.nodeOrder != null ? "Count: " + roomData.nodeOrder.Count() : "NULL");
+                //ETGModConsole.Log("2");
+                //ETGModConsole.Log(roomData.nodeOrder != null ? "Count: " + roomData.nodeOrder.Count() : "NULL");
 
                 for (int j = 0; j < roomData.nodeOrder.Length; j++)
                 {
 
-                    ETGModConsole.Log("3");
+                    //ETGModConsole.Log("3");
 
-                    ETGModConsole.Log($"{roomData.nodePaths[j]}{roomData.nodeOrder[j]}");
+                    //ETGModConsole.Log($"{roomData.nodePaths[j]}{roomData.nodeOrder[j]}");
                     stupidJankyPieceOfShit.Add($"{roomData.nodePaths[j]}{roomData.nodeOrder[j]}", j);
                 }
-                ETGModConsole.Log("4");
+                //ETGModConsole.Log("4");
 
                 for (int j = 0; j < roomData.nodePositions.Length; j++)
                 {
@@ -214,9 +292,9 @@ namespace Alexandria.DungeonAPI
                         }
                     }
 
-                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[fuckThisMod], roomData.nodeTypes[fuckThisMod], roomData.nodePaths[fuckThisMod], wrap);
+                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[fuckThisMod], roomData.nodeTypes[fuckThisMod], roomData.nodePaths[fuckThisMod], wrap, roomData.nodePathVisible[fuckThisMod]);
                 }
-                ETGModConsole.Log("5");
+                //ETGModConsole.Log("5");
 
             }
             if (RoomUtility.EnableDebugLogging == true)
@@ -243,7 +321,7 @@ namespace Alexandria.DungeonAPI
             room.allowFloorDecoration = roomData.doFloorDecoration;
             room.allowWallDecoration = roomData.doWallDecoration;
             room.usesProceduralLighting = roomData.doLighting;
-
+            room.overrideRoomVisualType = roomData.visualSubtype;
             if (roomData.darkRoom)
             {
                 room.roomEvents.Add(new RoomEventDefinition(RoomEventTriggerCondition.ON_ENTER_WITH_ENEMIES, RoomEventTriggerAction.BECOME_TERRIFYING_AND_DARK));
@@ -292,7 +370,7 @@ namespace Alexandria.DungeonAPI
         public static RoomData ExtractRoomDataFromResource(string path, Assembly assembly = null)
         {
             byte[] data = ResourceExtractor.ExtractEmbeddedResource(path, assembly ?? Assembly.GetCallingAssembly());
-            return ExtractRoomDataFromBytes(data);
+            return path.EndsWith(".newroom") ? ExtractRoomDataFromBytesWithoutHeadder(data) : ExtractRoomDataFromBytes(data);
         }
 
         public static RoomData ExtractRoomDataWithoutHeader(string data)
@@ -323,14 +401,16 @@ namespace Alexandria.DungeonAPI
             PrototypeDungeonRoom room = GetNewPrototypeDungeonRoom(width, height);
             PrototypeDungeonRoomCellData[] cellData = new PrototypeDungeonRoomCellData[width * height];
             //if (data.tilePositions == null) ETGModConsole.Log($"tilePositions not found for room \"{data.name}\"");
-
-            ETGModConsole.Log($"{data.name}: {data.tileInfo.Length} - {width * height}");
+            if (RoomUtility.EnableDebugLogging == true)
+            {
+                ETGModConsole.Log($"{data.name}: {width} x - { height} y");
+            }
 
             for (int y = 0; y < data.roomSize.y; y++)
             {
                 for (int x = 0; x < data.roomSize.x; x++)
                 {
-                    cellData[x + y * width] = CellDataFromNumber(int.Parse(data.tileInfo[x + (y * width)].ToString()));
+                    cellData[x + y * width] = CellDataFromNumber(data, data.tileInfo[x + (y * width)].ToString());
                 }
             }
 
@@ -359,27 +439,108 @@ namespace Alexandria.DungeonAPI
         }
 
 
-        private static CellType TypeFromNumber(int type)
+        private static CellType TypeFromNumber(string type)
         {
-            Dictionary<int, CellType> types = new Dictionary<int, CellType> { { 1, CellType.FLOOR }, { 2, CellType.WALL }, { 3, CellType.PIT } };
+            switch (type)
+            {
+                case "1":
+                    return CellType.FLOOR;
+                case "2":
+                    return CellType.WALL;
+                case "3":
+                    return CellType.PIT;
+                case "4":
+                    return CellType.FLOOR;
+                case "5":
+                    return CellType.FLOOR;
+                default:
+                    return CellType.WALL;
 
-            return types[type];
+            }
         }
 
-        public static PrototypeDungeonRoomCellData CellDataFromNumber(int type)
+        public static PrototypeDungeonRoomCellData CellDataFromNumber(RoomData roomData, string type)
         {
-            if (type <= 0) return null;
+            if (type == null) return null;
 
             var data = new PrototypeDungeonRoomCellData();
             data.state = TypeFromNumber(type);
             //data.diagonalWallType = DiagonalWallTypeFromColor(color);
-            data.diagonalWallType = DiagonalWallType.NONE;
+            data.diagonalWallType = ReturnDiagonalType(data, roomData, type);
+            
             data.appearance = new PrototypeDungeonRoomCellAppearance()
             {
-                OverrideFloorType = FloorType.Stone
+                overrideDungeonMaterialIndex = -1,
+                OverrideFloorType = ReturnCellFloorType(data, type),
+                IsPhantomCarpet = false,
+                ForceDisallowGoop = false,
+                globalOverrideIndices = new PrototypeIndexOverrideData() { indices = new List<int>(0) },
+                
+                
             };
             return data;
         }
+
+        public static Dungeonator.DiagonalWallType ReturnDiagonalType(PrototypeDungeonRoomCellData tile, RoomData roomData, string type)
+        {
+            switch (type)
+            {
+                case "6":
+                    tile.breakable = false;
+                    tile.ForceTileNonDecorated = true;
+                    return DiagonalWallType.SOUTHWEST;
+                case "7":
+                    tile.breakable = false;
+                    tile.ForceTileNonDecorated = true;
+                    return DiagonalWallType.SOUTHEAST;
+                case "8":
+                    tile.breakable = false;
+                    tile.ForceTileNonDecorated = true;
+                    return DiagonalWallType.NORTHEAST;
+                case "9":
+                    tile.breakable = false;
+                    tile.ForceTileNonDecorated = true;
+                    return DiagonalWallType.NORTHWEST;
+                default:
+                    return DiagonalWallType.NONE;
+            }
+        }
+
+
+        public static CellVisualData.CellFloorType ReturnCellFloorType(PrototypeDungeonRoomCellData cell, string type)
+        {
+            switch (type)
+            {
+                case "1":
+                    return FloorType.Stone;
+                case "2":
+                    return FloorType.Stone;
+                case "3":
+                    return FloorType.Stone;
+                case "4":
+                    cell.ForceTileNonDecorated = true;
+                    return FloorType.Ice;
+                case "5":
+                    cell.ForceTileNonDecorated = true;
+                    cell.doesDamage = true;
+                    
+                    cell.damageDefinition = new CellDamageDefinition()
+                    {
+                        damageTypes = CoreDamageTypes.Fire,
+                        damageToPlayersPerTick = 0.5f,
+                        damageToEnemiesPerTick = 0,
+                        tickFrequency = 1,
+                        respectsFlying = true,
+                        isPoison = false
+                    };
+                    return FloorType.ThickGoop;
+                default:
+                    return FloorType.Stone;
+
+            }
+        }
+
+
 
         public static PrototypeDungeonRoomCellData CellDataFromColor(Color32 color)
         {
@@ -522,23 +683,623 @@ namespace Alexandria.DungeonAPI
                         JToken value2;
                         float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
                         float timeToMaxSpeed = jobject.TryGetValue("tTMS", out value2) ? ((float)value2) : 1.5f;
+                        //ETGModConsole.Log(storedBody);
 
-                        gameObject = StaticReferences.DefineMinecartFromValues(maxSpeed, timeToMaxSpeed);
+                        bool storedGUID = jobject.TryGetValue("storedenemyBodyMC", out value2) ? ((bool)value2) : false;
+                        bool forceActive = jobject.TryGetValue("cartActive", out value2) ? ((bool)value2) : false;
+
+                        gameObject = StaticReferences.DefineMinecartFromValues("minecart_pathing", maxSpeed, timeToMaxSpeed, "", storedGUID, forceActive);
+
+
+
+                    }
+                    if (assetPath == "turretminecart_pathing")
+                    {
+                        JToken value2;
+                        float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
+                        float timeToMaxSpeed = jobject.TryGetValue("tTMS", out value2) ? ((float)value2) : 1.5f;
+
+                        float initialWait = jobject.TryGetValue("InitialtrapDelay", out value2) ? ((float)value2) : 3;
+                        float cooldown = jobject.TryGetValue("TrapTriggerDelay", out value2) ? ((float)value2) : 0.5f;
+                        bool forceActive = jobject.TryGetValue("cartActive", out value2) ? ((bool)value2) : false;
+
+                        string type = jobject.TryGetValue("projectileTypeTurret", out value2) ? ((string)value2) : "None.";
+
+                        float projSpeed = jobject.TryGetValue("trapProjSpeed", out value2) ? ((float)value2) : -1f;
+                        float range = jobject.TryGetValue("trapProjRange", out value2) ? ((float)value2) : 1000f;
+
+                        bool jammed = jobject.TryGetValue("j", out value2) ? ((bool)value2) : false;
+
+                        gameObject = StaticReferences.DefineMinecartFromValues("turretminecart_pathing", maxSpeed, timeToMaxSpeed, null, false, forceActive);
+
+                        var turretComp = gameObject.GetComponentInChildren<CartTurretController>();
+
+                        if (type != null && turretComp != null)
+                        {
+
+                            var b = turretComp.bulletBank;
+                            if (type == "Bouncy.")
+                            {
+                                b.Bullets = new List<AIBulletBank.Entry>();
+                                b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("1a4872dafdb34fd29fe8ac90bd2cea67").bulletBank.GetBullet("default"), "default", "DNC"));
+                            }
+                            else if (type == "Explosive.")
+                            {
+                                b.Bullets = new List<AIBulletBank.Entry>();
+                                b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("b4666cb6ef4f4b038ba8924fd8adf38f").bulletBank.GetBullet("self"), "default", "DNC"));
+                            }
+                            else if (type == "Tank Shell.")
+                            {
+                                b.Bullets = new List<AIBulletBank.Entry>();
+                                b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("fa76c8cfdf1c4a88b55173666b4bc7fb").bulletBank.GetBullet("fastBullet"), "default", "DNC"));
+                            }
+                            else if (type == "Bouncy Bullet Kin.")
+                            {
+                                b.Bullets = new List<AIBulletBank.Entry>();
+                                b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("465da2bb086a4a88a803f79fe3a27677").bulletBank.GetBullet("ricochet"), "default", "DNC"));
+                            } //Tank Shell
+                            else if (type == "Grenade.")
+                            {
+                                b.Bullets = new List<AIBulletBank.Entry>();
+                                b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("grenade"), "default", "DNC"));
+                            } //Dragun Bouncy
+                            else if (type == "Molotov.")
+                            {
+                                b.Bullets = new List<AIBulletBank.Entry>();
+                                b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("molotov"), "default", "DNC"));
+                            }
+                            else if (type == "Goblet.") 
+                            {
+                                b.Bullets = new List<AIBulletBank.Entry>();
+                                b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("ffca09398635467da3b1f4a54bcfda80").bulletBank.GetBullet("goblet"), "default", "DNC"));
+                            }
+                            else 
+                            {
+                                var bulletCopy = turretComp.bulletBank.Bullets[0];
+                                b.Bullets = new List<AIBulletBank.Entry>();
+                                b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(bulletCopy, "default", "DNC"));
+                                //trapComp.projectileModule.projectiles[0] = trapComp.projectileModule.projectiles[0].gameObject.InstantiateAndFakeprefab().GetComponent<Projectile>();
+                            }
+
+                            foreach (var entry in b.Bullets)
+                            {
+                                if (entry.Name == "default")
+                                {
+                                    var p = entry.BulletObject.GetComponent<Projectile>();
+                                    p.baseData.speed = projSpeed != -1f ? projSpeed : p.baseData.speed;
+                                    p.baseData.range = range;
+                                    if (jammed == true) { p.gameObject.AddComponent<ProjectileJammer>(); }
+                                }
+                            }
+                        }
+ 
+
+
+                        var c = gameObject.GetComponentInChildren<CartTurretController>();
+                        c.AwakeTimer = initialWait;
+                        c.TimeBetweenShots = cooldown;
+                    }
+                    if (assetPath == "explosivebarrelminecart_pathing")
+                    {
+                        JToken value2;
+                        float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
+                        float timeToMaxSpeed = jobject.TryGetValue("tTMS", out value2) ? ((float)value2) : 1.5f;
+                        bool forceActive = jobject.TryGetValue("cartActive", out value2) ? ((bool)value2) : false;
+
+                        gameObject = StaticReferences.DefineMinecartFromValues("explosivebarrelminecart_pathing", maxSpeed, timeToMaxSpeed, null, false, forceActive);          
+                    }
+                    if (assetPath == "CustomlightSource")
+                    {
+                        JToken value2;
+                        float radius = jobject.TryGetValue("lightRad", out value2) ? ((float)value2) : 3f;
+                        float intens = jobject.TryGetValue("lightInt", out value2) ? ((float)value2) : 3;
+                        float Red = jobject.TryGetValue("lightColorR", out value2) ? ((float)value2) : 1;
+                        float Green = jobject.TryGetValue("lightColorG", out value2) ? ((float)value2) : 1;
+                        float Blue = jobject.TryGetValue("lightColorB", out value2) ? ((float)value2) : 1;
+
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject("CustomlightSource"));
+                        var lightComp = gameObject.GetComponentInChildren<AdditionalBraveLight>();
+                        lightComp.LightIntensity = intens;
+                        lightComp.LightRadius = radius;
+                        lightComp.LightColor = new Color(Red, Green, Blue);
+                    }
+                    if (assetPath == "bossPedestal")
+                    {
+                        JToken value2;
+                        int id = jobject.TryGetValue("bossPdstlItmID", out value2) ? ((int)value2) : -1;
+                        string Tag = jobject.TryGetValue("bossPdstlItmStringID", out value2) ? ((string)value2) : "None.";
+                        string lootType = jobject.TryGetValue("bossPdstOverrideLootType", out value2) ? ((string)value2) : "N/A";
+
+
+                        var r = FakePrefab.Clone(RoomFactory.GetCustomDungeonPlaceableObject("bossPedestal").variantTiers[0].nonDatabasePlaceable);
+                        var pedestal = r.GetComponent<RewardPedestal>();
+                        var thing  = r.AddComponent<PedestalSetter>();
+                        if (lootType == "Fully Random") {thing.myLootType = PedestalSetter.LootType.RANDOM; }
+                        else if (lootType == "Random Gun") { thing.myLootType = PedestalSetter.LootType.RANDOM_GUN; }
+                        else if(lootType == "Random Item") { thing.myLootType = PedestalSetter.LootType.RANDOM_ITEM; }
+                        else if(lootType == "Crest") { thing.myLootType = PedestalSetter.LootType.CREST; }
+                        else if (lootType == "Set ID / Tag") { thing.myLootType = PedestalSetter.LootType.SET; }
+                        else { thing.myLootType = PedestalSetter.LootType.N_A; }
+                        pedestal.pickedUp = false;
+                        if (Tag != null && Tag != "None.")
+                        {
+                            if (StaticReferences.storedItemIDs.ContainsKey(Tag))
+                            {
+                                thing.Help = StaticReferences.storedItemIDs.Where(self => self.Key == Tag).First().Value;
+                            }
+                        }
+                        else if (id != -1)
+                        {
+                            thing.Help = id;
+
+                        }
+                        gameObject = r;
+                    }
+                    if (SetupExoticObjects.allBasictrapControllerAssetNames.Contains(assetPath))
+                    {
+                        JToken value2;
+                        
+                        string triggerMethod = jobject.TryGetValue("TrapTriggerMethod", out value2) ? ((string)value2) : "Timer";
+                        float cooldown = jobject.TryGetValue("TrapTriggerDelay", out value2) ? ((float)value2) : 1;
+                        float initialCooldown = jobject.TryGetValue("InitialtrapDelay", out value2) ? ((float)value2) : 1;
+                        float AttackDelay = jobject.TryGetValue("attackDelatTrap", out value2) ? ((float)value2) : 0.5f;
+                        bool trapTriggerOnBlank = jobject.TryGetValue("trapTriggerOnBlank", out value2) ? ((bool)value2) : false;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var trapComp = gameObject.GetComponentInChildren<BasicTrapController>();
+                        if (triggerMethod == "Timer") { trapComp.triggerMethod = BasicTrapController.TriggerMethod.Timer; }
+                        else if (triggerMethod == "Stepped On") { trapComp.triggerMethod = BasicTrapController.TriggerMethod.PlaceableFootprint; }
+                        else if(triggerMethod == "Collisions") { trapComp.triggerMethod = BasicTrapController.TriggerMethod.SpecRigidbody; }
+                        else if(triggerMethod == "Script") { trapComp.triggerMethod = BasicTrapController.TriggerMethod.Script; }
+                        trapComp.triggerTimerDelay = cooldown; // TrapTriggerDelay
+                        trapComp.triggerOnBlank = trapTriggerOnBlank; //trapTriggerOnBlank
+                        trapComp.triggerTimerOffset = initialCooldown; //Initial Cooldown
+                        trapComp.triggerDelay = AttackDelay; //Attack Delay
+                        trapComp.resetDelay = cooldown; 
+                    }
+                    if (assetPath == "WinchesterRoomController")
+                    {
+                        JToken value2;
+                        int bounces = jobject.TryGetValue("WinchesterBounceCount", out value2) ? ((int)value2) : 1;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject("WinchesterRoomController"));
+                        gameObject.GetComponent<ArtfulDodgerRoomController>().NumberBounces = bounces;
+                    }
+                    if (assetPath == "WinchesterCameraController")
+                    {
+                        JToken value2;
+                        float zoom = jobject.TryGetValue("WinCameraZoomOut", out value2) ? ((float)value2) : 0.75f;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject("WinchesterCameraController"));
+                        gameObject.GetComponent<ArtfulDodgerCameraManipulator>().OverrideZoomScale = zoom;
+                    }
+                    if (assetPath == "winchesterCameraPanPlacer")
+                    {
+                        JToken value2;
+                        int X = jobject.TryGetValue("WinchestX_Tarcker", out value2) ? ((int)value2) : 4;
+                        int Y = jobject.TryGetValue("WinchestY_Tarcker", out value2) ? ((int)value2) : 4;
+
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject("winchesterCameraPanPlacer"));
+
+                        SpeculativeRigidbody specBody = gameObject.GetOrAddComponent<SpeculativeRigidbody>();
+                        specBody.CollideWithTileMap = false;
+                        if (specBody.PixelColliders == null) { specBody.PixelColliders = new List<PixelCollider>(); }
+                        specBody.PixelColliders.Add(new PixelCollider
+                        {
+                            ColliderGenerationMode = PixelCollider.PixelColliderGeneration.Manual,
+                            CollisionLayer = CollisionLayer.Pickup,
+                            IsTrigger = true,
+                            BagleUseFirstFrameOnly = false,
+                            SpecifyBagelFrame = string.Empty,
+                            BagelColliderNumber = 0,
+                            ManualOffsetX = 0,
+                            ManualOffsetY = 0,
+                            ManualWidth = 16 * X,
+                            ManualHeight = 16 * Y,
+                            ManualDiameter = 0,
+                            ManualLeftX = 0,
+                            ManualLeftY = 0,
+                            ManualRightX = 0,
+                            ManualRightY = 0,
+
+                        });
+                        gameObject.GetOrAddComponent<WinchesterCameraHelper>();
+                    }
+                    if (assetPath == "WinchesterNPC")
+                    {
+                        JToken value2;
+                        float X = jobject.TryGetValue("TileSizeX_", out value2) ? ((float)value2) : 0;
+                        float Y = jobject.TryGetValue("TileSizeY_", out value2) ? ((float)value2) : 0;
+                        float wait = jobject.TryGetValue("WinchestGoneTime", out value2) ? ((float)value2) : 1;
+
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject("WinchesterNPC"));
+                        var c = gameObject.AddComponent<SpecialComponents.WinchesterAlterer>();
+                        c.goneTime = wait;
+                        c.movement = new Vector2(X, Y);
+                    }
+                    if (assetPath == "winchesterShootyTarget_pathing" | assetPath == "WinchesterMovingBumper1x3_pathing" | assetPath == "WinchesterMovingBumper2x2_pathing")
+                    {
+                        JToken value2;
+                        float speed = jobject.TryGetValue("WinchestTargetSpeed", out value2) ? ((float)value2) : 6;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        gameObject.GetComponent<PathMover>().OriginalPathSpeed = speed;
+                        gameObject.GetComponent<PathMover>().PathSpeed = speed;
+
+                    }
+                    if (assetPath == "ConveyorHorizontal" | assetPath == "ConveyorVertical")
+                    {
+                        JToken value2;
+                        float X = jobject.TryGetValue("TileSizeX_", out value2) ? ((float)value2) : 0;
+                        float Y = jobject.TryGetValue("TileSizeY_", out value2) ? ((float)value2) : 0;
+                        float VelX = jobject.TryGetValue("ConveyorHorizontalVelocity", out value2) ? ((float)value2) : 0;
+                        float VelY = jobject.TryGetValue("ConveyorVerticalVelocity", out value2) ? ((float)value2) : 0;
+                        bool Bool = jobject.TryGetValue("ConveyorReversed", out value2) ? ((bool)value2) : false;
+
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var conveyor = gameObject.GetComponent<ConveyorBelt>();
+                        conveyor.ConveyorWidth = X;
+                        conveyor.ConveyorHeight = Y;
+                        conveyor.VelocityX = VelX * (Bool ? -1 : 1);
+                        conveyor.VelocityY = VelY * (Bool ? -1 : 1);
+                    }
+                    if (assetPath == "FloorSkeleton_Note")
+                    {
+                        JToken value2;
+                        string customText = jobject.TryGetValue("customNoteText", out value2) ? ((string)value2) : "None.";
+                        bool isKey = jobject.TryGetValue("customNoteTextIsStringKey", out value2) ? ((bool)value2) : false;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var note = gameObject.GetComponentInChildren<NoteDoer>();
+                        if (customText != "None.")
+                        {
+                            note.isNormalNote = false;
+                            note.useItemsTable = false;
+                            note.useAdditionalStrings = false;
+                            if (isKey == true)
+                            {
+                                note.stringKey = customText;
+                                note.alreadyLocalized = false;
+                            }
+                            else
+                            {
+                                ETGMod.Databases.Strings.Core.Set("#" + customText.ToUpper() + "_CUSTOM", customText);
+                                note.stringKey = "#" + customText.ToUpper() + "_CUSTOM";
+                            }
+                        }
+                    }
+                    if (assetPath == "bulletPastPitfalltrap")
+                    {
+                        JToken value2;
+                        float AttackDelay = jobject.TryGetValue("attackDelatTrap", out value2) ? ((float)value2) : 3;
+                        bool trapTriggerOnBlank = jobject.TryGetValue("trapTriggerOnBlank", out value2) ? ((bool)value2) : false;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var trapComp = gameObject.GetComponentInChildren<BasicTrapController>();
+                        trapComp.triggerMethod = BasicTrapController.TriggerMethod.PlaceableFootprint;
+
+                        trapComp.triggerOnBlank = trapTriggerOnBlank; //trapTriggerOnBlank
+                        trapComp.triggerDelay = AttackDelay; //Attack Delay
+                    }
+                    //mines_face_shootssouth-mines_face_shootswest-mines_face_shootseast---mines_face_shootseast-hollow_face_shootssouth-hollow_face_shootswest
+
+                    if (assetPath == "forge_face_shootswest" | assetPath == "forge_face_shootssouth" | assetPath == "forge_face_shootseast" 
+                        | assetPath == "mines_face_shootssouth" | assetPath == "mines_face_shootswest" | assetPath == "mines_face_shootseast"
+                        | assetPath == "hollow_face_shootseast" | assetPath == "hollow_face_shootssouth" | assetPath == "hollow_face_shootswest")
+                    {
+                        JToken value2;
+                        float cooldown = jobject.TryGetValue("TrapTriggerDelay", out value2) ? ((float)value2) : 1;
+                        
+                        float projSpeed = jobject.TryGetValue("trapProjSpeed", out value2) ? ((float)value2) : 5f;
+                        float range = jobject.TryGetValue("trapProjRange", out value2) ? ((float)value2) : 1000f;
+                        string Direction = jobject.TryGetValue("DirectionShoot", out value2) ? ((string)value2) : "SOUTH";
+                        string type = jobject.TryGetValue("projectileTypeTurret", out value2) ? ((string)value2) : "None.";
+                        bool jammed = jobject.TryGetValue("j", out value2) ? ((bool)value2) : false;
+
+
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var trapComp = gameObject.GetComponentInChildren<ProjectileTrapController>();
+                        trapComp.shootDirection = (DungeonData.Direction)Enum.Parse(typeof(DungeonData.Direction), Direction);
+
+                        trapComp.triggerMethod = BasicTrapController.TriggerMethod.Timer;
+                        trapComp.triggerTimerDelay = cooldown; //trapTriggerOnBlank
+                        trapComp.triggerTimerDelay1 = cooldown; //trapTriggerOnBlank
+
+
+                        var data = trapComp.overrideProjectileData;
+                        data.speed = projSpeed;
+                        data.range = range;
+                        
+                        if (type != null)
+                        {
+                            //yes i CAN DO this much better but im fucking lazy
+                            if (type == "Bouncy.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("1a4872dafdb34fd29fe8ac90bd2cea67").bulletBank.GetBullet("default").BulletObject.InstantiateAndFakeprefab().GetComponent<Projectile>(); } //Bouncy
+                            else if (type == "Explosive.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("b4666cb6ef4f4b038ba8924fd8adf38f").bulletBank.GetBullet("self").BulletObject.InstantiateAndFakeprefab().GetComponent<Projectile>(); } // Small grenade
+                            else if(type == "Tank Shell.")
+                            {
+                                trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("fa76c8cfdf1c4a88b55173666b4bc7fb").bulletBank.GetBullet("fastBullet").BulletObject.InstantiateAndFakeprefab().GetComponent<Projectile>();
+                                trapComp.projectileModule.projectiles[0].gameObject.AddComponent<ProjectileWallUnfuckinator>();
+                            } // Bullet King Goblets
+                            else if(type == "Bouncy Bullet Kin.") 
+                            {
+                                trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("465da2bb086a4a88a803f79fe3a27677").bulletBank.GetBullet("ricochet").BulletObject.InstantiateAndFakeprefab().GetComponent<Projectile>();
+                                trapComp.projectileModule.projectiles[0].gameObject.AddComponent<ProjectileWallUnfuckinator>();
+                            } //Tank Shell
+                            else if(type == "Grenade.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("grenade").BulletObject.InstantiateAndFakeprefab().GetComponent<Projectile>(); } //Dragun Bouncy
+                            else if(type == "Molotov.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("molotov").BulletObject.InstantiateAndFakeprefab().GetComponent<Projectile>(); }
+                            else if (type == "Goblet.") { trapComp.projectileModule.projectiles[0] = EnemyDatabase.GetOrLoadByGuid("ffca09398635467da3b1f4a54bcfda80").bulletBank.GetBullet("goblet").BulletObject.InstantiateAndFakeprefab().GetComponent<Projectile>(); }
+                            else { trapComp.projectileModule.projectiles[0] = trapComp.projectileModule.projectiles[0].gameObject.InstantiateAndFakeprefab().GetComponent<Projectile>(); }
+                        }
+                        if (jammed == true)
+                        {
+                            trapComp.projectileModule.projectiles[0].gameObject.AddComponent<ProjectileJammer>();
+                        }
+                    }
+                    if (assetPath == "pew")
+                    {
+                        JToken value2;
+                        int lentgh = jobject.TryGetValue("pewLength", out value2) ? ((int)value2) : 4;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var collider = gameObject.GetComponentInChildren<ResizableCollider>();
+                        collider.NumTiles = lentgh;
+                        //gameObject.GetComponent<tk2dSlicedSprite>().dimensions = new Vector2(lentgh * 16, 16);
+                    }
+                    if (assetPath == "MouseTrap_North" | assetPath == "MouseTrap_East" | assetPath == "MouseTrap_West")
+                    {
+                        JToken value2;
+                        bool trapTriggerOnBlank = jobject.TryGetValue("trapTriggerOnBlank", out value2) ? ((bool)value2) : true;
+
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var collider = gameObject.GetComponent<BasicTrapController>();
+                        collider.triggerOnBlank = trapTriggerOnBlank;
                     }
 
+                    if (assetPath == "rollingIceLogVertical_pathing" | assetPath == "rollingLogVertical_pathing")
+                    {
+                        JToken value2;
+                        int lentgh = jobject.TryGetValue("logLength", out value2) ? ((int)value2) : 4;
+                        float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
+
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var collider = gameObject.GetComponent<ResizableCollider>();
+                        var path = gameObject.GetComponent<PathMover>();
+                        path.OriginalPathSpeed = maxSpeed;
+                        path.PathSpeed = maxSpeed;
+
+                        collider.NumTiles = lentgh;
+                        collider.IsHorizontal = true;
+                    }
+                    if (assetPath == "rollingIceLogHorizontal_pathing" | assetPath == "rollingLogHorizontal_pathing")
+                    {
+                        JToken value2;
+                        int lentgh = jobject.TryGetValue("logHeight", out value2) ? ((int)value2) : 4;
+                        float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
+
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var collider = gameObject.GetComponent<ResizableCollider>();
+
+                        var path = gameObject.GetComponent<PathMover>();
+                        path.OriginalPathSpeed = maxSpeed;
+                        path.PathSpeed = maxSpeed;
+
+                        collider.NumTiles = lentgh;
+                        collider.IsHorizontal = false;
+                    }
+                    if (assetPath == "lonk_NPC_pathing")
+                    {
+                        JToken value2;
+                        float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var path = gameObject.GetComponent<PathMover>();
+                        path.OriginalPathSpeed = maxSpeed;
+                        path.PathSpeed = maxSpeed;
+
+                    }
+                    if (assetPath == "flame_pipe_north" | assetPath == "flame_pipe_west" | assetPath == "flame_pipe_east")
+                    {
+                        JToken value2;
+                        float lifetime = jobject.TryGetValue("lf_pipe", out value2) ? ((float)value2) : 10f;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var collider = gameObject.GetComponent<ForgeFlamePipeController>();
+                        collider.TimeToSpew = lifetime;
+                    }
+                    if (assetPath == "OmniMovingPlatform_pathing" | assetPath == "OmniMovingPlatformMines_pathing" | assetPath == "OmniMovingPlatformSewer_pathing" | assetPath == "OmniMovingPlatformHollow_pathing" | assetPath == "OmniMovingPlatformForge_pathing")
+                    {
+                        JToken value2;
+                        float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
+                        int X = jobject.TryGetValue("TileSizeX_", out value2) ? ((int)value2) : 3;
+                        int Y = jobject.TryGetValue("TileSizeY_", out value2) ? ((int)value2) : 3;
+
+
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var path = gameObject.GetComponent<PathMover>();
+                        path.OriginalPathSpeed = maxSpeed;
+                        path.PathSpeed = maxSpeed;
+
+                        var mover = gameObject.GetComponent<MovingPlatform>();
+                        mover.UsesDwarfConfigurableSize = true;
+                        mover.DwarfConfigurableWidth = X;
+                        mover.DwarfConfigurableHeight = Y;
+
+                    }
+                    if (assetPath == "minecartFactory")
+                    {
+                        JToken value2;
+                        int maxCarts = jobject.TryGetValue("mCSpawner_amount", out value2) ? ((int)value2) : 5;
+                        float delayBetweenCarts = jobject.TryGetValue("mCSpawner_cartDelay", out value2) ? ((float)value2) : 3f;
+                        float delayDestory = jobject.TryGetValue("mCSpawner_destroyDelay", out value2) ? ((float)value2) : 1f;
+                        bool forceActive = jobject.TryGetValue("cartActive", out value2) ? ((bool)value2) : false;
+                        string cartType = jobject.TryGetValue("mCSpawner_cartType", out value2) ? ((string)value2) : "Explosive Barrel";
+                        bool cartCopy = jobject.TryGetValue("mCSpawner_cartCopy", out value2) ? ((bool)value2) : false;
+                        bool cartCopyDestroy = jobject.TryGetValue("mCSpawner_cartDestroyCopy", out value2) ? ((bool)value2) : true;
+                        
+                        int path = jobject.TryGetValue("tSP", out value2) ? ((int)value2) : 0;
+                        int startNode = jobject.TryGetValue("nSP_O", out value2) ? ((int)value2) : 0;
+
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        gameObject.SetActive(false);
+
+                        var factory = gameObject.GetComponent<MineCartFactory>();
+                        factory.MaxCarts = maxCarts;
+                        factory.DelayBetweenCarts = delayBetweenCarts;
+                        factory.DelayUponDestruction = delayDestory;
+                        factory.ForceCartActive = forceActive;
+                        factory.TargetPathIndex = path;
+                        factory.TargetPathNodeIndex = startNode;
+
+                        
+                        if (cartCopy == true)
+                        {
+                            var grabber = gameObject.AddComponent<MineCart_Proximity_Grabber>();
+                            grabber.DestroyAfterCopy = cartCopyDestroy;
+                            if (cartType == "Explosive Barrel") { grabber.fallBackCart = SetupExoticObjects.ExplosiveBarrelMinecart.GetComponent<MineCartController>(); }
+                            else if (cartType == "Default") { grabber.fallBackCart = SetupExoticObjects.Minecart.GetComponent<MineCartController>(); }
+                            else if (cartType == "Turret")
+                            {
+                                var cart = SetupExoticObjects.TurretMinecart.InstantiateAndFakeprefab();
+                                cart.gameObject.AddComponent<TurretCartReboot>();
+                                grabber.fallBackCart = cart.GetComponent<MineCartController>(); 
+                            }
+                        }
+                        else
+                        {
+                            if (cartType == "Explosive Barrel") { factory.MineCartPrefab = SetupExoticObjects.ExplosiveBarrelMinecart.GetComponent<MineCartController>(); }
+                            else if (cartType == "Default") { factory.MineCartPrefab = SetupExoticObjects.Minecart.GetComponent<MineCartController>(); }
+                            else if (cartType == "Turret")
+                            {
+                                var cart = SetupExoticObjects.TurretMinecart.InstantiateAndFakeprefab();
+                                cart.gameObject.AddComponent<TurretCartReboot>();
+                                factory.MineCartPrefab = cart.GetComponent<MineCartController>();
+                            }
+                        }
+                        
+                    }
+                    if (assetPath == "gullLeapPoint")
+                    {
+                        JToken value2;
+                        bool repos = jobject.TryGetValue("gullleap_Repos", out value2) ? ((bool)value2) : true;
+                        bool missile = jobject.TryGetValue("gullleap_Missile", out value2) ? ((bool)value2) : true;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var leaper = gameObject.GetComponent<GatlingGullLeapPoint>();
+                        leaper.ForReposition = repos;
+                        leaper.ForRockets = missile;
+                    }
+                    if (assetPath == "glitch_floor_properties")
+                    {
+                        JToken value2;
+
+                        float hpMult = jobject.TryGetValue("glitchHpMult", out value2) ? ((int)value2) : 0.7f;
+                        float timeScale = jobject.TryGetValue("glitchtimescaleMult", out value2) ? ((float)value2) : 1f;
+                        float Speed = jobject.TryGetValue("glitchspeedMult", out value2) ? ((float)value2) : 1f;
+                        bool fly = jobject.TryGetValue("forceFly", out value2) ? ((bool)value2) : false;
+
+                        
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var leaper = gameObject.GetComponent<Glitched_Boss_Modifier>();
+                        leaper.DamageMultiplier = hpMult;
+                        leaper.TimeScale = timeScale;
+                        leaper.MovementSpeed = Speed;
+                        leaper.ForceSlight = fly;
+
+                    }
+                    if (assetPath == "vertical_crusher"| assetPath == "horizontal_crusher")
+                    {
+                        JToken value2;
+
+                        float delay = jobject.TryGetValue("crushTrapDelay", out value2) ? ((int)value2) : 0.25f;
+                        float crushTrapCloseTime = jobject.TryGetValue("crushTrapCloseTime", out value2) ? ((float)value2) : 1f;
+                        float cooldown = jobject.TryGetValue("TrapTriggerDelay", out value2) ? ((float)value2) : 3f;
+                        float enemyDamage = jobject.TryGetValue("crushTrapEnemyDamage", out value2) ? ((float)value2) : 30f;
+                        float PlayerForce = jobject.TryGetValue("crushTrapPlayerKnockbackForce", out value2) ? ((float)value2) : 50f;
+                        float EnemyForce = jobject.TryGetValue("crushTrapEnemyKnockbackForce", out value2) ? ((float)value2) : 50f;
+
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var crusher = gameObject.GetComponent<ForgeCrushDoorController>();
+                        crusher.CooldownTime = cooldown;
+                        crusher.DelayTime = delay;
+                        crusher.TimeClosed = crushTrapCloseTime;
+                        crusher.DamageToEnemies = enemyDamage;
+                        crusher.KnockbackForcePlayers = PlayerForce;
+                        crusher.KnockbackForceEnemies = EnemyForce;
+
+                    }
+                    if (assetPath == "firebar_trap")
+                    {
+                        JToken value2;
+                        bool jammed = jobject.TryGetValue("j", out value2) ? ((bool)value2) : false;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var bulletBank = gameObject.GetComponent<AIBulletBank>();
+                        var newBank = EnemyBuildingTools.CopyBulletBankEntry(bulletBank.Bullets[0], "default", "DNC");
+                        bulletBank.Bullets.Clear();
+                        bulletBank.Bullets = new List<AIBulletBank.Entry>() { newBank };
+                        if (jammed == true)
+                        {
+                            bulletBank.Bullets[0].BulletObject.GetComponent<Projectile>().gameObject.AddComponent<ProjectileJammer>(); ;
+                        }
+                    }
+                    if (assetPath == "flameburst_trap")
+                    {
+                        JToken value2;
+                        bool jammed = jobject.TryGetValue("j", out value2) ? ((bool)value2) : false;
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var bulletBank = gameObject.GetComponent<AIBulletBank>();
+                        string type = jobject.TryGetValue("projectileTypeTurret", out value2) ? ((string)value2) : "None.";
+
+                        var b = bulletBank;
+                        if (type == "Bouncy.")
+                        {
+                            b.Bullets = new List<AIBulletBank.Entry>();
+                            b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("1a4872dafdb34fd29fe8ac90bd2cea67").bulletBank.GetBullet("default"), "default", "DNC"));
+                        }
+                        else if (type == "Explosive.")
+                        {
+                            b.Bullets = new List<AIBulletBank.Entry>();
+                            b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("b4666cb6ef4f4b038ba8924fd8adf38f").bulletBank.GetBullet("self"), "default", "DNC"));
+                        }
+                        else if (type == "Tank Shell.")
+                        {
+                            b.Bullets = new List<AIBulletBank.Entry>();
+                            b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("fa76c8cfdf1c4a88b55173666b4bc7fb").bulletBank.GetBullet("fastBullet"), "default", "DNC"));
+                        }
+                        else if (type == "Bouncy Bullet Kin.")
+                        {
+                            b.Bullets = new List<AIBulletBank.Entry>();
+                            b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("465da2bb086a4a88a803f79fe3a27677").bulletBank.GetBullet("ricochet"), "default", "DNC"));
+                        } //Tank Shell
+                        else if (type == "Grenade.")
+                        {
+                            b.Bullets = new List<AIBulletBank.Entry>();
+                            b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("grenade"), "default", "DNC"));
+                        } //Dragun Bouncy
+                        else if (type == "Molotov.")
+                        {
+                            b.Bullets = new List<AIBulletBank.Entry>();
+                            b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("8b913eea3d174184be1af362d441910d").bulletBank.GetBullet("molotov"), "default", "DNC"));
+                        }
+                        else if (type == "Goblet.")
+                        {
+                            b.Bullets = new List<AIBulletBank.Entry>();
+                            b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(EnemyDatabase.GetOrLoadByGuid("ffca09398635467da3b1f4a54bcfda80").bulletBank.GetBullet("goblet"), "default", "DNC"));
+                        }
+                        else
+                        {
+                            var bulletCopy = b.Bullets[0];
+                            b.Bullets = new List<AIBulletBank.Entry>();
+                            b.Bullets.Add(EnemyBuildingTools.CopyBulletBankEntry(bulletCopy, "default", "DNC"));
+                            //trapComp.projectileModule.projectiles[0] = trapComp.projectileModule.projectiles[0].gameObject.InstantiateAndFakeprefab().GetComponent<Projectile>();
+                        }
+
+                        float range = jobject.TryGetValue("trapProjRange", out value2) ? ((float)value2) : 1000f;
+                        bulletBank.Bullets[0].BulletObject.GetComponent<Projectile>().baseData.range = range;
+                        if (jammed == true)
+                        {
+                            bulletBank.Bullets[0].BulletObject.GetComponent<Projectile>().gameObject.AddComponent<ProjectileJammer>(); ;
+                        }
+                    }
                 }
-                
+
                 if (!gameObject && StaticReferences.customObjects.ContainsKey(assetPath))
                 {
                     gameObject = RoomFactory.GetCustomGameObject(assetPath);
-                    //ETGModConsole.Log(gameObject.name);
                 }
                 else if (!gameObject)
                 {
                     gameObject = RoomFactory.GetExoticGameObject(assetPath);
                 }
-
-
 
                 if (gameObject)
                 {
@@ -555,17 +1316,29 @@ namespace Alexandria.DungeonAPI
                         {
                             percentChance = 1f,
                             nonDatabasePlaceable = gameObject,
+                            
                             prerequisites = array,
                             materialRequirements = new DungeonPlaceableRoomMaterialRequirement[0]
                         }
                     };
                     int path = 0;
-
+                    int startNode = 0;
+                    /*
+                    room.AddEventTriggerArea = new List<RoomEventDefinition>()
+                    {
+                         
+                    };
+                    */
                     if (assetPath.Contains("_pathing") && jobject != null)
                     {
                         JToken value;
                         path = jobject.TryGetValue("tSP", out value) ? ((int)value) : 0;
-                        ETGModConsole.Log($"[{assetPath}]");
+                        startNode = jobject.TryGetValue("nSP_O", out value) ? ((int)value) : 0;
+
+                        if (RoomUtility.EnableDebugLogging == true)
+                        {
+                            ETGModConsole.Log($"[{assetPath}]");
+                        }
                         room.placedObjects.Add(new PrototypePlacedObjectData
                         {
                             contentsBasePosition = location,
@@ -573,8 +1346,63 @@ namespace Alexandria.DungeonAPI
                             instancePrerequisites = array,
                             linkedTriggerAreaIDs = new List<int>(),
                             placeableContents = dungeonPlaceable,
-                            assignedPathIDx = path
+                            assignedPathIDx = path,
+                            assignedPathStartNode = startNode
                         });
+                    }
+                    else if (assetPath.Contains("_DropDowntrap"))
+                    {
+                        JToken value2;
+                        int Order = jobject.TryGetValue("triggerEventValue", out value2) ? ((int)value2) : 0;
+                        room.placedObjects.Add(new PrototypePlacedObjectData
+                        {
+                            contentsBasePosition = location,
+                            fieldData = new List<PrototypePlacedObjectFieldData>() 
+                            {
+                                
+                            },
+                            instancePrerequisites = array,
+                            linkedTriggerAreaIDs = new List<int>() { Order },
+                            placeableContents = dungeonPlaceable,
+                            assignedPathIDx = -1,
+                            
+                            
+                        });
+                    }
+                    else if (assetPath.Contains("_DropDownswitch"))
+                    {
+                        JToken value2;
+                        int Order = jobject.TryGetValue("triggeredEventValue", out value2) ? ((int)value2) : 0;
+                        room.placedObjects.Add(new PrototypePlacedObjectData
+                        {
+                            contentsBasePosition = location,
+                            fieldData = new List<PrototypePlacedObjectFieldData>()
+                            {
+
+                            },
+                            instancePrerequisites = array,
+                            linkedTriggerAreaIDs = new List<int>() { Order },
+                            placeableContents = dungeonPlaceable,
+                            assignedPathIDx = -1,
+                        });
+                        
+                        PrototypeEventTriggerArea item2 = room.AddEventTriggerArea(new List<IntVector2>
+                        {
+                           new IntVector2((int)location.x, (int)location.y)
+                        });
+                        
+                    }
+                    else if (assetPath.Contains("gullLeapPoint") || assetPath.Contains("_dungeonPlaceable"))
+                    {
+                        room.placedObjects.Add(new PrototypePlacedObjectData
+                        {
+                            contentsBasePosition = location,
+                            fieldData = new List<PrototypePlacedObjectFieldData>(),
+                            instancePrerequisites = array,
+                            linkedTriggerAreaIDs = new List<int>(),
+                            assignedPathIDx = -1,
+                            nonenemyBehaviour = gameObject.GetComponent<DungeonPlaceableBehaviour>() 
+                        });;
                     }
                     else
                     {
@@ -585,10 +1413,9 @@ namespace Alexandria.DungeonAPI
                             instancePrerequisites = array,
                             linkedTriggerAreaIDs = new List<int>(),
                             placeableContents = dungeonPlaceable,
-                            assignedPathIDx = -1
+                            assignedPathIDx = -1,
                         });
                     }
-
                 }
                 else
                 {
@@ -746,33 +1573,50 @@ namespace Alexandria.DungeonAPI
         {
             GameObject gameObject = asset;
             JToken jtoken;
-            bool flag = attributes.TryGetValue("dI", out jtoken) && !string.IsNullOrEmpty(jtoken.ToObject<string>());
-            if (flag)
+            Chest component = gameObject.GetComponent<Chest>();
+            if (component)
             {
+                gameObject = FakePrefab.Clone(asset);
+                bool flag = attributes.TryGetValue("dI", out jtoken) && !string.IsNullOrEmpty(jtoken.ToObject<string>());
+                if (flag)
+                {
+                    bool flag2 = Game.Items.ContainsID(jtoken.ToObject<string>());
+                    if (flag2)
+                    {
+                        component.forceContentIds = new List<int>
+                        {
+                            Game.Items[jtoken.ToObject<string>()].PickupObjectId
+                        };
+                    }
+                }
                 JToken value = null;
-                string text = attributes.TryGetValue("jI", out value) ? ((string)value) : "";
+
+                bool junkie = attributes.TryGetValue("jI", out jtoken) && !string.IsNullOrEmpty(jtoken.ToObject<string>());
+                if (junkie)
+                {
+                    string text = attributes.TryGetValue("jI", out value) ? ((string)value) : "";
+                    bool flag3 = Game.Items.ContainsID(text);
+                    if (flag3)
+                    {
+                        component.overrideJunkId = Game.Items[text].PickupObjectId;
+                    }
+                }
+
                 float overrideMimicChance = attributes.TryGetValue("mC", out value) ? ((float)value) : 0f;
                 bool isLocked = !attributes.TryGetValue("cL", out value) || (bool)value;
                 bool preventFuse = attributes.TryGetValue("pV", out value) && (bool)value;
-                gameObject = FakePrefab.Clone(asset);
-                Chest component = gameObject.GetComponent<Chest>();
-                bool flag2 = Game.Items.ContainsID(jtoken.ToObject<string>());
-                if (flag2)
-                {
-                    component.forceContentIds = new List<int>
-                    {
-                        Game.Items[jtoken.ToObject<string>()].PickupObjectId
-                    };
-                }
-                bool flag3 = Game.Items.ContainsID(text);
-                if (flag3)
-                {
-                    component.overrideJunkId = Game.Items[text].PickupObjectId;
-                }
+                bool isGlitched = attributes.TryGetValue("isGlitched", out value) && (bool)value;
                 component.overrideMimicChance = overrideMimicChance;
                 component.IsLocked = isLocked;
                 component.PreventFuse = preventFuse;
+                if (isGlitched == true)
+                {
+                    component.m_isGlitchChest = true;
+                    component.gameObject.AddComponent<Glitchinator>();
+                }
             }
+
+           
             return gameObject;
         }
 
@@ -854,8 +1698,17 @@ namespace Alexandria.DungeonAPI
             return result;
         }
 
-
-        public static void AddNodeToRoom(PrototypeDungeonRoom room, Vector2 location, string guid, int layer, SerializedPath.SerializedPathWrapMode wrapMode)
+        public static DungeonPlaceable GetCustomDungeonPlaceableObject(string assetPath)
+        {
+            DungeonPlaceable result = null;
+            DungeonPlaceable gameObject;
+            if (StaticReferences.customPlaceables.TryGetValue(assetPath, out gameObject))
+            {
+                result = gameObject;
+            }
+            return result;
+        }
+        public static void AddNodeToRoom(PrototypeDungeonRoom room, Vector2 location, string guid, int layer, SerializedPath.SerializedPathWrapMode wrapMode, bool modifyTilemap)
         {
             IntVector2 intLocation = location.ToIntVector2();
             SerializedPath serializedPath = null;
@@ -872,7 +1725,7 @@ namespace Alexandria.DungeonAPI
 
                 room.paths.Add(serializedPath);
                 serializedPath.wrapMode = wrapMode;//SerializedPath.SerializedPathWrapMode.Loop;
-                serializedPath.tilesetPathGrid = 0;
+                serializedPath.tilesetPathGrid = modifyTilemap ? 0 : -1;
 
             }
             else
@@ -882,6 +1735,7 @@ namespace Alexandria.DungeonAPI
                 serializedPath.wrapMode = wrapMode;
                 node.placement = (SerializedPathNode.SerializedNodePlacement)Enum.Parse(typeof(SerializedPathNode.SerializedNodePlacement), guid);
                 serializedPath.nodes.Add(node);
+                serializedPath.tilesetPathGrid = modifyTilemap ? 0 : -1;
             }
 
         }
@@ -956,6 +1810,7 @@ namespace Alexandria.DungeonAPI
                     prerequisites = array,
                     forceBlackPhantom = forceBlackPhantom,
                     enemyPlaceableGuid = guid,
+                    
                     materialRequirements = new DungeonPlaceableRoomMaterialRequirement[0]
                 }
             };
@@ -1052,7 +1907,7 @@ namespace Alexandria.DungeonAPI
             room.additionalObjectLayers[layer].placedObjectBasePositions.Add(location);
         }
 
-        public static void AddExit(PrototypeDungeonRoom room, Vector2 location, DungeonData.Direction direction)
+        public static void AddExit(PrototypeDungeonRoom room, Vector2 location, DungeonData.Direction direction, PrototypeRoomExit.ExitType exitType = PrototypeRoomExit.ExitType.NO_RESTRICTION)
         {
             if (room.exitData == null)
                 room.exitData = new PrototypeRoomExitData();
@@ -1060,7 +1915,7 @@ namespace Alexandria.DungeonAPI
                 room.exitData.exits = new List<PrototypeRoomExit>();
 
             PrototypeRoomExit exit = new PrototypeRoomExit(direction, location);
-            exit.exitType = PrototypeRoomExit.ExitType.NO_RESTRICTION;
+            exit.exitType = exitType;
             Vector2 margin = (direction == DungeonData.Direction.EAST || direction == DungeonData.Direction.WEST) ? new Vector2(0, 1) : new Vector2(1, 0);
             exit.containedCells.Add(location + margin);
             room.exitData.exits.Add(exit);
@@ -1294,7 +2149,16 @@ namespace Alexandria.DungeonAPI
             public string name;
             [NonSerialized]
             public PrototypeDungeonRoom room;
-        }
+            public int visualSubtype;
 
+            public string superSpecialRoomType;
+
+            public float AmbientLight_R;
+            public float AmbientLight_G;
+            public float AmbientLight_B;
+            public bool usesAmbientLight;
+            public bool[] nodePathVisible;
+
+        }
     }
 }

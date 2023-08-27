@@ -6,6 +6,8 @@ using Alexandria.NPCAPI;
 using HutongGames.PlayMaker.Actions;
 using HarmonyLib;
 using UnityEngine;
+using Alexandria.DungeonAPI;
+using FullInspector;
 
 namespace Alexandria.CharacterAPI
 {
@@ -51,6 +53,26 @@ namespace Alexandria.CharacterAPI
         [HarmonyPrefix]
         public static void BlackSmithFix(TalkDoerLite __instance)
         {
+
+            if (__instance.gameObject.GetComponent<SpecialComponents.WinchesterAlterer>() != null)
+            {
+                var val = __instance.gameObject.GetComponent<SpecialComponents.WinchesterAlterer>();
+                var fsms = __instance.GetComponents<PlayMakerFSM>();
+
+                foreach (var winchester in fsms)
+                {
+                    foreach (var state in winchester.Fsm.States)
+                    {
+                        foreach (var switcher in state.Actions.Where(action => action is Teleport))
+                        {
+                            (switcher as Teleport).useEndOfPath = false;
+                            (switcher as Teleport).positionDelta.Value = val.movement;
+                            (switcher as Teleport).goneTime.Value = val.goneTime;
+                        }
+                    }
+                }
+            }
+
             if (!__instance.gameObject.GetComponent<PlayMakerFSM>() || !__instance.gameObject.name.Contains("NPC_Blacksmith")) return;
             foreach (var character in CharacterBuilder.storedCharacters)
             {

@@ -121,7 +121,7 @@ namespace Alexandria.StatAPI
 				}
             }
         }
-
+/*
         [HarmonyPatch(typeof(PickupObject), nameof(PickupObject.HandlePickupCurseParticles), new Type[0])]
         [HarmonyPrefix]
         internal static bool BetterCurseCheck(PickupObject __instance)
@@ -150,7 +150,7 @@ namespace Alexandria.StatAPI
                     }
                 }
             }
-            else if (__instance is PassiveItem p)
+            else if (__instance is PassiveItem p && p.passiveStatModifiers != null)
             {
                 foreach (var mod in p.passiveStatModifiers)
                 {
@@ -161,7 +161,7 @@ namespace Alexandria.StatAPI
                 }
             }
             return false;
-        }
+        }*/
 
 		[HarmonyPatch(typeof(PlayerStats), nameof(PlayerStats.ApplyStatModifier))]
 		[HarmonyPrefix]

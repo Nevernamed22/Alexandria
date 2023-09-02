@@ -66,6 +66,7 @@
     <Compile Include="ChestAPI\ChestSpawnHelper.cs" />
     <Compile Include="ChestAPI\ChestUtility.cs" />
     <Compile Include="DungeonAPI\BreachExtensions.cs" />
+    <Compile Include="DungeonAPI\DungeonPatches.cs" />
     <Compile Include="DungeonAPI\MasteryOverrideHandler.cs" />
     <Compile Include="DungeonAPI\RoomIcons.cs" />
     <Compile Include="DungeonAPI\RoomUtility.cs" />

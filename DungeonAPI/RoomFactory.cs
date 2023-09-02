@@ -23,11 +23,14 @@ using Alexandria.NPCAPI;
 using System.Collections;
 using static PrototypeRoomExit;
 using Alexandria.EnemyAPI;
+using HutongGames.Utility;
+using FullInspector;
 
 namespace Alexandria.DungeonAPI
 {
     public static class RoomFactory
     {
+        public static List<string> roomNames = new List<string>();
         public static Dictionary<string, RoomData> rooms = new Dictionary<string, RoomData>();
         public static bool FailSafeCheck;
         private static readonly string dataHeader = "***DATA***";
@@ -50,8 +53,14 @@ namespace Alexandria.DungeonAPI
                     }
                     var roomData = BuildFromRoomFile(g);
                     DungeonHandler.Register(roomData);
-                    rooms.Add(modPrefix + ":" + name, roomData);
-                    loadedRooms.Add(name, roomData);
+                    if (!rooms.ContainsKey(modPrefix + ":" + name))
+                    {
+                        rooms.Add(modPrefix + ":" + name, roomData);
+                    }
+                    if (!loadedRooms.ContainsKey(modPrefix + ":" + name))
+                    {
+                        loadedRooms.Add(modPrefix + ":" + name, roomData);
+                    }
                 }
                 else if (g.EndsWith(".newroom", StringComparison.OrdinalIgnoreCase))
                 {
@@ -62,8 +71,14 @@ namespace Alexandria.DungeonAPI
                     }
                     var roomData = BuildFromRoomFileWithoutTexture(g);
                     DungeonHandler.Register(roomData);
-                    rooms.Add(modPrefix + ":" + name, roomData);
-                    loadedRooms.Add(name, roomData);
+                    if (!rooms.ContainsKey(modPrefix + ":" + name))
+                    {
+                        rooms.Add(modPrefix + ":" + name, roomData);
+                    }
+                    if (!loadedRooms.ContainsKey(modPrefix + ":" + name))
+                    {
+                        loadedRooms.Add(modPrefix + ":" + name, roomData);
+                    }
                 }
             }
 
@@ -87,6 +102,8 @@ namespace Alexandria.DungeonAPI
             RoomData roomData = ExtractRoomDataFromFile(roomPath);
             roomData.name = Path.GetFileName(roomPath);
             roomData.room = Build(roomData);
+            PostProcessCells(roomData);
+
             return roomData;
         }
 
@@ -102,8 +119,12 @@ namespace Alexandria.DungeonAPI
             texture.name = Path.GetFileName(roomPath);
             RoomData roomData = ExtractRoomDataFromResource(roomPath, assembly ?? Assembly.GetCallingAssembly());
             roomData.room = Build(texture, roomData);
-            rooms.Add(roomData.room.name, roomData);
+            if (!rooms.ContainsKey(roomData.room.name))
+            {
+                rooms.Add(roomData.room.name, roomData);
+            }
             DungeonHandler.Register(roomData);
+
             return roomData;
         }
 
@@ -112,7 +133,12 @@ namespace Alexandria.DungeonAPI
             RoomData roomData = ExtractRoomDataFromResource(roomPath, assembly ?? Assembly.GetCallingAssembly());
             roomData.name = Path.GetFileName(roomPath);
             roomData.room = Build(roomData);
-            rooms.Add(roomData.room.name, roomData);
+            PostProcessCells(roomData);
+
+            if (!rooms.ContainsKey(roomData.room.name))
+            {
+                rooms.Add(roomData.room.name, roomData);
+            }
             DungeonHandler.Register(roomData);
             return roomData;
         }
@@ -122,6 +148,7 @@ namespace Alexandria.DungeonAPI
         {
             try
             {
+                int width = roomData.roomSize.x;
                 var room = CreateRoomFromData(roomData);
                 ApplyRoomData(room, roomData);
                 room.UpdatePrecalculatedData();
@@ -134,6 +161,53 @@ namespace Alexandria.DungeonAPI
             }
 
             return CreateEmptyRoom(12, 12);
+        }
+
+        public static void PostProcessCells(RoomData roomData)
+        {
+            if (roomData.tileInfo.Contains("X"))
+            {
+
+                var gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject("No_Pickup_Object"));
+                var l = gameObject.GetComponent<NoPickup>();
+                for (int y = 0; y < roomData.roomSize.y; y++)
+                {
+                    for (int x = 0; x < roomData.roomSize.x; x++)
+                    {
+                        if (roomData.tileInfo[x + (y* roomData.roomSize.x)].ToString() == "X")
+                        {
+                            l.offsets.Add(new Vector2(x, y));
+                        }
+                    }
+                }
+
+                DungeonPlaceable dungeonPlaceable = ScriptableObject.CreateInstance<DungeonPlaceable>();
+                dungeonPlaceable.width = 1;
+                dungeonPlaceable.height = 1;
+                dungeonPlaceable.respectsEncounterableDifferentiator = true;
+                dungeonPlaceable.variantTiers = new List<DungeonPlaceableVariant>
+                    {
+                        new DungeonPlaceableVariant
+                        {
+                            percentChance = 1f,
+                            nonDatabasePlaceable = gameObject,
+                            prerequisites = new DungeonPrerequisite[0],
+                            materialRequirements = new DungeonPlaceableRoomMaterialRequirement[0]
+                        }
+                    };
+                if (roomData.room.placedObjectPositions == null) { roomData.room.placedObjectPositions = new List<Vector2>() { }; }
+                roomData.room.placedObjectPositions.Add(new Vector2(0, 0));
+                roomData.room.placedObjects.Add(new PrototypePlacedObjectData()
+                {
+                    contentsBasePosition = new Vector2(0, 0),
+                    fieldData = new List<PrototypePlacedObjectFieldData>(),
+                    instancePrerequisites = new DungeonPrerequisite[0],
+                    linkedTriggerAreaIDs = new List<int>(),
+                    placeableContents = dungeonPlaceable,
+                    assignedPathIDx = -1,
+                });
+            }
+
         }
 
         public static PrototypeDungeonRoom Build(Texture2D texture, RoomData roomData)
@@ -196,6 +270,9 @@ namespace Alexandria.DungeonAPI
 
         public static void ApplyRoomData(PrototypeDungeonRoom room, RoomData roomData)
         {
+
+            roomNames.Add(roomData.name);
+            room.name = roomData.name;
             if (roomData.exitPositions != null)
             {
                 for (int i = 0; i < roomData.exitPositions.Length; i++)
@@ -292,7 +369,7 @@ namespace Alexandria.DungeonAPI
                         }
                     }
 
-                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[fuckThisMod], roomData.nodeTypes[fuckThisMod], roomData.nodePaths[fuckThisMod], wrap, roomData.nodePathVisible[fuckThisMod]);
+                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[fuckThisMod], roomData.nodeTypes[fuckThisMod], roomData.nodePaths[fuckThisMod], wrap, roomData.nodePathVisible != null ? roomData.nodePathVisible[fuckThisMod] :false);
                 }
                 //ETGModConsole.Log("5");
 
@@ -322,6 +399,11 @@ namespace Alexandria.DungeonAPI
             room.allowWallDecoration = roomData.doWallDecoration;
             room.usesProceduralLighting = roomData.doLighting;
             room.overrideRoomVisualType = roomData.visualSubtype;
+            if  (roomData.visualSubtype > -1)
+            {
+                room.overrideRoomVisualTypeForSecretRooms = true;
+            }
+
             if (roomData.darkRoom)
             {
                 room.roomEvents.Add(new RoomEventDefinition(RoomEventTriggerCondition.ON_ENTER_WITH_ENEMIES, RoomEventTriggerAction.BECOME_TERRIFYING_AND_DARK));
@@ -419,6 +501,10 @@ namespace Alexandria.DungeonAPI
             return room;
         }
 
+
+
+        
+
         public static PrototypeDungeonRoom CreateRoomFromTexture(Texture2D texture)
         {
             int width = texture.width;
@@ -453,6 +539,8 @@ namespace Alexandria.DungeonAPI
                     return CellType.FLOOR;
                 case "5":
                     return CellType.FLOOR;
+                case "X":
+                    return CellType.FLOOR;
                 default:
                     return CellType.WALL;
 
@@ -474,12 +562,12 @@ namespace Alexandria.DungeonAPI
                 OverrideFloorType = ReturnCellFloorType(data, type),
                 IsPhantomCarpet = false,
                 ForceDisallowGoop = false,
-                globalOverrideIndices = new PrototypeIndexOverrideData() { indices = new List<int>(0) },
-                
-                
+                globalOverrideIndices = new PrototypeIndexOverrideData() { indices = new List<int>(0) },         
             };
             return data;
         }
+
+
 
         public static Dungeonator.DiagonalWallType ReturnDiagonalType(PrototypeDungeonRoomCellData tile, RoomData roomData, string type)
         {
@@ -939,13 +1027,13 @@ namespace Alexandria.DungeonAPI
                         conveyor.VelocityX = VelX * (Bool ? -1 : 1);
                         conveyor.VelocityY = VelY * (Bool ? -1 : 1);
                     }
-                    if (assetPath == "FloorSkeleton_Note")
+                    if (assetPath == "FloorSkeleton_Note" | assetPath == "ShopSign")
                     {
                         JToken value2;
                         string customText = jobject.TryGetValue("customNoteText", out value2) ? ((string)value2) : "None.";
                         bool isKey = jobject.TryGetValue("customNoteTextIsStringKey", out value2) ? ((bool)value2) : false;
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
-                        var note = gameObject.GetComponentInChildren<NoteDoer>();
+                        var note = gameObject.GetComponentInChildren<NoteDoer>() ?? gameObject.GetComponent<NoteDoer>();
                         if (customText != "None.")
                         {
                             note.isNormalNote = false;
@@ -1290,6 +1378,102 @@ namespace Alexandria.DungeonAPI
                             bulletBank.Bullets[0].BulletObject.GetComponent<Projectile>().gameObject.AddComponent<ProjectileJammer>(); ;
                         }
                     }
+                    if (assetPath == "ShopItemObject" | assetPath == "Glass_Case_Custom")
+                    {
+                        JToken value2;
+                        string It = jobject.TryGetValue("shopItemBase", out value2) ? ((string)value2) : "Primary";
+                        string shopUser = jobject.TryGetValue("UsedByShop", out value2) ? ((string)value2) : "UsedByShop";
+                        float chance = jobject.TryGetValue("shopItemBaseChance", out value2) ? ((int)value2) : 1f;
+                        string dir = jobject.TryGetValue("facingDirItem", out value2) ? ((string)value2) : "NORTH";
+                        bool she_omni = jobject.TryGetValue("omniDir", out value2) ? ((bool)value2) : true;
+                        int id = jobject.TryGetValue("bossPdstlItmID", out value2) ? ((int)value2) : -1;
+                        string Tag = jobject.TryGetValue("bossPdstlItmStringID", out value2) ? ((string)value2) : "None.";
+                        int overridePrice = jobject.TryGetValue("overridePrice", out value2) ? ((int)value2) : -1;
+                        float PriceMult = jobject.TryGetValue("priceMultiplier", out value2) ? ((int)value2) : 1f;
+
+
+
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
+                        var fuckYOU = gameObject.GetComponent<ShopSubsidiaryZone>();
+                        if (fuckYOU != null) { UnityEngine.Object.Destroy(fuckYOU); }
+                        var tiem = gameObject.GetComponent<ShopItemPosition>();
+                        tiem.Chance = chance;
+                        tiem.OmniDirectional = she_omni;
+                        if (overridePrice != -1) { tiem.OverridePrice = overridePrice; }
+                        tiem.PriceMultiplier = PriceMult;
+                        if (Tag != null && Tag != "None.")
+                        {
+                            if (StaticReferences.storedItemIDs.ContainsKey(Tag))
+                            {
+                                tiem.itemID = StaticReferences.storedItemIDs.Where(self => self.Key == Tag).First().Value;
+                            }
+                        }
+                        else if (id != -1)
+                        {
+                            tiem.itemID = id;
+
+                        }
+                        switch (dir)
+                        {
+                            case "NORTH":
+                                tiem.direction = DungeonData.Direction.NORTH;
+                                break;
+                            case "SOUTH":
+                                tiem.direction = DungeonData.Direction.SOUTH;
+                                break;
+                            case "EAST":
+                                tiem.direction = DungeonData.Direction.EAST;
+                                break;
+                            case "WEST":
+                                tiem.direction = DungeonData.Direction.WEST;
+                                break;
+                            default:
+                                tiem.direction = DungeonData.Direction.NORTH;
+                                break;
+                        }
+
+                        tiem.thisType = It == "Primary" ? ShopItemPosition.TableType.PRIMARY : ShopItemPosition.TableType.SECONDARY;
+                        if (shopUser == "Any")
+                        {
+                            tiem.SeenByAny = true;
+                        }
+                        else
+                        {
+                            switch (shopUser)
+                            {
+                                case "Bello":
+                                    tiem.Type = BaseShopController.AdditionalShopType.NONE;
+                                    break;
+                                case "Goopton":
+                                    tiem.Type = BaseShopController.AdditionalShopType.GOOP;
+                                    break;
+                                case "Old Red":
+                                    tiem.Type = BaseShopController.AdditionalShopType.BLANK;
+                                    break;
+                                case "Flynt":
+                                    tiem.Type = BaseShopController.AdditionalShopType.KEY;
+                                    break;
+                                case "Cursula":
+                                    tiem.Type = BaseShopController.AdditionalShopType.CURSE;
+                                    break;
+                                case "Trorc":
+                                    tiem.Type = BaseShopController.AdditionalShopType.TRUCK;
+                                    break;
+                                case "Blacksmith":
+                                    tiem.Type = BaseShopController.AdditionalShopType.BLACKSMITH;
+                                    break;
+                                case "Shortcut Rat":
+                                    tiem.Type = BaseShopController.AdditionalShopType.RESRAT_SHORTCUT;
+                                    break;
+                                case "Meta Shop":
+                                    tiem.Type = BaseShopController.AdditionalShopType.FOYER_META;
+                                    break;
+                                default:
+                                    tiem.SeenByAny = true;
+                                    break;
+                            }
+                        }
+                    }
                 }
 
                 if (!gameObject && StaticReferences.customObjects.ContainsKey(assetPath))
@@ -1364,9 +1548,7 @@ namespace Alexandria.DungeonAPI
                             instancePrerequisites = array,
                             linkedTriggerAreaIDs = new List<int>() { Order },
                             placeableContents = dungeonPlaceable,
-                            assignedPathIDx = -1,
-                            
-                            
+                            assignedPathIDx = -1,                    
                         });
                     }
                     else if (assetPath.Contains("_DropDownswitch"))
@@ -1916,6 +2098,8 @@ namespace Alexandria.DungeonAPI
 
             PrototypeRoomExit exit = new PrototypeRoomExit(direction, location);
             exit.exitType = exitType;
+            exit.containsDoor = true;
+
             Vector2 margin = (direction == DungeonData.Direction.EAST || direction == DungeonData.Direction.WEST) ? new Vector2(0, 1) : new Vector2(1, 0);
             exit.containedCells.Add(location + margin);
             room.exitData.exits.Add(exit);
@@ -2158,6 +2342,8 @@ namespace Alexandria.DungeonAPI
             public float AmbientLight_B;
             public bool usesAmbientLight;
             public bool[] nodePathVisible;
+            
+            public string specialRoomPool;
 
         }
     }

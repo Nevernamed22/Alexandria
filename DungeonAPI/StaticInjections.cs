@@ -21,5 +21,13 @@ namespace Alexandria.DungeonAPI
         public static DungeonFlow GlitchFlow;
         public static DungeonFlowNode Node;
 
+        public static SharedInjectionData Shrine_injections;
+        public static SharedInjectionData NPC_injections;
+        public static SharedInjectionData Black_Market_injections;
+        public static SharedInjectionData Miniboss_injections;
+        public static SharedInjectionData Fallback_Subshop_Injections;
+        public static SharedInjectionData Base_Shared_Injections;
+
+
     }
 }

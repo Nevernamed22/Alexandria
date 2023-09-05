@@ -1,4 +1,5 @@
 ﻿using Alexandria.ItemAPI;
+using Alexandria.NPCAPI;
 using Dungeonator;
 using System;   
 using System.Collections;
@@ -6,13 +7,125 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Experimental.UIElements;
 using static PickupObject;
 
 namespace Alexandria.DungeonAPI
 {
     public class SpecialComponents
     {
+        public class NoPickup : MonoBehaviour
+        {
+            public List<Vector3> offsets  = new List<Vector3>();
 
+            public void Start()
+            {
+                if (GameManager.Instance.Dungeon == null)
+                {
+                    return; }
+
+                foreach (var entry in offsets)
+                {
+                    IntVector2 intVector = ((base.transform.position + entry).XY() + new Vector2(0.5f, 0.5f)).ToIntVector2(VectorConversions.Floor);
+                    if (GameManager.Instance.Dungeon.data[intVector.x, intVector.y] != null)
+                    {
+                        GameManager.Instance.Dungeon.data[intVector.x, intVector.y].PreventRewardSpawn = true;
+                    }
+                }
+            }
+        }
+        public class ShopItemPosition : MonoBehaviour 
+        {
+
+            public bool Used = false;
+            public TableType thisType = TableType.PRIMARY;
+            public BaseShopController.AdditionalShopType Type = BaseShopController.AdditionalShopType.NONE;
+            public bool SeenByAny = true;
+            public bool OmniDirectional = true;
+            public DungeonData.Direction direction = DungeonData.Direction.NORTH;
+            public int itemID = -1;
+            public int OverridePrice = -1;
+            public float PriceMultiplier = 1f;
+
+            public Vector3 Offset = new Vector3(0, 0, 0);
+
+            public enum TableType
+            {
+                PRIMARY,
+                SECONDARY
+            };
+
+            public float Chance = 1f;
+
+            public void DoItemPlace(BaseShopController Controller)
+            {
+                if (Chance < UnityEngine.Random.value) { return; }
+                Func<GameObject, float, float> weightModifier = null;
+                if (SecretHandshakeItem.NumActive > 0)
+                {
+                    weightModifier = delegate (GameObject prefabObject, float sourceWeight)
+                    {
+                        PickupObject component10 = prefabObject.GetComponent<PickupObject>();
+                        float num7 = sourceWeight;
+                        if (component10 != null)
+                        {
+                            int quality = (int)component10.quality;
+                            num7 *= 1f + (float)quality / 10f;
+                        }
+                        return num7;
+                    };
+                }
+
+                GameObject gunObj = itemID != -1 ? PickupObjectDatabase.GetById(itemID).gameObject : thisType == TableType.PRIMARY ? Controller.shopItems.SubshopSelectByWeightWithoutDuplicatesFullPrereqs(Controller.m_shopItems, weightModifier, 1, GameManager.Instance.IsSeeded) : Controller.shopItemsGroup2 != null ? Controller.shopItemsGroup2.SubshopSelectByWeightWithoutDuplicatesFullPrereqs(Controller.m_shopItems, weightModifier, 1, GameManager.Instance.IsSeeded) : Controller.shopItems.SubshopSelectByWeightWithoutDuplicatesFullPrereqs(Controller.m_shopItems, weightModifier, 1, GameManager.Instance.IsSeeded);
+
+                GameObject gameObject8 = new GameObject("Additional Shop Item(" + gunObj.name + ")");
+                Transform transform4 = gameObject8.transform;
+
+                GameObject transObj = new GameObject();
+                transObj.transform.position = this.transform.position + Offset; 
+                transform4.position = transObj.transform.position;
+
+
+                transform4.parent = transObj.transform;
+
+
+                EncounterTrackable component9 = gunObj.GetComponent<EncounterTrackable>();
+                if (component9 != null)
+                {
+                    GameManager.Instance.ExtantShopTrackableGuids.Add(component9.EncounterGuid);
+                }
+
+                ShopItemController shopItemController2 = gameObject8.AddComponent<ShopItemController>();
+                Controller.AssignItemFacing(transObj.transform, shopItemController2);
+                shopItemController2.UseOmnidirectionalItemFacing = this.OmniDirectional;
+                shopItemController2.itemFacing = this.direction;
+
+
+                shopItemController2.Initialize(gunObj.GetComponent<PickupObject>(), Controller);
+                shopItemController2.CurrencyType = Controller.m_itemControllers[0].CurrencyType;
+                Controller.m_itemControllers.Add(shopItemController2);
+                Controller.m_shopItems.Add(gunObj);
+                Controller.m_room.RegisterInteractable(shopItemController2);
+
+                var discounter = shopItemController2.gameObject.GetOrAddComponent<ShopDiscountController>();
+                discounter.localDiscounts.Add(new ShopDiscount() 
+                {
+                    PriceMultiplier = PriceMultiplier,
+                    isCompleteOverrideCost = OverridePrice != -1 ? true : false,
+                    CustomCost = OverridePrice
+                });
+                discounter.discounts = CustomDiscountManager.DiscountsToAdd ?? new List<ShopDiscount>() { };
+                trans = (shopItemController2.gameObject);
+            }
+            private GameObject trans;
+            public void Update()
+            {
+                if (trans == null) { return; }
+                trans.transform.position = trans.transform.position.WithZ(20);
+            }
+        }
+
+        public class AttackLeapPoint : MonoBehaviour { }
         public class ProjectileJammer : MonoBehaviour
         {
             public void Start()

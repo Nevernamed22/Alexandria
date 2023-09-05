@@ -69,13 +69,23 @@ namespace Alexandria.NPCAPI
         public bool CanBeDiscounted()
         {
             if (OverridePriceReduction == true) { return false; }
+            if (isCompleteOverrideCost == true) { return false; }
+
             if (CanDiscountCondition != null)
             {
                 return CanDiscountCondition();
             }
-            return false;
+            return true;
         }
 
+        public int ReturnCustomOverrideCost()
+        {
+            if (CustomCostModifier != null)
+            {
+                return CustomCostModifier();
+            }
+            return CustomCost;
+        }
 
         public float ReturnCustomPriceMultiplier()
         {
@@ -85,6 +95,10 @@ namespace Alexandria.NPCAPI
             }
             return PriceMultiplier;
         }
+        public bool isCompleteOverrideCost = false;
+        public int CustomCost = -1;
+        public Func<int> CustomCostModifier;
+
     }
 
     public class ShopDiscountController : MonoBehaviour
@@ -96,42 +110,10 @@ namespace Alexandria.NPCAPI
         public void UpdatePlacement()
         {
             shopItemSelf = this.GetComponent<ShopItemController>();
-            if (shopItemSelf != null)
-            {
-                shopItemSelf.StartCoroutine(FrameDelay());
-            }
-        }
-        public IEnumerator FrameDelay()
-        {
-            yield return null;
-            if (DoManyChecks() == true)
-            {
-                if (shopItemSelf is CustomShopItemController)
-                {
-                    StartPrice = shopItemSelf.OverridePrice ?? (shopItemSelf as CustomShopItemController).ModifiedPrice;//shopItemSelf.ModifiedPrice;
-                }
-                else
-                {
-                    StartPrice = shopItemSelf.OverridePrice ?? shopItemSelf.ModifiedPrice;
-                }
-            }
-            FullyInited = true;
-            yield break;
         }
 
-        public void ResetPrice(ShopItemController newSelf, int? currentOverridePrice)
-        {
-            shopItemSelf = newSelf;
-            if (shopItemSelf is CustomShopItemController)
-            {
-                StartPrice = currentOverridePrice ?? (shopItemSelf as CustomShopItemController).ModifiedPrice;//shopItemSelf.ModifiedPrice;
-            }
-            else
-            {
-                StartPrice = currentOverridePrice ?? shopItemSelf.ModifiedPrice;
-            }
-        }
 
+        public List<ShopDiscount> localDiscounts = new List<ShopDiscount>();
 
 
 
@@ -143,23 +125,66 @@ namespace Alexandria.NPCAPI
             return true;
         }
 
-        private float StartPrice = -1;
-
         public void Update()
         {
             if (FullyInited == false) { return; }
             DoPriceReduction();
         }
-        private void DoPriceReduction()
-        {
-            if (shopItemSelf == null) { return; }
 
+        public int DoPriceOverride()
+        {
+            if (shopItemSelf == null) { return -1; }
             if (GameStatsManager.Instance != null)
             {
                 //Payday item failsafes
-                if (shopItemSelf.item is PaydayDrillItem && GameStatsManager.Instance.GetFlag(GungeonFlags.ITEMSPECIFIC_STOLE_DRILL) == false) { return; } 
-                if (shopItemSelf.item is BankMaskItem && GameStatsManager.Instance.GetFlag(GungeonFlags.ITEMSPECIFIC_STOLE_BANKMASK) == false) { return; }
-                if (shopItemSelf.item is BankBagItem && GameStatsManager.Instance.GetFlag(GungeonFlags.ITEMSPECIFIC_STOLE_BANKBAG) == false) { return; }
+                if (shopItemSelf.item is PaydayDrillItem && GameStatsManager.Instance.GetFlag(GungeonFlags.ITEMSPECIFIC_STOLE_DRILL) == false) { return -1; }
+                if (shopItemSelf.item is BankMaskItem && GameStatsManager.Instance.GetFlag(GungeonFlags.ITEMSPECIFIC_STOLE_BANKMASK) == false) { return -1; }
+                if (shopItemSelf.item is BankBagItem && GameStatsManager.Instance.GetFlag(GungeonFlags.ITEMSPECIFIC_STOLE_BANKBAG) == false) { return -1; }
+            }
+            int Cost = 1;
+            if (discounts.Where(self => self.isCompleteOverrideCost).Count() == 0 && localDiscounts.Where(self => self.isCompleteOverrideCost).Count() == 0) { return -1; }
+
+            foreach (var DiscountVar in discounts)
+            {
+                if (Valid(DiscountVar) == true)
+                {
+                    if (DiscountVar.CanBeDiscounted() == true && DiscountVar.isCompleteOverrideCost)
+                    {
+                        Cost += DiscountVar.ReturnCustomOverrideCost();
+                    }
+                }
+            }
+            if (discounts.Count > 1)
+            {
+                Cost /= discounts.Count;
+            }
+            foreach (var DiscountVar in localDiscounts)
+            {
+                if (Valid(DiscountVar) == true)
+                {
+                    if (DiscountVar.CanBeDiscounted() == true && DiscountVar.isCompleteOverrideCost)
+                    {
+                        Cost += DiscountVar.ReturnCustomOverrideCost();
+                    }
+                }
+            }
+            if (localDiscounts.Count > 1)
+            {
+                Cost /= localDiscounts.Count;
+            }
+            return Cost;
+        }
+
+
+        public float DoPriceReduction()
+        {
+            if (shopItemSelf == null) { return 1; }
+            if (GameStatsManager.Instance != null)
+            {
+                //Payday item failsafes
+                if (shopItemSelf.item is PaydayDrillItem && GameStatsManager.Instance.GetFlag(GungeonFlags.ITEMSPECIFIC_STOLE_DRILL) == false) { return 1; } 
+                if (shopItemSelf.item is BankMaskItem && GameStatsManager.Instance.GetFlag(GungeonFlags.ITEMSPECIFIC_STOLE_BANKMASK) == false) { return 1; }
+                if (shopItemSelf.item is BankBagItem && GameStatsManager.Instance.GetFlag(GungeonFlags.ITEMSPECIFIC_STOLE_BANKBAG) == false) { return 1; }
             }
 
             float mult = 1;
@@ -173,34 +198,20 @@ namespace Alexandria.NPCAPI
                     }
                 }
             }
-            DoTotalDiscount(mult);
-        }
-
-
-        public bool ReturnMoneyCurrencyType()
-        {
-            return shopItemSelf.CurrencyType == ShopItemController.ShopCurrencyType.COINS;
-        }
-        private void DoTotalDiscount(float H)
-        {
-            if (shopItemSelf == null) { return; }
-            if (GameManager.Instance == null) { return; }
-            if (GameManager.Instance.PrimaryPlayer == null) { return; }
-
-            //GameLevelDefinition lastLoadedLevelDefinition = GameManager.Instance.GetLastLoadedLevelDefinition();
-            float newCost = StartPrice != -1 ? StartPrice : ReturnMoneyCurrencyType() == false ? shopItemSelf.CurrentPrice : shopItemSelf.ModifiedPrice;
-            //float num4 = (lastLoadedLevelDefinition == null) ? 1f : lastLoadedLevelDefinition.priceMultiplier;
-
-            float num3 = GameManager.Instance.PrimaryPlayer.stats.GetStatValue(PlayerStats.StatType.GlobalPriceMultiplier);
-
-            if (GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER && GameManager.Instance.SecondaryPlayer)
+            foreach (var DiscountVar in localDiscounts)
             {
-                num3 *= GameManager.Instance.SecondaryPlayer.stats.GetStatValue(PlayerStats.StatType.GlobalPriceMultiplier);
+                if (Valid(DiscountVar) == true)
+                {
+                    if (DiscountVar.CanBeDiscounted() == true)
+                    {
+                        mult *= DiscountVar.ReturnCustomPriceMultiplier();
+                    }
+                }
             }
-            newCost *= num3;
-            shopItemSelf.OverridePrice = (int)(newCost *= H);
+            return mult;
         }
 
+      
 
         /// <summary>
         /// Sets the override for a ShopDiscount with a specific IdentificationKey.
@@ -224,13 +235,7 @@ namespace Alexandria.NPCAPI
             return null;
         }
 
-        private void OnDestroy()
-        {
-            if (shopItemSelf != null)
-            {
-                shopItemSelf.OverridePrice = null;
-            }
-        }
+
 
 
         //checks if the item itself is valid in the first place
@@ -238,7 +243,7 @@ namespace Alexandria.NPCAPI
         {
             if (shopItemSelf == null) { return false; }
             if (shopDiscount.ItemIsValidForDiscount != null) { return shopDiscount.ItemIsValidForDiscount(shopItemSelf); }
-            return false;
+            return true;
         }
 
 
@@ -247,10 +252,6 @@ namespace Alexandria.NPCAPI
             return shopItemSelf;
         }
 
-        public float ReturnStartPrice()
-        {
-            return StartPrice;
-        }
         public List<ShopDiscount> discounts = new List<ShopDiscount>();
         private ShopItemController shopItemSelf;
     }

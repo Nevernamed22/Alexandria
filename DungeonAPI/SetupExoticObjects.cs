@@ -18,10 +18,13 @@ namespace Alexandria.DungeonAPI
 
         }
     }
+
+
 	public class SetupExoticObjects
 	{
+		public static GameObject assignedGameObject;
 
-		public static void InitialiseObjects()
+        public static void InitialiseObjects()
 		{
 			Dungeon orLoadByName = DungeonDatabase.GetOrLoadByName("base_castle");
 
@@ -40,7 +43,11 @@ namespace Alexandria.DungeonAPI
 			Dungeon dungeon11 = DungeonDatabase.GetOrLoadByName("finalscenario_convict");
 			Dungeon dungeon12 = DungeonDatabase.GetOrLoadByName("finalscenario_soldier");
 			Dungeon dungeon13 = DungeonDatabase.GetOrLoadByName("finalscenario_guide");
+            Dungeon tutorialDungeon = DungeonDatabase.GetOrLoadByName("base_tutorial");
 
+
+            //assignedGameObject = dungeon4.PatternSettings.flows[0].AllNodes[12].overrideExactRoom.additionalObjectLayers[0].placedObjects[11].nonenemyBehaviour.gameObject;
+            Golden_Boss_Pedestal = dungeon4.PatternSettings.flows[0].AllNodes[12].overrideExactRoom.additionalObjectLayers[0].placedObjects[11].nonenemyBehaviour.gameObject.InstantiateAndFakeprefab();
 
 
             SetupExoticObjects.ForgeGunTrap_North = LoadHelper.LoadAssetFromAnywhere<GameObject>("forge_face_shootssouth");
@@ -867,10 +874,248 @@ namespace Alexandria.DungeonAPI
 
             SetupExoticObjects.Glitched_Boss_Modifier = new GameObject("Glitch_Boss_Modifier").InstantiateAndFakeprefab();
 			SetupExoticObjects.Glitched_Boss_Modifier.AddComponent<Glitched_Boss_Modifier>();
+            
+			SetupExoticObjects.AttackLeapPoint = new GameObject("Attack Leap Point Dummy").InstantiateAndFakeprefab();
+            SetupExoticObjects.AttackLeapPoint.AddComponent<AttackLeapPoint>();
 
+			SetupExoticObjects.DemonFace = LoadHelper.LoadAssetFromAnywhere<GameObject>("shrine_demonface");
+
+            SetupExoticObjects.Wood_Sign_N = tutorialDungeon.PatternSettings.flows[0].AllNodes[9].overrideExactRoom.placedObjects[1].nonenemyBehaviour.gameObject.InstantiateAndFakeprefab();
+            SetupExoticObjects.Wood_Sign_E = tutorialDungeon.PatternSettings.flows[0].AllNodes[11].overrideExactRoom.placedObjects[14].nonenemyBehaviour.gameObject.InstantiateAndFakeprefab();
+            SetupExoticObjects.Wood_Sign_W = tutorialDungeon.PatternSettings.flows[0].AllNodes[11].overrideExactRoom.placedObjects[13].nonenemyBehaviour.gameObject.InstantiateAndFakeprefab();
+            SetupExoticObjects.Wood_Sign_S = tutorialDungeon.PatternSettings.flows[0].AllNodes[11].overrideExactRoom.placedObjects[13].nonenemyBehaviour.gameObject.InstantiateAndFakeprefab();
+            SetupExoticObjects.Wood_Sign_S.GetComponent<tk2dSprite>().spriteId = 132;
+
+            var dummyObject = new GameObject("Dummy");
+            dummyObject.AddComponent<tk2dSprite>();
+			var p = dummyObject.InstantiateAndFakeprefab();
+            var sprite = p.GetComponent<tk2dSprite>();
+            sprite.SetSprite(SetupExoticObjects.Wood_Sign_N.GetComponent<tk2dSprite>().sprite.collection, 1);
+
+            SetupExoticObjects.Red_Torn_Carpet = p.InstantiateAndFakeprefab();
+            SetupExoticObjects.Red_Torn_Carpet.name = "Red_Torn_Carpet";
+            SetupExoticObjects.Red_Torn_Carpet.GetComponent<tk2dSprite>().SetSprite(101);
+            SetupExoticObjects.Red_Torn_Carpet.SetLayerRecursively(LayerMask.NameToLayer("BG_Nonsense"));
+
+            SetupExoticObjects.Stair_Case = p.InstantiateAndFakeprefab();
+            SetupExoticObjects.Stair_Case.name = "Stair_Case";
+            SetupExoticObjects.Stair_Case.GetComponent<tk2dSprite>().SetSprite(103);
+            SetupExoticObjects.Stair_Case.SetLayerRecursively(LayerMask.NameToLayer("BG_Nonsense"));
+
+            SetupExoticObjects.Start_Room_Decor = p.InstantiateAndFakeprefab();
+            SetupExoticObjects.Start_Room_Decor.name = "StartRoom_Decor";
+            SetupExoticObjects.Start_Room_Decor.GetComponent<tk2dSprite>().SetSprite(105);
+            SetupExoticObjects.Start_Room_Decor.SetLayerRecursively(LayerMask.NameToLayer("BG_Nonsense"));
+
+            SetupExoticObjects.Start_Room_Floor = p.InstantiateAndFakeprefab();
+            SetupExoticObjects.Start_Room_Floor.name = "StartRoom_Floor";
+            SetupExoticObjects.Start_Room_Floor.GetComponent<tk2dSprite>().SetSprite(151);
+            SetupExoticObjects.Start_Room_Floor.SetLayerRecursively(LayerMask.NameToLayer("BG_Nonsense"));
+
+            SetupExoticObjects.Special_Dais = p.InstantiateAndFakeprefab();
+            SetupExoticObjects.Special_Dais.name = "Special_Dais";
+            SetupExoticObjects.Special_Dais.GetComponent<tk2dSprite>().spriteId = 41;
+            SetupExoticObjects.Special_Dais.SetLayerRecursively(LayerMask.NameToLayer("BG_Nonsense"));
+
+            SetupExoticObjects.Hanging_Concrete_Block = p.InstantiateAndFakeprefab();
+            SetupExoticObjects.Hanging_Concrete_Block.name = "Hanging_Concrete_Block";
+            SetupExoticObjects.Hanging_Concrete_Block.GetComponent<tk2dSprite>().SetSprite(79);
+            SetupExoticObjects.Hanging_Concrete_Block.SetLayerRecursively(LayerMask.NameToLayer("BG_Nonsense"));
+
+            SetupExoticObjects.Gungeon_Grate = p.InstantiateAndFakeprefab();
+            SetupExoticObjects.Gungeon_Grate.name = "Gungeon_Grate";
+            SetupExoticObjects.Gungeon_Grate.GetComponent<tk2dSprite>().SetSprite(9);
+            SetupExoticObjects.Gungeon_Grate.SetLayerRecursively(LayerMask.NameToLayer("BG_Nonsense"));
+
+
+
+            PrototypeDungeonRoom roomPrefab = LoadHelper.LoadAssetFromAnywhere<PrototypeDungeonRoom>("shop02");
+            SetupExoticObjects.Shop_TeleporterSign = roomPrefab.placedObjects[10].nonenemyBehaviour.gameObject.InstantiateAndFakeprefab();
+            
+			SetupExoticObjects.ShopLayout = roomPrefab.placedObjects[12].nonenemyBehaviour.gameObject.InstantiateAndFakeprefab();
+
+            SetupExoticObjects.Shop_Crates = ShopLayout.transform.GetChild(1).gameObject.InstantiateAndFakeprefab();
+            SetupExoticObjects.Shop_Crate = ShopLayout.transform.GetChild(5).gameObject.InstantiateAndFakeprefab();
+            SetupExoticObjects.Shop_Sack = ShopLayout.transform.GetChild(3).gameObject.InstantiateAndFakeprefab();
+            SetupExoticObjects.Shop_ShelfBarrel = ShopLayout.transform.GetChild(10).gameObject.InstantiateAndFakeprefab();
+            SetupExoticObjects.Shop_Shelf = ShopLayout.transform.GetChild(7).gameObject.InstantiateAndFakeprefab();
+            SetupExoticObjects.Shop_Mask = ShopLayout.transform.GetChild(6).gameObject.InstantiateAndFakeprefab();
+            SetupExoticObjects.Shop_Wallsword = ShopLayout.transform.GetChild(11).gameObject.InstantiateAndFakeprefab();
+            SetupExoticObjects.Shop_StandingShelf = ShopLayout.transform.GetChild(8).gameObject.InstantiateAndFakeprefab();
+            SetupExoticObjects.Shop_AKBarrel = ShopLayout.transform.GetChild(9).gameObject.InstantiateAndFakeprefab();
+            SetupExoticObjects.Shop_Stool = ShopLayout.transform.GetChild(12).gameObject.InstantiateAndFakeprefab();
+
+            roomPrefab = null;
+
+
+            SetupExoticObjects.ShopItemObject = new GameObject("ShopItemObjectDummy").InstantiateAndFakeprefab();
+			SetupExoticObjects.ShopItemObject.AddComponent<ShopItemPosition>();
+
+            SetupExoticObjects.Ser_Manuels_Body = tutorialDungeon.PatternSettings.flows[0].AllNodes[15].overrideExactRoom.placedObjects[0].nonenemyBehaviour.gameObject.transform.GetChild(2).gameObject.InstantiateAndFakeprefab();
+
+
+            SetupExoticObjects.ShopRoundTable = LoadHelper.LoadAssetFromAnywhere<GameObject>("shoptable");
+            SetupExoticObjects.ShopRoundTable_Empty = LoadHelper.LoadAssetFromAnywhere<GameObject>("shoptable").InstantiateAndFakeprefab();
+			UnityEngine.Object.Destroy(SetupExoticObjects.ShopRoundTable_Empty.GetComponent<ShopSubsidiaryZone>());
+			
+			SetupExoticObjects.Glass_Case = LoadHelper.LoadAssetFromAnywhere<GameObject>("shop_specialcase").InstantiateAndFakeprefab();
+
+            SetupExoticObjects.Glass_Case_Custom = LoadHelper.LoadAssetFromAnywhere<GameObject>("shop_specialcase").InstantiateAndFakeprefab();
+            UnityEngine.Object.Destroy(SetupExoticObjects.Glass_Case_Custom.GetComponent<ShopSubsidiaryZone>());
+            SetupExoticObjects.Glass_Case_Custom.AddComponent<ShopItemPosition>().Offset = new Vector3(1, 2.125f, 10);
+
+
+            SetupExoticObjects.Glass_Case_Empty = LoadHelper.LoadAssetFromAnywhere<GameObject>("shop_specialcase").InstantiateAndFakeprefab();
+            UnityEngine.Object.Destroy(SetupExoticObjects.Glass_Case_Empty.GetComponent<ShopSubsidiaryZone>());
+
+			SetupExoticObjects.No_Pickup = new GameObject("No_Pickup").InstantiateAndFakeprefab();
+			SetupExoticObjects.No_Pickup.AddComponent<NoPickup>();
+            
 
             SetupExoticObjects.objects = new Dictionary<string, GameObject>
 			{
+                {
+                    "No_Pickup_Object",
+                    SetupExoticObjects.No_Pickup
+                },
+                {
+                    "Glass_Case",
+                    SetupExoticObjects.Glass_Case
+                },
+                {
+                    "Glass_Case_Custom",
+                    SetupExoticObjects.Glass_Case_Custom
+                },
+                {
+                    "Glass_Case_Empty",
+                    SetupExoticObjects.Glass_Case_Empty
+                },
+
+                {
+                    "round_table",
+                    SetupExoticObjects.ShopRoundTable
+                },
+                {
+                    "round_table_empty",
+                    SetupExoticObjects.ShopRoundTable_Empty
+                },
+
+                {
+                    "Ser_Manuels_Body",
+                    SetupExoticObjects.Ser_Manuels_Body
+                },
+                {
+                    "ShopItemObject",
+                    SetupExoticObjects.ShopItemObject
+                },
+                {
+                    "shopLayout",
+                    SetupExoticObjects.ShopLayout
+                },
+                {
+                    "Shop_Crates",
+                    SetupExoticObjects.Shop_Crates
+                },
+                {
+                    "Shop_Crate",
+                    SetupExoticObjects.Shop_Crate
+                },
+                {
+                    "Shop_Sack",
+                    SetupExoticObjects.Shop_Sack
+                },
+                {
+                    "Shop_ShelfBarrel",
+                    SetupExoticObjects.Shop_ShelfBarrel
+                },
+                {
+                    "Shop_Shelf",
+                    SetupExoticObjects.Shop_Shelf
+                },
+
+                {
+                    "Shop_Mask",
+                    SetupExoticObjects.Shop_Mask
+                },
+                {
+                    "Shop_Wallsword",
+                    SetupExoticObjects.Shop_Wallsword
+                },
+                {
+                    "Shop_StandingShelf",
+                    SetupExoticObjects.Shop_StandingShelf
+                },
+                {
+                    "Shop_AKBarrel",
+                    SetupExoticObjects.Shop_AKBarrel
+                },
+                {
+                    "Shop_Stool",
+                    SetupExoticObjects.Shop_Stool
+                },
+
+                {
+                    "ShopSign",
+                    SetupExoticObjects.Shop_TeleporterSign
+                },
+                {
+                    "Special_Dais",
+                    SetupExoticObjects.Special_Dais
+                },
+                {
+                    "RedTornCarpet",
+                    SetupExoticObjects.Red_Torn_Carpet
+                },
+                {
+                    "StairCase",
+                    SetupExoticObjects.Stair_Case
+                },
+                {
+                    "GungeonGrate",
+                    SetupExoticObjects.Gungeon_Grate
+                },
+                {
+                    "HangingConcreteBlock",
+                    SetupExoticObjects.Hanging_Concrete_Block
+                },
+
+                {
+                    "Start_Room_Decor",
+                    SetupExoticObjects.Start_Room_Decor
+                },
+                {
+                    "Start_Room_Floor",
+                    SetupExoticObjects.Start_Room_Floor
+                },
+
+                {
+                    "WoodSignArrow_N",
+                    SetupExoticObjects.Wood_Sign_N
+                },
+                {
+                    "WoodSignArrow_E",
+                    SetupExoticObjects.Wood_Sign_E
+                },
+                {
+                    "WoodSignArrow_W",
+                    SetupExoticObjects.Wood_Sign_W
+                },
+                {
+                    "WoodSignArrow_S",
+                    SetupExoticObjects.Wood_Sign_S
+                },
+                {
+                    "demonFace",
+                    SetupExoticObjects.DemonFace
+                },
+                {
+                    "land_point",
+                    SetupExoticObjects.AttackLeapPoint
+                },
+                {
+                    "bossPedestalGolden",
+                    SetupExoticObjects.Golden_Boss_Pedestal
+                },
                 {
                     "glitch_floor_properties",
                     SetupExoticObjects.Glitched_Boss_Modifier
@@ -1970,6 +2215,7 @@ namespace Alexandria.DungeonAPI
 			dungeon11 = null;
 			dungeon12 = null;
 			dungeon13 = null;
+			tutorialDungeon = null;
 		}
 
 		public static List<string> allBasictrapControllerAssetNames = new List<string>()
@@ -2137,6 +2383,7 @@ namespace Alexandria.DungeonAPI
         public static GameObject TurretMinecart;
         public static GameObject ExplosiveBarrelMinecart;
 
+
 		public static GameObject KeepSconce;
         public static GameObject KeepSconceSideLeft;
         public static GameObject KeepSconceSideRight;
@@ -2263,23 +2510,61 @@ namespace Alexandria.DungeonAPI
         public static GameObject Old_King_Arena_MainWall;
         public static GameObject Old_King_Arena_SideWall_1;
         public static GameObject Old_King_Arena_SideWall_2;
-
         public static GameObject ForgeGunTrap_North;
         public static GameObject ForgeGunTrap_East;
         public static GameObject ForgeGunTrap_West;
-
         public static GameObject HollowGunTrap_North;
         public static GameObject HollowGunTrap_East;
         public static GameObject HollowGunTrap_West;
-
         public static GameObject MinesGunTrap_North;
         public static GameObject MinesGunTrap_East;
         public static GameObject MinesGunTrap_West;
-
         public static GameObject MinecarftFactory_Object;
-
 		public static GameObject GatlingGull_Valid_Leap_Position;
         public static GameObject Glitched_Boss_Modifier;
+        public static GameObject Golden_Boss_Pedestal;
+        public static GameObject AttackLeapPoint;
+        public static GameObject DemonFace;
+
+
+        public static GameObject Wood_Sign_N;
+        public static GameObject Wood_Sign_E;
+        public static GameObject Wood_Sign_W;
+        public static GameObject Wood_Sign_S;
+
+        public static GameObject Red_Torn_Carpet;
+        public static GameObject Stair_Case;
+        public static GameObject Start_Room_Decor;
+        public static GameObject Start_Room_Floor;
+        public static GameObject Special_Dais;
+        public static GameObject Hanging_Concrete_Block;
+        public static GameObject Gungeon_Grate;
+
+        public static GameObject Shop_TeleporterSign;
+		public static GameObject Shop_Crates;
+        public static GameObject Shop_Crate;
+        public static GameObject Shop_Sack;
+        public static GameObject Shop_ShelfBarrel;
+        public static GameObject Shop_Shelf;
+        public static GameObject Shop_Mask;
+        public static GameObject Shop_Wallsword;
+        public static GameObject Shop_StandingShelf;
+        public static GameObject Shop_AKBarrel;
+        public static GameObject Shop_Stool;
+        public static GameObject ShopLayout;
+
+        public static GameObject ShopItemObject;
+
+        public static GameObject Ser_Manuels_Body;
+
+        public static GameObject ShopRoundTable;
+        public static GameObject ShopRoundTable_Empty;
+
+        public static GameObject Glass_Case;
+        public static GameObject Glass_Case_Custom;
+        public static GameObject Glass_Case_Empty;
+
+        public static GameObject No_Pickup;
 
         public static Dictionary<string, GameObject> objects = new Dictionary<string, GameObject>();
 	}

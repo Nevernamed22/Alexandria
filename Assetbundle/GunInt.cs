@@ -25,7 +25,9 @@ namespace Alexandria.Assetbundle
             }
             if (defaultSprite != null)
             {
-                AddSpriteToCollection(collection.GetSpriteDefinition(defaultSprite), ammonomiconCollection);
+                GunSpriteDefs.Add(collection.GetSpriteDefinition(defaultSprite));
+
+                //AddSpriteToCollection(collection.GetSpriteDefinition(defaultSprite), ammonomiconCollection);
                 gun.encounterTrackable.journalData.AmmonomiconSprite = defaultSprite;
             }
             gun.UpdateAnimations(collection);
@@ -38,19 +40,56 @@ namespace Alexandria.Assetbundle
                 gun.SetAnimationFPS(fps);
             }
         }
-        private static int AddSpriteToCollection(tk2dSpriteDefinition spriteDefinition, tk2dSpriteCollectionData collection)
+
+
+        /// <summary>
+        /// Virtually the same as GunExt, except allows for using pre-built sprite collections to use as Ammonomicon sprites. Use only if your animations are also pre-built.
+        /// </summary>
+        /// <param name="gun">The prefix of the mod that adds the stat.</param>
+        /// <param name="collection">The sprite collection the ammonomicon sprite is from.</param>
+        /// <param name="defaultSprite">The name of your sprite you want to use for your ammonomicon entry, thats in your collection.</param>
+
+        /// <returns></returns>
+        public static void SetupSpritePrebaked(this Gun gun, tk2dSpriteCollectionData collection = null, string defaultSprite = null)
         {
-            tk2dSpriteDefinition[] spriteDefinitions = collection.spriteDefinitions;
-            tk2dSpriteDefinition[] array = spriteDefinitions.Concat(new tk2dSpriteDefinition[]
+            if ((object)collection == null)
             {
-                spriteDefinition
-            }).ToArray<tk2dSpriteDefinition>();
-            collection.spriteDefinitions = array;
-            FieldInfo field = typeof(tk2dSpriteCollectionData).GetField("spriteNameLookupDict", BindingFlags.Instance | BindingFlags.NonPublic);
-            field.SetValue(collection, null);
-            collection.InitDictionary();
-            return array.Length - 1;
+                collection = ETGMod.Databases.Items.WeaponCollection;
+            }
+            if (defaultSprite != null)// && !GunSpriteDefs.Contains(gun))
+            {
+                GunSpriteDefs.Add(collection.GetSpriteDefinition(defaultSprite));
+
+                //AddSpriteToCollection(collection.GetSpriteDefinition(defaultSprite), ammonomiconCollection);
+                gun.encounterTrackable.journalData.AmmonomiconSprite = defaultSprite;
+            }
+            gun.emptyAnimation = null;
+
+            tk2dBaseSprite sprite = gun.GetSprite();
+            tk2dSpriteCollectionData newCollection = collection;
+            int newSpriteId = (gun.DefaultSpriteID = collection.GetSpriteIdByName(gun.encounterTrackable.journalData.AmmonomiconSprite));
+            sprite.SetSprite(newCollection, newSpriteId);
         }
+        private static List<tk2dSpriteDefinition> GunSpriteDefs = new List<tk2dSpriteDefinition>();
+
+
+
+        public static void FinalizeSprites()
+        {
+            if (GunSpriteDefs.Count() == 0) { return; }
+            tk2dSpriteDefinition[] spriteDefinitions = ammonomiconCollection.spriteDefinitions;
+            tk2dSpriteDefinition[] array = spriteDefinitions.Concat(GunSpriteDefs.ToArray()).ToArray<tk2dSpriteDefinition>();
+            ammonomiconCollection.spriteDefinitions = array;
+            ammonomiconCollection.spriteNameLookupDict = ammonomiconCollection.spriteNameLookupDict ?? new Dictionary<string, int>();
+            for (int i = 0; i < ammonomiconCollection.spriteDefinitions.Length; i++)
+            {
+                if (ammonomiconCollection.spriteDefinitions[i] != null && ammonomiconCollection.spriteDefinitions[i].name != null)
+                {
+                    ammonomiconCollection.spriteNameLookupDict[ammonomiconCollection.spriteDefinitions[i].name] = i;
+                }
+            }
+        }
+
         public static tk2dSpriteCollectionData ammonomiconCollection = AmmonomiconController.ForceInstance.EncounterIconCollection;
     }
 }

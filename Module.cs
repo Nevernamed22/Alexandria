@@ -16,6 +16,7 @@ using System.Collections;
 using HarmonyLib;
 using System.Reflection;
 using Dungeonator;
+using Alexandria.Assetbundle;
 
 namespace Alexandria
 {
@@ -27,7 +28,7 @@ namespace Alexandria
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
 
-        public const string VERSION = "0.3.24";
+        public const string VERSION = "0.3.25";
 
 
         public void Start()
@@ -87,7 +88,7 @@ namespace Alexandria
 
                 //DungeonAPI.RoomFactory.BuildNewRoomFromResource("Alexandria/Testing/testMegaFinale.newroom");
                 //DungeonAPI.RoomFactory.BuildNewRoomFromResource("Alexandria/Testing/KP-Manuel.newroom");
-
+                GunInt.FinalizeSprites();
             }
             catch (Exception e)
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using UnityEngine;
 
 namespace Alexandria.Assetbundle
 {
@@ -25,16 +26,15 @@ namespace Alexandria.Assetbundle
             }
             if (defaultSprite != null)
             {
-                GunSpriteDefs.Add(collection.GetSpriteDefinition(defaultSprite));
+                //GunSpriteDefs.Add(collection.GetSpriteDefinition(defaultSprite));
 
-                //AddSpriteToCollection(collection.GetSpriteDefinition(defaultSprite), ammonomiconCollection);
+                AddSpriteToCollection(collection.GetSpriteDefinition(defaultSprite), ammonomiconCollection);
                 gun.encounterTrackable.journalData.AmmonomiconSprite = defaultSprite;
             }
             gun.UpdateAnimations(collection);
             tk2dBaseSprite sprite = gun.GetSprite();
-            tk2dSpriteCollectionData newCollection = collection;
-            int newSpriteId = (gun.DefaultSpriteID = collection.GetSpriteIdByName(gun.encounterTrackable.journalData.AmmonomiconSprite));
-            sprite.SetSprite(newCollection, newSpriteId);
+            int newSpriteId = (gun.DefaultSpriteID = collection.GetSpriteIdByName(defaultSprite));
+            sprite.SetSprite(collection, newSpriteId);
             if (fps != 0)
             {
                 gun.SetAnimationFPS(fps);
@@ -58,38 +58,54 @@ namespace Alexandria.Assetbundle
             }
             if (defaultSprite != null)// && !GunSpriteDefs.Contains(gun))
             {
-                GunSpriteDefs.Add(collection.GetSpriteDefinition(defaultSprite));
+                //GunSpriteDefs.Add(collection.GetSpriteDefinition(defaultSprite));
 
-                //AddSpriteToCollection(collection.GetSpriteDefinition(defaultSprite), ammonomiconCollection);
+                AddSpriteToCollection(collection.GetSpriteDefinition(defaultSprite), ammonomiconCollection);
                 gun.encounterTrackable.journalData.AmmonomiconSprite = defaultSprite;
             }
             gun.emptyAnimation = null;
 
             tk2dBaseSprite sprite = gun.GetSprite();
-            tk2dSpriteCollectionData newCollection = collection;
-            int newSpriteId = (gun.DefaultSpriteID = collection.GetSpriteIdByName(gun.encounterTrackable.journalData.AmmonomiconSprite));
-            sprite.SetSprite(newCollection, newSpriteId);
+            int newSpriteId = (gun.DefaultSpriteID = collection.GetSpriteIdByName(defaultSprite));
+            sprite.SetSprite(collection, newSpriteId);
         }
         private static List<tk2dSpriteDefinition> GunSpriteDefs = new List<tk2dSpriteDefinition>();
 
-
-
-        public static void FinalizeSprites()
+        public static int AddSpriteToCollection(tk2dSpriteDefinition spriteDefinition, tk2dSpriteCollectionData collection)
         {
-            if (GunSpriteDefs.Count() == 0) { return; }
-            tk2dSpriteDefinition[] spriteDefinitions = ammonomiconCollection.spriteDefinitions;
-            tk2dSpriteDefinition[] array = spriteDefinitions.Concat(GunSpriteDefs.ToArray()).ToArray<tk2dSpriteDefinition>();
-            ammonomiconCollection.spriteDefinitions = array;
-            ammonomiconCollection.spriteNameLookupDict = ammonomiconCollection.spriteNameLookupDict ?? new Dictionary<string, int>();
-            for (int i = 0; i < ammonomiconCollection.spriteDefinitions.Length; i++)
-            {
-                if (ammonomiconCollection.spriteDefinitions[i] != null && ammonomiconCollection.spriteDefinitions[i].name != null)
-                {
-                    ammonomiconCollection.spriteNameLookupDict[ammonomiconCollection.spriteDefinitions[i].name] = i;
-                }
-            }
+            //Add definition to collection
+            var defs = collection.spriteDefinitions;
+            var newDefs = defs.Concat(new tk2dSpriteDefinition[] { spriteDefinition }).ToArray();
+            collection.spriteDefinitions = newDefs;
+
+            //Reset lookup dictionary
+            FieldInfo f = typeof(tk2dSpriteCollectionData).GetField("spriteNameLookupDict", BindingFlags.Instance | BindingFlags.NonPublic);
+            f.SetValue(collection, null);  //Set dictionary to null
+            collection.InitDictionary(); //InitDictionary only runs if the dictionary is null
+            return newDefs.Length - 1;
         }
 
+        /*
+        public static void FinalizeSprites()
+        {
+            var collection = ammonomiconCollection;
+
+            var defs = collection.spriteDefinitions;
+
+            foreach (var entry in GunSpriteDefs)
+            {
+                var newDefs = defs.Concat(new tk2dSpriteDefinition[] {entry}).ToArray();
+                collection.spriteDefinitions = newDefs;
+            }
+
+
+            //Reset lookup dictionary
+            FieldInfo f = typeof(tk2dSpriteCollectionData).GetField("spriteNameLookupDict", BindingFlags.Instance | BindingFlags.NonPublic);
+            f.SetValue(collection, null);  //Set dictionary to null
+            collection.InitDictionary(); //InitDictionary only runs if the dictionary is null
+
+        }
+        */
         public static tk2dSpriteCollectionData ammonomiconCollection = AmmonomiconController.ForceInstance.EncounterIconCollection;
     }
 }

@@ -541,6 +541,8 @@ namespace Alexandria.DungeonAPI
                     return CellType.FLOOR;
                 case "X":
                     return CellType.FLOOR;
+                case "G":
+                    return CellType.FLOOR;
                 default:
                     return CellType.WALL;
 
@@ -610,8 +612,7 @@ namespace Alexandria.DungeonAPI
                     return FloorType.Ice;
                 case "5":
                     cell.ForceTileNonDecorated = true;
-                    cell.doesDamage = true;
-                    
+                    cell.doesDamage = true;         
                     cell.damageDefinition = new CellDamageDefinition()
                     {
                         damageTypes = CoreDamageTypes.Fire,
@@ -622,6 +623,10 @@ namespace Alexandria.DungeonAPI
                         isPoison = false
                     };
                     return FloorType.ThickGoop;
+                case "G":
+                    cell.doesDamage = true;
+                    cell.appearance = new PrototypeDungeonRoomCellAppearance() { OverrideFloorType = FloorType.Grass };
+                    return FloorType.Grass;
                 default:
                     return FloorType.Stone;
 

@@ -426,9 +426,19 @@ namespace Alexandria.DungeonAPI
                 c.m_room = this.transform.position.GetAbsoluteRoom();
 
                 int ID = returnItemID();
-
+                for (int i = c.spawnTransform.childCount-1; i > -1; i--)
+                {
+                    if (c.spawnTransform.GetChild(i).gameObject.name.Contains("Display Sprite"))
+                    {
+                        Destroy(c.spawnTransform.GetChild(i).gameObject);
+                    }
+                }
+                c.m_itemDisplaySprite = null;
                 if (ID != -1)
                 {
+
+
+
                     if (c.m_itemDisplaySprite == null)
                     {
                         c.contents = PickupObjectDatabase.GetById(ID);
@@ -453,6 +463,8 @@ namespace Alexandria.DungeonAPI
                         component.UpdateZDepth();
                         c.sprite.UpdateZDepth();
                     }
+                    
+                    
                 }
                 else
                 {
@@ -465,6 +477,7 @@ namespace Alexandria.DungeonAPI
                     }
                 }
 
+                
 
                 
             }

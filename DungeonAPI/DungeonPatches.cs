@@ -110,9 +110,12 @@ namespace Alexandria.DungeonAPI
             [HarmonyPostfix]
             public static void Prefix(BaseShopController __instance)
             {
+                if (__instance == null) { return; }
                 if (__instance.GetAbsoluteParentRoom() == null) { return; }
-                var leapPoints = __instance.GetAbsoluteParentRoom().GetComponentsInRoom<ShopItemPosition>();
-                var shops = __instance.GetAbsoluteParentRoom().GetComponentsInRoom<BaseShopController>();
+                var room = __instance.GetAbsoluteParentRoom();
+
+                var leapPoints = room.GetComponentsInRoom<ShopItemPosition>();
+                var shops = room.GetComponentsInRoom<BaseShopController>();
 
 
                 if (leapPoints != null && leapPoints.Count > 0)

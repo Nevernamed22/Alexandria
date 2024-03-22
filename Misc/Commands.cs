@@ -17,8 +17,8 @@ namespace Alexandria.Misc
         {
             ETGModConsole.Commands.AddGroup("alexandria");
 
-            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("logAllFlags", delegate (string[] args)
-            {
+            //ETGModConsole.Commands.GetGroup("alexandria").AddUnit("logAllFlags", delegate (string[] args)
+            //{
                 /*foreach (var save in SaveAPIManager.AdvancedGameSaves)
                 {
                     ETGModConsole.Log($"--=== {save.Key.ToUpper()} ===---");
@@ -30,9 +30,10 @@ namespace Alexandria.Misc
                     }
                 }
                 ETGModConsole.Log($"--=== END ===---");*/
-            });
+            //});
 
-            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("checkCustomObjects", delegate (string[] args)
+
+            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("checkcustomobjects", delegate (string[] args)
             {
                 ETGModConsole.Log("\nCustom Objects List Start:\n=====");
                 foreach (var thing in StaticReferences.customObjects)
@@ -41,9 +42,9 @@ namespace Alexandria.Misc
                 }
                 ETGModConsole.Log("=====\nCustom Objects List End\n=====");
             });
-            ETGModConsole.CommandDescriptions.Add("alexandria checkCustomObjects", "Lists every gameObject stored in StaticReferences.customObjects.");
+            ETGModConsole.CommandDescriptions.Add("alexandria checkcustomobjects", "Lists every gameObject stored in Alexandrias StaticReferences.customObjects dictionary.");
 
-            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("checkCustomPlaceables", delegate (string[] args)
+            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("checkcustomplaceables", delegate (string[] args)
             {
                 ETGModConsole.Log("\nCustom Placeables List Start:\n=====");
                 foreach (var thing in StaticReferences.customPlaceables)
@@ -52,10 +53,10 @@ namespace Alexandria.Misc
                 }
                 ETGModConsole.Log("=====\nCustom Placeables List End\n=====");
             });
-            ETGModConsole.CommandDescriptions.Add("alexandria checkCustomPlaceables", "Lists every DungeonPlaceable stored in StaticReferences.customPlaceables.");
+            ETGModConsole.CommandDescriptions.Add("alexandria checkcustomplaceables", "Lists every DungeonPlaceable stored in Alexandrias StaticReferences.customPlaceables dictionary.");
 
 
-            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("checkStaticObjects", delegate (string[] args)
+            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("checkstaticobjects", delegate (string[] args)
             {
                 ETGModConsole.Log("\nStatic Objects List Start:\n=====");
                 foreach (var thing in SetupExoticObjects.objects)
@@ -64,16 +65,16 @@ namespace Alexandria.Misc
                 }
                 ETGModConsole.Log("=====\nStatic Objects List End\n=====");
             });
-            ETGModConsole.CommandDescriptions.Add("alexandria checkStaticObjects", "Lists every stored gameObject inSetupExoticObjects.objects.");
+            ETGModConsole.CommandDescriptions.Add("alexandria checkstaticobjects", "Lists every stored gameObject in Alexandrias SetupExoticObjects.objects dictionary.");
 
 
 
-            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("getRoomName", delegate (string[] args)
+            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("getroomname", delegate (string[] args)
             {
                 RoomHandler currentRoom = GameManager.Instance.PrimaryPlayer.CurrentRoom;
                 ETGModConsole.Log(currentRoom.GetRoomName());
             });
-            ETGModConsole.CommandDescriptions.Add("alexandria getRoomName", "Logs the name of the primary players current room.");
+            ETGModConsole.CommandDescriptions.Add("alexandria getroomname", "Logs the name of the primary players current room.");
 
             /*
             ETGModConsole.Commands.GetGroup("alexandria").AddUnit("spawnAssigned", delegate (string[] args)
@@ -88,13 +89,13 @@ namespace Alexandria.Misc
             });
             ETGModConsole.CommandDescriptions.Add("alexandria loadNPCParadise", "Loads a special debug flow that contains every basegame NPC and their variants.");
 
-            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("testpickupSpawn", delegate (string[] args)
+            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("testpickupspawn", delegate (string[] args)
             {
                 RoomHandler currentRoom = GameManager.Instance.PrimaryPlayer.CurrentRoom;
                 GameManager.Instance.StartCoroutine(H(currentRoom));
                
             });
-            ETGModConsole.CommandDescriptions.Add("alexandria testpickupSpawn", "Spawns 64 pickups on the floor. Used to check for valid pickup spawn positions.");
+            ETGModConsole.CommandDescriptions.Add("alexandria testpickupspawn", "Spawns 64 pickups on the floor. Used to check for valid pickup spawn positions.");
 
             ETGModConsole.Commands.GetGroup("alexandria").AddUnit("debugflow", (args) =>
             {
@@ -103,7 +104,7 @@ namespace Alexandria.Misc
                 string color = DungeonHandler.debugFlow ? "00FF00" : "FF0000";
                 DebugUtility.Print($"Debug flow {status}", color, true);
             });
-            ETGModConsole.CommandDescriptions.Add("alexandria debugflow", "Toggles the debugflow, which loads every custom room into one large pathway.\n--(Takes very long to generate if there are too many custom rooms / may not generate at all).");
+            ETGModConsole.CommandDescriptions.Add("alexandria debugflow", "Toggles the debugflow, which loads every custom room into one large pathway.\n--(Takes very long to generate if there are too many custom rooms / may not generate at all if your rooms do not have enough entrances / exits.).");
 
             //This is useful for figuring out where you want your shrine to go in the breach
             ETGModConsole.Commands.GetGroup("alexandria").AddUnit("getpos", (args) =>
@@ -132,15 +133,20 @@ namespace Alexandria.Misc
             ETGModConsole.CommandDescriptions.Add("alexandria showhitboxes", "Shows the hitboxes of nearby SpeculativeRigidbodies.");
 
 
-            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("spawnObject_Custom", x => { if (x.Length <= 0) { DebugUtility.Log("No Object Given!"); return; } ObjectCheck(x[0], false); }, ETGModConsole.AutocompletionFromCollectionGetter(() => DungeonAPI.StaticReferences.customObjects.Keys));
-            ETGModConsole.CommandDescriptions.Add("alexandria spawnObject_Custom", "Spawns a given gameObject from the StaticReferences.customObjects list.");
+            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("spawnobject_custom", x => { if (x.Length <= 0) { DebugUtility.Log("No Object Given!"); return; } ObjectCheck(x[0], false); }, ETGModConsole.AutocompletionFromCollectionGetter(() => DungeonAPI.StaticReferences.customObjects.Keys));
+            ETGModConsole.CommandDescriptions.Add("alexandria spawnobject_custom", "Spawns a given gameObject from Alexandrias StaticReferences.customObjects list.");
 
-            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("spawnPlaceable_Custom", x => { if (x.Length <= 0) { DebugUtility.Log("No Placeable Given!"); return; } PlaceableCheck(x[0], false); }, ETGModConsole.AutocompletionFromCollectionGetter(() => DungeonAPI.StaticReferences.customPlaceables.Keys));
-            ETGModConsole.CommandDescriptions.Add("alexandria spawnPlaceable_Custom", "Spawns a given dungeonPlaceable from the StaticReferences.customPlaceables list.");
+            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("spawnplaceable_custom", x => { if (x.Length <= 0) { DebugUtility.Log("No Placeable Given!"); return; } PlaceableCheck(x[0], false); }, ETGModConsole.AutocompletionFromCollectionGetter(() => DungeonAPI.StaticReferences.customPlaceables.Keys));
+            ETGModConsole.CommandDescriptions.Add("alexandria spawnplaceable_custom", "Spawns a given dungeonPlaceable from Alexandrias StaticReferences.customPlaceables list.");
 
-            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("spawnStored_Object", x => { if (x.Length <= 0) { DebugUtility.Log("No Stored Object Given!"); return; } StoredObject(x[0], false); }, ETGModConsole.AutocompletionFromCollectionGetter(() => DungeonAPI.SetupExoticObjects.objects.Keys));
-            ETGModConsole.CommandDescriptions.Add("alexandria spawnStored_Object", "Spawns a given gameObject from the SetupExoticObjects.objects list.");
+            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("spawnstored_object", x => { if (x.Length <= 0) { DebugUtility.Log("No Stored Object Given!"); return; } StoredObject(x[0], false); }, ETGModConsole.AutocompletionFromCollectionGetter(() => DungeonAPI.SetupExoticObjects.objects.Keys));
+            ETGModConsole.CommandDescriptions.Add("alexandria spawnstored_object", "Spawns a given gameObject from Alexandrias SetupExoticObjects.objects list.");
 
+            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("forceresetrun", (args) =>
+            {
+                GameManager.Instance.QuickRestart();
+            });
+            ETGModConsole.CommandDescriptions.Add("alexandria forceresetrun", "Forcefully restarts the players run. Only to be used in softlock situations.");
         }
 
         public static void StoredObject(string level, bool ignoreDictionary)
@@ -221,7 +227,6 @@ namespace Alexandria.Misc
                     if (GameManager.Instance.PrimaryPlayer.CurrentRoom == null)
                     {
                         ETGModConsole.Log("Failed to place Object: " + level + " because Player 1 is NOT in a room! DungeonPlaceables require a room.");
-
                     }
                     else
                     {

@@ -29,7 +29,7 @@ namespace Alexandria
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
 
-        public const string VERSION = "0.3.27";
+        public const string VERSION = "0.3.35";
 
 
         public void Start()
@@ -43,10 +43,8 @@ namespace Alexandria
 
         public void GMStart(GameManager g)
         {
-
             try
             {
-
                 //The Most important classes, which must be initialised first
                 StaticReferences.Init();
                 DungeonHandler.Init();

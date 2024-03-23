@@ -643,6 +643,20 @@ namespace Alexandria.DungeonAPI
                    },
                 },
             });
+            StaticReferences.customPlaceables.Add("bossPedestalGolden", new DungeonPlaceable()
+            {
+                height = 2,
+                width = 2,
+                variantTiers = new List<DungeonPlaceableVariant>()
+                {
+                   new DungeonPlaceableVariant()
+                   {
+                       nonDatabasePlaceable = dungeon4.PatternSettings.flows[0].AllNodes[12].overrideExactRoom.additionalObjectLayers[0].placedObjects[11].nonenemyBehaviour.gameObject.InstantiateAndFakeprefab(),
+                       prerequisites = new DungeonPrerequisite[0],
+                   },
+                },
+            });
+
             var lightObject = FakePrefabExtensions.InstantiateAndFakeprefab(new GameObject("RAT Light Object"));
 			var childObject = new GameObject("ChildLight");
             childObject.GetOrAddComponent<AdditionalBraveLight>();

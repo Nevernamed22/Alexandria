@@ -25,6 +25,7 @@ using static PrototypeRoomExit;
 using Alexandria.EnemyAPI;
 using HutongGames.Utility;
 using FullInspector;
+using Alexandria.Misc;
 
 namespace Alexandria.DungeonAPI
 {
@@ -38,6 +39,13 @@ namespace Alexandria.DungeonAPI
         private static RoomEventDefinition sealOnEnterWithEnemies = new RoomEventDefinition(RoomEventTriggerCondition.ON_ENTER_WITH_ENEMIES, RoomEventTriggerAction.SEAL_ROOM);
         private static RoomEventDefinition unsealOnRoomClear = new RoomEventDefinition(RoomEventTriggerCondition.ON_ENEMIES_CLEARED, RoomEventTriggerAction.UNSEAL_ROOM);
 
+
+        /// <summary>
+        /// Loads all rooms in a given folder, similar to how Gun Sprites are setup (Example: LoadRoomsFromRoomDirectory("Alex", this.FolderPath() + "/newRooms");
+        /// </summary>
+        /// <param name="modPrefix"></param>
+        /// <param name="roomDirectory"></param>
+        /// <returns></returns>
         public static Dictionary<string, RoomData> LoadRoomsFromRoomDirectory(string modPrefix, string roomDirectory)
         {
             var loadedRooms = new Dictionary<string, RoomData>();
@@ -314,8 +322,11 @@ namespace Alexandria.DungeonAPI
             {
                 ETGModConsole.Log("enemy done");
             }
+
+            Dictionary<int, PrototypeEventTriggerArea> keyValuePairs;
             if (roomData.placeablePositions != null)
             {
+                keyValuePairs = new Dictionary<int, PrototypeEventTriggerArea>();
                 for (int i = 0; i < roomData.placeablePositions.Length; i++)
                 {
                     /*
@@ -330,11 +341,30 @@ namespace Alexandria.DungeonAPI
                     {
                     }
                     */
-                    AddPlaceableToRoom(room, roomData.placeablePositions[i], roomData.placeableGUIDs[i], (roomData.placeableAttributes != null && roomData.placeableAttributes.Length > 0 ? roomData.placeableAttributes[i] : ""));
+                    AddPlaceableToRoom(room, roomData.placeablePositions[i], roomData.placeableGUIDs[i], (roomData.placeableAttributes != null && roomData.placeableAttributes.Length > 0 ? roomData.placeableAttributes[i] : ""), keyValuePairs);
                     //AddPlaceableToRoom(room, roomData.placeablePositions[i], roomData.placeableGUIDs[i]);
                 }
+                List<PrototypeEventTriggerArea> prototypeEventTriggerAreas = new List<PrototypeEventTriggerArea> {};
+                foreach (var ebtry in room.eventTriggerAreas)
+                {
+                    prototypeEventTriggerAreas.Add(ebtry);
+                }
+                int e = 0;
+                foreach (var entry in keyValuePairs)
+                {
+                    //ETGModConsole.Log(e);
+                    if (prototypeEventTriggerAreas.Count > e)
+                    {
+                        //ETGModConsole.Log(entry.Key);
+                        if (room.eventTriggerAreas.Count > entry.Key)
+                        {
+                            room.eventTriggerAreas[entry.Key] = prototypeEventTriggerAreas[e];
+                        }
+                    }
+                    e++;
+                }
             }
-
+            keyValuePairs = null;
             if (RoomUtility.EnableDebugLogging == true)
             {
                 ETGModConsole.Log("placeable done");
@@ -369,7 +399,7 @@ namespace Alexandria.DungeonAPI
                         }
                     }
 
-                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[fuckThisMod], roomData.nodeTypes[fuckThisMod], roomData.nodePaths[fuckThisMod], wrap, roomData.nodePathVisible != null ? roomData.nodePathVisible[fuckThisMod] :false);
+                    RoomFactory.AddNodeToRoom(room, roomData.nodePositions[fuckThisMod], roomData.nodeTypes[fuckThisMod], roomData.nodePaths[fuckThisMod], wrap, roomData.nodePathVisible != null ? roomData.nodePathVisible[fuckThisMod] :false, roomData.additionalPauseDelay != null ? roomData.additionalPauseDelay[j] : 0f);
                 }
                 //ETGModConsole.Log("5");
 
@@ -734,15 +764,35 @@ namespace Alexandria.DungeonAPI
             return -1;
         }*/
 
-        public static void AddPlaceableToRoom(PrototypeDungeonRoom room, Vector2 location, string assetPath, string attributes)
+        public static void AddPlaceableToRoom(PrototypeDungeonRoom room, Vector2 location, string assetPath, string attributes, Dictionary<int, PrototypeEventTriggerArea> prototypeEventTriggerAreas)
         {
             try
             {
+                
+
                 GameObject gameObject = RoomFactory.GetGameObjectFromBundles(assetPath);
                 JObject jobject = null;
                 if (!string.IsNullOrEmpty(attributes))
                 {
                     jobject = JObject.Parse(attributes);
+                    if (assetPath == "saw_blade_pathing")
+                    {
+                        JToken value;
+                        float delay = jobject.TryGetValue("addDelay", out value) ? ((float)value) : 0f;
+                        float maxSpeed = jobject.TryGetValue("mS", out value) ? ((float)value) : 9f;
+
+
+
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject("saw_blade_pathing"));
+                        var pather = gameObject.GetComponent<PathMover>();
+                        pather.AdditionalNodeDelay = delay;
+                        pather.PathSpeed = maxSpeed;
+                        pather.OriginalPathSpeed = maxSpeed;
+
+
+
+                    }
+
                     if (assetPath == "customsetupdeadblow")
                     {
                         JToken value;
@@ -896,7 +946,7 @@ namespace Alexandria.DungeonAPI
                         lightComp.LightRadius = radius;
                         lightComp.LightColor = new Color(Red, Green, Blue);
                     }
-                    if (assetPath == "bossPedestal")
+                    if (assetPath == "bossPedestal" | assetPath == "bossPedestalGolden")
                     {
                         JToken value2;
                         int id = jobject.TryGetValue("bossPdstlItmID", out value2) ? ((int)value2) : -1;
@@ -904,7 +954,7 @@ namespace Alexandria.DungeonAPI
                         string lootType = jobject.TryGetValue("bossPdstOverrideLootType", out value2) ? ((string)value2) : "N/A";
 
 
-                        var r = FakePrefab.Clone(RoomFactory.GetCustomDungeonPlaceableObject("bossPedestal").variantTiers[0].nonDatabasePlaceable);
+                        var r = FakePrefab.Clone(RoomFactory.GetCustomDungeonPlaceableObject(assetPath).variantTiers[0].nonDatabasePlaceable);
                         var pedestal = r.GetComponent<RewardPedestal>();
                         var thing  = r.AddComponent<PedestalSetter>();
                         if (lootType == "Fully Random") {thing.myLootType = PedestalSetter.LootType.RANDOM; }
@@ -933,8 +983,8 @@ namespace Alexandria.DungeonAPI
                         JToken value2;
                         
                         string triggerMethod = jobject.TryGetValue("TrapTriggerMethod", out value2) ? ((string)value2) : "Timer";
-                        float cooldown = jobject.TryGetValue("TrapTriggerDelay", out value2) ? ((float)value2) : 1;
-                        float initialCooldown = jobject.TryGetValue("InitialtrapDelay", out value2) ? ((float)value2) : 1;
+                        float cooldown = jobject.TryGetValue("TrapTriggerDelay", out value2) ? ((float)value2) : 1f;
+                        float initialCooldown = jobject.TryGetValue("InitialtrapDelay", out value2) ? ((float)value2) : 1f;
                         float AttackDelay = jobject.TryGetValue("attackDelatTrap", out value2) ? ((float)value2) : 0.5f;
                         bool trapTriggerOnBlank = jobject.TryGetValue("trapTriggerOnBlank", out value2) ? ((bool)value2) : false;
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
@@ -1011,9 +1061,12 @@ namespace Alexandria.DungeonAPI
                     {
                         JToken value2;
                         float speed = jobject.TryGetValue("WinchestTargetSpeed", out value2) ? ((float)value2) : 6;
+                        float delay = jobject.TryGetValue("addDelay", out value2) ? ((float)value2) : 0f;
+
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
                         gameObject.GetComponent<PathMover>().OriginalPathSpeed = speed;
                         gameObject.GetComponent<PathMover>().PathSpeed = speed;
+                        gameObject.GetComponent<PathMover>().AdditionalNodeDelay = delay;
 
                     }
                     if (assetPath == "ConveyorHorizontal" | assetPath == "ConveyorVertical")
@@ -1146,12 +1199,15 @@ namespace Alexandria.DungeonAPI
                         JToken value2;
                         int lentgh = jobject.TryGetValue("logLength", out value2) ? ((int)value2) : 4;
                         float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
+                        float pauseTime = jobject.TryGetValue("addDelay", out value2) ? ((float)value2) : 0f;
+
 
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
                         var collider = gameObject.GetComponent<ResizableCollider>();
                         var path = gameObject.GetComponent<PathMover>();
                         path.OriginalPathSpeed = maxSpeed;
                         path.PathSpeed = maxSpeed;
+                        path.AdditionalNodeDelay = pauseTime;
 
                         collider.NumTiles = lentgh;
                         collider.IsHorizontal = true;
@@ -1161,6 +1217,7 @@ namespace Alexandria.DungeonAPI
                         JToken value2;
                         int lentgh = jobject.TryGetValue("logHeight", out value2) ? ((int)value2) : 4;
                         float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
+                        float pauseTime = jobject.TryGetValue("addDelay", out value2) ? ((float)value2) : 0f;
 
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
                         var collider = gameObject.GetComponent<ResizableCollider>();
@@ -1168,6 +1225,7 @@ namespace Alexandria.DungeonAPI
                         var path = gameObject.GetComponent<PathMover>();
                         path.OriginalPathSpeed = maxSpeed;
                         path.PathSpeed = maxSpeed;
+                        path.AdditionalNodeDelay = pauseTime;
 
                         collider.NumTiles = lentgh;
                         collider.IsHorizontal = false;
@@ -1178,8 +1236,11 @@ namespace Alexandria.DungeonAPI
                         float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
                         var path = gameObject.GetComponent<PathMover>();
+                        float pauseTime = jobject.TryGetValue("addDelay", out value2) ? ((float)value2) : 0f;
+
                         path.OriginalPathSpeed = maxSpeed;
                         path.PathSpeed = maxSpeed;
+                        path.AdditionalNodeDelay = pauseTime;
 
                     }
                     if (assetPath == "flame_pipe_north" | assetPath == "flame_pipe_west" | assetPath == "flame_pipe_east")
@@ -1196,12 +1257,14 @@ namespace Alexandria.DungeonAPI
                         float maxSpeed = jobject.TryGetValue("mS", out value2) ? ((float)value2) : 9f;
                         int X = jobject.TryGetValue("TileSizeX_", out value2) ? ((int)value2) : 3;
                         int Y = jobject.TryGetValue("TileSizeY_", out value2) ? ((int)value2) : 3;
+                        float pauseTime = jobject.TryGetValue("addDelay", out value2) ? ((float)value2) : 0f;
 
 
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));
                         var path = gameObject.GetComponent<PathMover>();
                         path.OriginalPathSpeed = maxSpeed;
                         path.PathSpeed = maxSpeed;
+                        path.AdditionalNodeDelay = pauseTime;
 
                         var mover = gameObject.GetComponent<MovingPlatform>();
                         mover.UsesDwarfConfigurableSize = true;
@@ -1275,7 +1338,7 @@ namespace Alexandria.DungeonAPI
                     {
                         JToken value2;
 
-                        float hpMult = jobject.TryGetValue("glitchHpMult", out value2) ? ((int)value2) : 0.7f;
+                        float hpMult = jobject.TryGetValue("glitchHpMult", out value2) ? ((float)value2) : 0.7f;
                         float timeScale = jobject.TryGetValue("glitchtimescaleMult", out value2) ? ((float)value2) : 1f;
                         float Speed = jobject.TryGetValue("glitchspeedMult", out value2) ? ((float)value2) : 1f;
                         bool fly = jobject.TryGetValue("forceFly", out value2) ? ((bool)value2) : false;
@@ -1293,7 +1356,7 @@ namespace Alexandria.DungeonAPI
                     {
                         JToken value2;
 
-                        float delay = jobject.TryGetValue("crushTrapDelay", out value2) ? ((int)value2) : 0.25f;
+                        float delay = jobject.TryGetValue("crushTrapDelay", out value2) ? ((float)value2) : 0.25f;
                         float crushTrapCloseTime = jobject.TryGetValue("crushTrapCloseTime", out value2) ? ((float)value2) : 1f;
                         float cooldown = jobject.TryGetValue("TrapTriggerDelay", out value2) ? ((float)value2) : 3f;
                         float enemyDamage = jobject.TryGetValue("crushTrapEnemyDamage", out value2) ? ((float)value2) : 30f;
@@ -1321,7 +1384,7 @@ namespace Alexandria.DungeonAPI
                         bulletBank.Bullets = new List<AIBulletBank.Entry>() { newBank };
                         if (jammed == true)
                         {
-                            bulletBank.Bullets[0].BulletObject.GetComponent<Projectile>().gameObject.AddComponent<ProjectileJammer>(); ;
+                            bulletBank.Bullets[0].BulletObject.GetComponent<Projectile>().gameObject.AddComponent<ProjectileJammer>();
                         }
                     }
                     if (assetPath == "flameburst_trap")
@@ -1388,13 +1451,13 @@ namespace Alexandria.DungeonAPI
                         JToken value2;
                         string It = jobject.TryGetValue("shopItemBase", out value2) ? ((string)value2) : "Primary";
                         string shopUser = jobject.TryGetValue("UsedByShop", out value2) ? ((string)value2) : "UsedByShop";
-                        float chance = jobject.TryGetValue("shopItemBaseChance", out value2) ? ((int)value2) : 1f;
+                        float chance = jobject.TryGetValue("shopItemBaseChance", out value2) ? ((float)value2) : 1f;
                         string dir = jobject.TryGetValue("facingDirItem", out value2) ? ((string)value2) : "NORTH";
                         bool she_omni = jobject.TryGetValue("omniDir", out value2) ? ((bool)value2) : true;
                         int id = jobject.TryGetValue("bossPdstlItmID", out value2) ? ((int)value2) : -1;
                         string Tag = jobject.TryGetValue("bossPdstlItmStringID", out value2) ? ((string)value2) : "None.";
                         int overridePrice = jobject.TryGetValue("overridePrice", out value2) ? ((int)value2) : -1;
-                        float PriceMult = jobject.TryGetValue("priceMultiplier", out value2) ? ((int)value2) : 1f;
+                        float PriceMult = jobject.TryGetValue("priceMultiplier", out value2) ? ((float)value2) : 1f;
 
 
 
@@ -1489,7 +1552,6 @@ namespace Alexandria.DungeonAPI
                 {
                     gameObject = RoomFactory.GetExoticGameObject(assetPath);
                 }
-
                 if (gameObject)
                 {
                     if (jobject != null) gameObject = RoomFactory.MaybeModifyAsset(assetPath, jobject, gameObject);
@@ -1512,12 +1574,7 @@ namespace Alexandria.DungeonAPI
                     };
                     int path = 0;
                     int startNode = 0;
-                    /*
-                    room.AddEventTriggerArea = new List<RoomEventDefinition>()
-                    {
-                         
-                    };
-                    */
+
                     if (assetPath.Contains("_pathing") && jobject != null)
                     {
                         JToken value;
@@ -1546,15 +1603,16 @@ namespace Alexandria.DungeonAPI
                         room.placedObjects.Add(new PrototypePlacedObjectData
                         {
                             contentsBasePosition = location,
-                            fieldData = new List<PrototypePlacedObjectFieldData>() 
+                            fieldData = new List<PrototypePlacedObjectFieldData>()
                             {
-                                
+
                             },
                             instancePrerequisites = array,
                             linkedTriggerAreaIDs = new List<int>() { Order },
                             placeableContents = dungeonPlaceable,
-                            assignedPathIDx = -1,                    
+                            assignedPathIDx = -1,
                         });
+                        //ETGModConsole.Log("_DropDowntrap" + " " + Order + " " + location);
                     }
                     else if (assetPath.Contains("_DropDownswitch"))
                     {
@@ -1573,11 +1631,21 @@ namespace Alexandria.DungeonAPI
                             assignedPathIDx = -1,
                         });
                         
-                        PrototypeEventTriggerArea item2 = room.AddEventTriggerArea(new List<IntVector2>
+                        if (prototypeEventTriggerAreas.ContainsKey(Order))
                         {
-                           new IntVector2((int)location.x, (int)location.y)
-                        });
+                            prototypeEventTriggerAreas[Order].triggerCells.Add(location);
+                        }
+                        else
+                        {
+                            PrototypeEventTriggerArea item2 = room.AddEventTriggerArea(new List<IntVector2>
+                            {
+                                new IntVector2((int)location.x, (int)location.y),
+                            });
+                            prototypeEventTriggerAreas.Add(Order, item2);
+                        }
                         
+                        //ETGModConsole.Log("_DropDownswitch" + " " + Order + " " + location);
+
                     }
                     else if (assetPath.Contains("gullLeapPoint") || assetPath.Contains("_dungeonPlaceable"))
                     {
@@ -1895,7 +1963,7 @@ namespace Alexandria.DungeonAPI
             }
             return result;
         }
-        public static void AddNodeToRoom(PrototypeDungeonRoom room, Vector2 location, string guid, int layer, SerializedPath.SerializedPathWrapMode wrapMode, bool modifyTilemap)
+        public static void AddNodeToRoom(PrototypeDungeonRoom room, Vector2 location, string guid, int layer, SerializedPath.SerializedPathWrapMode wrapMode, bool modifyTilemap, float delay)
         {
             IntVector2 intLocation = location.ToIntVector2();
             SerializedPath serializedPath = null;
@@ -1909,7 +1977,8 @@ namespace Alexandria.DungeonAPI
                 var node = new SerializedPathNode(intLocation);
                 node.placement = (SerializedPathNode.SerializedNodePlacement)Enum.Parse(typeof(SerializedPathNode.SerializedNodePlacement), guid);
                 //serializedPath.nodes[0] = node;
-
+                node.delayTime = delay;
+                serializedPath.nodes.Add(node);
                 room.paths.Add(serializedPath);
                 serializedPath.wrapMode = wrapMode;//SerializedPath.SerializedPathWrapMode.Loop;
                 serializedPath.tilesetPathGrid = modifyTilemap ? 0 : -1;
@@ -1921,6 +1990,7 @@ namespace Alexandria.DungeonAPI
                 var node = new SerializedPathNode(intLocation);
                 serializedPath.wrapMode = wrapMode;
                 node.placement = (SerializedPathNode.SerializedNodePlacement)Enum.Parse(typeof(SerializedPathNode.SerializedNodePlacement), guid);
+                node.delayTime = delay;
                 serializedPath.nodes.Add(node);
                 serializedPath.tilesetPathGrid = modifyTilemap ? 0 : -1;
             }
@@ -2349,6 +2419,8 @@ namespace Alexandria.DungeonAPI
             public bool[] nodePathVisible;
             
             public string specialRoomPool;
+
+            public float[] additionalPauseDelay;
 
         }
     }

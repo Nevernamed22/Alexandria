@@ -49,6 +49,11 @@
     <Compile Include="Assetbundle\JsonEmbedder.cs" />
     <Compile Include="Assetbundle\ProjectileBuilders.cs" />
     <Compile Include="BreakableAPI\BreakableAPIToolbox.cs" />
+    <Compile Include="cAPI\Hat.cs" />
+    <Compile Include="cAPI\Hatabase.cs" />
+    <Compile Include="cAPI\HatController.cs" />
+    <Compile Include="cAPI\HatRoom.cs" />
+    <Compile Include="cAPI\HatUtility.cs" />
     <Compile Include="CharApi\CharacterBuilding\CharacterBuilder.cs" />
     <Compile Include="CharApi\CharacterBuilding\CustomCharacter.cs" />
     <Compile Include="CharApi\CharacterBuilding\FoyerCharacterHandler.cs" />
@@ -436,6 +441,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />
+    <EmbeddedResource Include="cAPI\hat_pedestal.png" />
+    <EmbeddedResource Include="cAPI\hat_room_entrance.png" />
+    <EmbeddedResource Include="cAPI\hat_room_exit.png" />
     <EmbeddedResource Include="NativeResources\debugfloor.png" />
     <EmbeddedResource Include="NativeResources\debugnorthwall.png" />
     <EmbeddedResource Include="NativeResources\debugwalls.png" />

@@ -10,6 +10,7 @@ using Alexandria.DungeonAPI;
 using Alexandria.ItemAPI;
 using Alexandria.Misc;
 using Alexandria.ChestAPI;
+using Alexandria.cAPI;
 using BepInEx;
 using Alexandria.CharacterAPI;
 using System.Collections;
@@ -29,7 +30,7 @@ namespace Alexandria
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
 
-        public const string VERSION = "0.3.35";
+        public const string VERSION = "0.4.0";
 
 
         public void Start()
@@ -81,6 +82,8 @@ namespace Alexandria
                 CharacterAPI.Hooks.Init();
                 ToolsCharApi.Init();
 
+                //cAPI
+                HatUtility.SetupConsoleCommands();
 
                 this.StartCoroutine(this.delayedstarthandler());
                 ETGModConsole.Log("AlexandriaLib started correctly. Ver. : "+VERSION);

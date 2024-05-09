@@ -29,6 +29,7 @@ namespace Alexandria.ItemAPI
             Goopton, Flynt, Cursula, Trorc, OldRed
         }
 
+        public static GenericLootTable GunslingKingChallengeGuns;
         public static Dictionary<ShopType, GenericLootTable> shopInventories;
 
         /// <summary>
@@ -52,6 +53,8 @@ namespace Alexandria.ItemAPI
             shopInventories.Add(ShopType.Cursula, LoadShopTable("Shop_Curse_Items_01"));
             shopInventories.Add(ShopType.Goopton, LoadShopTable("Shop_Goop_Items_01"));
             shopInventories.Add(ShopType.OldRed, LoadShopTable("Shop_Blank_Items_01"));
+
+            GunslingKingChallengeGuns = ResourceManager.LoadAssetBundle("shared_auto_001").LoadAsset<GenericLootTable>("gunslingkingshittyguntable");
         }
 
         /// <summary>
@@ -79,6 +82,8 @@ namespace Alexandria.ItemAPI
         public static GameObject AddSpriteToObjectAssetbundle(string name, int CollectionID, tk2dSpriteCollectionData data, GameObject obj = null)
         {
             GameObject spriteObject = SpriteFromBundle(name, CollectionID, data, obj);
+            FakePrefab.MarkAsFakePrefab(spriteObject);
+            spriteObject.SetActive(false);
             spriteObject.name = name;
             return spriteObject;
         }
@@ -387,6 +392,18 @@ namespace Alexandria.ItemAPI
                 pickupId = po.PickupObjectId,
                 weight = weight,
                 rawGameObject = po.gameObject,
+                forceDuplicatesPossible = false,
+                additionalPrerequisites = new DungeonPrerequisite[0]
+            });
+        }
+
+        public static void AddToGunslingKingTable(this PickupObject gun, int weight = 1)
+        {
+            GunslingKingChallengeGuns.defaultItemDrops.Add(new WeightedGameObject()
+            {
+                pickupId = gun.PickupObjectId,
+                weight = weight,
+                rawGameObject = gun.gameObject,
                 forceDuplicatesPossible = false,
                 additionalPrerequisites = new DungeonPrerequisite[0]
             });

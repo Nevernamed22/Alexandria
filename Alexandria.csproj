@@ -49,6 +49,11 @@
     <Compile Include="Assetbundle\JsonEmbedder.cs" />
     <Compile Include="Assetbundle\ProjectileBuilders.cs" />
     <Compile Include="BreakableAPI\BreakableAPIToolbox.cs" />
+    <Compile Include="cAPI\Hat.cs" />
+    <Compile Include="cAPI\Hatabase.cs" />
+    <Compile Include="cAPI\HatController.cs" />
+    <Compile Include="cAPI\HatRoom.cs" />
+    <Compile Include="cAPI\HatUtility.cs" />
     <Compile Include="CharApi\CharacterBuilding\CharacterBuilder.cs" />
     <Compile Include="CharApi\CharacterBuilding\CustomCharacter.cs" />
     <Compile Include="CharApi\CharacterBuilding\FoyerCharacterHandler.cs" />
@@ -66,10 +71,14 @@
     <Compile Include="ChestAPI\ChestSpawnHelper.cs" />
     <Compile Include="ChestAPI\ChestUtility.cs" />
     <Compile Include="DungeonAPI\BreachExtensions.cs" />
+    <Compile Include="DungeonAPI\DungeonPatches.cs" />
     <Compile Include="DungeonAPI\MasteryOverrideHandler.cs" />
+    <Compile Include="DungeonAPI\RoomIcons.cs" />
     <Compile Include="DungeonAPI\RoomUtility.cs" />
     <Compile Include="DungeonAPI\RuntimeDungeonEditing.cs" />
     <Compile Include="DungeonAPI\SetupExoticObjects.cs" />
+    <Compile Include="DungeonAPI\SpecialComponents.cs" />
+    <Compile Include="DungeonAPI\StaticInjections.cs" />
     <Compile Include="EnemyAPI\AIActorUtility.cs" />
     <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
     <Compile Include="EnemyAPI\EnemyBuildingTools.cs" />
@@ -112,6 +121,7 @@
     <Compile Include="Misc\ExtendedPlayerComponent.cs" />
     <Compile Include="Misc\GameManagerUtility.cs" />
     <Compile Include="Misc\GoopUtility.cs" />
+    <Compile Include="Misc\HitboxMonitor.cs" />
     <Compile Include="Misc\MagicCircleDoer.cs" />
     <Compile Include="Misc\MiscUtility.cs" />
     <Compile Include="Misc\PickupUtility.cs" />
@@ -192,6 +202,7 @@
     <Compile Include="StatAPI\ExtendedPlayerStats.cs" />
     <Compile Include="StatAPI\ModifyMethodE.cs" />
     <Compile Include="StatAPI\StatAPIManager.cs" />
+    <Compile Include="Storage\EnemyGUIDs.cs" />
     <Compile Include="TranslationAPI\CustomStringDBTable.cs" />
     <Compile Include="TranslationAPI\StringTableType.cs" />
     <Compile Include="TranslationAPI\Translation.cs" />
@@ -218,6 +229,8 @@
   <ItemGroup>
     <None Include=".editorconfig" />
     <None Include="packages.config" />
+    <EmbeddedResource Include="Testing\testMegaFinale.newroom" />
+    <EmbeddedResource Include="Testing\KP-Manuel.newroom" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -428,6 +441,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />
+    <EmbeddedResource Include="cAPI\hat_pedestal.png" />
+    <EmbeddedResource Include="cAPI\hat_room_entrance.png" />
+    <EmbeddedResource Include="cAPI\hat_room_exit.png" />
     <EmbeddedResource Include="NativeResources\debugfloor.png" />
     <EmbeddedResource Include="NativeResources\debugnorthwall.png" />
     <EmbeddedResource Include="NativeResources\debugwalls.png" />

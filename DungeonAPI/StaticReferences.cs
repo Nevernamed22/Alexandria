@@ -8,19 +8,25 @@ using Alexandria.ItemAPI;
 using Planetside;
 using System.Reflection;
 using MonoMod.RuntimeDetour;
-
+using System.Collections;
+using HarmonyLib;
+using Alexandria.Misc;
+using System.ComponentModel;
 
 namespace Alexandria.DungeonAPI
 {
+
     public static class StaticReferences
     {
-
+        public static List<string> GlitchBossNames = new List<string>();
         public static Dictionary<string, AssetBundle> AssetBundles;
         public static Dictionary<string, GenericRoomTable> RoomTables;
         public static SharedInjectionData subShopTable;
 
         public static Dictionary<string, GameObject> customObjects = new Dictionary<string, GameObject>();
         public static Dictionary<string, DungeonPlaceable> customPlaceables = new Dictionary<string, DungeonPlaceable>();
+        public static Dictionary<string, int> storedItemIDs = new Dictionary<string, int>();
+
 
         public static Dictionary<string, string> roomTableMap = new Dictionary<string, string>()
         {
@@ -41,7 +47,11 @@ namespace Alexandria.DungeonAPI
         {
             { "special", "basic special rooms (shrines, etc)" },
             { "shop", "Shop Room Table" },
-            { "secret", "secret_room_table_01" }
+            { "secret", "secret_room_table_01" },
+            { "winchester", "WinchesterRoomTable" },
+
+
+
         };
 
 
@@ -157,12 +167,25 @@ namespace Alexandria.DungeonAPI
                 }
                 catch (Exception e)
                 {
-                    ShrineTools.PrintError($"Failed to load special room table: {entry.Key}:{entry.Value}");
+                    ShrineTools.PrintError($"Failed to load special room table: {entry.Key} : {entry.Value}");
                     ShrineTools.PrintException(e);
                 }
             }
 
+            /*
+            int i = 0;
+            foreach (var entry in OfficialFlows.GetDungeonPrefab("base_resourcefulrat").PatternSettings.flows[1].AllNodes)
+            {
+
+                if (entry.overrideExactRoom != null)
+                {
+                    ETGModConsole.Log(entry.overrideExactRoom.name + " : " + i);
+                }
+                i++;
+            }
+            `*/
             //================================ Adss Boss Rooms into RoomTables
+
             foreach (var entry in BossRoomTableMap)
             {
                 try
@@ -191,17 +214,323 @@ namespace Alexandria.DungeonAPI
                 }
             }
 
+            //shrineTable-npcTable-blackMarketInjection
+
+
+
             subShopTable = AssetBundles["shared_auto_001"].LoadAsset<SharedInjectionData>("_global injected subshop table");
-            //foreach(var data in subShopTable.InjectionData)
-            //{
-            //    Tools.LogPropertiesAndFields(data, data.annotation);
-            //}
+            /*
+            int i = 0;
+            foreach(var data in subShopTable.InjectionData)
+            {
+                ETGModConsole.Log(data.exactRoom.name + " : " + i);
+                i++;
+                ETGModConsole.Log("====");
+                //CharacterAPI.ToolsCharApi.LogPropertiesAndFields(data, data.annotation);
+            }
+            */
+            RoomTables.Add("oldred", ConvertExactRoomIntoNewRoomTable(subShopTable.InjectionData[0], subShopTable.InjectionData[0].exactRoom));
+            RoomTables.Add("cursula", ConvertExactRoomIntoNewRoomTable(subShopTable.InjectionData[1], subShopTable.InjectionData[1].exactRoom));
+            RoomTables.Add("flynt", ConvertExactRoomIntoNewRoomTable(subShopTable.InjectionData[2], subShopTable.InjectionData[2].exactRoom));
+            RoomTables.Add("trorc", ConvertExactRoomIntoNewRoomTable(subShopTable.InjectionData[3], subShopTable.InjectionData[3].exactRoom));
+            RoomTables.Add("goopton", ConvertExactRoomIntoNewRoomTable(subShopTable.InjectionData[4], subShopTable.InjectionData[4].exactRoom));
 
 
+            RoomIcons.LoadRoomIcons();
+
+            RoomIcons.WinchesterRoomIcon = RoomTables["winchester"].includedRooms.elements[0].room.associatedMinimapIcon;
+
+            
+            Dungeon keep_ = DungeonDatabase.GetOrLoadByName("base_castle");
+            Dungeon sewer_ = DungeonDatabase.GetOrLoadByName("base_sewer");
+            Dungeon proper_ = DungeonDatabase.GetOrLoadByName("base_gungeon");
+            Dungeon abbey_ = DungeonDatabase.GetOrLoadByName("base_cathedral");
+            Dungeon hollow_ = DungeonDatabase.GetOrLoadByName("base_catacombs");
+            Dungeon hell_ = DungeonDatabase.GetOrLoadByName("base_bullethell");
+
+            StaticInjections.Keep_Injections_Sewer = keep_.PatternSettings.flows[1].sharedInjectionData[1];
+            StaticInjections.Sewer_Injections = sewer_.PatternSettings.flows[0].sharedInjectionData[1];
+            StaticInjections.Proper_Injections = proper_.PatternSettings.flows[0].sharedInjectionData[1];
+            StaticInjections.Abbey_Injections = abbey_.PatternSettings.flows[0].sharedInjectionData[1];
+            StaticInjections.Hollow_Injections = hollow_.PatternSettings.flows[0].sharedInjectionData[1];
+            StaticInjections.Hell_Injections = hell_.PatternSettings.flows[0].sharedInjectionData[0];
+
+            
+            RoomTables.Add("sewerentrace", ProcessRoomTableThing(StaticInjections.Keep_Injections_Sewer, StaticInjections.Keep_Injections_Sewer.InjectionData[0], 1).roomTable);
+
+            RoomTables.Add("fireplace", keep_.PatternSettings.flows[0].sharedInjectionData[1].InjectionData[1].roomTable);
+            RoomTables.Add("miscreward", keep_.PatternSettings.flows[0].sharedInjectionData[0].InjectionData[1].roomTable);
+
+
+            RoomTables.Add("crestroom", ProcessRoomTableThing(StaticInjections.Sewer_Injections, StaticInjections.Sewer_Injections.InjectionData[1]).roomTable);
+            RoomTables.Add("abbeyentrance", ProcessRoomTableThing(StaticInjections.Proper_Injections, StaticInjections.Proper_Injections.InjectionData[0]).roomTable);
+            RoomTables.Add("abbeyextrasecret", ProcessRoomTableThing(StaticInjections.Abbey_Injections, StaticInjections.Abbey_Injections.InjectionData[0]).roomTable);
+            RoomTables.Add("rng_entry", ProcessRoomTableThing(StaticInjections.Hollow_Injections, StaticInjections.Hollow_Injections.InjectionData[1]).roomTable);
+            RoomTables.Add("bullet_hell_secret", ProcessRoomTableThing(StaticInjections.Hell_Injections, StaticInjections.Hell_Injections.InjectionData[0]).roomTable);
+            
+            keep_ = null;
+            sewer_ = null;
+            proper_ = null;
+            abbey_ = null;
+            hollow_ = null;
+            hell_ = null;
+
+
+            //FlowDatabase.GetOrLoadByName("Secret_DoubleBeholster_Flow");
+
+            var glitchedFlow = ResourceManager.LoadAssetBundle("flows_base_001").LoadAsset<DungeonFlow>("Secret_DoubleBeholster_Flow");
+            StaticInjections.GlitchFlow = glitchedFlow;
+            StaticInjections.Node = glitchedFlow.AllNodes[2];
+            RoomTables.Add("glitchedBoss", ConvertNodeToRoomTable(StaticInjections.Node).overrideRoomTable);
+
+            StaticInjections.Shrine_injections = LoadHelper.LoadAssetFromAnywhere<SharedInjectionData>("_global injected shrine table");
+            
+            RoomTables.Add("challenge_shrine_keep", StaticInjections.Shrine_injections.InjectionData[1].roomTable);
+            RoomTables.Add("challenge_shrine_proper", StaticInjections.Shrine_injections.InjectionData[2].roomTable);
+            RoomTables.Add("challenge_shrine_mines", StaticInjections.Shrine_injections.InjectionData[3].roomTable);
+            RoomTables.Add("challenge_shrine_hollow", StaticInjections.Shrine_injections.InjectionData[4].roomTable);
+            RoomTables.Add("challenge_shrine_forge", StaticInjections.Shrine_injections.InjectionData[5].roomTable);
+            StaticInjections.Shrine_injections.InjectionData[0].roomTable.includedRoomTables = new List<GenericRoomTable>()
+            {
+
+            };
+            RoomTables.Add("cleanse_shrine", ConvertRoomIntoNewRoomTable(StaticInjections.Shrine_injections.InjectionData[0], StaticInjections.Shrine_injections.InjectionData[0].roomTable, 0));
+            RoomTables.Add("cursed_mirror", ConvertRoomIntoNewRoomTable(StaticInjections.Shrine_injections.InjectionData[0], StaticInjections.Shrine_injections.InjectionData[0].roomTable, 1));
+            RoomTables.Add("black_market_entrance", ConvertRoomIntoNewRoomTable(StaticInjections.Shrine_injections.InjectionData[0], StaticInjections.Shrine_injections.InjectionData[0].roomTable, 2));
+            RoomTables.Add("random_shrine", ConvertRoomIntoNewRoomTable(StaticInjections.Shrine_injections.InjectionData[0], StaticInjections.Shrine_injections.InjectionData[0].roomTable, 3));
+            RoomTables.Add("glass_shrine", ConvertRoomIntoNewRoomTable(StaticInjections.Shrine_injections.InjectionData[0], StaticInjections.Shrine_injections.InjectionData[0].roomTable, 4));
+            ETGMod.StartGlobalCoroutine(Delay(StaticInjections.Shrine_injections.InjectionData[0].roomTable));
+
+            StaticInjections.NPC_injections = LoadHelper.LoadAssetFromAnywhere<SharedInjectionData>("_global injected npc table");
+            RoomTables.Add("lost_adventurer", ProcessRoomTableThing(StaticInjections.NPC_injections, StaticInjections.NPC_injections.InjectionData[1]).roomTable);
+            RoomTables.Add("gunsling_king", ProcessRoomTableThing(StaticInjections.NPC_injections, StaticInjections.NPC_injections.InjectionData[2]).roomTable);
+            RoomTables.Add("mendy_and_patches", ProcessRoomTableThing(StaticInjections.NPC_injections, StaticInjections.NPC_injections.InjectionData[3]).roomTable);
+            RoomTables.Add("synergrace", ProcessRoomTableThing(StaticInjections.NPC_injections, StaticInjections.NPC_injections.InjectionData[4]).roomTable);
+
+            StaticInjections.Black_Market_injections = LoadHelper.LoadAssetFromAnywhere<SharedInjectionData>("black market injection data");
+            RoomTables.Add("black_market", ProcessRoomTableThing(StaticInjections.Black_Market_injections, StaticInjections.Black_Market_injections.InjectionData[0]).roomTable);
+
+            StaticInjections.Miniboss_injections = LoadHelper.LoadAssetFromAnywhere<SharedInjectionData>("phantom agunim injection data");
+            RoomTables.Add("fuselier", ProcessRoomTableThing(StaticInjections.Miniboss_injections, StaticInjections.Miniboss_injections.InjectionData[2]).roomTable);
+
+            StaticInjections.Fallback_Subshop_Injections = LoadHelper.LoadAssetFromAnywhere<SharedInjectionData>("subshop fallback injection data");
+            RoomTables.Add("gun_muncher", ProcessRoomTableThing(StaticInjections.Fallback_Subshop_Injections, StaticInjections.Fallback_Subshop_Injections.InjectionData[0]).roomTable);
+            RoomTables.Add("vampire", ProcessRoomTableThing(StaticInjections.Fallback_Subshop_Injections, StaticInjections.Fallback_Subshop_Injections.InjectionData[1]).roomTable);
+
+
+            if (DebugSpawns == true)
+            {
+                StaticInjections.Shrine_injections.ChanceToSpawnOne = 1;
+                StaticInjections.Shrine_injections.OnlyOne = false;
+                StaticInjections.Shrine_injections.IgnoreUnmetPrerequisiteEntries = true;
+
+                StaticInjections.NPC_injections.ChanceToSpawnOne = 1;
+                StaticInjections.NPC_injections.OnlyOne = false;
+                StaticInjections.NPC_injections.IgnoreUnmetPrerequisiteEntries = true;
+
+                StaticInjections.Black_Market_injections.ChanceToSpawnOne = 1;
+                StaticInjections.Black_Market_injections.OnlyOne = false;
+                StaticInjections.Black_Market_injections.IgnoreUnmetPrerequisiteEntries = true;
+
+                StaticInjections.Miniboss_injections.ChanceToSpawnOne = 1;
+                StaticInjections.Miniboss_injections.OnlyOne = false;
+                StaticInjections.Miniboss_injections.IgnoreUnmetPrerequisiteEntries = true;
+
+                StaticInjections.Fallback_Subshop_Injections.ChanceToSpawnOne = 1;
+                StaticInjections.Fallback_Subshop_Injections.OnlyOne = false;
+                StaticInjections.Fallback_Subshop_Injections.IgnoreUnmetPrerequisiteEntries = true;
+
+            }
+            StaticInjections.Base_Shared_Injections = LoadHelper.LoadAssetFromAnywhere<SharedInjectionData>("base shared injection data");
+            RoomTables.Add("jailedNPC", StaticInjections.Base_Shared_Injections.InjectionData[1].roomTable);
+
+            /*
+            if (StaticInjections.Gungeon_Common_Injections != null)
+            {
+                foreach (var entry in StaticInjections.Gungeon_Common_Injections.InjectionData)
+                {
+                    CharacterAPI.ToolsCharApi.LogPropertiesAndFields(entry, "");
+                }
+            }
+            */
 
             ShrineTools.Print("Static references initialized.");
         }
-       
+
+
+        private static GenericRoomTable ConvertExactRoomIntoNewRoomTable(ProceduralFlowModifierData roomTableToAddTo, PrototypeDungeonRoom roomEntry)
+        {
+            if (DebugSpawns == true)
+            {
+                roomTableToAddTo.chanceToLock = 0;
+                roomTableToAddTo.chanceToSpawn = 1;
+                roomTableToAddTo.selectionWeight = 1;
+                roomTableToAddTo.prerequisites = new DungeonPrerequisite[0];
+                roomTableToAddTo.OncePerRun = false;
+                roomTableToAddTo.RequiresMasteryToken = false;
+                roomTableToAddTo.DEBUG_FORCE_SPAWN = true;
+            }
+
+            var newTable = ScriptableObject.CreateInstance<GenericRoomTable>();
+
+            newTable.includedRoomTables = new List<GenericRoomTable>() { };
+
+            newTable.includedRooms = new WeightedRoomCollection()
+            {
+                elements = new List<WeightedRoom>()
+                {
+                    new WeightedRoom()
+                    {
+                        room = roomEntry,
+                        weight = roomTableToAddTo.chanceToSpawn,
+                        additionalPrerequisites = roomTableToAddTo.prerequisites != null&& DebugSpawns == false  ?  roomTableToAddTo.prerequisites.ToArray() : new DungeonPrerequisite[0],
+                    }
+                },
+            };
+            roomTableToAddTo.roomTable = ScriptableObject.CreateInstance<GenericRoomTable>();
+
+            roomTableToAddTo.roomTable.includedRooms = new WeightedRoomCollection()
+            {
+                elements = new List<WeightedRoom>()
+                {
+                    new WeightedRoom()
+                    {
+                       
+                    }
+                },
+            };
+            roomTableToAddTo.roomTable.includedRoomTables = new List<GenericRoomTable>();
+            roomTableToAddTo.roomTable.includedRoomTables.Add(newTable);
+            return newTable;
+
+        }
+        private static GenericRoomTable ConvertRoomIntoNewRoomTable(ProceduralFlowModifierData roomTableToAddTo, GenericRoomTable roomTableToPullFrom, int entry)
+        {
+            var roomEntry = roomTableToPullFrom.includedRooms.elements[entry];
+            if (DebugSpawns == true)
+            {
+                roomTableToAddTo.chanceToLock = 0;
+                roomTableToAddTo.chanceToSpawn = 1;
+                roomTableToAddTo.selectionWeight = 1;
+                roomTableToAddTo.prerequisites = new DungeonPrerequisite[0];
+                roomTableToAddTo.OncePerRun = false;
+                roomTableToAddTo.RequiresMasteryToken = false;
+                roomTableToAddTo.DEBUG_FORCE_SPAWN = true;
+            }
+            var newTable = ScriptableObject.CreateInstance<GenericRoomTable>();
+            newTable.includedRoomTables = new List<GenericRoomTable>() { };
+            newTable.includedRooms = new WeightedRoomCollection()
+            {
+                elements = new List<WeightedRoom>()
+                {
+                    new WeightedRoom()
+                    {
+                        room = roomEntry.room,
+                        weight = roomEntry.weight,
+                        additionalPrerequisites = roomEntry.room.prerequisites != null&& DebugSpawns == false  ?  roomEntry.room.prerequisites.ToArray() : new DungeonPrerequisite[0],
+                    }
+                },             
+            };
+
+            roomTableToAddTo.roomTable.includedRoomTables.Add(newTable);
+            return newTable;
+
+        }
+        private static DungeonFlowNode ConvertNodeToRoomTable(DungeonFlowNode node, float overrideWeight = 1)
+        {
+            node.overrideRoomTable = ScriptableObject.CreateInstance<GenericRoomTable>();
+            node.overrideRoomTable.includedRooms = new WeightedRoomCollection()
+            {
+                elements = new List<WeightedRoom>()
+                {
+                    new WeightedRoom()
+                    {
+                        room = node.overrideExactRoom,
+                        weight = overrideWeight,
+                        additionalPrerequisites = node.overrideExactRoom.prerequisites != null ? node.overrideExactRoom.prerequisites.ToArray() : new DungeonPrerequisite[0],  
+                    }
+                }
+            };
+            node.overrideRoomTable.name = "alexandriaGlitchTable";
+            node.overrideRoomTable.includedRoomTables = new List<GenericRoomTable>() { };
+            ETGMod.StartGlobalCoroutine(Delay(node));
+            return node;
+        }
+        private static IEnumerator Delay(GenericRoomTable flow)
+        {
+            yield return null;
+            flow.includedRooms = new WeightedRoomCollection() { elements = new List<WeightedRoom>() { } };
+            yield break;
+        }
+        private static IEnumerator Delay(DungeonFlowNode flow)
+        {
+            yield return null;
+            flow.overrideExactRoom = null;
+            yield break;
+        }
+
+        private static bool DebugSpawns = false;
+
+        private static ProceduralFlowModifierData ProcessRoomTableThing(SharedInjectionData shared , ProceduralFlowModifierData data, float defaultWeight = 1, bool debug = false)
+        {
+            ProceduralFlowModifierData modifierData = new ProceduralFlowModifierData()
+            {
+                annotation = data.annotation,
+                CanBeForcedSecret = data.CanBeForcedSecret,
+                chanceToLock = DebugSpawns == true ? 0 : data.chanceToLock,
+                chanceToSpawn = DebugSpawns == true ? 1 : data.chanceToSpawn,
+                selectionWeight = DebugSpawns == true ? 1 : data.selectionWeight,
+                DEBUG_FORCE_SPAWN = DebugSpawns == true ? true : data.DEBUG_FORCE_SPAWN,
+                exactRoom = null,
+                exactSecondaryRoom = data.exactSecondaryRoom,
+                framedCombatNodes = data.framedCombatNodes,
+                IsWarpWing = data.IsWarpWing,
+                OncePerRun = DebugSpawns == true ? false : data.OncePerRun,
+                placementRules = data.placementRules,
+                prerequisites = DebugSpawns == true ? new DungeonPrerequisite[0]: data.prerequisites.ToArray(),       
+                RandomNodeChildMinDistanceFromEntrance = data.RandomNodeChildMinDistanceFromEntrance,
+                RequiredValidPlaceable = data.RequiredValidPlaceable,
+                RequiresMasteryToken = DebugSpawns == true ? false : data.RequiresMasteryToken,
+                
+                roomTable = ScriptableObject.CreateInstance<GenericRoomTable>(),
+               
+            };
+            if (debug == true)
+            {
+                ETGModConsole.Log(data.exactRoom.name);
+                int I = 0;
+                foreach (var entryR in data.exactRoom.placedObjects)
+                {
+                    if (entryR.nonenemyBehaviour != null)
+                    {
+                        ETGModConsole.Log(entryR.nonenemyBehaviour.name ?? "NULL");
+                    }
+                    I++;
+                }
+                I = 0;      
+            }
+
+            modifierData.roomTable.includedRooms = new WeightedRoomCollection()
+            {
+                elements = new()
+                {
+                    new WeightedRoom()
+                    {
+                        room = data.exactRoom,
+                        additionalPrerequisites = data.exactRoom.prerequisites != null && DebugSpawns == false ? data.exactRoom.prerequisites.ToArray() : new DungeonPrerequisite[0],
+                        weight = defaultWeight
+                    }
+                }
+
+            };
+            modifierData.roomTable.includedRoomTables = new List<GenericRoomTable>() { };
+
+            data.chanceToSpawn = 0;
+            shared.InjectionData.Add(modifierData);
+            return modifierData;
+        }
+
+
 
 
         public static void InitStaticRoomObjects()
@@ -311,37 +640,14 @@ namespace Alexandria.DungeonAPI
                 }
             }
             sewerDungeon = null;
-            PrototypeDungeonRoom asset = null;
-            foreach (var bundle in StaticReferences.AssetBundles.Values)
-            {
-                asset = bundle.LoadAsset<PrototypeDungeonRoom>("ChallengeShrine_Gungeon_002");
-                if (asset)
-                    break;
-            }
-            GameObject ChallengeShrine = FakePrefab.Clone(asset.placedObjects[0].nonenemyBehaviour.gameObject);
-            if (ChallengeShrine.GetComponentInChildren<ChallengeShrineController>() == null) { ETGModConsole.Log("HOW THE *FUCK* IS THIS NULL??"); }
-            FoolproofedChallengeShrineController newController = ChallengeShrine.AddComponent<FoolproofedChallengeShrineController>();
-            ChallengeShrineController baseController = ChallengeShrine.GetComponentInChildren<ChallengeShrineController>();
-            newController.acceptOptionKey = baseController.acceptOptionKey;
-            newController.AlternativeOutlineTarget = baseController.AlternativeOutlineTarget;
-            newController.CustomChestTable = baseController.CustomChestTable;
-            newController.declineOptionKey = baseController.declineOptionKey;
-            newController.difficulty = baseController.difficulty;
-            newController.displayTextKey = baseController.displayTextKey;
-            newController.isPassable = baseController.isPassable;
-            newController.onPlayerVFX = baseController.onPlayerVFX;
-            newController.placeableHeight = baseController.placeableHeight;
-            newController.placeableWidth = baseController.placeableWidth;
-            newController.playerVFXOffset = baseController.playerVFXOffset;
-            newController.talkPoint = baseController.talkPoint;
-            newController.usesCustomChestTable = baseController.usesCustomChestTable;
-            if (ChallengeShrine.GetComponentInChildren<ChallengeShrineController>()) UnityEngine.Object.Destroy(ChallengeShrine.GetComponentInChildren<ChallengeShrineController>());
-            StoredRoomObjects.Add("ChallengeShrine", ChallengeShrine);           
+           
         }
 
-        public static GameObject DefineMinecartFromValues(float maxSpeed, float timeToMaxSpeed)
+
+
+        public static GameObject DefineMinecartFromValues(string cartType, float maxSpeed, float timeToMaxSpeed, string storedBody, bool NearestInCart, bool forceActive)
         {
-            GameObject asset = RoomFactory.GetExoticGameObject("minecart_pathing");
+            GameObject asset = RoomFactory.GetExoticGameObject(cartType);
             GameObject gameObject = FakePrefab.Clone(asset);
             MineCartController component = gameObject.GetComponent<MineCartController>();
             GameObject result;
@@ -353,10 +659,20 @@ namespace Alexandria.DungeonAPI
             {
                 component.MaxSpeed = maxSpeed;
                 component.TimeToMaxSpeed = timeToMaxSpeed;
+                component.ForceActive = forceActive;
+                if (NearestInCart == true)
+                {
+                    gameObject.AddComponent<SpecialComponents.ForceNearestToRide>();
+                }
+
                 result = gameObject;
             }
             return result;
         }
+
+      
+
+     
 
 
         public static GameObject DefineDeadBlowFromValues(bool followsPlayer, bool persistent, bool facesLeft, bool leaveGoop, bool fireBullets, string goopType, float initialDelay, float minDelay, float maxDelay)

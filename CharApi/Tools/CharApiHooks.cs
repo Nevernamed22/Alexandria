@@ -13,6 +13,7 @@ using IEnumerator = System.Collections.IEnumerator;
 using Alexandria.ItemAPI;
 using Dungeonator;
 using HarmonyLib;
+using FullInspector;
 
 namespace Alexandria.CharacterAPI
 {
@@ -1740,12 +1741,19 @@ namespace Alexandria.CharacterAPI
 
         public static void DoGhostBlankHook(Action<PlayerController> orig, PlayerController self)
         {
-
-            if (CharacterBuilder.storedCharacters[self.gameObject.GetComponent<CustomCharacter>()?.data.nameInternal.ToLower()].First.coopBlankReplacement != null)
+            if (CharacterBuilder.storedCharacters.Count() > 0)
             {
-                FieldInfo _blankCooldownTimer = typeof(PlayerController).GetField("m_blankCooldownTimer", BindingFlags.NonPublic | BindingFlags.Instance);
-                self.QueueSpecificAnimation("ghost_sneeze_right");
-                ReflectionHelper.SetValue(_blankCooldownTimer, self, CharacterBuilder.storedCharacters[self.gameObject.GetComponent<CustomCharacter>()?.data.nameInternal.ToLower()].First.coopBlankReplacement(self));
+                orig(self);
+                return;
+            }
+            var component = self.gameObject.GetComponent<CustomCharacter>();
+            if (component != null)
+            {
+                if (CharacterBuilder.storedCharacters[component.data.nameInternal.ToLower()].First.coopBlankReplacement != null)
+                {
+                    self.m_blankCooldownTimer = CharacterBuilder.storedCharacters[self.gameObject.GetComponent<CustomCharacter>()?.data.nameInternal.ToLower()].First.coopBlankReplacement(self);
+
+                }
             }
             else
             {

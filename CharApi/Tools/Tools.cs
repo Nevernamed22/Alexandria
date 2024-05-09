@@ -328,71 +328,16 @@ namespace Alexandria.CharacterAPI
 		/// <returns></returns>
 		public static bool ResizeBetter(this Texture2D tex, int width, int height, bool center = false)
         {
-            if (tex.IsReadable())
-            {
-                Color[][] pixels = new Color[Math.Min(tex.width, width)][];
+            if (!tex.IsReadable())
+              return tex.Resize(width, height);
 
-
-                for (int x = 0; x < Math.Min(tex.width, width); x++)
-                {
-                    for (int y = 0; y < Math.Min(tex.height, height); y++)
-                    {
-                        if (pixels[x] == null)
-                        {
-                            pixels[x] = new Color[Math.Min(tex.height, height)];
-                        }
-                        pixels[x][y] = tex.GetPixel(x, y);
-                    }
-                }
-
-                int value = 2;
-                if (center)
-                {
-                    value = 1;
-                }
-                else
-                {
-                    value = 0;
-                }
-
-                bool result = tex.Resize(width, height);
-                for (int x = value; x < tex.width - value; x++)
-                {
-                    for (int y = value; y < tex.height - value; y++)
-                    {
-                        bool isInOrigTex = false;
-                        if (x - value < pixels.Length)
-                        {
-                            if (y - value < pixels[x - value].Length)
-                            {
-                                isInOrigTex = true;
-                                tex.SetPixel(x, y, pixels[x - value][y - value]);
-                            }
-                        }
-                        if (!isInOrigTex)
-                        {
-                            tex.SetPixel(x, y, Color.clear);
-                        }
-                    }
-                }
-
-                for (int x = 0; x < tex.width; x++)
-                {
-                    for (int y = 0; y < tex.height; y++)
-                    {
-
-                        if (tex.GetPixel(x, y) == new Color32(205, 205, 205, 205))
-                        {
-                            tex.SetPixel(x, y, Color.clear);
-                        }
-
-                    }
-                }
-
-                tex.Apply();
-                return result;
-            }
-            return tex.Resize(width, height);
+            int value = center ? 1 : 0;
+            Texture2D tempTex = new Texture2D(width, height);
+            tempTex.SetPixels(value, value, tex.width - 2 * value, tex.height - 2 * value, tex.GetPixels());
+            bool result = tex.Resize(width, height);
+            tex.SetPixels(tempTex.GetPixels());
+            tex.Apply();
+            return result;
         }
 
         /// <summary>
@@ -570,13 +515,13 @@ namespace Alexandria.CharacterAPI
 
         public static void LogPropertiesAndFields<T>(T obj, string header = "")
         {
-            Log(header);
-            Log("=======================");
-            if (obj == null) { Log("LogPropertiesAndFields: Null object"); return; }
+            Print(header, "FFFFFF", true);
+            Print("=======================");
+            if (obj == null) { Print("LogPropertiesAndFields: Null object", "FFFFFF", true); return; }
             Type type = obj.GetType();
-            Log($"Type: {type}");
+            Print($"Type: {type}", "FFFFFF", true);
             PropertyInfo[] pinfos = type.GetProperties();
-            Log($"{typeof(T)} Properties: ");
+            Print($"{typeof(T)} Properties: ", "FFFFFF", true);
             foreach (var pinfo in pinfos)
             {
                 try
@@ -593,15 +538,15 @@ namespace Alexandria.CharacterAPI
                             valueString += "\n\t\t" + subval.ToString();
                         }
                     }
-                    Log($"\t{pinfo.Name}: {valueString}");
+                    Print($"\t{pinfo.Name}: {valueString}", "FFFFFF", true);
                 }
                 catch { }
             }
-            Log($"{typeof(T)} Fields: ");
+            Print($"{typeof(T)} Fields: ", "FFFFFF", true);
             FieldInfo[] finfos = type.GetFields();
             foreach (var finfo in finfos)
             {
-                Log($"\t{finfo.Name}: {finfo.GetValue(obj)}");
+                Print($"\t{finfo.Name}: {finfo.GetValue(obj)}", "FFFFFF", true);
             }
         }
 

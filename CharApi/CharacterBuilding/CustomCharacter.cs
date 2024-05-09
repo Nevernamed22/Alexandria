@@ -61,6 +61,8 @@ namespace Alexandria.CharacterAPI
         public string altHandName = null;
 
         public List<Tuple<GameObject, Vector3>> randomFoyerBullshitNNAskedFor = new List<Tuple<GameObject, Vector3>>();
+
+        public bool punchoutSpriteFixEnabled;
     }
 
     class CustomCharacterFoyerController : MonoBehaviour

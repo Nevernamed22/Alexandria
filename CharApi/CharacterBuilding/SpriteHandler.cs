@@ -194,8 +194,8 @@ namespace Alexandria.CharacterAPI
                         var thisH = tex.height / 16f;
 
                         // Calculate the difference vector by subtracting the width and height of the replacement texture from the original width and height.
-                        var wDiffVector = new Vector3(thisW - hunterW, 0);
-                        var hDiffVector = new Vector3(0, thisH - hunterH);
+                        var wDiffVector = new Vector3((thisW - hunterW) / 2f, 0);
+                        var hDiffVector = new Vector3(0, (thisH - hunterH) / 2f);
 
                         df.position0 += -wDiffVector - hDiffVector; // Expand the lower left corner to the left and down.
                         df.position1 +=  wDiffVector - hDiffVector; // Expand the lower right corner to the right and down.

@@ -171,42 +171,41 @@ namespace Alexandria.CharacterAPI
                     }
                 }
 
-                //ETGModConsole.Log("added to atlas");
                 var defMatches = collection.spriteDefinitions.Where(def => def.name.Contains(baseName) && !def.name.Contains("vfx")).Select(def => def);
                 List<int> ids = new List<int>();
-                //ETGModConsole.Log("pre foreach");
 
-                bool h = false;
                 foreach (var def in defMatches)
                 {
+                    var tex = data.punchoutSprites[def.name.Replace(baseName, data.nameShort.ToLower())];
+                    var id = AddSpriteToCollection(tex, collection);
 
-                    //.Log(def.name.Replace(baseName, data.nameShort.ToLower()) +": " + data.punchoutSprites.Where(sprite => sprite.Key == (def.name.Replace(baseName, data.nameShort.ToLower()))).Select(sprite => sprite).Count().ToString());
-                    /*
-                    var sList = data.punchoutSprites.Where(sprite => sprite.Key == (def.name.Replace(baseName, data.nameShort.ToLower()))).ToList();
-                    if (sList == null || sList.Count <= 0)
+                    var df = collection.spriteDefinitions[id];
+
+                    df.CopyToSelf(def);
+
+                    if (data.punchoutSpriteFixEnabled)
                     {
-                        ETGModConsole.Log($"An issue occursed while trying to add the sprite: \"{collection.spriteDefinitions[frame.spriteId].name}\"");
+                        // Read the width and height of the original frame by subtracting the coordinates of its lower left corner from the coordinates of its upper right corner.
+                        var hunterW = def.position3.x - def.position0.x;
+                        var hunterH = def.position3.y - def.position0.y;
+
+                        // Read and convert the width and height of the replacement texture into gungeon units.
+                        var thisW = tex.width / 16f;
+                        var thisH = tex.height / 16f;
+
+                        // Calculate the difference vector by subtracting the width and height of the replacement texture from the original width and height.
+                        var wDiffVector = new Vector3((thisW - hunterW) / 2f, 0);
+                        var hDiffVector = new Vector3(0, (thisH - hunterH) / 2f);
+
+                        df.position0 += -wDiffVector - hDiffVector; // Expand the lower left corner to the left and down.
+                        df.position1 +=  wDiffVector - hDiffVector; // Expand the lower right corner to the right and down.
+                        df.position2 += -wDiffVector + hDiffVector; // Expand the upper left corner to the left and up.
+                        df.position3 +=  wDiffVector + hDiffVector; // Expand the upper right corner to the right and up.
                     }
-                    */
 
-
-                    //ETGModConsole.Log(def.name.Replace(baseName, data.nameShort.ToLower()));
-
-                    var id = AddSpriteToCollection(data.punchoutSprites.Where(sprite => sprite.Key == (def.name.Replace(baseName, data.nameShort.ToLower()))).First().Value, collection);
-                    if (!h)
-                    {
-
-                        //ToolsCharApi.ExportTexture(collection.spriteDefinitions[id].material.mainTexture.GetReadable(), "ihateyou", "zatherzyoulittlefucker");
-                        h = true;
-                    }
-
-                    collection.spriteDefinitions[id].CopyToSelf(def);
-                    //ETGModConsole.Log(collection.spriteDefinitions[id].name);
                     ids.Add(id);
-
                 }
 
-                //ETGModConsole.Log("added to collectiom");
                 var animMatches = libary.clips.Where(clip => clip.name.Contains(baseName) && !clip.name.Contains("vfx")).Select(clip => clip);
 
                 foreach (var clip in animMatches)
@@ -266,14 +265,15 @@ namespace Alexandria.CharacterAPI
             {
                 var id = AddSpriteToCollection(sprite.Value, collection);
 
-                collection.spriteDefinitions[id].position0 = collection.spriteDefinitions[collection.GetSpriteIdByName(sprite.Key.Replace(data.nameShort.ToLower(), "hunter"))].position0;
-                collection.spriteDefinitions[id].position1 = collection.spriteDefinitions[collection.GetSpriteIdByName(sprite.Key.Replace(data.nameShort.ToLower(), "hunter"))].position1;
-                collection.spriteDefinitions[id].position2 = collection.spriteDefinitions[collection.GetSpriteIdByName(sprite.Key.Replace(data.nameShort.ToLower(), "hunter"))].position2;
-                collection.spriteDefinitions[id].position3 = collection.spriteDefinitions[collection.GetSpriteIdByName(sprite.Key.Replace(data.nameShort.ToLower(), "hunter"))].position3;
+                var hunterDef = collection.spriteDefinitions[collection.GetSpriteIdByName(sprite.Key.Replace(data.nameShort.ToLower(), "hunter"))];
+
+                collection.spriteDefinitions[id].position0 = hunterDef.position0;
+                collection.spriteDefinitions[id].position1 = hunterDef.position1;
+                collection.spriteDefinitions[id].position2 = hunterDef.position2; 
+                collection.spriteDefinitions[id].position3 = hunterDef.position3;
 
                 spriteIds.Add(sprite.Key, id);
             }
-
 
             var matches = spriteIds.Where(pair => pair.Key.Contains("_punch_win_")).Select(pair => pair.Key);
 

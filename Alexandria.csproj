@@ -198,6 +198,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SoundAPI\SoundManager.cs" />
+    <Compile Include="SoundAPI\SwitchedEvent.cs" />
+    <Compile Include="SoundAPI\SwitchStorer.cs" />
     <Compile Include="StatAPI\CustomStatValues.cs" />
     <Compile Include="StatAPI\ExtendedPlayerStats.cs" />
     <Compile Include="StatAPI\ModifyMethodE.cs" />

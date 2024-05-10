@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using AK.Wwise;
 using HarmonyLib;
@@ -197,6 +199,100 @@ namespace Alexandria.SoundAPI
 
             // Add the additional events to the events list.
             events.AddRange(additionalEvents);
+        }
+
+        /// <summary>
+        /// Loads all soundbanks from a given or calling assembly.
+        /// </summary>
+        /// <param name="assembly">The assembly to load the soundbanks from. If null, the calling assembly will be used instead.</param>
+        public static void LoadSoundbanksFromAssembly(Assembly assembly = null)
+        {
+            // If assembly is not specified, get the calling assembly instead.
+            assembly ??= Assembly.GetCallingAssembly();
+
+            // Iterate through all resources in the assembly.
+            foreach(var resName in assembly.GetManifestResourceNames())
+            {
+                // Check if the resource is a sound bank.
+                if (resName.EndsWith(".bnk"))
+                {
+                    // Load the bank from that path.
+                    LoadSoundbankFromAssembly(resName, assembly);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Loads a specific soundbank from a given or calling assembly.
+        /// </summary>
+        /// <param name="path">The resource path to the soundbank.</param>
+        /// <param name="assembly">The assembly to load the soundbanks from. If null, the calling assembly will be used instead.</param>
+        public static void LoadSoundbankFromAssembly(string path, Assembly assembly = null)
+        {
+            // If assembly is not specified, get the calling assembly instead.
+            assembly ??= Assembly.GetCallingAssembly();
+
+            // Fix path separators.
+            path = path.Replace("/", ".").Replace("\\", ".");
+
+            // If path doesn't end with .bnk, add it to the end of the path.
+            if (!path.EndsWith(".bnk"))
+            {
+                path += ".bnk";
+            }
+
+            // Set the name of the bank to the full path.
+            var name = path;
+
+            // If there are any path separators, remove every character after the last path separator (functionally, removes the path extension)
+            if(name.LastIndexOf('.') >= 0)
+            {
+                name = name.Substring(0, name.LastIndexOf("."));
+
+                // If there are still path separators remaining, remove every character before the new last path separator (functionally, removes the folders the bank is located in, leaving only the filename)
+                if(name.LastIndexOf('.') >= 0)
+                {
+                    name = name.Substring(name.LastIndexOf('.') + 1);
+                }
+            }
+
+            // Load stream from path.
+            using var strem = assembly.GetManifestResourceStream(path);
+
+            // Load the bank from the stream.
+            LoadSoundbankFromStream(strem, name);
+        }
+
+        /// <summary>
+        /// Loads a soundbank from a given stream.
+        /// </summary>
+        /// <param name="stream">The stream to read the soundbank from.</param>
+        /// <param name="bankName">The name of the bank that will be loaded.</param>
+        public static void LoadSoundbankFromStream(Stream stream, string bankName)
+        {
+            // Create an array the same size as the stream.
+            var ba = new byte[stream.Length];
+
+            // Read the bytes from the stream into the array.
+            stream.Read(ba, 0, ba.Length);
+
+            // Load the bank from the bytes in the steam.
+            LoadSoundbankFromBytes(ba, bankName);
+        }
+        
+        /// <summary>
+        /// Loads a soundbank from a given array of bytes.
+        /// </summary>
+        /// <param name="bytes">The array containing the soundbank bytes.</param>
+        /// <param name="bankName">The name of the bank that will be loaded.</param>
+        public static unsafe void LoadSoundbankFromBytes(byte[] bytes, string bankName)
+        {
+            // Pin the pointer to the bytes array using fixed.
+            fixed(byte* ba = bytes)
+            {
+                // Load the bank from memory using the pointer to the bytes array.
+                AkSoundEngine.LoadAndDecodeBankFromMemory((IntPtr)ba, (uint)bytes.Length, false, bankName, false, out _);
+            }
         }
     }
 }

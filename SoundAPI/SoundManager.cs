@@ -13,22 +13,39 @@ namespace Alexandria.SoundAPI
     [HarmonyPatch]
     public static class SoundManager
     {
-        // Hierarchy:
-        //   Original Event
-        //     Switch Group
-        //       Switch Value
-        //         Events for custom switch.
+        /// <summary>
+        /// Hierarchy:
+        ///   Original Event
+        ///     Switch Group
+        ///       Switch Value
+        ///         Events for custom switch.
+        /// </summary>
         private static readonly Dictionary<string, Dictionary<string, Dictionary<string, List<SwitchedEvent>>>> CustomSwitchData = new();
 
-        // Dictionary where keys are the names of original events and the values are the switched events that will be played in addition to the original.
+        /// <summary>
+        /// Dictionary where keys are the names of original events and the values are the switched events that will be played in addition to the original.
+        /// </summary>
         private static readonly Dictionary<string, List<SwitchedEvent>> SwitchlessAddedEvents = new();
 
-        // Original version of the Post Event method that won't play any custom switched events.
+        /// <summary>
+        /// Original version of the Post Event method that won't play any custom switched events.
+        /// </summary>
+        /// <param name="in_pszEventName"></param>
+        /// <param name="in_gameObjectID"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
         [HarmonyPatch(typeof(AkSoundEngine), nameof(AkSoundEngine.PostEvent), typeof(string), typeof(GameObject))]
         [HarmonyReversePatch(HarmonyReversePatchType.Original)]
         internal static uint PostEvent_Orig(string in_pszEventName, GameObject in_gameObjectID) => throw new NotImplementedException();
 
-        // Original version of the Set Switch method that won't store the new switch.
+        /// <summary>
+        /// Original version of the Set Switch method that won't store the new switch.
+        /// </summary>
+        /// <param name="in_pszSwitchGroup"></param>
+        /// <param name="in_pszSwitchState"></param>
+        /// <param name="in_gameObjectID"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
         [HarmonyPatch(typeof(AkSoundEngine), nameof(AkSoundEngine.SetSwitch), typeof(string), typeof(string), typeof(GameObject))]
         [HarmonyReversePatch(HarmonyReversePatchType.Original)]
         internal static uint SetSwitch_Orig(string in_pszSwitchGroup, string in_pszSwitchState, GameObject in_gameObjectID) => throw new NotImplementedException();
@@ -229,6 +246,12 @@ namespace Alexandria.SoundAPI
         /// <param name="assembly">The assembly to load the soundbanks from. If null, the calling assembly will be used instead.</param>
         public static void LoadSoundbankFromAssembly(string path, Assembly assembly = null)
         {
+            // Don't attempt to load soundbank from empty path.
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
+
             // If assembly is not specified, get the calling assembly instead.
             assembly ??= Assembly.GetCallingAssembly();
 
@@ -270,6 +293,12 @@ namespace Alexandria.SoundAPI
         /// <param name="bankName">The name of the bank that will be loaded.</param>
         public static void LoadSoundbankFromStream(Stream stream, string bankName)
         {
+            // Don't attempt to load soundbank from null/empty stream.
+            if(stream == null || stream.Length <= 0)
+            {
+                return;
+            }
+
             // Create an array the same size as the stream.
             var ba = new byte[stream.Length];
 
@@ -287,6 +316,12 @@ namespace Alexandria.SoundAPI
         /// <param name="bankName">The name of the bank that will be loaded.</param>
         public static unsafe void LoadSoundbankFromBytes(byte[] bytes, string bankName)
         {
+            // Don't attempt to load soundbank from null/empty byte array.
+            if(bytes == null || bytes.Length <= 0)
+            {
+                return;
+            }
+
             // Pin the pointer to the bytes array using fixed.
             fixed(byte* ba = bytes)
             {

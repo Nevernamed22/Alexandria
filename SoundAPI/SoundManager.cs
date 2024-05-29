@@ -60,13 +60,13 @@ namespace Alexandria.SoundAPI
         private static bool OverrideEvent(ref uint __result, string in_pszEventName, GameObject in_gameObjectID)
         {
             // Check if the game object exists.
-            if(in_gameObjectID == null)
+            if(in_gameObjectID == null || string.IsNullOrEmpty(in_pszEventName))
             {
                 return true;
             }
 
             // Check if there are any switchless added events attached to the played event.
-            if (SwitchlessAddedEvents.TryGetValue(in_pszEventName.ToLowerInvariant(), out var switchlessEvents) && switchlessEvents != null)
+            if (SwitchlessAddedEvents != null && SwitchlessAddedEvents.TryGetValue(in_pszEventName.ToLowerInvariant(), out var switchlessEvents) && switchlessEvents != null)
             {
                 foreach (var e in switchlessEvents)
                 {
@@ -85,7 +85,7 @@ namespace Alexandria.SoundAPI
             var storer = in_gameObjectID.GetComponent<SwitchStorer>();
 
             // Check if the switch storer has any saved switches and then check if the played event has any custom switch data.
-            if (storer == null || storer.Switches == null || storer.Switches.Count <= 0 || !CustomSwitchData.TryGetValue(in_pszEventName.ToLowerInvariant(), out var dat))
+            if (storer == null || storer.Switches == null || storer.Switches.Count <= 0 || CustomSwitchData == null || !CustomSwitchData.TryGetValue(in_pszEventName.ToLowerInvariant(), out var dat) || dat == null || dat.Count <= 0)
             {
                 return true;
             }
@@ -96,8 +96,20 @@ namespace Alexandria.SoundAPI
             // Go through all of the game object's switches.
             foreach (var s in storer.Switches)
             {
-                // Check if the custom switch data for the event has keys for both the switch group and the switch value
-                if (!dat.TryGetValue(s.Key.ToLowerInvariant(), out var dat2) || !dat2.TryGetValue(s.Value.ToLowerInvariant(), out var events))
+                // Ignore switches with null/empty keys/values.
+                if(string.IsNullOrEmpty(s.Key) || string.IsNullOrEmpty(s.Value))
+                {
+                    continue;
+                }
+
+                // Check if the custom switch data for the event has keys for the switch group.
+                if (!dat.TryGetValue(s.Key.ToLowerInvariant(), out var dat2) || dat2 == null)
+                {
+                    continue;
+                }
+
+                // Check if the custom switch data for the event has keys for the switch value
+                if (!dat2.TryGetValue(s.Value.ToLowerInvariant(), out var events))
                 {
                     continue;
                 }

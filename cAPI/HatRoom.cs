@@ -52,9 +52,9 @@ namespace Alexandria.cAPI
         }
     }
 
-    /// <summary>Marks the hat room in need of regeneration every time the Breach is unloaded</summary>
-    [HarmonyPatch(typeof(Foyer), nameof(Foyer.OnDepartedFoyer))]
-    private class OnDepartedFoyerPatch
+    /// <summary>Marks the hat room in need of regeneration every time the Breach is reloaded</summary>
+    [HarmonyPatch(typeof(Foyer), nameof(Foyer.Start))]
+    private class OnFoyerStartPatch
     {
         static void Postfix(Foyer __instance)
         {

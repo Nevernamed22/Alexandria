@@ -77,6 +77,18 @@ namespace Alexandria.cAPI
                 CachedP2Animator = hatOwnerAnimator;
 
             // get the player specific offset for the hat
+            DeterminePlayerSpecificOffsets();
+
+            // cache some useful variables
+            hatWidth = Mathf.RoundToInt(16f * hatSprite.GetCurrentSpriteDef().colliderVertices[1].x);
+            hatFlipOffset = hatOffset.WithX(-hatOffset.x);
+
+            UpdateHatFacingDirection();
+            HandleAttachedSpriteDepth();
+        }
+
+        public void DeterminePlayerSpecificOffsets()
+        {
             bool onEyes = (attachLevel == HatAttachLevel.EYE_LEVEL);
             var headOffsets = onEyes ? Hatabase.EyeLevel : Hatabase.HeadLevel;
             ownerIsModdedChar = !headOffsets.TryGetValue(hatOwner.sprite.spriteAnimator.library.name, out playerSpecificOffset);
@@ -100,13 +112,20 @@ namespace Alexandria.cAPI
             {
                 offsetDict = onEyes ? Hatabase.EyeFrameOffsets : Hatabase.HeadFrameOffsets;
             }
+        }
 
-            // cache some useful variables
-            hatWidth = Mathf.RoundToInt(16f * hatSprite.GetCurrentSpriteDef().colliderVertices[1].x);
-            hatFlipOffset = hatOffset.WithX(-hatOffset.x);
-
-            UpdateHatFacingDirection();
-            HandleAttachedSpriteDepth();
+        /// <summary>Patch for recalculating hat offsets when the player swaps costumes in the Breach</summary>
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.SwapToAlternateCostume))]
+        private class CostumeSwapHatFixerPatch
+        {
+            static void Postfix(PlayerController __instance)
+            {
+                if (__instance.GetComponent<HatController>() is not HatController hatController)
+                    return;
+                if (hatController.CurrentHat is not Hat hat)
+                    return;
+                hat.DeterminePlayerSpecificOffsets();
+            }
         }
 
         private void Update()
@@ -302,13 +321,19 @@ namespace Alexandria.cAPI
 
             // get the base offset for every character
             float effectiveX = player.SpriteBottomCenter.x;
-            if (flipped) // if the sprite is flipped, we need to account for whether the player sprite and hat sprite are even / odd pixels and adjust the offset accordingly
+            // due to weird rounding issues, we need to account for whether the player sprite and hat sprite are even / odd pixels and adjust the offset accordingly
+            int playerWidth = Mathf.RoundToInt(16f * cachedDef.untrimmedBoundsDataExtents.x); // use untrimmed bounds to avoid missing pixels on alt skins
+            if (flipped)
             {
-                int playerWidth = Mathf.RoundToInt(16f * cachedDef.untrimmedBoundsDataExtents.x); // use untrimmed bounds to avoid missing pixels on alt skins
                 if (playerWidth % 2 == 0) // if our player sprite is an even number of pixels, we need to quantize our center point
                     effectiveX = effectiveX.Quantize(0.0625f, (hatWidth % 2 == 0) ? VectorConversions.Ceil : VectorConversions.Floor);
                 if ((hatWidth + playerWidth) % 2 == 1) // if the sum of our player sprite width and hat sprite width is odd, we need to adjust by another half pixel
                     effectiveX += 1f/32f;
+            }
+            else
+            {
+                if ((hatWidth + playerWidth) % 2 == 1) // if the sum of our player sprite width and hat sprite width is odd, we need to adjust by another half pixel
+                    effectiveX -= 1f/32f;
             }
             Vector2 baseOffset = new(effectiveX, player.sprite.transform.position.y);
 
@@ -318,7 +343,7 @@ namespace Alexandria.cAPI
                 animationFrameSpecificOffset += flipped ? frameOffset.flipOffset : frameOffset.offset;
 
             // combine everything and return
-            return baseOffset + animationFrameSpecificOffset + (flipped ? hatFlipOffset : hatOffset) + playerSpecificOffset;
+            return baseOffset + animationFrameSpecificOffset + ((flipped && flipHorizontalWithPlayer) ? hatFlipOffset : hatOffset) + playerSpecificOffset;
         }
 
         internal void StickHatToPlayer(PlayerController player)

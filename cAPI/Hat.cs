@@ -302,13 +302,19 @@ namespace Alexandria.cAPI
 
             // get the base offset for every character
             float effectiveX = player.SpriteBottomCenter.x;
-            if (flipped) // if the sprite is flipped, we need to account for whether the player sprite and hat sprite are even / odd pixels and adjust the offset accordingly
+            // due to weird rounding issues, we need to account for whether the player sprite and hat sprite are even / odd pixels and adjust the offset accordingly
+            int playerWidth = Mathf.RoundToInt(16f * cachedDef.untrimmedBoundsDataExtents.x); // use untrimmed bounds to avoid missing pixels on alt skins
+            if (flipped)
             {
-                int playerWidth = Mathf.RoundToInt(16f * cachedDef.untrimmedBoundsDataExtents.x); // use untrimmed bounds to avoid missing pixels on alt skins
                 if (playerWidth % 2 == 0) // if our player sprite is an even number of pixels, we need to quantize our center point
                     effectiveX = effectiveX.Quantize(0.0625f, (hatWidth % 2 == 0) ? VectorConversions.Ceil : VectorConversions.Floor);
                 if ((hatWidth + playerWidth) % 2 == 1) // if the sum of our player sprite width and hat sprite width is odd, we need to adjust by another half pixel
                     effectiveX += 1f/32f;
+            }
+            else
+            {
+                if ((hatWidth + playerWidth) % 2 == 1) // if the sum of our player sprite width and hat sprite width is odd, we need to adjust by another half pixel
+                    effectiveX -= 1f/32f;
             }
             Vector2 baseOffset = new(effectiveX, player.sprite.transform.position.y);
 

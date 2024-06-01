@@ -77,6 +77,18 @@ namespace Alexandria.cAPI
                 CachedP2Animator = hatOwnerAnimator;
 
             // get the player specific offset for the hat
+            DeterminePlayerSpecificOffsets();
+
+            // cache some useful variables
+            hatWidth = Mathf.RoundToInt(16f * hatSprite.GetCurrentSpriteDef().colliderVertices[1].x);
+            hatFlipOffset = hatOffset.WithX(-hatOffset.x);
+
+            UpdateHatFacingDirection();
+            HandleAttachedSpriteDepth();
+        }
+
+        public void DeterminePlayerSpecificOffsets()
+        {
             bool onEyes = (attachLevel == HatAttachLevel.EYE_LEVEL);
             var headOffsets = onEyes ? Hatabase.EyeLevel : Hatabase.HeadLevel;
             ownerIsModdedChar = !headOffsets.TryGetValue(hatOwner.sprite.spriteAnimator.library.name, out playerSpecificOffset);
@@ -100,13 +112,20 @@ namespace Alexandria.cAPI
             {
                 offsetDict = onEyes ? Hatabase.EyeFrameOffsets : Hatabase.HeadFrameOffsets;
             }
+        }
 
-            // cache some useful variables
-            hatWidth = Mathf.RoundToInt(16f * hatSprite.GetCurrentSpriteDef().colliderVertices[1].x);
-            hatFlipOffset = hatOffset.WithX(-hatOffset.x);
-
-            UpdateHatFacingDirection();
-            HandleAttachedSpriteDepth();
+        /// <summary>Patch for recalculating hat offsets when the player swaps costumes in the Breach</summary>
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.SwapToAlternateCostume))]
+        private class CostumeSwapHatFixerPatch
+        {
+            static void Postfix(PlayerController __instance)
+            {
+                if (__instance.GetComponent<HatController>() is not HatController hatController)
+                    return;
+                if (hatController.CurrentHat is not Hat hat)
+                    return;
+                hat.DeterminePlayerSpecificOffsets();
+            }
         }
 
         private void Update()

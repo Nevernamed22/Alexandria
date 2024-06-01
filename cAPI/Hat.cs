@@ -324,7 +324,7 @@ namespace Alexandria.cAPI
                 animationFrameSpecificOffset += flipped ? frameOffset.flipOffset : frameOffset.offset;
 
             // combine everything and return
-            return baseOffset + animationFrameSpecificOffset + (flipped ? hatFlipOffset : hatOffset) + playerSpecificOffset;
+            return baseOffset + animationFrameSpecificOffset + ((flipped && flipHorizontalWithPlayer) ? hatFlipOffset : hatOffset) + playerSpecificOffset;
         }
 
         internal void StickHatToPlayer(PlayerController player)

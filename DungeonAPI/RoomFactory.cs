@@ -299,6 +299,7 @@ namespace Alexandria.DungeonAPI
                 AddExit(room, new Vector2(room.Width, room.Height / 2), DungeonData.Direction.EAST);
                 AddExit(room, new Vector2(0, room.Height / 2), DungeonData.Direction.WEST);
             }
+            //ETGModConsole.Log("cando: " + roomData.randomizeEnemyPositions);
             if (roomData.enemyPositions != null)
             {
                 for (int i = 0; i < roomData.enemyPositions.Length; i++)
@@ -311,7 +312,7 @@ namespace Alexandria.DungeonAPI
                             COND = ReturnTrigger(roomData.waveTriggers[i]);
                         }
                     }
-                    
+
 
                     //ETGModConsole.Log("Trigger "+ roomData.waveTriggers[i]);
                     AddEnemyToRoom(room, roomData.enemyPositions[i], roomData.enemyGUIDs[i], (roomData.enemyAttributes != null && roomData.enemyAttributes.Length > 0 ? roomData.enemyAttributes[i] : ""), roomData.enemyReinforcementLayers[i], roomData.randomizeEnemyPositions, COND);
@@ -1016,8 +1017,8 @@ namespace Alexandria.DungeonAPI
                     if (assetPath == "winchesterCameraPanPlacer")
                     {
                         JToken value2;
-                        int X = jobject.TryGetValue("WinchestX_Tarcker", out value2) ? ((int)value2) : 4;
-                        int Y = jobject.TryGetValue("WinchestY_Tarcker", out value2) ? ((int)value2) : 4;
+                        int X = jobject.TryGetValue("TileSizeX_", out value2) ? ((int)value2) : 4;
+                        int Y = jobject.TryGetValue("TileSizeY_", out value2) ? ((int)value2) : 4;
 
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject("winchesterCameraPanPlacer"));
 
@@ -1048,8 +1049,8 @@ namespace Alexandria.DungeonAPI
                     if (assetPath == "WinchesterNPC")
                     {
                         JToken value2;
-                        float X = jobject.TryGetValue("TileSizeX_", out value2) ? ((float)value2) : 0;
-                        float Y = jobject.TryGetValue("TileSizeY_", out value2) ? ((float)value2) : 0;
+                        float X = jobject.TryGetValue("WinchestMoveXTele", out value2) ? ((float)value2) : 0;
+                        float Y = jobject.TryGetValue("WinchestMoveYTele", out value2) ? ((float)value2) : 0;
                         float wait = jobject.TryGetValue("WinchestGoneTime", out value2) ? ((float)value2) : 1;
 
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject("WinchesterNPC"));
@@ -1060,7 +1061,7 @@ namespace Alexandria.DungeonAPI
                     if (assetPath == "winchesterShootyTarget_pathing" | assetPath == "WinchesterMovingBumper1x3_pathing" | assetPath == "WinchesterMovingBumper2x2_pathing")
                     {
                         JToken value2;
-                        float speed = jobject.TryGetValue("WinchestTargetSpeed", out value2) ? ((float)value2) : 6;
+                        float speed = jobject.TryGetValue("WinchestTargetSpeed", out value2) ? ((float)value2) : 6f;
                         float delay = jobject.TryGetValue("addDelay", out value2) ? ((float)value2) : 0f;
 
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject(assetPath));

@@ -313,6 +313,7 @@ namespace Alexandria.DungeonAPI
                         }
                     }
 
+                    //ETGModConsole.Log($"{roomData.enemyGUIDs[i]} | {roomData.enemyReinforcementLayers[i]} | {}");
 
                     //ETGModConsole.Log("Trigger "+ roomData.waveTriggers[i]);
                     AddEnemyToRoom(room, roomData.enemyPositions[i], roomData.enemyGUIDs[i], (roomData.enemyAttributes != null && roomData.enemyAttributes.Length > 0 ? roomData.enemyAttributes[i] : ""), roomData.enemyReinforcementLayers[i], roomData.randomizeEnemyPositions, COND);
@@ -1150,7 +1151,7 @@ namespace Alexandria.DungeonAPI
                         var data = trapComp.overrideProjectileData;
                         data.speed = projSpeed;
                         data.range = range;
-                        
+
                         if (type != null)
                         {
                             //yes i CAN DO this much better but im fucking lazy

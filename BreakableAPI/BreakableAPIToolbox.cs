@@ -36,7 +36,7 @@ namespace Alexandria.BreakableAPI
         {
             TeleporterController existingTeleporterController = ResourceManager.LoadAssetBundle("brave_resources_001").LoadAsset<GameObject>("Teleporter_Gungeon_01").GetComponentInChildren<TeleporterController>();
 
-            GameObject gameObject = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], null);
+            GameObject gameObject = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], null, Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(gameObject);
             gameObject.name = name;
             gameObject.layer = 20;
@@ -58,7 +58,7 @@ namespace Alexandria.BreakableAPI
             teleporterController.spriteAnimator = animator;
 
 
-            GameObject roomIcon = SpriteBuilder.SpriteFromResource(MinimapIconPath, null);
+            GameObject roomIcon = SpriteBuilder.SpriteFromResource(MinimapIconPath, null, Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(roomIcon);
             roomIcon.name = name + "_RoomIcon";
             roomIcon.layer = 22;
@@ -121,7 +121,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < idleSpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
@@ -148,7 +148,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < activationSpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(activationSpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(activationSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     unsealFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
@@ -157,7 +157,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < activeIdleSpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(activeIdleSpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(activeIdleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     unsealFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
@@ -193,11 +193,11 @@ namespace Alexandria.BreakableAPI
 
         public static GameObject GenerateShadow(string ShadowSpritePath, string name, Transform parent, Vector3 Offset, tk2dSpriteCollectionData customCollection = null)
         {
-            GameObject shadowObject = SpriteBuilder.SpriteFromResource(ShadowSpritePath, null);
+            GameObject shadowObject = SpriteBuilder.SpriteFromResource(ShadowSpritePath, null, Assembly.GetCallingAssembly());
 
             tk2dSpriteCollectionData ShadowSpriteCollection = customCollection ?? SpriteBuilder.ConstructCollection(shadowObject, (name + "_Collection"));
             shadowObject.name = name;
-            int newSpriteId2 = SpriteBuilder.AddSpriteToCollection(ShadowSpritePath, ShadowSpriteCollection);
+            int newSpriteId2 = SpriteBuilder.AddSpriteToCollection(ShadowSpritePath, ShadowSpriteCollection, Assembly.GetCallingAssembly());
             tk2dSprite orAddComponent3 = shadowObject.GetOrAddComponent<tk2dSprite>();
             orAddComponent3.SetSprite(ShadowSpriteCollection, newSpriteId2);
 
@@ -220,12 +220,12 @@ namespace Alexandria.BreakableAPI
         private static DungeonDoorSubsidiaryBlocker GenerateDungeonDoorSubsidiaryBlocker(string name, string[] idleSpritePaths, string[] sealSpritePaths, string[] unsealSpritePaths, bool isNorthSouthDoor, string[] playerNearSealedDoorAnimPaths = null, int idleAnimFPS = 5, int sealAnimFPS = 5, int unsealAnimFPS = 5, int playerNearSealedDoorAnimFPS = 5, string[] chainIdleSpritePaths = null, string[] chainSealSpritePaths = null, string[] chainUnsealSpritePaths = null, string[] chainPlayerNearChainPaths = null)
         {
 
-            GameObject gameObject = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], null);
+            GameObject gameObject = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], null, Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(gameObject);
             gameObject.name = name;
 
             tk2dSpriteCollectionData SpriteObjectSpriteCollection = SpriteBuilder.ConstructCollection(gameObject, (name + "_Collection"));
-            int spriteID = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[0], SpriteObjectSpriteCollection);
+            int spriteID = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[0], SpriteObjectSpriteCollection, Assembly.GetCallingAssembly());
             tk2dSprite sprite = gameObject.GetOrAddComponent<tk2dSprite>();
             sprite.SetSprite(SpriteObjectSpriteCollection, spriteID);
 
@@ -267,7 +267,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < idleSpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
@@ -293,7 +293,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < sealSpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(sealSpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(sealSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     sealFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
@@ -312,7 +312,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < unsealSpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(unsealSpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(unsealSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     unsealFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
@@ -331,7 +331,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < playerNearSealedDoorAnimPaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(playerNearSealedDoorAnimPaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(playerNearSealedDoorAnimPaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     playernearblockerFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
@@ -356,13 +356,13 @@ namespace Alexandria.BreakableAPI
 
         private static tk2dSpriteAnimator GenerateChainObject(string name, GameObject parent, tk2dSpriteCollectionData parentCollection, DungeonDoorSubsidiaryBlocker dungeonDoorSubsidiaryBlocker, string[] idleSpritePaths, string[] sealSpritePaths, string[] unsealSpritePaths, string[] playerNearSealedDoorAnimPaths = null, int idleAnimFPS = 5, int sealAnimFPS = 5, int unsealAnimFPS = 5, int playerNearSealedDoorAnimFPS = 5)
         {
-            GameObject gameObject = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], null);
+            GameObject gameObject = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], null, Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(gameObject);
             gameObject.name = name + "Chain";
 
 
             tk2dSpriteCollectionData SpriteObjectSpriteCollection = parentCollection;
-            int spriteID = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[0], SpriteObjectSpriteCollection);
+            int spriteID = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[0], SpriteObjectSpriteCollection, Assembly.GetCallingAssembly());
             tk2dSprite sprite = gameObject.GetOrAddComponent<tk2dSprite>();
             sprite.SetSprite(SpriteObjectSpriteCollection, spriteID);
 
@@ -384,7 +384,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < idleSpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
@@ -411,7 +411,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < sealSpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(sealSpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(sealSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     sealFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
@@ -430,7 +430,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < unsealSpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(unsealSpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(unsealSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     unsealFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
@@ -449,7 +449,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < playerNearSealedDoorAnimPaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(playerNearSealedDoorAnimPaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(playerNearSealedDoorAnimPaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     playernearblockerFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
@@ -499,12 +499,12 @@ namespace Alexandria.BreakableAPI
         /// </summary>
         private static DungeonDoorController.DoorModule GenerateDoorModule(string name, string[] idleSpritePaths, string[] closeAnimPaths, string[] openAimPaths, int AnimFPS = 5)
         {
-            GameObject gameObject = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], null);
+            GameObject gameObject = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], null, Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(gameObject);
             gameObject.name = name;
 
             tk2dSpriteCollectionData SpriteObjectSpriteCollection = SpriteBuilder.ConstructCollection(gameObject, (name + "_Collection"));
-            int spriteID = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[0], SpriteObjectSpriteCollection);
+            int spriteID = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[0], SpriteObjectSpriteCollection, Assembly.GetCallingAssembly());
             tk2dSprite sprite = gameObject.GetOrAddComponent<tk2dSprite>();
             sprite.SetSprite(SpriteObjectSpriteCollection, spriteID);
 
@@ -521,7 +521,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < idleSpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
@@ -579,7 +579,7 @@ namespace Alexandria.BreakableAPI
             for (int i = 0; i < SpritePaths.Length; i++)
             {
                 tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(SpritePaths[i], collection);
+                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(SpritePaths[i], collection, Assembly.GetCallingAssembly());
                 tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                 frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                 frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
@@ -599,13 +599,13 @@ namespace Alexandria.BreakableAPI
 
         public static GameObject GenerateDecalObject(string name, string[] SpritePaths, int AnimFPS = 5)
         {
-            GameObject gameObject = SpriteBuilder.SpriteFromResource(SpritePaths[0], null);
+            GameObject gameObject = SpriteBuilder.SpriteFromResource(SpritePaths[0], null, Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(gameObject);
             gameObject.name = name;
             gameObject.layer = 20;
 
             tk2dSpriteCollectionData SpriteObjectSpriteCollection = SpriteBuilder.ConstructCollection(gameObject, (name + "_Collection"));
-            int spriteID = SpriteBuilder.AddSpriteToCollection(SpritePaths[0], SpriteObjectSpriteCollection);
+            int spriteID = SpriteBuilder.AddSpriteToCollection(SpritePaths[0], SpriteObjectSpriteCollection, Assembly.GetCallingAssembly());
             tk2dSprite sprite = gameObject.GetOrAddComponent<tk2dSprite>();
             sprite.SetSprite(SpriteObjectSpriteCollection, spriteID);
 
@@ -622,7 +622,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < SpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(SpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(SpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
@@ -680,15 +680,15 @@ namespace Alexandria.BreakableAPI
         /// <param name="collisionLayerList">Sets the collision layer/s of the MajorBreakable. leaving this as null will set it to HighObstacle AND BulletBlocker, however basegame MajorBreakables can use different ones, and at times multiple at once.</param>
         public static KickableObject GenerateKickableObject(string name, string[] idleSpritePaths, string[] rollNorthPaths, string[] rollSouthPaths, string[] rollEastPaths, string[] rollWestPaths, string[] impactNorthPaths, string[] impactSouthPaths, string[] impactEastPaths, string[] impactWestPaths, string[] impactNotRollingPaths, string[] RolledIntoBreakPaths, int idleAnimFPS = 4, int rollAnimFPS = 5, int breakAnimFPS = 4, int breakNotRollingFPS = 4, int breakRolledIntoFPS = 4, bool UsesCustomColliderValues = false, int ColliderSizeX = 16, int ColliderSizeY = 8, int ColliderOffsetX = 0, int ColliderOffsetY = 8, bool HasAdditionalCollisions = true, bool AdditionalCollisionsUseColliderSizes = true, int AdiitionalColliderSizeX = 8, int AdiitionalColliderSizeY = 8, int AdiitionalColliderOffsetX = 0, int AdiitionalColliderOffsetY = 0, string breakAudioEvent = "Play_OBJ_barrel_break_01", float rollingSpeed = 3, List<CollisionLayer> collisionLayerList = null)
         {
-            Texture2D textureFromResource = ResourceExtractor.GetTextureFromResource(idleSpritePaths[0]);
-            GameObject gameObject = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], null);
+            Texture2D textureFromResource = ResourceExtractor.GetTextureFromResource(idleSpritePaths[0], Assembly.GetCallingAssembly());
+            GameObject gameObject = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], null, Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(gameObject);
             gameObject.name = name;
             KickableObject kickable = gameObject.AddComponent<KickableObject>();
             MinorBreakable breakable = gameObject.AddComponent<MinorBreakable>();
 
             tk2dSpriteCollectionData KickableSpriteCollection = SpriteBuilder.ConstructCollection(gameObject, (name + "_Collection"));
-            int spriteID = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[0], KickableSpriteCollection);
+            int spriteID = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[0], KickableSpriteCollection, Assembly.GetCallingAssembly());
             tk2dSprite sprite = gameObject.GetOrAddComponent<tk2dSprite>();
             sprite.SetSprite(KickableSpriteCollection, spriteID);
 
@@ -773,7 +773,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < idleSpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = KickableSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
                     frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
@@ -840,7 +840,7 @@ namespace Alexandria.BreakableAPI
             for (int i = 0; i < spritePaths.Length; i++)
             {
                 tk2dSpriteCollectionData collection = Tablecollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(spritePaths[i], collection);
+                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(spritePaths[i], collection, Assembly.GetCallingAssembly());
                 tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                 frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
             }
@@ -897,15 +897,15 @@ namespace Alexandria.BreakableAPI
             Dictionary<float, string> unflippedBreakAnimPercentagesAndSpritePaths = null, bool IsSlideable = true, bool hasDecorations = false, float chanceToDecorateTable = 1)
 
         {
-            Texture2D textureFromResource = ResourceExtractor.GetTextureFromResource(idleSpritePaths[0]);
-            GameObject gameObject = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], null);
+            Texture2D textureFromResource = ResourceExtractor.GetTextureFromResource(idleSpritePaths[0], Assembly.GetCallingAssembly());
+            GameObject gameObject = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], null, Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(gameObject);
             gameObject.name = name + "_Table";
             FlippableCover table = gameObject.AddComponent<FlippableCover>();
             MajorBreakable majorBreakable = gameObject.AddComponent<MajorBreakable>();
 
             tk2dSpriteCollectionData TableCollection = SpriteBuilder.ConstructCollection(gameObject, (name + "_Collection"));
-            int spriteID = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[0], TableCollection);
+            int spriteID = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[0], TableCollection, Assembly.GetCallingAssembly());
             tk2dSprite sprite = gameObject.GetOrAddComponent<tk2dSprite>();
             tk2dBaseSprite baseSprite = gameObject.GetOrAddComponent<tk2dBaseSprite>();
             baseSprite.SetSprite(TableCollection, spriteID);
@@ -937,7 +937,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < idleSpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = TableCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
                     tk2dSpriteDefinition frameDefMod = GenerateColliderForSpriteDefinition(frameDef, new Vector3(colliderSize.x, colliderSize.y), new Vector3(colliderOffset.x, colliderOffset.y));
@@ -958,9 +958,9 @@ namespace Alexandria.BreakableAPI
 
             if (ShadowSpritePath != null)
             {
-                GameObject shadowObject = SpriteBuilder.SpriteFromResource(ShadowSpritePath, null);
+                GameObject shadowObject = SpriteBuilder.SpriteFromResource(ShadowSpritePath, null, Assembly.GetCallingAssembly());
                 FakePrefab.MarkAsFakePrefab(shadowObject);
-                int shadowID = SpriteBuilder.AddSpriteToCollection(ShadowSpritePath, TableCollection);
+                int shadowID = SpriteBuilder.AddSpriteToCollection(ShadowSpritePath, TableCollection, Assembly.GetCallingAssembly());
                 tk2dSprite shadowSprite = shadowObject.GetComponent<tk2dSprite>();
                 shadowSprite.SetSprite(TableCollection, shadowID);
                 table.shadowSprite = shadowSprite;
@@ -1041,7 +1041,7 @@ namespace Alexandria.BreakableAPI
                     {
                         BreakFrame breakFrame = new BreakFrame();
                         breakFrame.healthPercentage = Entry.Key;
-                        int SpriteID = SpriteBuilder.AddSpriteToCollection(Entry.Value, TableCollection);
+                        int SpriteID = SpriteBuilder.AddSpriteToCollection(Entry.Value, TableCollection, Assembly.GetCallingAssembly());
                         string ConvertedName = TableCollection.spriteDefinitions[SpriteID].name;
                         ETGModConsole.Log(TableCollection.spriteDefinitions[SpriteID].name);
                         if (ConvertedName.ToLower().Contains("north"))
@@ -1060,7 +1060,7 @@ namespace Alexandria.BreakableAPI
                     {
                         BreakFrame breakFrame = new BreakFrame();
                         breakFrame.healthPercentage = Entry.Key;
-                        int SpriteID = SpriteBuilder.AddSpriteToCollection(Entry.Value, TableCollection);
+                        int SpriteID = SpriteBuilder.AddSpriteToCollection(Entry.Value, TableCollection, Assembly.GetCallingAssembly());
                         string ConvertedName = TableCollection.spriteDefinitions[SpriteID].name;
                         ETGModConsole.Log(TableCollection.spriteDefinitions[SpriteID].name);
                         if (ConvertedName.ToLower().Contains("south"))
@@ -1078,7 +1078,7 @@ namespace Alexandria.BreakableAPI
                     {
                         BreakFrame breakFrame = new BreakFrame();
                         breakFrame.healthPercentage = Entry.Key;
-                        int SpriteID = SpriteBuilder.AddSpriteToCollection(Entry.Value, TableCollection);
+                        int SpriteID = SpriteBuilder.AddSpriteToCollection(Entry.Value, TableCollection, Assembly.GetCallingAssembly());
                         string ConvertedName = TableCollection.spriteDefinitions[SpriteID].name;
                         if (ConvertedName.ToLower().Contains("east"))
                         {
@@ -1096,7 +1096,7 @@ namespace Alexandria.BreakableAPI
                     {
                         BreakFrame breakFrame = new BreakFrame();
                         breakFrame.healthPercentage = Entry.Key;
-                        int SpriteID = SpriteBuilder.AddSpriteToCollection(Entry.Value, TableCollection);
+                        int SpriteID = SpriteBuilder.AddSpriteToCollection(Entry.Value, TableCollection, Assembly.GetCallingAssembly());
                         string ConvertedName = TableCollection.spriteDefinitions[SpriteID].name;
                         if (ConvertedName.ToLower().Contains("west"))
                         {
@@ -1143,7 +1143,7 @@ namespace Alexandria.BreakableAPI
                 {
                     BreakFrame breakFrame = new BreakFrame();
                     breakFrame.healthPercentage = Entry.Key;
-                    int SpriteID = SpriteBuilder.AddSpriteToCollection(Entry.Value, TableCollection);
+                    int SpriteID = SpriteBuilder.AddSpriteToCollection(Entry.Value, TableCollection, Assembly.GetCallingAssembly());
                     breakFrame.sprite = TableCollection.spriteDefinitions[SpriteID].name;
                     breakFrameList.Add(breakFrame);
                 }
@@ -1167,12 +1167,12 @@ namespace Alexandria.BreakableAPI
         }
         private static GameObject GenerateTableOutlineObject(string name, string outlinePath, GameObject parent, tk2dSpriteCollectionData collection)
         {
-            GameObject gameObject = SpriteBuilder.SpriteFromResource(outlinePath, null);
+            GameObject gameObject = SpriteBuilder.SpriteFromResource(outlinePath, null, Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(gameObject);
             gameObject.name = name + "_Outline";
             gameObject.layer = 0;
             gameObject.GetComponent<tk2dSprite>().HeightOffGround = 0.1f;
-            SpriteBuilder.AddSpriteToCollection(outlinePath, collection);
+            SpriteBuilder.AddSpriteToCollection(outlinePath, collection, Assembly.GetCallingAssembly());
 
             gameObject.transform.parent = parent.transform;
             return gameObject;
@@ -1193,7 +1193,7 @@ namespace Alexandria.BreakableAPI
             for (int i = 0; i < spritePaths.Length; i++)
             {
                 tk2dSpriteCollectionData collection = Tablecollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(spritePaths[i], collection);
+                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(spritePaths[i], collection, Assembly.GetCallingAssembly());
                 tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                 frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
 
@@ -1309,14 +1309,14 @@ namespace Alexandria.BreakableAPI
 
         public static MajorBreakable GenerateMajorBreakable(string name, string[] idleSpritePaths, int idleAnimFPS = 2, string[] breakSpritePaths = null, int breakAnimFPS = 5, float HP = 100, bool UsesCustomColliderValues = false, int ColliderSizeX = 16, int ColliderSizeY = 8, int ColliderOffsetX = 0, int ColliderOffsetY = 8, bool DistribleShards = true, VFXPool breakVFX = null, VFXPool damagedVFX = null, bool BlocksPaths = false, List<CollisionLayer> collisionLayerList = null, Dictionary<float, string> preBreakframesAndHPPercentages = null)
         {
-            Texture2D textureFromResource = ResourceExtractor.GetTextureFromResource(idleSpritePaths[0]);
-            GameObject gameObject = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], null);
+            Texture2D textureFromResource = ResourceExtractor.GetTextureFromResource(idleSpritePaths[0], Assembly.GetCallingAssembly());
+            GameObject gameObject = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], null, Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(gameObject);
             gameObject.name = name;
             MajorBreakable breakable = gameObject.AddComponent<MajorBreakable>();
 
             tk2dSpriteCollectionData MajorBreakableSpriteCollection = SpriteBuilder.ConstructCollection(gameObject, (name + "_Collection"));
-            int spriteID = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[0], MajorBreakableSpriteCollection);
+            int spriteID = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[0], MajorBreakableSpriteCollection, Assembly.GetCallingAssembly());
             tk2dSprite sprite = gameObject.GetOrAddComponent<tk2dSprite>();
             sprite.SetSprite(MajorBreakableSpriteCollection, spriteID);
 
@@ -1412,7 +1412,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < idleSpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = MajorBreakableSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
@@ -1433,7 +1433,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < breakSpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = MajorBreakableSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(breakSpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(breakSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
                     breakFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
@@ -1464,7 +1464,7 @@ namespace Alexandria.BreakableAPI
                 {
                     BreakFrame breakFrame = new BreakFrame();
                     breakFrame.healthPercentage = Entry.Key;
-                    int SpriteID = SpriteBuilder.AddSpriteToCollection(Entry.Value, MajorBreakableSpriteCollection);
+                    int SpriteID = SpriteBuilder.AddSpriteToCollection(Entry.Value, MajorBreakableSpriteCollection, Assembly.GetCallingAssembly());
                     breakFrame.sprite = MajorBreakableSpriteCollection.spriteDefinitions[SpriteID].name;
                     breakFrameList.Add(breakFrame);
                 }
@@ -1494,14 +1494,14 @@ namespace Alexandria.BreakableAPI
 
         public static MinorBreakable GenerateMinorBreakable(string name, string[] idleSpritePaths, int idleAnimFPS = 1, string[] breakSpritePaths = null, int breakAnimFPS = 5, string breakAudioEvent = "Play_OBJ_pot_shatter_01", bool UsesCustomColliderValues = false, int ColliderSizeX = 16, int ColliderSizeY = 8, int ColliderOffsetX = 0, int ColliderOffsetY = 8, GameObject DestroyVFX = null, List<CollisionLayer> collisionLayerList = null)
         {
-            Texture2D textureFromResource = ResourceExtractor.GetTextureFromResource(idleSpritePaths[0]);
-            GameObject gameObject = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], null);
+            Texture2D textureFromResource = ResourceExtractor.GetTextureFromResource(idleSpritePaths[0], Assembly.GetCallingAssembly());
+            GameObject gameObject = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], null, Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(gameObject);
             gameObject.name = name;
             MinorBreakable breakable = gameObject.AddComponent<MinorBreakable>();
 
             tk2dSpriteCollectionData MinorBreakableSpriteCollection = SpriteBuilder.ConstructCollection(gameObject, (name + "_Collection"));
-            int spriteID = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[0], MinorBreakableSpriteCollection);
+            int spriteID = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[0], MinorBreakableSpriteCollection, Assembly.GetCallingAssembly());
             tk2dSprite sprite = gameObject.GetOrAddComponent<tk2dSprite>();
             sprite.SetSprite(MinorBreakableSpriteCollection, spriteID);
 
@@ -1576,7 +1576,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < idleSpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = MinorBreakableSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
                     frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
@@ -1597,7 +1597,7 @@ namespace Alexandria.BreakableAPI
                 for (int i = 0; i < breakSpritePaths.Length; i++)
                 {
                     tk2dSpriteCollectionData collection = MinorBreakableSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(breakSpritePaths[i], collection);
+                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(breakSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
                     breakFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
@@ -1644,7 +1644,7 @@ namespace Alexandria.BreakableAPI
 
         public static WaftingDebrisObject GenerateWaftingDebrisObject(string shardSpritePath, Vector2 waftDuration, Vector2 waftDistance, Vector2 initialBurstDuration, bool debrisObjectsCanRotate = true, float LifeSpanMin = 0.33f, float LifeSpanMax = 2f, float AngularVelocity = 540, float AngularVelocityVariance = 180f, tk2dSprite shadowSprite = null, float Mass = 1, string AudioEventName = null, GameObject BounceVFX = null, int DebrisBounceCount = 0, bool DoesGoopOnRest = false, GoopDefinition GoopType = null, float GoopRadius = 1f)
         {
-            GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePath, null);
+            GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePath, null, Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(debrisObject);
             tk2dSprite tk2dsprite = debrisObject.GetComponent<tk2dSprite>();
             WaftingDebrisObject DebrisObj = debrisObject.AddComponent<WaftingDebrisObject>();
@@ -1695,12 +1695,12 @@ namespace Alexandria.BreakableAPI
 
         public static WaftingDebrisObject GenerateAnimatedWaftingDebrisObject(string[] shardSpritePaths, Vector2 waftDuration, Vector2 waftDistance, Vector2 initialBurstDuration, int FPS = 12, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop, bool debrisObjectsCanRotate = true, float LifeSpanMin = 0.33f, float LifeSpanMax = 2f, float AngularVelocity = 540, float AngularVelocityVariance = 180f, tk2dSprite shadowSprite = null, float Mass = 1, string AudioEventName = null, GameObject BounceVFX = null, int DebrisBounceCount = 0, bool DoesGoopOnRest = false, GoopDefinition GoopType = null, float GoopRadius = 1f)
         {
-            GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[0], null);
+            GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[0], null, Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(debrisObject);
             WaftingDebrisObject DebrisObj = debrisObject.AddComponent<WaftingDebrisObject>();
 
             tk2dSpriteCollectionData VFXSpriteCollection = SpriteBuilder.ConstructCollection(debrisObject, (shardSpritePaths[0] + "_Collection"));
-            int spriteID = SpriteBuilder.AddSpriteToCollection(shardSpritePaths[0], VFXSpriteCollection);
+            int spriteID = SpriteBuilder.AddSpriteToCollection(shardSpritePaths[0], VFXSpriteCollection, Assembly.GetCallingAssembly());
             tk2dSprite sprite = debrisObject.GetOrAddComponent<tk2dSprite>();
             sprite.SetSprite(VFXSpriteCollection, spriteID);
 
@@ -1713,7 +1713,7 @@ namespace Alexandria.BreakableAPI
             for (int i = 0; i < shardSpritePaths.Length; i++)
             {
                 tk2dSpriteCollectionData collection = VFXSpriteCollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(shardSpritePaths[i], collection);
+                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(shardSpritePaths[i], collection, Assembly.GetCallingAssembly());
                 tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                 frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
             }
@@ -1770,7 +1770,7 @@ namespace Alexandria.BreakableAPI
             List<WaftingDebrisObject> DebrisObjectList = new List<WaftingDebrisObject>();
             for (int i = 0; i < shardSpritePaths.Length; i++)
             {
-                GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[i], null);
+                GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[i], null, Assembly.GetCallingAssembly());
                 FakePrefab.MarkAsFakePrefab(debrisObject);
                 tk2dSprite tk2dsprite = debrisObject.GetComponent<tk2dSprite>();
                 WaftingDebrisObject DebrisObj = debrisObject.AddComponent<WaftingDebrisObject>();
@@ -1830,11 +1830,11 @@ namespace Alexandria.BreakableAPI
                 string[] paths = shardSpritePathsList[i];
                 for (int e = 0; e < paths.Length; e++)
                 {
-                    GameObject debrisObject = SpriteBuilder.SpriteFromResource(paths[0], null);
+                    GameObject debrisObject = SpriteBuilder.SpriteFromResource(paths[0], null, Assembly.GetCallingAssembly());
                     FakePrefab.MarkAsFakePrefab(debrisObject);
                     WaftingDebrisObject DebrisObj = debrisObject.AddComponent<WaftingDebrisObject>();
                     tk2dSpriteCollectionData VFXSpriteCollection = SpriteBuilder.ConstructCollection(debrisObject, (paths[0] + "_Collection"));
-                    int spriteID = SpriteBuilder.AddSpriteToCollection(paths[0], VFXSpriteCollection);
+                    int spriteID = SpriteBuilder.AddSpriteToCollection(paths[0], VFXSpriteCollection, Assembly.GetCallingAssembly());
                     tk2dSprite sprite = debrisObject.GetOrAddComponent<tk2dSprite>();
                     sprite.SetSprite(VFXSpriteCollection, spriteID);
 
@@ -1847,7 +1847,7 @@ namespace Alexandria.BreakableAPI
                     for (int q = 0; q < paths.Length; q++)
                     {
                         tk2dSpriteCollectionData collection = VFXSpriteCollection;
-                        int frameSpriteId = SpriteBuilder.AddSpriteToCollection(paths[q], collection);
+                        int frameSpriteId = SpriteBuilder.AddSpriteToCollection(paths[q], collection, Assembly.GetCallingAssembly());
                         tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                         frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                     }
@@ -1942,12 +1942,12 @@ namespace Alexandria.BreakableAPI
         /// <param name="GoopRadius">The radius of the spawned goop.</param>
         public static DebrisObject GenerateAnimatedDebrisObject(string[] shardSpritePaths, int FPS = 12, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop, bool debrisObjectsCanRotate = true, float LifeSpanMin = 0.33f, float LifeSpanMax = 2f, float AngularVelocity = 540, float AngularVelocityVariance = 180f, tk2dSprite shadowSprite = null, float Mass = 1, string AudioEventName = null, GameObject BounceVFX = null, int DebrisBounceCount = 0, bool DoesGoopOnRest = false, GoopDefinition GoopType = null, float GoopRadius = 1f)
         {
-            GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[0], null);
+            GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[0], null, Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(debrisObject);
             DebrisObject DebrisObj = debrisObject.AddComponent<DebrisObject>();
 
             tk2dSpriteCollectionData VFXSpriteCollection = SpriteBuilder.ConstructCollection(debrisObject, (shardSpritePaths[0] + "_Collection"));
-            int spriteID = SpriteBuilder.AddSpriteToCollection(shardSpritePaths[0], VFXSpriteCollection);
+            int spriteID = SpriteBuilder.AddSpriteToCollection(shardSpritePaths[0], VFXSpriteCollection, Assembly.GetCallingAssembly());
             tk2dSprite sprite = debrisObject.GetOrAddComponent<tk2dSprite>();
             sprite.SetSprite(VFXSpriteCollection, spriteID);
 
@@ -1960,7 +1960,7 @@ namespace Alexandria.BreakableAPI
             for (int i = 0; i < shardSpritePaths.Length; i++)
             {
                 tk2dSpriteCollectionData collection = VFXSpriteCollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(shardSpritePaths[i], collection);
+                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(shardSpritePaths[i], collection, Assembly.GetCallingAssembly());
                 tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                 frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
             }
@@ -2007,7 +2007,7 @@ namespace Alexandria.BreakableAPI
             List<DebrisObject> DebrisObjectList = new List<DebrisObject>();
             for (int i = 0; i < shardSpritePaths.Length; i++)
             {
-                GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[i], null);
+                GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[i], null, Assembly.GetCallingAssembly());
                 FakePrefab.MarkAsFakePrefab(debrisObject);
                 tk2dSprite tk2dsprite = debrisObject.GetComponent<tk2dSprite>();
                 DebrisObject DebrisObj = debrisObject.AddComponent<DebrisObject>();
@@ -2059,11 +2059,11 @@ namespace Alexandria.BreakableAPI
                 string[] paths = shardSpritePathsList[i];
                 for (int e = 0; e < paths.Length; e++)
                 {
-                    GameObject debrisObject = SpriteBuilder.SpriteFromResource(paths[0], null);
+                    GameObject debrisObject = SpriteBuilder.SpriteFromResource(paths[0], null, Assembly.GetCallingAssembly());
                     FakePrefab.MarkAsFakePrefab(debrisObject);
                     DebrisObject DebrisObj = debrisObject.AddComponent<DebrisObject>();
                     tk2dSpriteCollectionData VFXSpriteCollection = SpriteBuilder.ConstructCollection(debrisObject, (paths[0] + "_Collection"));
-                    int spriteID = SpriteBuilder.AddSpriteToCollection(paths[0], VFXSpriteCollection);
+                    int spriteID = SpriteBuilder.AddSpriteToCollection(paths[0], VFXSpriteCollection, Assembly.GetCallingAssembly());
                     tk2dSprite sprite = debrisObject.GetOrAddComponent<tk2dSprite>();
                     sprite.SetSprite(VFXSpriteCollection, spriteID);
 
@@ -2076,7 +2076,7 @@ namespace Alexandria.BreakableAPI
                     for (int q = 0; q < paths.Length; q++)
                     {
                         tk2dSpriteCollectionData collection = VFXSpriteCollection;
-                        int frameSpriteId = SpriteBuilder.AddSpriteToCollection(paths[q], collection);
+                        int frameSpriteId = SpriteBuilder.AddSpriteToCollection(paths[q], collection, Assembly.GetCallingAssembly());
                         tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                         frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                     }

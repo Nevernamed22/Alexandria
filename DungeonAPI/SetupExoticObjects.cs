@@ -46,8 +46,13 @@ namespace Alexandria.DungeonAPI
             Dungeon tutorialDungeon = DungeonDatabase.GetOrLoadByName("base_tutorial");
 
 
+
+
             //assignedGameObject = dungeon4.PatternSettings.flows[0].AllNodes[12].overrideExactRoom.additionalObjectLayers[0].placedObjects[11].nonenemyBehaviour.gameObject;
             Golden_Boss_Pedestal = dungeon4.PatternSettings.flows[0].AllNodes[12].overrideExactRoom.additionalObjectLayers[0].placedObjects[11].nonenemyBehaviour.gameObject.InstantiateAndFakeprefab();
+
+
+
 
 
             SetupExoticObjects.ForgeGunTrap_North = LoadHelper.LoadAssetFromAnywhere<GameObject>("forge_face_shootssouth");
@@ -461,8 +466,10 @@ namespace Alexandria.DungeonAPI
 						SetupExoticObjects.KitchenChairLeft = dungeon6.PatternSettings.flows[0].AllNodes[4].overrideExactRoom.placedObjects[8].nonenemyBehaviour.gameObject;
 						SetupExoticObjects.KitchenChairRight = dungeon6.PatternSettings.flows[0].AllNodes[4].overrideExactRoom.placedObjects[12].nonenemyBehaviour.gameObject;
 						SetupExoticObjects.KitchenCounter = dungeon6.PatternSettings.flows[0].AllNodes[4].overrideExactRoom.placedObjects[16].nonenemyBehaviour.gameObject;
+						
 						SetupExoticObjects.SteelTableHorizontal = dungeon6.PatternSettings.flows[0].AllNodes[4].overrideExactRoom.placedObjects[6].nonenemyBehaviour.gameObject;
 						SetupExoticObjects.SteelTableVertical = dungeon6.PatternSettings.flows[0].AllNodes[4].overrideExactRoom.placedObjects[3].nonenemyBehaviour.gameObject;
+						
 						SetupExoticObjects.BathroomStallDividerNorth = dungeon6.PatternSettings.flows[0].AllNodes[6].overrideExactRoom.placedObjects[0].nonenemyBehaviour.gameObject;
 						SetupExoticObjects.BathroomStallDividerEast = dungeon6.PatternSettings.flows[0].AllNodes[6].overrideExactRoom.placedObjects[6].nonenemyBehaviour.gameObject;
 						SetupExoticObjects.BathroomStallDividerWest = dungeon6.PatternSettings.flows[0].AllNodes[6].overrideExactRoom.placedObjects[9].nonenemyBehaviour.gameObject;
@@ -2215,6 +2222,9 @@ namespace Alexandria.DungeonAPI
                     "minelantern_right",
                     SetupExoticObjects.MineLanternRight
                 },
+
+
+
             };
             dungeon = null;
 			dungeon2 = null;
@@ -2230,9 +2240,17 @@ namespace Alexandria.DungeonAPI
 			dungeon12 = null;
 			dungeon13 = null;
 			tutorialDungeon = null;
-		}
 
-		public static List<string> allBasictrapControllerAssetNames = new List<string>()
+			var obj = RoomFactory.GetPlaceableFromBundles("whichshrinewillitbe");
+			for (int i = 0; i < obj.variantTiers.Count; i++)
+			{
+                objects.Add(obj.variantTiers[i].nonDatabasePlaceable.gameObject.name.ToLower(), obj.variantTiers[i].nonDatabasePlaceable.gameObject);
+            }
+            var godRay = RoomFactory.GetGameObjectFromBundles("godray_placeable");
+            objects.Add("godray", godRay);
+        }
+
+        public static List<string> allBasictrapControllerAssetNames = new List<string>()
 		{
             "trap_flame_poofy_gungeon_1x1",
             "trap_pit_gungeon_trigger_2x2",

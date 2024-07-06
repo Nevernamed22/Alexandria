@@ -12,7 +12,7 @@ using System.Globalization;
 
 namespace Alexandria.cAPI
 {
-    /// <summary>Cached and precomputed hat information</summary>
+    /// <summary>Cached and precomputed hat information</summary> 
     public static class Hatabase
     {
         /// <summary>Helper class for storing additional hat offsets for individual sprite definitions</summary>

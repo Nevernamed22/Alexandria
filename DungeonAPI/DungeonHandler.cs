@@ -117,23 +117,23 @@ namespace Alexandria.DungeonAPI
                 switch (roomData.superSpecialRoomType.ToLower())
                 {
                     case "old_red":
-                        room.associatedMinimapIcon = RoomIcons.Old_Red_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Old_Red_Room_Icon;
                         StaticReferences.RoomTables["oldred"].includedRooms.Add(wRoom);
                         break;
                     case "cursula":
-                        room.associatedMinimapIcon = RoomIcons.Cursula_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Cursula_Room_Icon;
                         StaticReferences.RoomTables["cursula"].includedRooms.Add(wRoom);
                         break;
                     case "flynt":
-                        room.associatedMinimapIcon = RoomIcons.Flynt_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Flynt_Room_Icon;
                         StaticReferences.RoomTables["flynt"].includedRooms.Add(wRoom);
                         break;
                     case "trorc":
-                        room.associatedMinimapIcon = RoomIcons.Trorc_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Trorc_Room_Icon;
                         StaticReferences.RoomTables["trorc"].includedRooms.Add(wRoom);
                         break;
                     case "goopton":
-                        room.associatedMinimapIcon = RoomIcons.Goopton_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Goopton_Room_Icon;
                         StaticReferences.RoomTables["goopton"].includedRooms.Add(wRoom);
                         break;
                     case "blockner_miniboss":
@@ -154,63 +154,63 @@ namespace Alexandria.DungeonAPI
                         StaticReferences.RoomTables["black_market"].includedRooms.Add(wRoom);
                         break;
                     case "lost_adventurer":
-                        room.associatedMinimapIcon = RoomIcons.Lost_Adventurer_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Lost_Adventurer_Room_Icon;
                         StaticReferences.RoomTables["lost_adventurer"].includedRooms.Add(wRoom);
                         break;
                     case "gunsling_king":
-                        room.associatedMinimapIcon = RoomIcons.Gunsling_King_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Gunsling_King_Room_Icon;
                         StaticReferences.RoomTables["gunsling_king"].includedRooms.Add(wRoom);
                         break;
                     case "vampire":
-                        room.associatedMinimapIcon = RoomIcons.Vampire_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Vampire_Room_Icon;
                         StaticReferences.RoomTables["vampire"].includedRooms.Add(wRoom);
                         break;
                     case "gun_muncher":
-                        room.associatedMinimapIcon = RoomIcons.Gun_Muncher_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Gun_Muncher_Room_Icon;
                         StaticReferences.RoomTables["gun_muncher"].includedRooms.Add(wRoom);
                         break;
                     case "mendy_and_patches":
-                        room.associatedMinimapIcon = RoomIcons.Mendy_And_Patches_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Mendy_And_Patches_Room_Icon;
                         StaticReferences.RoomTables["mendy_and_patches"].includedRooms.Add(wRoom);
                         break;
                     case "synergrace":
-                        room.associatedMinimapIcon = RoomIcons.Synergrace_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Synergrace_Room_Icon;
                         StaticReferences.RoomTables["synergrace"].includedRooms.Add(wRoom);
                         break;
                     case "glass_shrine":
-                        room.associatedMinimapIcon = RoomIcons.Shrine_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Shrine_Room_Icon;
                         StaticReferences.RoomTables["glass_shrine"].includedRooms.Add(wRoom);
                         break;
                     case "random_shrine":
-                        room.associatedMinimapIcon = RoomIcons.Shrine_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Shrine_Room_Icon;
                         StaticReferences.RoomTables["random_shrine"].includedRooms.Add(wRoom);
                         break;
                     case "cursed_mirror":
-                        room.associatedMinimapIcon = RoomIcons.Cursed_Mirror_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Cursed_Mirror_Room_Icon;
                         StaticReferences.RoomTables["cursed_mirror"].includedRooms.Add(wRoom);
                         break;
                     case "cleanse_shrine":
-                        room.associatedMinimapIcon = RoomIcons.Cleanse_Shrine_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Cleanse_Shrine_Room_Icon;
                         StaticReferences.RoomTables["cleanse_shrine"].includedRooms.Add(wRoom);
                         break;
                     case "challenge_shrine_keep":
-                        room.associatedMinimapIcon = RoomIcons.Shrine_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Shrine_Room_Icon;
                         StaticReferences.RoomTables["challenge_shrine_keep"].includedRooms.Add(wRoom);
                         break;
                     case "challenge_shrine_proper":
-                        room.associatedMinimapIcon = RoomIcons.Shrine_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Shrine_Room_Icon;
                         StaticReferences.RoomTables["challenge_shrine_proper"].includedRooms.Add(wRoom);
                         break;
                     case "challenge_shrine_mines":
-                        room.associatedMinimapIcon = RoomIcons.Shrine_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Shrine_Room_Icon;
                         StaticReferences.RoomTables["challenge_shrine_mines"].includedRooms.Add(wRoom);
                         break;
                     case "challenge_shrine_hollow":
-                        room.associatedMinimapIcon = RoomIcons.Shrine_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Shrine_Room_Icon;
                         StaticReferences.RoomTables["challenge_shrine_hollow"].includedRooms.Add(wRoom);
                         break;
                     case "challenge_shrine_forge":
-                        room.associatedMinimapIcon = RoomIcons.Shrine_Room_Icon;
+                        //room.associatedMinimapIcon = RoomIcons.Shrine_Room_Icon;
                         StaticReferences.RoomTables["challenge_shrine_forge"].includedRooms.Add(wRoom);
                         break;
                     case "winchester":

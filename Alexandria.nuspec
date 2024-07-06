@@ -2,12 +2,12 @@
 <package >
   <metadata>
     <id>EtG.Alexandria</id>
-    <version>0.3.23</version>
+    <version>0.4.1</version>
     <title>EtG.Alexandria</title>
     <authors>$author$</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
-    <iconUrl>https://gcdn.thunderstore.io/live/repository/icons/Alexandria-Alexandria-0.3.21.png.128x128_q95.png</iconUrl>
+    <iconUrl>https://gcdn.thunderstore.io/live/repository/icons/Alexandria-Alexandria-0.4.0.png.128x128_q95.png</iconUrl>
     <projectUrl>https://github.com/nota8ot/Alexandria</projectUrl>
     <description>$description$</description>
     <releaseNotes></releaseNotes>

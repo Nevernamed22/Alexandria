@@ -26,6 +26,7 @@ using Alexandria.EnemyAPI;
 using HutongGames.Utility;
 using FullInspector;
 using Alexandria.Misc;
+using com.subjectnerd;
 
 namespace Alexandria.DungeonAPI
 {
@@ -235,7 +236,7 @@ namespace Alexandria.DungeonAPI
 
             return CreateEmptyRoom(12, 12);
         }
-        public static GameObject MinimapIconPrefab;
+        //public static GameObject MinimapIconPrefab;
 
 
 
@@ -769,14 +770,23 @@ namespace Alexandria.DungeonAPI
         public static void AddPlaceableToRoom(PrototypeDungeonRoom room, Vector2 location, string assetPath, string attributes, Dictionary<int, PrototypeEventTriggerArea> prototypeEventTriggerAreas)
         {
             try
-            {
-                
-
+            {           
                 GameObject gameObject = RoomFactory.GetGameObjectFromBundles(assetPath);
                 JObject jobject = null;
                 if (!string.IsNullOrEmpty(attributes))
                 {
                     jobject = JObject.Parse(attributes);
+
+                    if (assetPath == "godray")
+                    {
+                        gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject("godray"));
+                        JToken value;
+                        float offsetX = jobject.TryGetValue("offsetx", out value) ? ((float)value) : 0f;
+                        float offsetY = jobject.TryGetValue("offsety", out value) ? ((float)value) : 0f;
+
+                        gameObject.GetOrAddComponent<Repositioner>().reposition = new Vector3(offsetX, offsetY, 0);
+                    }
+
                     if (assetPath == "saw_blade_pathing")
                     {
                         JToken value;
@@ -790,9 +800,6 @@ namespace Alexandria.DungeonAPI
                         pather.AdditionalNodeDelay = delay;
                         pather.PathSpeed = maxSpeed;
                         pather.OriginalPathSpeed = maxSpeed;
-
-
-
                     }
 
                     if (assetPath == "customsetupdeadblow")

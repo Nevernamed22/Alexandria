@@ -49,9 +49,6 @@ namespace Alexandria.DungeonAPI
             { "shop", "Shop Room Table" },
             { "secret", "secret_room_table_01" },
             { "winchester", "WinchesterRoomTable" },
-
-
-
         };
 
 
@@ -298,6 +295,7 @@ namespace Alexandria.DungeonAPI
             RoomTables.Add("cursed_mirror", ConvertRoomIntoNewRoomTable(StaticInjections.Shrine_injections.InjectionData[0], StaticInjections.Shrine_injections.InjectionData[0].roomTable, 1));
             RoomTables.Add("black_market_entrance", ConvertRoomIntoNewRoomTable(StaticInjections.Shrine_injections.InjectionData[0], StaticInjections.Shrine_injections.InjectionData[0].roomTable, 2));
             RoomTables.Add("random_shrine", ConvertRoomIntoNewRoomTable(StaticInjections.Shrine_injections.InjectionData[0], StaticInjections.Shrine_injections.InjectionData[0].roomTable, 3));
+
             RoomTables.Add("glass_shrine", ConvertRoomIntoNewRoomTable(StaticInjections.Shrine_injections.InjectionData[0], StaticInjections.Shrine_injections.InjectionData[0].roomTable, 4));
             ETGMod.StartGlobalCoroutine(Delay(StaticInjections.Shrine_injections.InjectionData[0].roomTable));
 

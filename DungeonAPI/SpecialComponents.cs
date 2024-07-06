@@ -17,7 +17,6 @@ namespace Alexandria.DungeonAPI
         public class NoPickup : MonoBehaviour
         {
             public List<Vector3> offsets  = new List<Vector3>();
-
             public void Start()
             {
                 if (GameManager.Instance.Dungeon == null)
@@ -312,6 +311,11 @@ namespace Alexandria.DungeonAPI
                 if (body != null)
                 {
                     body.Reinitialize();
+                }
+                var body2 = this.GetComponentInChildren<SpeculativeRigidbody>();
+                if (body2 != null)
+                {
+                    body2.Reinitialize();
                 }
             }
         }

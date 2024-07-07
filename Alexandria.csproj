@@ -130,6 +130,7 @@
     <Compile Include="Misc\RuntimeRoomhandlerUtility.cs" />
     <Compile Include="Misc\ShadowBulletDoer.cs" />
     <Compile Include="Misc\SupplyDropDoer.cs" />
+    <Compile Include="Misc\TextHelper.cs" />
     <Compile Include="Misc\Tk2dSpriteAnimatorUtility.cs" />
     <Compile Include="NPCAPI\BreachShopTools.cs" />
     <Compile Include="NPCAPI\CustomDiscountManager.cs" />

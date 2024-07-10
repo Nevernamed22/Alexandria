@@ -37,7 +37,6 @@ namespace Alexandria.ItemAPI
         /// </summary>
         public static void Init()
         {
-            FakePrefabHooks.Init();
             CompanionBuilder.Init();
             LoadShopTables();
         }

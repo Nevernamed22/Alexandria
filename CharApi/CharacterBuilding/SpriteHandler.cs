@@ -21,10 +21,6 @@ namespace Alexandria.CharacterAPI
 
     public static class SpriteHandler
     {
-        private static FieldInfo spriteNameLookup =
-            typeof(tk2dSpriteCollectionData).GetField("spriteNameLookupDict",
-            BindingFlags.Instance | BindingFlags.NonPublic);
-
         private static FieldInfo m_playerMarkers = typeof(Minimap).GetField("m_playerMarkers", BindingFlags.NonPublic | BindingFlags.Instance);
         public static dfAtlas uiAtlas;
         public static List<dfAtlas.ItemInfo> uiFaceCards = new List<dfAtlas.ItemInfo>();
@@ -1837,8 +1833,10 @@ namespace Alexandria.CharacterAPI
             collection.spriteDefinitions = newDefs;
 
             //Reset lookup dictionary
-            spriteNameLookup.SetValue(collection, null);  //Set dictionary to null
-            collection.InitDictionary(); //InitDictionary only runs if the dictionary is null
+            if (collection.spriteNameLookupDict == null)
+                collection.InitDictionary();
+            else
+                collection.spriteNameLookupDict[spriteDefinition.name] = newDefs.Length - 1;
             return newDefs.Length - 1;
         }
     }

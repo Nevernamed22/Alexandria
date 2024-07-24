@@ -214,6 +214,7 @@
     <Compile Include="Misc\AudioUtility.cs" />
     <Compile Include="ItemAPI\AlexandriaTags.cs" />
     <Compile Include="Misc\DebuffUtility.cs" />
+    <Compile Include="Misc\VolleyRebuildHelpers.cs" />
     <Compile Include="Misc\EnumUtility.cs" />
     <Compile Include="Misc\DebugUtility.cs" />
     <Compile Include="Misc\LootUtility.cs" />

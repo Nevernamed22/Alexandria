@@ -91,7 +91,10 @@ namespace Alexandria.NPCAPI
 			{
 				if (this.m_itemControllers[i])
 				{
+					// due to the quirk of reimplementing IPlayerInteractable in CustomShopItemController, we need to set
+					//   the Locked value for both our base class and our child class
 					this.m_itemControllers[i].Locked = true;
+					(this.m_itemControllers[i] as CustomShopItemController).Locked = true;
 				}
 			}
 			for (int j = 0; j < GameManager.Instance.AllPlayers.Length; j++)
@@ -140,6 +143,7 @@ namespace Alexandria.NPCAPI
 		{
 			TryPlayAnimation(this.shopkeepFSM.gameObject, "stolen");
 			this.shopkeepFSM.SendEvent("caughtStealing");
+			LockItems();
 			this.m_wasCaughtStealing = true;
 		}
 

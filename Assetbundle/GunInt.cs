@@ -79,9 +79,10 @@ namespace Alexandria.Assetbundle
             collection.spriteDefinitions = newDefs;
 
             //Reset lookup dictionary
-            FieldInfo f = typeof(tk2dSpriteCollectionData).GetField("spriteNameLookupDict", BindingFlags.Instance | BindingFlags.NonPublic);
-            f.SetValue(collection, null);  //Set dictionary to null
-            collection.InitDictionary(); //InitDictionary only runs if the dictionary is null
+            if (collection.spriteNameLookupDict == null)
+                collection.InitDictionary();
+            else
+                collection.spriteNameLookupDict[spriteDefinition.name] = newDefs.Length - 1;
             return newDefs.Length - 1;
         }
 

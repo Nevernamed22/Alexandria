@@ -108,8 +108,9 @@ namespace Alexandria.ItemAPI
                             if (texture != null && definition != null)
                             {
                                 var pixelOffset = texture.TrimTexture();
+                                if (pixelOffset.x < 0)
+                                    continue;
                                 RuntimeAtlasSegment ras = ETGMod.Assets.Packer.Pack(texture); //pack your resources beforehand or the outlines will turn out weird
-
                                 Material material = new Material(definition.material);
                                 material.mainTexture = ras.texture;
                                 definition.uvs = ras.uvs;
@@ -143,43 +144,31 @@ namespace Alexandria.ItemAPI
             def.position2 += new Vector3(xOffset, yOffset, 0);
             def.position3 += new Vector3(xOffset, yOffset, 0);
             def.boundsDataCenter += new Vector3(xOffset, yOffset, 0);
-            def.boundsDataExtents += new Vector3(xOffset, yOffset, 0);
+            // def.boundsDataExtents += new Vector3(xOffset, yOffset, 0);
             def.untrimmedBoundsDataCenter += new Vector3(xOffset, yOffset, 0);
-            def.untrimmedBoundsDataExtents += new Vector3(xOffset, yOffset, 0);
+            // def.untrimmedBoundsDataExtents += new Vector3(xOffset, yOffset, 0);
             if (def.colliderVertices != null && def.colliderVertices.Length > 0 && changesCollider)
             {
                 def.colliderVertices[0] += new Vector3(xOffset, yOffset, 0);
             }
         }
+
         public static IntVector2 TrimTexture(this Texture2D orig)
         {
             RectInt bounds = orig.GetTrimmedBounds();
-            Color[][] pixels = new Color[bounds.width][];
-
-            for (int x = bounds.x; x < bounds.x + bounds.width; x++)
+            if (bounds.width <= 0 || bounds.height <= 0)
             {
-                for (int y = bounds.y; y < bounds.y + bounds.height; y++)
-                {
-                    if (pixels[x - bounds.x] == null)
-                    {
-                        pixels[x - bounds.x] = new Color[bounds.height];
-                    }
-                    pixels[x - bounds.x][y - bounds.y] = orig.GetPixel(x, y);
-                }
+                // ETGModConsole.Log($"WARNING: tried to trim empty texture with size {orig.width},{orig.height}");
+                return new IntVector2(-1, -1);
             }
-
+            Texture2D tempTex = new Texture2D(bounds.width, bounds.height);
+            tempTex.SetPixels(orig.GetPixels(bounds.x, bounds.y, bounds.width, bounds.height));
             orig.Resize(bounds.width, bounds.height);
-
-            for (int x = 0; x < bounds.width; x++)
-            {
-                for (int y = 0; y < bounds.height; y++)
-                {
-                    orig.SetPixel(x, y, pixels[x][y]);
-                }
-            }
-            orig.Apply(false, false);
+            orig.SetPixels(tempTex.GetPixels());
+            orig.Apply(true, false);
             return new IntVector2(bounds.x, bounds.y);
         }
+
         public static RectInt GetTrimmedBounds(this Texture2D t)
         {
 

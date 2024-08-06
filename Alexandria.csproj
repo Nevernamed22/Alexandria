@@ -130,6 +130,7 @@
     <Compile Include="Misc\RuntimeRoomhandlerUtility.cs" />
     <Compile Include="Misc\ShadowBulletDoer.cs" />
     <Compile Include="Misc\SupplyDropDoer.cs" />
+    <Compile Include="Misc\TextHelper.cs" />
     <Compile Include="Misc\Tk2dSpriteAnimatorUtility.cs" />
     <Compile Include="NPCAPI\BreachShopTools.cs" />
     <Compile Include="NPCAPI\CustomDiscountManager.cs" />
@@ -213,6 +214,7 @@
     <Compile Include="Misc\AudioUtility.cs" />
     <Compile Include="ItemAPI\AlexandriaTags.cs" />
     <Compile Include="Misc\DebuffUtility.cs" />
+    <Compile Include="Misc\VolleyRebuildHelpers.cs" />
     <Compile Include="Misc\EnumUtility.cs" />
     <Compile Include="Misc\DebugUtility.cs" />
     <Compile Include="Misc\LootUtility.cs" />

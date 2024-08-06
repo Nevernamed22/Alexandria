@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Alexandria.VisualAPI
 {
-    class VFXBuilder
+    public class VFXBuilder
     {
         public static tk2dSpriteCollectionData itemCollection = PickupObjectDatabase.GetById(155).sprite.Collection;
         public static VFXComplex CreateBlankVFXComplex()

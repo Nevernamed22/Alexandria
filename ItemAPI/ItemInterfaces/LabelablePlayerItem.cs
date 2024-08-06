@@ -36,6 +36,8 @@ namespace Alexandria.ItemAPI
                 var label = labelitem.GetLabel();
                 if (!string.IsNullOrEmpty(label))
                 {
+                    self.ItemCountLabel.AutoHeight = true; // enable multiline text
+                    self.ItemCountLabel.ProcessMarkup = true; // enable multicolor text
                     self.ItemCountLabel.IsVisible = true;
                     self.ItemCountLabel.Text = label;
                 }

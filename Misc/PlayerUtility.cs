@@ -180,31 +180,37 @@ namespace Alexandria.Misc
             Dictionary<int, int> tiersAndCounts = new Dictionary<int, int>();
             foreach (var o in player.orbitals)
             {
-                var orbital = (PlayerOrbital)o;
-                int targetTier = PlayerOrbital.CalculateTargetTier(player, o);
-                orbital.SetOrbitalTier(targetTier);
-                if (tiersAndCounts.ContainsKey(targetTier)) //Count starts at 0
+                if (o is PlayerOrbital)
                 {
-                    int existingCount = tiersAndCounts[targetTier];
-                    tiersAndCounts[targetTier] = existingCount + 1;
+                    var orbital = (PlayerOrbital)o;
+                    int targetTier = PlayerOrbital.CalculateTargetTier(player, o);
+                    orbital.SetOrbitalTier(targetTier);
+                    if (tiersAndCounts.ContainsKey(targetTier)) //Count starts at 0
+                    {
+                        int existingCount = tiersAndCounts[targetTier];
+                        tiersAndCounts[targetTier] = existingCount + 1;
+                    }
+                    else tiersAndCounts.Add(targetTier, 0);
                 }
-                else tiersAndCounts.Add(targetTier, 0);
             }
             foreach (var o in player.orbitals)
             {
-                var orbital = (PlayerOrbital)o;
-                int currentTier = orbital.GetOrbitalTier();
-                if (tiersAndCounts.ContainsKey(currentTier))
+                if (o is PlayerOrbital)
                 {
-                    int currentAmtInTier = tiersAndCounts[currentTier];
-                    orbital.SetOrbitalTierIndex(tiersAndCounts[currentTier]);
-                    tiersAndCounts[currentTier] = currentAmtInTier - 1;
+                    var orbital = (PlayerOrbital)o;
+                    int currentTier = orbital.GetOrbitalTier();
+                    if (tiersAndCounts.ContainsKey(currentTier))
+                    {
+                        int currentAmtInTier = tiersAndCounts[currentTier];
+                        orbital.SetOrbitalTierIndex(tiersAndCounts[currentTier]);
+                        tiersAndCounts[currentTier] = currentAmtInTier - 1;
 
-                }
-                else
-                {
-                    orbital.SetOrbitalTierIndex(0);
-                }
+                    }
+                    else
+                    {
+                        orbital.SetOrbitalTierIndex(0);
+                    }
+                }  
             }
         }
 
@@ -229,7 +235,7 @@ namespace Alexandria.Misc
             if (type == EasyBlankType.MINI)
             {
                 GameObject silencerVFX = (GameObject)ResourceCache.Acquire("Global VFX/BlankVFX_Ghost");
-                AkSoundEngine.PostEvent("Play_OBJ_silenceblank_small_01", blankOwner.gameObject);
+                if (blankOwner) AkSoundEngine.PostEvent("Play_OBJ_silenceblank_small_01", blankOwner.gameObject);
                 GameObject gameObject = new GameObject("silencer");
                 SilencerInstance silencerInstance = gameObject.AddComponent<SilencerInstance>();
                 silencerInstance.TriggerSilencer(blankPosition, 25f, 5f, silencerVFX, 0f, 3f, 3f, 3f, 250f, 5f, 0.25f, blankOwner, false, false);
@@ -237,7 +243,7 @@ namespace Alexandria.Misc
             else if (type == EasyBlankType.FULL)
             {
                 GameObject bigSilencerVFX = (GameObject)ResourceCache.Acquire("Global VFX/BlankVFX");
-                AkSoundEngine.PostEvent("Play_OBJ_silenceblank_use_01", blankOwner.gameObject);
+                if (blankOwner) AkSoundEngine.PostEvent("Play_OBJ_silenceblank_use_01", blankOwner.gameObject);
                 GameObject gameObject = new GameObject("silencer");
                 SilencerInstance silencerInstance = gameObject.AddComponent<SilencerInstance>();
                 silencerInstance.TriggerSilencer(blankPosition, 50f, 25f, bigSilencerVFX, 0.15f, 0.2f, 50f, 10f, 140f, 15f, 0.5f, blankOwner, true, false);

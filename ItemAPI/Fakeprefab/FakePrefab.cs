@@ -70,35 +70,36 @@ namespace Alexandria.ItemAPI
         /// <param name="new_o">The object instantiated from the original object.</param>
         public static UnityEngine.Object Instantiate(UnityEngine.Object o, UnityEngine.Object new_o)
         {
-            if (o is GameObject && ExistingFakePrefabs.Contains((GameObject)o))
+            if (o is GameObject go && ExistingFakePrefabs.Contains(go))
             {
-                ((GameObject)new_o).SetActive(true);
-                if ((new_o as GameObject).GetComponent<CustomShopController>() != null)
+                GameObject new_go = (GameObject)new_o;
+                new_go.SetActive(true);
+                if (new_go.GetComponent<CustomShopController>() is CustomShopController newCsc)
                 {
-                    (new_o as GameObject).GetComponent<CustomShopController>().customCanBuy = (o as GameObject).GetComponent<CustomShopController>().customCanBuy;
-                    (new_o as GameObject).GetComponent<CustomShopController>().customPrice = (o as GameObject).GetComponent<CustomShopController>().customPrice;
-                    (new_o as GameObject).GetComponent<CustomShopController>().removeCurrency = (o as GameObject).GetComponent<CustomShopController>().removeCurrency;
-                    (new_o as GameObject).GetComponent<CustomShopController>().OnSteal = (o as GameObject).GetComponent<CustomShopController>().OnSteal;
-                    (new_o as GameObject).GetComponent<CustomShopController>().OnPurchase = (o as GameObject).GetComponent<CustomShopController>().OnPurchase;
-                    //(new_o as GameObject).GetComponent<CustomShopController>().customCurrencyAtlas = (o as GameObject).GetComponent<CustomShopController>().customCurrencyAtlas;
+                    CustomShopController cscPrefab = go.GetComponent<CustomShopController>();
+                    newCsc.customCanBuy   = cscPrefab.customCanBuy;
+                    newCsc.customPrice    = cscPrefab.customPrice;
+                    newCsc.removeCurrency = cscPrefab.removeCurrency;
+                    newCsc.OnSteal        = cscPrefab.OnSteal;
+                    newCsc.OnPurchase     = cscPrefab.OnPurchase;
+                    // newCsc.customCurrencyAtlas = cscPrefab.customCurrencyAtlas;
                 }
             }
-            else if (o is Component && ExistingFakePrefabs.Contains(((Component)o).gameObject))
+            else if (o is Component c && ExistingFakePrefabs.Contains(c.gameObject))
             {
-                ((Component)new_o).gameObject.SetActive(true);
-                if ((new_o is CustomShopController))
+                GameObject new_go = ((Component)new_o).gameObject;
+                new_go.SetActive(true);
+                if (new_o is CustomShopController newCsc)
                 {
-                    (new_o as CustomShopController).customCanBuy = (o as CustomShopController).customCanBuy;
-                    (new_o as CustomShopController).customPrice = (o as CustomShopController).customPrice;
-                    (new_o as CustomShopController).removeCurrency = (o as CustomShopController).removeCurrency;
-                    (new_o as GameObject).GetComponent<CustomShopController>().OnSteal = (o as GameObject).GetComponent<CustomShopController>().OnSteal;
-                    (new_o as GameObject).GetComponent<CustomShopController>().OnPurchase = (o as GameObject).GetComponent<CustomShopController>().OnPurchase;
-                    //(new_o as CustomShopController).customCurrencyAtlas = (o as CustomShopController).customCurrencyAtlas;
+                    CustomShopController cscPrefab = (CustomShopController)o;
+                    newCsc.customCanBuy   = cscPrefab.customCanBuy;
+                    newCsc.customPrice    = cscPrefab.customPrice;
+                    newCsc.removeCurrency = cscPrefab.removeCurrency;
+                    newCsc.OnSteal        = cscPrefab.OnSteal;
+                    newCsc.OnPurchase     = cscPrefab.OnPurchase;
+                    // newCsc.customCurrencyAtlas = cscPrefab.customCurrencyAtlas;
                 }
-
-
             }
-
 
             return new_o;
         }

@@ -357,3 +357,6 @@ MigrationBackup/
 FodyWeavers.xsd
 
 local.props
+
+*.sublime-project
+*.sublime-workspace

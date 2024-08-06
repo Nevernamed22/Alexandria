@@ -27,6 +27,7 @@ using HutongGames.Utility;
 using FullInspector;
 using Alexandria.Misc;
 using com.subjectnerd;
+using Pathfinding;
 
 namespace Alexandria.DungeonAPI
 {
@@ -55,7 +56,7 @@ namespace Alexandria.DungeonAPI
             {
                 if (g.EndsWith(".room", StringComparison.OrdinalIgnoreCase))
                 {
-                    string name = Path.GetFullPath(g).RemovePrefix(roomDirectory).RemoveSuffix(".room");
+                    string name = System.IO.Path.GetFullPath(g).RemovePrefix(roomDirectory).RemoveSuffix(".room");
                     if (RoomUtility.EnableDebugLogging == true) 
                     {
                         ETGModConsole.Log($"Found room: \"{name}\"");
@@ -73,7 +74,7 @@ namespace Alexandria.DungeonAPI
                 }
                 else if (g.EndsWith(".newroom", StringComparison.OrdinalIgnoreCase))
                 {
-                    string name = Path.GetFullPath(g).RemovePrefix(roomDirectory).RemoveSuffix(".newroom");
+                    string name = System.IO.Path.GetFullPath(g).RemovePrefix(roomDirectory).RemoveSuffix(".newroom");
                     if (RoomUtility.EnableDebugLogging == true)
                     {
                         ETGModConsole.Log($"New Found room: \"{name}\"");
@@ -97,7 +98,7 @@ namespace Alexandria.DungeonAPI
         private static RoomData BuildFromRoomFile(string roomPath)
         {
             var texture = ResourceExtractor.GetTextureFromFile(roomPath, ".room");
-            texture.name = Path.GetFileName(roomPath);
+            texture.name = System.IO.Path.GetFileName(roomPath);
             RoomData roomData = ExtractRoomDataFromFile(roomPath);
             roomData.room = Build(texture, roomData);
 
@@ -109,7 +110,7 @@ namespace Alexandria.DungeonAPI
         {
             //ETGModConsole.Log(roomPath);
             RoomData roomData = ExtractRoomDataFromFile(roomPath);
-            roomData.name = Path.GetFileName(roomPath);
+            roomData.name = System.IO.Path.GetFileName(roomPath);
             roomData.room = Build(roomData);
             PostProcessCells(roomData);
 
@@ -125,7 +126,7 @@ namespace Alexandria.DungeonAPI
         public static RoomData BuildFromResource(string roomPath, Assembly assembly = null)
         {
             var texture = ResourceExtractor.GetTextureFromResource(roomPath, assembly ?? Assembly.GetCallingAssembly());
-            texture.name = Path.GetFileName(roomPath);
+            texture.name = System.IO.Path.GetFileName(roomPath);
             RoomData roomData = ExtractRoomDataFromResource(roomPath, assembly ?? Assembly.GetCallingAssembly());
             roomData.room = Build(texture, roomData);
             if (!rooms.ContainsKey(roomData.room.name))
@@ -140,7 +141,7 @@ namespace Alexandria.DungeonAPI
         public static RoomData BuildNewRoomFromResource(string roomPath, Assembly assembly = null)
         {
             RoomData roomData = ExtractRoomDataFromResource(roomPath, assembly ?? Assembly.GetCallingAssembly());
-            roomData.name = Path.GetFileName(roomPath);
+            roomData.name = System.IO.Path.GetFileName(roomPath);
             roomData.room = Build(roomData);
             PostProcessCells(roomData);
 
@@ -841,8 +842,6 @@ namespace Alexandria.DungeonAPI
                         bool forceActive = jobject.TryGetValue("cartActive", out value2) ? ((bool)value2) : false;
 
                         gameObject = StaticReferences.DefineMinecartFromValues("minecart_pathing", maxSpeed, timeToMaxSpeed, "", storedGUID, forceActive);
-
-
 
                     }
                     if (assetPath == "turretminecart_pathing")
@@ -1841,6 +1840,8 @@ namespace Alexandria.DungeonAPI
             if (component)
             {
                 gameObject = FakePrefab.Clone(asset);
+                component = gameObject.GetComponent<Chest>(); // sets "component" to the fakeprefabbed chest component instead of the prefab (i had a different crappier fix that worked but this was spapis idea, i just woke up im tired aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa)
+
                 bool flag = attributes.TryGetValue("dI", out jtoken) && !string.IsNullOrEmpty(jtoken.ToObject<string>());
                 if (flag)
                 {

@@ -42,8 +42,9 @@ namespace Alexandria.CharacterAPI
 
         public static void AddDFStringDefinition(string key, string value)
         {
-            if (!customStringDictionary.ContainsKey(key))
-                customStringDictionary.Add(key, value);
+            string lowerKey = key.ToLower();
+            if (!customStringDictionary.ContainsKey(lowerKey))
+                customStringDictionary.Add(lowerKey, value);
         }
     }
 }

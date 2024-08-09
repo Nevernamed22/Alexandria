@@ -97,6 +97,7 @@
     <Compile Include="ItemAPI\SynergyTools\AdvancedHoveringGunSynergyProcessor.cs" />
     <Compile Include="Misc\AmmoPickupFixer.cs" />
     <Compile Include="Misc\ChamberGunAPI.cs" />
+    <Compile Include="Misc\LightAPI.cs" />
     <Compile Include="EnemyAPI\BossBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyTools.cs" />

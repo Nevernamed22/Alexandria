@@ -1728,14 +1728,10 @@ namespace Alexandria.CharacterAPI
         public delegate TResult Func<T1, T2, T3, T4, T5, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
         public static string GetBaseAnimationNameHook(Func<PlayerController, Vector2, float, bool, bool, string> orig, PlayerController self, Vector2 v, float gunAngle, bool invertThresholds = false, bool forceTwoHands = false)
         {
-            if (!string.IsNullOrEmpty(self.gameObject?.GetComponent<CustomCharacter>()?.overrideAnimation))
-            {
-                return self.gameObject?.GetComponent<CustomCharacter>()?.overrideAnimation;
-            }
-            else
-            {
-                return orig(self, v, gunAngle, invertThresholds, forceTwoHands);
-            }
+            string s = self.gameObject?.GetComponent<CustomCharacter>()?.overrideAnimation;
+            if (!string.IsNullOrEmpty(s))
+                return s;
+            return orig(self, v, gunAngle, invertThresholds, forceTwoHands);
 
         }
 
@@ -2065,13 +2061,8 @@ namespace Alexandria.CharacterAPI
         //Used to add in strings 
         public static string DFGetLocalizedValue(Func<dfControl, string, string> orig, dfControl self, string key)
         {
-            foreach (var pair in StringHandler.customStringDictionary)
-            {
-                if (pair.Key.ToLower() == key.ToLower())
-                {
-                    return pair.Value;
-                }
-            }
+            if (StringHandler.customStringDictionary.TryGetValue(key.ToLower(), out string val))
+                return val;
             return orig(self, key);
         }
 

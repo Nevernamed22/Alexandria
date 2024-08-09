@@ -30,7 +30,7 @@ namespace Alexandria
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
 
-        public const string VERSION = "0.4.6";
+        public const string VERSION = "0.4.8";
 
 
 
@@ -67,7 +67,6 @@ namespace Alexandria
                 GoopUtility.Init();
 
                 //Low Priority
-                CustomClipAmmoTypeToolbox.Init();
                 ChamberGunAPI.Init();
                 GenericItemAPIHooks.InitHooks();
                 AlexandriaTags.InitGenericTags();

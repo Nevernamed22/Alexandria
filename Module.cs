@@ -67,7 +67,6 @@ namespace Alexandria
                 GoopUtility.Init();
 
                 //Low Priority
-                CustomClipAmmoTypeToolbox.Init();
                 ChamberGunAPI.Init();
                 GenericItemAPIHooks.InitHooks();
                 AlexandriaTags.InitGenericTags();

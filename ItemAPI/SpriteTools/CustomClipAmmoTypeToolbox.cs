@@ -4,15 +4,12 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using HarmonyLib;
 
 namespace Alexandria.ItemAPI
 {
     public static class CustomClipAmmoTypeToolbox
     {
-        public static void Init()
-        {
-            ETGModMainBehaviour.Instance.gameObject.AddComponent<AddMissingAmmoTypes>();
-        }
         public static List<GameUIAmmoType> addedAmmoTypes = new List<GameUIAmmoType>();
         public static string AddCustomAmmoType(string name, string ammoTypeSpritePath, string ammoBackgroundSpritePath)
         {
@@ -75,25 +72,19 @@ namespace Alexandria.ItemAPI
             array = list.ToArray<T>();
         }
     }
-    public class AddMissingAmmoTypes : MonoBehaviour
-    {
 
-        public void Update()
+    [HarmonyPatch(typeof(GameUIAmmoController), nameof(GameUIAmmoController.Initialize))]
+    internal static class GameUIAmmoControllerInitializePatch
+    {
+        private static void Postfix(GameUIAmmoController __instance)
         {
-            if (GameUIRoot.HasInstance)
-            {
-                foreach (GameUIAmmoController uiammocontroller in GameUIRoot.Instance.ammoControllers)
-                {
-                    foreach (GameUIAmmoType uiammotype in CustomClipAmmoTypeToolbox.addedAmmoTypes)
-                    {
-                        if (!uiammocontroller.ammoTypes.Contains(uiammotype))
-                        {
-                            CustomClipAmmoTypeToolbox.Add(ref uiammocontroller.ammoTypes, uiammotype);
-                        }
-                    }
-                }
-            }
+            int newCount = CustomClipAmmoTypeToolbox.addedAmmoTypes.Count;
+            if (newCount < 1)
+                return;
+            int curLength = __instance.ammoTypes.Length;
+            Array.Resize(ref __instance.ammoTypes, curLength + newCount);
+            for (int i = 0; i < newCount; ++i)
+                __instance.ammoTypes[curLength++] = CustomClipAmmoTypeToolbox.addedAmmoTypes[i];
         }
-        
     }
 }

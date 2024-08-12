@@ -8,8 +8,12 @@ using Alexandria.ItemAPI; // SpriteBuilder
 
 namespace Alexandria.Misc
 {
+    //WARNING: The sole purpose of this class is to unify methods that are repeated throughout Alexandria that can't be removed due to backwards compatibility issues.
+    //         Never make this class or any of the methods inside it public.
     internal static class Shared
     {
+        private static readonly HashSet<tk2dSpriteDefinition> adjustedDefs = new();
+
         internal static void MakeOffset(this tk2dSpriteDefinition def, Vector3 offset, bool changesCollider = false)
         {
             def.position0 += offset;
@@ -22,7 +26,6 @@ namespace Alexandria.Misc
                 def.colliderVertices[0] += offset;
         }
 
-        private static readonly HashSet<tk2dSpriteDefinition> adjustedDefs = new();
         internal static void ConstructOffsetsFromAnchor(this tk2dSpriteDefinition def, tk2dBaseSprite.Anchor anchor, Vector2? scale = null, bool fixesScale = false, bool changesCollider = true)
         {
             if (adjustedDefs.Contains(def))
@@ -364,6 +367,42 @@ namespace Alexandria.Misc
                 ETGModConsole.Log(e.ToString());
                 return null;
             }
+        }
+
+        internal static tk2dSpriteDefinition SetupDefinitionForProjectileSprite(string name, int id, tk2dSpriteCollectionData data, int pixelWidth, int pixelHeight, bool lightened = true, int? overrideColliderPixelWidth = null, int? overrideColliderPixelHeight = null, int? overrideColliderOffsetX = null, int? overrideColliderOffsetY = null, Projectile overrideProjectileToCopyFrom = null)
+        {
+            overrideColliderPixelWidth ??= pixelWidth;
+            overrideColliderPixelHeight ??= pixelHeight;
+            overrideColliderOffsetX ??= 0;
+            overrideColliderOffsetY ??= 0;
+
+            float trueWidth = 0.0625f * pixelWidth;
+            float trueHeight = 0.0625f * pixelHeight;
+            float colliderWidth = 0.0625f * overrideColliderPixelWidth.Value;
+            float colliderHeight = 0.0625f * overrideColliderPixelHeight.Value;
+            float colliderOffsetX = 0.0625f * overrideColliderOffsetX.Value;
+            float colliderOffsetY = 0.0625f * overrideColliderOffsetY.Value;
+            tk2dSpriteDefinition def = ETGMod.Databases.Items.ProjectileCollection.inst.spriteDefinitions[(overrideProjectileToCopyFrom ??
+                    (PickupObjectDatabase.GetById(lightened ? 47 : 12) as Gun).DefaultModule.projectiles[0]).GetAnySprite().spriteId].CopyDefinitionFrom();
+            def.boundsDataCenter = new Vector3(trueWidth / 2f, trueHeight / 2f, 0f);
+            def.boundsDataExtents = new Vector3(trueWidth, trueHeight, 0f);
+            def.untrimmedBoundsDataCenter = new Vector3(trueWidth / 2f, trueHeight / 2f, 0f);
+            def.untrimmedBoundsDataExtents = new Vector3(trueWidth, trueHeight, 0f);
+            def.texelSize = new Vector2(1 / 16f, 1 / 16f);
+            def.position0 = new Vector3(0f, 0f, 0f);
+            def.position1 = new Vector3(0f + trueWidth, 0f, 0f);
+            def.position2 = new Vector3(0f, 0f + trueHeight, 0f);
+            def.position3 = new Vector3(0f + trueWidth, 0f + trueHeight, 0f);
+
+            def.materialInst.mainTexture = data.spriteDefinitions[id].materialInst.mainTexture;
+            def.uvs = data.spriteDefinitions[id].uvs.ToArray();
+
+            def.colliderVertices = new Vector3[2];
+            def.colliderVertices[0] = new Vector3(colliderOffsetX, colliderOffsetY, 0f);
+            def.colliderVertices[1] = new Vector3(colliderWidth / 2, colliderHeight / 2);
+            def.name = name;
+            data.spriteDefinitions[id] = def;
+            return def;
         }
     }
 }

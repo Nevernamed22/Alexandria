@@ -129,10 +129,7 @@ namespace Alexandria.ItemAPI
 
                 tiledSprite.SetSprite(ETGMod.Databases.Items.ProjectileCollection, spriteID);
                 tk2dSpriteDefinition def = tiledSprite.GetCurrentSpriteDef();
-                def.colliderVertices = new Vector3[]{
-                    0.0625f * colliderOffsets,
-                    0.0625f * colliderDimensions
-                };
+                def.colliderVertices = new Vector3[]{ 0.0625f * colliderOffsets, 0.0625f * colliderDimensions };
 
                 def.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.MiddleLeft); //NOTE: this seems right, but double check later
 
@@ -270,6 +267,7 @@ namespace Alexandria.ItemAPI
                 return null;
             }
         }
+
         private static IEnumerator HandleFreeFiringBeam(BeamController beam, SpeculativeRigidbody otherShooter, Vector2 fixedPosition, float targetAngle, float duration, bool followProjDir, float projFollowOffset)
         {
             bool parented = otherShooter != null;

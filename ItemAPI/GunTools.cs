@@ -325,57 +325,14 @@ namespace Alexandria.ItemAPI
             result.colliderVertices = colliderVertices.ToArray();
             return result;
         }
+
         public static tk2dSpriteDefinition SetupDefinitionForProjectileSprite(string name, int id, int pixelWidth, int pixelHeight, bool lightened = true, int? overrideColliderPixelWidth = null, int? overrideColliderPixelHeight = null,
             int? overrideColliderOffsetX = null, int? overrideColliderOffsetY = null, Projectile overrideProjectileToCopyFrom = null)
         {
-            if (overrideColliderPixelWidth == null)
-            {
-                overrideColliderPixelWidth = pixelWidth;
-            }
-            if (overrideColliderPixelHeight == null)
-            {
-                overrideColliderPixelHeight = pixelHeight;
-            }
-            if (overrideColliderOffsetX == null)
-            {
-                overrideColliderOffsetX = 0;
-            }
-            if (overrideColliderOffsetY == null)
-            {
-                overrideColliderOffsetY = 0;
-            }
-            float thing = 16;
-            float thing2 = 16;
-            float trueWidth = (float)pixelWidth / thing;
-            float trueHeight = (float)pixelHeight / thing;
-            float colliderWidth = (float)overrideColliderPixelWidth.Value / thing2;
-            float colliderHeight = (float)overrideColliderPixelHeight.Value / thing2;
-            float colliderOffsetX = (float)overrideColliderOffsetX.Value / thing2;
-            float colliderOffsetY = (float)overrideColliderOffsetY.Value / thing2;
-            tk2dSpriteDefinition def = ETGMod.Databases.Items.ProjectileCollection.inst.spriteDefinitions[(overrideProjectileToCopyFrom ??
-                    (PickupObjectDatabase.GetById(lightened ? 47 : 12) as Gun).DefaultModule.projectiles[0]).GetAnySprite().spriteId].CopyDefinitionFrom();
-            def.boundsDataCenter = new Vector3(trueWidth / 2f, trueHeight / 2f, 0f);
-            def.boundsDataExtents = new Vector3(trueWidth, trueHeight, 0f);
-            def.untrimmedBoundsDataCenter = new Vector3(trueWidth / 2f, trueHeight / 2f, 0f);
-            def.untrimmedBoundsDataExtents = new Vector3(trueWidth, trueHeight, 0f);
-            def.texelSize = new Vector2(1 / 16f, 1 / 16f);
-            def.position0 = new Vector3(0f, 0f, 0f);
-            def.position1 = new Vector3(0f + trueWidth, 0f, 0f);
-            def.position2 = new Vector3(0f, 0f + trueHeight, 0f);
-            def.position3 = new Vector3(0f + trueWidth, 0f + trueHeight, 0f);
-            def.colliderVertices = new Vector3[2];
-            def.colliderVertices[0] = new Vector3(colliderOffsetX, colliderOffsetY, 0f);
-            def.colliderVertices[1] = new Vector3(colliderWidth / 2, colliderHeight / 2);
-            def.name = name;
-
-            def.materialInst.mainTexture = ETGMod.Databases.Items.ProjectileCollection.inst.spriteDefinitions[id].materialInst.mainTexture;
-            def.uvs = ETGMod.Databases.Items.ProjectileCollection.inst.spriteDefinitions[id].uvs.ToArray();
-
-            ETGMod.Databases.Items.ProjectileCollection.inst.spriteDefinitions[id] = def;
-
-            return def;
+            var data = ETGMod.Databases.Items.ProjectileCollection.inst;
+            return Shared.SetupDefinitionForProjectileSprite(name, id, data, pixelWidth, pixelHeight, lightened, overrideColliderPixelWidth,
+                overrideColliderPixelHeight, overrideColliderOffsetX, overrideColliderOffsetY, overrideProjectileToCopyFrom);
         }
-
 
         /// <summary>
         /// Adds a custom sprite to your projectile from your mods sprites/ProjectileCollection folder.
@@ -402,9 +359,9 @@ namespace Alexandria.ItemAPI
                 tk2dSpriteDefinition def = SetupDefinitionForProjectileSprite(name, proj.GetAnySprite().spriteId, pixelWidth, pixelHeight, lightened, overrideColliderPixelWidth, overrideColliderPixelHeight, overrideColliderOffsetX,
                     overrideColliderOffsetY, overrideProjectileToCopyFrom);
                 def.ConstructOffsetsFromAnchor(anchor, def.position3, fixesScale, anchorChangesCollider);
-                proj.GetAnySprite().scale = new Vector3(1f, 1f, 1f);
-                proj.transform.localScale = new Vector3(1f, 1f, 1f);
-                proj.GetAnySprite().transform.localScale = new Vector3(1f, 1f, 1f);
+                proj.GetAnySprite().scale = Vector3.one;
+                proj.transform.localScale = Vector3.one;
+                proj.GetAnySprite().transform.localScale = Vector3.one;
                 proj.AdditionalScaleMultiplier = 1f;
                 return def;
             }
@@ -469,12 +426,7 @@ namespace Alexandria.ItemAPI
         /// <param name="gun">The gun being checked.</param>
         public static bool IsCurrentGun(this Gun gun)
         {
-            if (gun && gun.CurrentOwner)
-            {
-                if (gun.CurrentOwner.CurrentGun == gun) return true;
-                else return false;
-            }
-            else return false;
+            return gun && gun.CurrentOwner && (gun.CurrentOwner.CurrentGun == gun);
         }
 
         /// <summary>
@@ -483,8 +435,7 @@ namespace Alexandria.ItemAPI
         /// <param name="gun">The gun being checked for an owner.</param>
         public static PlayerController GunPlayerOwner(this Gun gun)
         {
-            if (gun && gun.CurrentOwner && gun.CurrentOwner is PlayerController) return gun.CurrentOwner as PlayerController;
-            else return null;
+            return gun ? (gun.CurrentOwner as PlayerController) : null;
         }
 
         public static ProjectileModule AddProjectileModuleToRawVolley(this Gun gun, ProjectileModule projectile)

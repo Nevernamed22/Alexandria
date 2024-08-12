@@ -25,7 +25,7 @@ namespace Alexandria.Assetbundle
                 tk2dSpriteDefinition def = SetupDefinitionForProjectileSprite(name, proj.GetAnySprite().spriteId, data, pixelWidth, pixelHeight, lightened,
                     overrideColliderPixelWidth, overrideColliderPixelHeight, overrideColliderOffsetX, overrideColliderOffsetY, overrideProjectileToCopyFrom);
 
-                def.ConstructOffsetsFromAnchor(anchor, def.position3, fixesScale, anchorChangesCollider);
+                Shared.ConstructOffsetsFromAnchor(def, anchor, def.position3, fixesScale, anchorChangesCollider);
                 proj.GetAnySprite().scale = Vector3.one;
                 proj.transform.localScale = Vector3.one;
                 proj.GetAnySprite().transform.localScale = Vector3.one;
@@ -42,38 +42,8 @@ namespace Alexandria.Assetbundle
 
         private static tk2dSpriteDefinition SetupDefinitionForProjectileSprite(string name, int id, tk2dSpriteCollectionData data, int pixelWidth, int pixelHeight, bool lightened = true, int? overrideColliderPixelWidth = null, int? overrideColliderPixelHeight = null, int? overrideColliderOffsetX = null, int? overrideColliderOffsetY = null, Projectile overrideProjectileToCopyFrom = null)
         {
-            overrideColliderPixelWidth ??= pixelWidth;
-            overrideColliderPixelHeight ??= pixelHeight;
-            overrideColliderOffsetX ??= 0;
-            overrideColliderOffsetY ??= 0;
-
-            float trueWidth = 0.0625f * pixelWidth;
-            float trueHeight = 0.0625f * pixelHeight;
-            float colliderWidth = 0.0625f * overrideColliderPixelWidth.Value;
-            float colliderHeight = 0.0625f * overrideColliderPixelHeight.Value;
-            float colliderOffsetX = 0.0625f * overrideColliderOffsetX.Value;
-            float colliderOffsetY = 0.0625f * overrideColliderOffsetY.Value;
-            tk2dSpriteDefinition def = ETGMod.Databases.Items.ProjectileCollection.inst.spriteDefinitions[(overrideProjectileToCopyFrom ??
-                    (PickupObjectDatabase.GetById(lightened ? 47 : 12) as Gun).DefaultModule.projectiles[0]).GetAnySprite().spriteId].CopyDefinitionFrom();
-            def.boundsDataCenter = new Vector3(trueWidth / 2f, trueHeight / 2f, 0f);
-            def.boundsDataExtents = new Vector3(trueWidth, trueHeight, 0f);
-            def.untrimmedBoundsDataCenter = new Vector3(trueWidth / 2f, trueHeight / 2f, 0f);
-            def.untrimmedBoundsDataExtents = new Vector3(trueWidth, trueHeight, 0f);
-            def.texelSize = new Vector2(1 / 16f, 1 / 16f);
-            def.position0 = new Vector3(0f, 0f, 0f);
-            def.position1 = new Vector3(0f + trueWidth, 0f, 0f);
-            def.position2 = new Vector3(0f, 0f + trueHeight, 0f);
-            def.position3 = new Vector3(0f + trueWidth, 0f + trueHeight, 0f);
-
-            def.materialInst.mainTexture = data.spriteDefinitions[id].materialInst.mainTexture;
-            def.uvs = data.spriteDefinitions[id].uvs.ToArray();
-
-            def.colliderVertices = new Vector3[2];
-            def.colliderVertices[0] = new Vector3(colliderOffsetX, colliderOffsetY, 0f);
-            def.colliderVertices[1] = new Vector3(colliderWidth / 2, colliderHeight / 2);
-            def.name = name;
-            data.spriteDefinitions[id] = def;
-            return def;
+            return Shared.SetupDefinitionForProjectileSprite(name, id, data, pixelWidth, pixelHeight, lightened, overrideColliderPixelWidth,
+                overrideColliderPixelHeight, overrideColliderOffsetX, overrideColliderOffsetY, overrideProjectileToCopyFrom);
         }
 
         public static void AnimateProjectileBundle(this Projectile proj, string defaultClipName, tk2dSpriteCollectionData data, tk2dSpriteAnimation animation, string animationName, List<IntVector2> pixelSizes, List<bool> lighteneds, List<tk2dBaseSprite.Anchor> anchors, List<bool> anchorsChangeColliders, List<bool> fixesScales, List<Vector3?> manualOffsets, List<IntVector2?> overrideColliderPixelSizes, List<IntVector2?> overrideColliderOffsets, List<Projectile> overrideProjectilesToCopyFrom)
@@ -95,7 +65,7 @@ namespace Alexandria.Assetbundle
                 tk2dSpriteDefinition def = SetupDefinitionForProjectileSprite(animationName, frames[i].spriteId, data, pixelSizes[i].x, pixelSizes[i].y, lighteneds[i],
                     overrideColliderPixelSizes[i]?.x, overrideColliderPixelSizes[i]?.y, overrideColliderOffsets[i]?.x, overrideColliderOffsets[i]?.y,
                     overrideProjectilesToCopyFrom[i]);
-                def.ConstructOffsetsFromAnchor(anchors[i], def.position3, fixesScales[i], anchorsChangeColliders[i]);
+                Shared.ConstructOffsetsFromAnchor(def, anchors[i], def.position3, fixesScales[i], anchorsChangeColliders[i]);
                 if (manualOffsets[i] is Vector3 manualOffset)
                 {
                     def.position0 += manualOffset;
@@ -120,7 +90,7 @@ namespace Alexandria.Assetbundle
                 tiledSprite.SetSprite(tk2DSpriteCollectionData, tk2DSpriteCollectionData.GetSpriteIdByName(spriteName));
                 tk2dSpriteDefinition def = tiledSprite.GetCurrentSpriteDef();
                 def.colliderVertices = new Vector3[]{ 0.0625f * colliderOffsets, 0.0625f * colliderDimensions };
-                def.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft); //NOTE: this doesn't seem right, but maybe it is?
+                Shared.ConstructOffsetsFromAnchor(def, tk2dBaseSprite.Anchor.LowerLeft); //NOTE: this doesn't seem right, but maybe it is?
                 tk2dSpriteAnimator animator = newTrailObject.GetOrAddComponent<tk2dSpriteAnimator>();
                 animator.playAutomatically = true;
                 animator.defaultClipId = animationLibrary.GetClipIdByName(defaultAnimation);

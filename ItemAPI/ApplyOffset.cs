@@ -10,7 +10,7 @@ namespace Alexandria.ItemAPI
 {
     public static class ApplyOffsetStuff
     {
-       public static void ApplyOffset(this tk2dSpriteDefinition def, Vector2 offset)
+        public static void ApplyOffset(this tk2dSpriteDefinition def, Vector2 offset)
         {
             Shared.MakeOffset(def, offset);
         }

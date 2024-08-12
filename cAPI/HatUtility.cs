@@ -273,15 +273,10 @@ namespace Alexandria.cAPI
                 int frameSpriteId = SpriteBuilder.AddSpriteToCollection(path, HatSpriteCollection, callingASM);
                 tk2dSpriteDefinition frameDef = HatSpriteCollection.spriteDefinitions[frameSpriteId];
                 frameDef.colliderVertices = def.colliderVertices;
-                frameDef.AdjustOffset(offset);
+                Shared.MakeOffset(frameDef, offset);
                 clip.frames[i] = new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = HatSpriteCollection };
             }
             animation.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { clip }).ToArray();
-        }
-
-        private static void AdjustOffset(this tk2dSpriteDefinition def, Vector3 offset)
-        {
-            Shared.MakeOffset(def, offset);
         }
 
         private static void AddHatToDatabase(Hat hat, bool excludeFromHatRoom)

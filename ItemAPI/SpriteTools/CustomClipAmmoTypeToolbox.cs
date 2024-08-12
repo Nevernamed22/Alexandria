@@ -11,6 +11,10 @@ namespace Alexandria.ItemAPI
     public static class CustomClipAmmoTypeToolbox
     {
         public static List<GameUIAmmoType> addedAmmoTypes = new List<GameUIAmmoType>();
+
+        [ObsoleteAttribute("This method is obsolete and does nothing; it exists for backwards compatability only.", false)]
+        public static void Init() { }
+
         public static string AddCustomAmmoType(string name, string ammoTypeSpritePath, string ammoBackgroundSpritePath)
         {
             Texture2D fgTexture = ResourceExtractor.GetTextureFromResource(ammoTypeSpritePath + ".png", Assembly.GetCallingAssembly());

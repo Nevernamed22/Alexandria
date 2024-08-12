@@ -207,7 +207,7 @@ namespace Alexandria.Misc
                 if (overrideVertices != null)
                     frameDef.colliderVertices = overrideVertices;
                 else if (colliderDimensions != null && colliderOffsets != null)
-                    frameDef.colliderVertices = new Vector3[]{ 0.0625f * colliderDimensions.Value, 0.0625f * colliderOffsets.Value };
+                    frameDef.colliderVertices = new Vector3[]{ 0.0625f * colliderOffsets.Value, 0.0625f * colliderDimensions.Value };
                 else
                     ETGModConsole.Log("<size=100><color=#ff0000ff>BEAM ERROR: colliderDimensions or colliderOffsets was null with no override vertices!</color></size>", false);
             }

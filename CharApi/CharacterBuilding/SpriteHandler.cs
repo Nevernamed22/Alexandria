@@ -1121,43 +1121,15 @@ namespace Alexandria.CharacterAPI
             {
                 definition.name = name; //naming the definition is actually extremely important 
             }
-            definition.ConstructOffsetsFromAnchor(anchor);
+            SharedExtensions.ConstructOffsetsFromAnchor(definition, anchor);
 
             return AddSpriteToCollection(definition, collection);
         }
 
         public static void ConstructOffsetsFromAnchorC(this tk2dSpriteDefinition def, tk2dBaseSprite.Anchor anchor, Vector2? scale = null, bool fixesScale = false, bool changesCollider = true)
         {
-            if (!scale.HasValue)
-            {
-                scale = new Vector2?(def.position3);
-            }
-            if (fixesScale)
-            {
-                Vector2 fixedScale = scale.Value - def.position0.XY();
-                scale = new Vector2?(fixedScale);
-            }
-            float xOffset = 0;
-            if (anchor == tk2dBaseSprite.Anchor.LowerCenter || anchor == tk2dBaseSprite.Anchor.MiddleCenter || anchor == tk2dBaseSprite.Anchor.UpperCenter)
-            {
-                xOffset = -(scale.Value.x / 2f);
-            }
-            else if (anchor == tk2dBaseSprite.Anchor.LowerRight || anchor == tk2dBaseSprite.Anchor.MiddleRight || anchor == tk2dBaseSprite.Anchor.UpperRight)
-            {
-                xOffset = -scale.Value.x;
-            }
-            float yOffset = 0;
-            if (anchor == tk2dBaseSprite.Anchor.MiddleLeft || anchor == tk2dBaseSprite.Anchor.MiddleCenter || anchor == tk2dBaseSprite.Anchor.MiddleLeft)
-            {
-                yOffset = -(scale.Value.y / 2f);
-            }
-            else if (anchor == tk2dBaseSprite.Anchor.UpperLeft || anchor == tk2dBaseSprite.Anchor.UpperCenter || anchor == tk2dBaseSprite.Anchor.UpperRight)
-            {
-                yOffset = -scale.Value.y;
-            }
-            def.MakeOffset(new Vector2(xOffset, yOffset), changesCollider);
+            SharedExtensions.ConstructOffsetsFromAnchor(def, anchor, scale, fixesScale, false);
         }
-
 
         public static void MakeOffset(this tk2dSpriteDefinition def, Vector2 offset, bool changesCollider = false)
         {

@@ -4,12 +4,13 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using Alexandria.ItemAPI; // SpriteBuilder
 
 namespace Alexandria.Misc
 {
-    public static class SharedExtensions
+    internal static class Shared
     {
-        public static void MakeOffset(this tk2dSpriteDefinition def, Vector3 offset, bool changesCollider = false)
+        internal static void MakeOffset(this tk2dSpriteDefinition def, Vector3 offset, bool changesCollider = false)
         {
             def.position0 += offset;
             def.position1 += offset;
@@ -21,7 +22,7 @@ namespace Alexandria.Misc
                 def.colliderVertices[0] += offset;
         }
 
-        public static void ConstructOffsetsFromAnchor(this tk2dSpriteDefinition def, tk2dBaseSprite.Anchor anchor, Vector2? scale = null, bool fixesScale = false, bool changesCollider = true)
+        internal static void ConstructOffsetsFromAnchor(this tk2dSpriteDefinition def, tk2dBaseSprite.Anchor anchor, Vector2? scale = null, bool fixesScale = false, bool changesCollider = true)
         {
             if (!scale.HasValue)
             {
@@ -75,7 +76,7 @@ namespace Alexandria.Misc
             }
         }
 
-        public static tk2dSpriteDefinition ConstructDefinition(Texture2D texture, Material overrideMat = null, bool apply = true, bool useOffset = false)
+        internal static tk2dSpriteDefinition ConstructDefinition(Texture2D texture, Material overrideMat = null, bool apply = true, bool useOffset = false)
         {
             RuntimeAtlasSegment ras = ETGMod.Assets.Packer.Pack(texture, apply); //pack your resources beforehand or the outlines will turn out weird
 
@@ -157,6 +158,42 @@ namespace Alexandria.Misc
 
             def.name = texture.name;
             return def;
+        }
+
+        internal static tk2dSpriteAnimationClip CreateAnimation(tk2dSpriteCollectionData collection, List<int> spriteIDs, string clipName, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop, float fps = 15, tk2dBaseSprite.Anchor? offsetAnchor = null)
+        {
+            bool constructOffsets = offsetAnchor.HasValue;
+            tk2dSprite.Anchor anchor = offsetAnchor ?? default;
+            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
+            for (int i = 0; i < spriteIDs.Count; i++)
+            {
+                tk2dSpriteDefinition def = collection.spriteDefinitions[spriteIDs[i]];
+                if (!def.Valid)
+                    continue;
+                frames.Add(new tk2dSpriteAnimationFrame()
+                {
+                    spriteCollection = collection,
+                    spriteId = spriteIDs[i]
+                });
+                if (constructOffsets)
+                    ConstructOffsetsFromAnchor(def, anchor);
+            }
+
+            return new tk2dSpriteAnimationClip()
+            {
+                name = clipName,
+                fps = fps,
+                wrapMode = wrapMode,
+                frames = frames.ToArray(),
+            };
+        }
+
+        internal static tk2dSpriteAnimationClip CreateAnimation(this Assembly assembly, tk2dSpriteCollectionData collection, List<string> spritePaths, string clipName, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop, float fps = 15, tk2dBaseSprite.Anchor? offsetAnchor = null)
+        {
+            List<int> spriteIDs = new List<int>(spritePaths.Count);
+            foreach(var path in spritePaths)
+                spriteIDs.Add(SpriteBuilder.AddSpriteToCollection(path, collection, assembly));
+            return CreateAnimation(collection, spriteIDs, clipName, wrapMode, fps, offsetAnchor);
         }
     }
 }

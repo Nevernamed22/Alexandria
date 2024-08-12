@@ -3,6 +3,7 @@ using Alexandria.DungeonAPI;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
 using Alexandria.ItemAPI;
+using Alexandria.Misc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1814,38 +1815,18 @@ namespace Alexandria.NPCAPI
         public static tk2dSpriteAnimationClip AddAnimation(tk2dSpriteAnimator animator, tk2dSpriteCollectionData collection, List<int> spriteIDs,
             string clipName, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop, float fps = 15)
         {
+            var clip = Shared.CreateAnimation(collection, spriteIDs, clipName, wrapMode, fps);
+
             if (animator.Library == null)
             {
                 animator.Library = animator.gameObject.AddComponent<tk2dSpriteAnimation>();
                 animator.Library.clips = new tk2dSpriteAnimationClip[0];
                 animator.Library.enabled = true;
-
             }
 
-            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-            for (int i = 0; i < spriteIDs.Count; i++)
-            {
-                tk2dSpriteDefinition sprite = collection.spriteDefinitions[spriteIDs[i]];
-                if (sprite.Valid)
-                {
-                    frames.Add(new tk2dSpriteAnimationFrame()
-                    {
-                        spriteCollection = collection,
-                        spriteId = spriteIDs[i]
-                    });
-                }
-            }
-
-            var clip = new tk2dSpriteAnimationClip()
-            {
-                name = clipName,
-                fps = fps,
-                wrapMode = wrapMode,
-            };
             Array.Resize(ref animator.Library.clips, animator.Library.clips.Length + 1);
             animator.Library.clips[animator.Library.clips.Length - 1] = clip;
 
-            clip.frames = frames.ToArray();
             return clip;
         }
 

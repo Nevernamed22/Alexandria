@@ -12,7 +12,7 @@ namespace Alexandria.ItemAPI
     {
        public static void ApplyOffset(this tk2dSpriteDefinition def, Vector2 offset)
         {
-            SharedExtensions.MakeOffset(def, offset);
+            Shared.MakeOffset(def, offset);
         }
     }
 }

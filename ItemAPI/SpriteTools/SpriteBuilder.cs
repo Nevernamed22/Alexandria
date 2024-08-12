@@ -16,38 +16,18 @@ namespace Alexandria.ItemAPI
 		public static tk2dSpriteAnimationClip AddAnimation(tk2dSpriteAnimator animator, tk2dSpriteCollectionData collection, List<int> spriteIDs,
 			string clipName, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop, float fps = 15)
 		{
+			var clip = Shared.CreateAnimation(collection, spriteIDs, clipName, wrapMode, fps);
+
 			if (animator.Library == null)
 			{
 				animator.Library = animator.gameObject.AddComponent<tk2dSpriteAnimation>();
 				animator.Library.clips = new tk2dSpriteAnimationClip[0];
 				animator.Library.enabled = true;
-
 			}
 
-			List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-			for (int i = 0; i < spriteIDs.Count; i++)
-			{
-				tk2dSpriteDefinition sprite = collection.spriteDefinitions[spriteIDs[i]];
-				if (sprite.Valid)
-				{
-					frames.Add(new tk2dSpriteAnimationFrame()
-					{
-						spriteCollection = collection,
-						spriteId = spriteIDs[i]
-					});
-				}
-			}
-
-			var clip = new tk2dSpriteAnimationClip()
-			{
-				name = clipName,
-				fps = fps,
-				wrapMode = wrapMode,
-			};
 			Array.Resize(ref animator.Library.clips, animator.Library.clips.Length + 1);
 			animator.Library.clips[animator.Library.clips.Length - 1] = clip;
 
-			clip.frames = frames.ToArray();
 			return clip;
 		}
 		
@@ -214,73 +194,28 @@ namespace Alexandria.ItemAPI
 		public static tk2dSpriteAnimationClip AddAnimation(tk2dSpriteAnimation animaton, tk2dSpriteCollectionData collection, List<int> spriteIDs,
 			string clipName, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop, float fps = 15)
 		{
-			List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-			for (int i = 0; i < spriteIDs.Count; i++)
-			{
-				tk2dSpriteDefinition sprite = collection.spriteDefinitions[spriteIDs[i]];
-				if (sprite.Valid)
-				{
-					frames.Add(new tk2dSpriteAnimationFrame()
-					{
-						spriteCollection = collection,
-						spriteId = spriteIDs[i]
-					});
-				}
-			}
-			var clip = new tk2dSpriteAnimationClip()
-			{
-				name = clipName,
-				fps = fps,
-				wrapMode = wrapMode,
-			};
+			var clip = Shared.CreateAnimation(collection, spriteIDs, clipName, wrapMode, fps);
+
 			Array.Resize(ref animaton.clips, animaton.clips.Length + 1);
 			animaton.clips[animaton.clips.Length - 1] = clip;
-
-			clip.frames = frames.ToArray();
 			return clip;
 		}
 
 		public static tk2dSpriteAnimationClip AddAnimation(tk2dSpriteAnimator animator, tk2dSpriteCollectionData collection, List<string> spritePaths,
 	string clipName, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop, int fps = 15)
 		{
+			var clip = Assembly.GetCallingAssembly().CreateAnimation(collection, spritePaths, clipName, wrapMode, fps);
+
 			if (animator.Library == null)
 			{
 				animator.Library = animator.gameObject.AddComponent<tk2dSpriteAnimation>();
 				animator.Library.clips = new tk2dSpriteAnimationClip[0];
 				animator.Library.enabled = true;
-
-			}
-			List<int> spriteIDs = new List<int>();
-
-			foreach(var FUCKINGDIE in spritePaths)
-            {
-				spriteIDs.Add(AddSpriteToCollection(FUCKINGDIE, collection, Assembly.GetCallingAssembly()));
 			}
 
-			List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-			for (int i = 0; i < spriteIDs.Count; i++)
-			{
-				tk2dSpriteDefinition sprite = collection.spriteDefinitions[spriteIDs[i]];
-				if (sprite.Valid)
-				{
-					frames.Add(new tk2dSpriteAnimationFrame()
-					{
-						spriteCollection = collection,
-						spriteId = spriteIDs[i]
-					});
-				}
-			}
-
-			var clip = new tk2dSpriteAnimationClip()
-			{
-				name = clipName,
-				fps = fps,
-				wrapMode = wrapMode,
-			};
 			Array.Resize(ref animator.Library.clips, animator.Library.clips.Length + 1);
 			animator.Library.clips[animator.Library.clips.Length - 1] = clip;
 
-			clip.frames = frames.ToArray();
 			return clip;
 		}
 
@@ -305,12 +240,12 @@ namespace Alexandria.ItemAPI
 		// Token: 0x06000009 RID: 9 RVA: 0x00002404 File Offset: 0x00000604
 		public static tk2dSpriteDefinition ConstructDefinition(Texture2D texture)
 		{
-			return SharedExtensions.ConstructDefinition(texture: texture, overrideMat: null, apply: false, useOffset: false);
+			return Shared.ConstructDefinition(texture: texture, overrideMat: null, apply: false, useOffset: false);
 		}
 
 		public static tk2dSpriteDefinition ConstructDefinition2(Texture2D texture, tk2dSpriteCollectionData collection)
 		{
-			return SharedExtensions.ConstructDefinition(texture: texture, overrideMat: null, apply: false, useOffset: true);
+			return Shared.ConstructDefinition(texture: texture, overrideMat: null, apply: false, useOffset: true);
 		}
 
 		// Token: 0x0600000A RID: 10 RVA: 0x000026EC File Offset: 0x000008EC

@@ -473,7 +473,7 @@ namespace Alexandria.CharacterAPI
         /// <returns>A new sprite definition with the given texture</returns>
         public static tk2dSpriteDefinition ConstructDefinition(Texture2D texture, Material overrideMat = null)
         {
-            return SharedExtensions.ConstructDefinition(texture: texture, overrideMat: overrideMat, apply: true, useOffset: false);
+            return Shared.ConstructDefinition(texture: texture, overrideMat: overrideMat, apply: true, useOffset: false);
         }
 
         public static Texture2D AddOutlineToTexture(Texture2D sprite, Color color)
@@ -1057,19 +1057,19 @@ namespace Alexandria.CharacterAPI
             {
                 definition.name = name; //naming the definition is actually extremely important 
             }
-            SharedExtensions.ConstructOffsetsFromAnchor(definition, anchor);
+            Shared.ConstructOffsetsFromAnchor(definition, anchor);
 
             return AddSpriteToCollection(definition, collection);
         }
 
         public static void ConstructOffsetsFromAnchorC(this tk2dSpriteDefinition def, tk2dBaseSprite.Anchor anchor, Vector2? scale = null, bool fixesScale = false, bool changesCollider = true)
         {
-            SharedExtensions.ConstructOffsetsFromAnchor(def, anchor, scale, fixesScale, false);
+            Shared.ConstructOffsetsFromAnchor(def, anchor, scale, fixesScale, false);
         }
 
         public static void MakeOffset(this tk2dSpriteDefinition def, Vector2 offset, bool changesCollider = false)
         {
-            SharedExtensions.MakeOffset(def, offset, changesCollider);
+            Shared.MakeOffset(def, offset, changesCollider);
         }
 
         /// <summary>

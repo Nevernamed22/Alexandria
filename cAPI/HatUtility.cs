@@ -281,7 +281,7 @@ namespace Alexandria.cAPI
 
         private static void AdjustOffset(this tk2dSpriteDefinition def, Vector3 offset)
         {
-            SharedExtensions.MakeOffset(def, offset);
+            Shared.MakeOffset(def, offset);
         }
 
         private static void AddHatToDatabase(Hat hat, bool excludeFromHatRoom)

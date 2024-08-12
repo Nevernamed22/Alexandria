@@ -156,11 +156,11 @@ namespace Alexandria.Assetbundle
 
         public static void ConstructOffsetsFromAnchor(this tk2dSpriteDefinition def, tk2dBaseSprite.Anchor anchor, Vector2? scale = null, bool fixesScale = false, bool changesCollider = true)
         {
-            SharedExtensions.ConstructOffsetsFromAnchor(def, anchor, scale, fixesScale, changesCollider);
+            Shared.ConstructOffsetsFromAnchor(def, anchor, scale, fixesScale, changesCollider);
         }
         public static void MakeOffset(this tk2dSpriteDefinition def, Vector2 offset, bool changesCollider = false)
         {
-            SharedExtensions.MakeOffset(def, offset, changesCollider);
+            Shared.MakeOffset(def, offset, changesCollider);
         }
 
         private static void SetupBeamPart(tk2dSpriteAnimation beamAnimation, tk2dSpriteCollectionData data, string animationName, Vector2? colliderDimensions = null, Vector2? colliderOffsets = null, Vector3[] overrideVertices = null, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Once)

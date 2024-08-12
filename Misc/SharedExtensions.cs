@@ -74,5 +74,89 @@ namespace Alexandria.Misc
                 def.colliderVertices[0] += new Vector3(colliderXOffset, colliderYOffset, 0);
             }
         }
+
+        public static tk2dSpriteDefinition ConstructDefinition(Texture2D texture, Material overrideMat = null, bool apply = true, bool useOffset = false)
+        {
+            RuntimeAtlasSegment ras = ETGMod.Assets.Packer.Pack(texture, apply); //pack your resources beforehand or the outlines will turn out weird
+
+            Material material = null;
+            if (overrideMat != null)
+            {
+                material = overrideMat;
+            }
+            else
+            {
+                material = new Material(ShaderCache.Acquire(PlayerController.DefaultShaderName));
+            }
+            material.mainTexture = ras.texture;
+
+            var width = texture.width;
+            var height = texture.height;
+
+            var x = 0f;
+            var y = 0f;
+
+            var w = width / 16f;
+            var h = height / 16f;
+
+            float posX, posY, posW, posH;
+            if (useOffset) //NOTE: I don't think the original code for this functions as intended, but I also can't find indication anyone uses it...
+            {
+                Vector2 anchor = tk2dSpriteGeomGen.GetAnchorOffset(tk2dBaseSprite.Anchor.LowerLeft, w, h);
+                posX = -anchor.x;
+                posY = -height + anchor.y; //NOTE: this doesn't seem right, but that's how it was originally...
+                posW = w;
+                posH = height; //NOTE: this doesn't seem right, but that's how it was originally...
+            }
+            else
+            {
+                posX = x;
+                posY = y;
+                posW = w;
+                posH = h;
+            }
+
+            var def = new tk2dSpriteDefinition
+            {
+                normals = new Vector3[] {
+                    new Vector3(0.0f, 0.0f, -1.0f),
+                    new Vector3(0.0f, 0.0f, -1.0f),
+                    new Vector3(0.0f, 0.0f, -1.0f),
+                    new Vector3(0.0f, 0.0f, -1.0f),
+                },
+                tangents = new Vector4[] {
+                    new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
+                    new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
+                    new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
+                    new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
+                },
+                texelSize = new Vector2(1 / 16f, 1 / 16f),
+                extractRegion = false,
+                regionX = 0,
+                regionY = 0,
+                regionW = 0,
+                regionH = 0,
+                flipped = tk2dSpriteDefinition.FlipMode.None,
+                complexGeometry = false,
+                physicsEngine = tk2dSpriteDefinition.PhysicsEngine.Physics3D,
+                colliderType = tk2dSpriteDefinition.ColliderType.None,
+                collisionLayer = CollisionLayer.HighObstacle,
+                position0 = new Vector3(posX, posY, 0f),
+                position1 = new Vector3(posX + posW, posY, 0f),
+                position2 = new Vector3(posX, posY + posH, 0f),
+                position3 = new Vector3(posX + posW, posY + posH, 0f),
+                material = material,
+                materialInst = material,
+                materialId = 0,
+                uvs = ras.uvs,
+                boundsDataCenter = new Vector3(w / 2f, h / 2f, 0f),
+                boundsDataExtents = new Vector3(w, h, 0f),
+                untrimmedBoundsDataCenter = new Vector3(w / 2f, h / 2f, 0f),
+                untrimmedBoundsDataExtents = new Vector3(w, h, 0f),
+            };
+
+            def.name = texture.name;
+            return def;
+        }
     }
 }

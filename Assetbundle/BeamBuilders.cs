@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Alexandria.Misc;
 
 namespace Alexandria.Assetbundle
 {
@@ -208,20 +209,7 @@ namespace Alexandria.Assetbundle
         }
         public static void MakeOffset(this tk2dSpriteDefinition def, Vector2 offset, bool changesCollider = false)
         {
-            float xOffset = offset.x;
-            float yOffset = offset.y;
-            def.position0 += new Vector3(xOffset, yOffset, 0);
-            def.position1 += new Vector3(xOffset, yOffset, 0);
-            def.position2 += new Vector3(xOffset, yOffset, 0);
-            def.position3 += new Vector3(xOffset, yOffset, 0);
-            def.boundsDataCenter += new Vector3(xOffset, yOffset, 0);
-            def.boundsDataExtents += new Vector3(xOffset, yOffset, 0);
-            def.untrimmedBoundsDataCenter += new Vector3(xOffset, yOffset, 0);
-            def.untrimmedBoundsDataExtents += new Vector3(xOffset, yOffset, 0);
-            if (def.colliderVertices != null && def.colliderVertices.Length > 0 && changesCollider)
-            {
-                def.colliderVertices[0] += new Vector3(xOffset, yOffset, 0);
-            }
+            SharedExtensions.MakeOffset(def, offset, changesCollider);
         }
 
         private static void SetupBeamPart(tk2dSpriteAnimation beamAnimation, tk2dSpriteCollectionData data, string animationName, Vector2? colliderDimensions = null, Vector2? colliderOffsets = null, Vector3[] overrideVertices = null, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Once)

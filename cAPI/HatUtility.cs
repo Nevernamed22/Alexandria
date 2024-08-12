@@ -7,6 +7,7 @@ using Gungeon;
 using Dungeonator;
 using System.Reflection;
 using Alexandria.ItemAPI;
+using Alexandria.Misc;
 using System.Collections;
 using System.Globalization;
 using System.IO;
@@ -280,14 +281,7 @@ namespace Alexandria.cAPI
 
         private static void AdjustOffset(this tk2dSpriteDefinition def, Vector3 offset)
         {
-            def.position0 += offset;
-            def.position1 += offset;
-            def.position2 += offset;
-            def.position3 += offset;
-            def.boundsDataCenter += offset;
-            def.boundsDataExtents += offset;
-            def.untrimmedBoundsDataCenter += offset;
-            def.untrimmedBoundsDataExtents += offset;
+            SharedExtensions.MakeOffset(def, offset);
         }
 
         private static void AddHatToDatabase(Hat hat, bool excludeFromHatRoom)

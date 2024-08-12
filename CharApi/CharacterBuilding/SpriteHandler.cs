@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 
 using System;
 using Alexandria.ItemAPI;
+using Alexandria.Misc;
 using System.IO;
 using Microsoft.Cci;
 using Pathfinding;
@@ -1160,20 +1161,7 @@ namespace Alexandria.CharacterAPI
 
         public static void MakeOffset(this tk2dSpriteDefinition def, Vector2 offset, bool changesCollider = false)
         {
-            float xOffset = offset.x;
-            float yOffset = offset.y;
-            def.position0 += new Vector3(xOffset, yOffset, 0);
-            def.position1 += new Vector3(xOffset, yOffset, 0);
-            def.position2 += new Vector3(xOffset, yOffset, 0);
-            def.position3 += new Vector3(xOffset, yOffset, 0);
-            def.boundsDataCenter += new Vector3(xOffset, yOffset, 0);
-            def.boundsDataExtents += new Vector3(xOffset, yOffset, 0);
-            def.untrimmedBoundsDataCenter += new Vector3(xOffset, yOffset, 0);
-            def.untrimmedBoundsDataExtents += new Vector3(xOffset, yOffset, 0);
-            if (def.colliderVertices != null && def.colliderVertices.Length > 0 && changesCollider)
-            {
-                def.colliderVertices[0] += new Vector3(xOffset, yOffset, 0);
-            }
+            SharedExtensions.MakeOffset(def, offset, changesCollider);
         }
 
         /// <summary>

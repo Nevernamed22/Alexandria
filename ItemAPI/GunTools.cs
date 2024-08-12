@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
+using Alexandria.Misc;
 
 namespace Alexandria.ItemAPI
 {
@@ -137,20 +138,7 @@ namespace Alexandria.ItemAPI
         }
         public static void AddOffset(this tk2dSpriteDefinition def, Vector2 offset, bool changesCollider = false)
         {
-            float xOffset = offset.x;
-            float yOffset = offset.y;
-            def.position0 += new Vector3(xOffset, yOffset, 0);
-            def.position1 += new Vector3(xOffset, yOffset, 0);
-            def.position2 += new Vector3(xOffset, yOffset, 0);
-            def.position3 += new Vector3(xOffset, yOffset, 0);
-            def.boundsDataCenter += new Vector3(xOffset, yOffset, 0);
-            // def.boundsDataExtents += new Vector3(xOffset, yOffset, 0);
-            def.untrimmedBoundsDataCenter += new Vector3(xOffset, yOffset, 0);
-            // def.untrimmedBoundsDataExtents += new Vector3(xOffset, yOffset, 0);
-            if (def.colliderVertices != null && def.colliderVertices.Length > 0 && changesCollider)
-            {
-                def.colliderVertices[0] += new Vector3(xOffset, yOffset, 0);
-            }
+            SharedExtensions.MakeOffset(def, offset, changesCollider);
         }
 
         public static IntVector2 TrimTexture(this Texture2D orig)
@@ -429,20 +417,7 @@ namespace Alexandria.ItemAPI
         }
         public static void MakeOffset(this tk2dSpriteDefinition def, Vector2 offset, bool changesCollider = false)
         {
-            float xOffset = offset.x;
-            float yOffset = offset.y;
-            def.position0 += new Vector3(xOffset, yOffset, 0);
-            def.position1 += new Vector3(xOffset, yOffset, 0);
-            def.position2 += new Vector3(xOffset, yOffset, 0);
-            def.position3 += new Vector3(xOffset, yOffset, 0);
-            def.boundsDataCenter += new Vector3(xOffset, yOffset, 0);
-            def.boundsDataExtents += new Vector3(xOffset, yOffset, 0);
-            def.untrimmedBoundsDataCenter += new Vector3(xOffset, yOffset, 0);
-            def.untrimmedBoundsDataExtents += new Vector3(xOffset, yOffset, 0);
-            if (def.colliderVertices != null && def.colliderVertices.Length > 0 && changesCollider)
-            {
-                def.colliderVertices[0] += new Vector3(xOffset, yOffset, 0);
-            }
+            SharedExtensions.MakeOffset(def, offset, changesCollider);
         }
         public static void ConstructOffsetsFromAnchor(this tk2dSpriteDefinition def, tk2dBaseSprite.Anchor anchor, Vector2? scale = null, bool fixesScale = false, bool changesCollider = true)
         {

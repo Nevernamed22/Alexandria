@@ -195,5 +195,42 @@ namespace Alexandria.Misc
                 spriteIDs.Add(SpriteBuilder.AddSpriteToCollection(path, collection, assembly));
             return CreateAnimation(collection, spriteIDs, clipName, wrapMode, fps, offsetAnchor);
         }
+
+        internal static void SetupBeamPart(tk2dSpriteAnimation beamAnimation, tk2dSpriteCollectionData data, string animationName, Vector2? colliderDimensions = null,
+            Vector2? colliderOffsets = null, Vector3[] overrideVertices = null, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Once,
+            tk2dBaseSprite.Anchor anchor = tk2dBaseSprite.Anchor.MiddleLeft)
+        {
+            foreach (var frame in beamAnimation.GetClipByName(animationName).frames)
+            {
+                tk2dSpriteDefinition frameDef = data.spriteDefinitions[frame.spriteId];
+                frameDef.ConstructOffsetsFromAnchor(anchor);
+                if (overrideVertices != null)
+                    frameDef.colliderVertices = overrideVertices;
+                else if (colliderDimensions != null && colliderOffsets != null)
+                    frameDef.colliderVertices = new Vector3[]{ 0.0625f * colliderDimensions.Value, 0.0625f * colliderOffsets.Value };
+                else
+                    ETGModConsole.Log("<size=100><color=#ff0000ff>BEAM ERROR: colliderDimensions or colliderOffsets was null with no override vertices!</color></size>", false);
+            }
+        }
+
+        internal static void SetupBeamPart(tk2dSpriteAnimation beamAnimation, List<string> animSpritePaths, string animationName, int fps, Assembly assembly,
+            Vector2? colliderDimensions = null, Vector2? colliderOffsets = null, Vector3[] overrideVertices = null,
+            tk2dBaseSprite.Anchor anchor = tk2dBaseSprite.Anchor.MiddleCenter) //NOTE: why is the default anchor here different...
+        {
+            tk2dSpriteCollectionData collection = ETGMod.Databases.Items.ProjectileCollection;
+            tk2dSpriteAnimationClip clip = new tk2dSpriteAnimationClip() {
+                name = animationName,
+                frames = new tk2dSpriteAnimationFrame[animSpritePaths.Count],
+                fps = fps,
+            };
+            for (int i = 0; i < animSpritePaths.Count; ++i)
+            {
+                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(animSpritePaths[i], collection, assembly);
+                clip.frames[i] = new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection };
+            }
+            beamAnimation.clips = beamAnimation.clips.Concat(new tk2dSpriteAnimationClip[] { clip }).ToArray();
+            SetupBeamPart(beamAnimation, collection, animationName, colliderDimensions, colliderOffsets, overrideVertices,
+                wrapMode: tk2dSpriteAnimationClip.WrapMode.Once, anchor: anchor);
+        }
     }
 }

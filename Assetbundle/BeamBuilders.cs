@@ -158,6 +158,7 @@ namespace Alexandria.Assetbundle
         {
             Shared.ConstructOffsetsFromAnchor(def, anchor, scale, fixesScale, changesCollider);
         }
+
         public static void MakeOffset(this tk2dSpriteDefinition def, Vector2 offset, bool changesCollider = false)
         {
             Shared.MakeOffset(def, offset, changesCollider);
@@ -165,36 +166,10 @@ namespace Alexandria.Assetbundle
 
         private static void SetupBeamPart(tk2dSpriteAnimation beamAnimation, tk2dSpriteCollectionData data, string animationName, Vector2? colliderDimensions = null, Vector2? colliderOffsets = null, Vector3[] overrideVertices = null, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Once)
         {
-
-            foreach (var path in beamAnimation.GetClipByName(animationName).frames)
-            {
-                tk2dSpriteDefinition frameDef = data.spriteDefinitions[path.spriteId];
-                frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.MiddleLeft);
-                if (overrideVertices != null)
-                {
-                    frameDef.colliderVertices = overrideVertices;
-                }
-                else
-                {
-                    if (colliderDimensions == null || colliderOffsets == null)
-                    {
-                        ETGModConsole.Log("<size=100><color=#ff0000ff>BEAM ERROR: colliderDimensions or colliderOffsets was null with no override vertices!</color></size>", false);
-                    }
-                    else
-                    {
-                        Vector2 actualDimensions = (Vector2)colliderDimensions;
-                        Vector2 actualOffsets = (Vector2)colliderDimensions;
-                        frameDef.colliderVertices = new Vector3[]{
-                            new Vector3(actualOffsets.x / 16, actualOffsets.y / 16, 0f),
-                            new Vector3(actualDimensions.x / 16, actualDimensions.y / 16, 0f)
-                        };
-                    }
-                }
-            }
+            Shared.SetupBeamPart(beamAnimation, data, animationName, colliderDimensions, colliderOffsets, overrideVertices, wrapMode, anchor: tk2dBaseSprite.Anchor.MiddleLeft);
         }
-
-
     }
+
     internal class EmmisiveBeams : MonoBehaviour
     {
         public EmmisiveBeams()

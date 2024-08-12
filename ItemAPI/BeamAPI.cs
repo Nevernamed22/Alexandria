@@ -232,40 +232,7 @@ namespace Alexandria.ItemAPI
         /// <param name="overrideVertices">A set of override colliders, if applicable.</param>
         public static void SetupBeamPart(tk2dSpriteAnimation beamAnimation, List<string> animSpritePaths, string animationName, int fps, Assembly assembly, Vector2? colliderDimensions = null, Vector2? colliderOffsets = null, Vector3[] overrideVertices = null)
         {
-            tk2dSpriteAnimationClip clip = new tk2dSpriteAnimationClip() { name = animationName, frames = new tk2dSpriteAnimationFrame[0], fps = fps };
-            List<string> spritePaths = animSpritePaths;
-
-            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-            foreach (string path in spritePaths)
-            {
-                tk2dSpriteCollectionData collection = ETGMod.Databases.Items.ProjectileCollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(path, collection, assembly);
-                tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
-                frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.MiddleCenter);
-                if (overrideVertices != null)
-                {
-                    frameDef.colliderVertices = overrideVertices;
-                }
-                else
-                {
-                    if (colliderDimensions == null || colliderOffsets == null)
-                    {
-                        ETGModConsole.Log("<size=100><color=#ff0000ff>BEAM ERROR: colliderDimensions or colliderOffsets was null with no override vertices!</color></size>", false);
-                    }
-                    else
-                    {
-                        Vector2 actualDimensions = (Vector2)colliderDimensions;
-                        Vector2 actualOffsets = (Vector2)colliderDimensions;
-                        frameDef.colliderVertices = new Vector3[]{
-                            new Vector3(actualOffsets.x / 16, actualOffsets.y / 16, 0f),
-                            new Vector3(actualDimensions.x / 16, actualDimensions.y / 16, 0f)
-                        };
-                    }
-                }
-                frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-            }
-            clip.frames = frames.ToArray();
-            beamAnimation.clips = beamAnimation.clips.Concat(new tk2dSpriteAnimationClip[] { clip }).ToArray();
+            Shared.SetupBeamPart(beamAnimation, animSpritePaths, animationName, fps, assembly, colliderDimensions, colliderOffsets, overrideVertices, anchor: tk2dBaseSprite.Anchor.MiddleCenter);
         }
 
         //Methods and extensions related to spawning beam prefabs at runtime

@@ -1,5 +1,6 @@
 ﻿using Alexandria.ItemAPI;
 using Alexandria.PrefabAPI;
+using Alexandria.Misc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -265,31 +266,12 @@ namespace Alexandria.Assetbundle
         }
         private static void SetupBeamPart(tk2dSpriteAnimation beamAnimation, string animationName, Vector2? colliderDimensions = null, Vector2? colliderOffsets = null, Vector3[] overrideVertices = null)
         {
-            foreach (var path in beamAnimation.GetClipByName(animationName).frames)
-            {
-                tk2dSpriteDefinition frameDef = path.spriteCollection.spriteDefinitions[path.spriteId];
-                frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
-                if (overrideVertices != null)
-                {
-                    frameDef.colliderVertices = overrideVertices;
-                }
-                else
-                {
-                    if (colliderDimensions == null || colliderOffsets == null)
-                    {
-                        ETGModConsole.Log("<size=100><color=#ff0000ff>BEAM ERROR: colliderDimensions or colliderOffsets was null with no override vertices!</color></size>", false);
-                    }
-                    else
-                    {
-                        Vector2 actualDimensions = (Vector2)colliderDimensions;
-                        Vector2 actualOffsets = (Vector2)colliderDimensions;
-                        frameDef.colliderVertices = new Vector3[]{
-                            new Vector3(actualOffsets.x / 16, actualOffsets.y / 16, 0f),
-                            new Vector3(actualDimensions.x / 16, actualDimensions.y / 16, 0f)
-                        };
-                    }
-                }
-            }
+            if (beamAnimation.GetClipByName(animationName) is not tk2dSpriteAnimationClip clip)
+                return;
+            if (clip.frames == null || clip.frames.Length == 0)
+                return;
+            Shared.SetupBeamPart(beamAnimation, clip.frames[0].spriteCollection, animationName, colliderDimensions, colliderOffsets, overrideVertices,
+                tk2dSpriteAnimationClip.WrapMode.Once, anchor: tk2dBaseSprite.Anchor.MiddleLeft); //NOTE: a third different offset
         }
     }
 

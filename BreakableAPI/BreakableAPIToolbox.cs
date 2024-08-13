@@ -11,6 +11,7 @@ using Gungeon;
 using FullInspector;
 using Brave.BulletScript;
 using Alexandria.ItemAPI;
+using Alexandria.Misc;
 
 namespace Alexandria.BreakableAPI
 {
@@ -124,7 +125,7 @@ namespace Alexandria.BreakableAPI
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                 }
                 idleClip.frames = frames.ToArray();
                 idleClip.wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop;
@@ -151,7 +152,7 @@ namespace Alexandria.BreakableAPI
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(activationSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     unsealFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                 }
 
                 for (int i = 0; i < activeIdleSpritePaths.Length; i++)
@@ -160,7 +161,7 @@ namespace Alexandria.BreakableAPI
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(activeIdleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     unsealFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                 }
                 unsealClip.wrapMode = tk2dSpriteAnimationClip.WrapMode.LoopSection;
                 unsealClip.loopStart = activationSpritePaths.Length;
@@ -270,7 +271,7 @@ namespace Alexandria.BreakableAPI
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                 }
                 idleClip.frames = frames.ToArray();
                 idleClip.wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop;
@@ -296,7 +297,7 @@ namespace Alexandria.BreakableAPI
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(sealSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     sealFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                 }
                 sealClip.frames = sealFrames.ToArray();
                 sealClip.wrapMode = tk2dSpriteAnimationClip.WrapMode.Once;
@@ -315,7 +316,7 @@ namespace Alexandria.BreakableAPI
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(unsealSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     unsealFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                 }
                 unsealClip.frames = unsealFrames.ToArray();
                 unsealClip.wrapMode = tk2dSpriteAnimationClip.WrapMode.Once;
@@ -334,7 +335,7 @@ namespace Alexandria.BreakableAPI
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(playerNearSealedDoorAnimPaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     playernearblockerFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                 }
                 playernearblockerClip.frames = playernearblockerFrames.ToArray();
                 playernearblockerClip.wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop;
@@ -387,7 +388,7 @@ namespace Alexandria.BreakableAPI
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                 }
                 idleClip.frames = frames.ToArray();
                 idleClip.wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop;
@@ -414,7 +415,7 @@ namespace Alexandria.BreakableAPI
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(sealSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     sealFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                 }
                 sealClip.frames = sealFrames.ToArray();
                 sealClip.wrapMode = tk2dSpriteAnimationClip.WrapMode.Once;
@@ -433,7 +434,7 @@ namespace Alexandria.BreakableAPI
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(unsealSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     unsealFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                 }
                 unsealClip.frames = unsealFrames.ToArray();
                 unsealClip.wrapMode = tk2dSpriteAnimationClip.WrapMode.Once;
@@ -452,7 +453,7 @@ namespace Alexandria.BreakableAPI
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(playerNearSealedDoorAnimPaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     playernearblockerFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                 }
                 playernearblockerClip.frames = playernearblockerFrames.ToArray();
                 playernearblockerClip.wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop;
@@ -524,7 +525,7 @@ namespace Alexandria.BreakableAPI
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                 }
                 idleClip.frames = frames.ToArray();
                 idleClip.wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop;
@@ -574,18 +575,8 @@ namespace Alexandria.BreakableAPI
 
         public static tk2dSpriteAnimationClip AddAnimation(string clipName, tk2dSpriteAnimator animator, tk2dSpriteAnimation animation, int FPS, string[] SpritePaths, tk2dSpriteCollectionData SpriteObjectSpriteCollection, tk2dSpriteAnimationClip.WrapMode wrapMode)
         {
-            tk2dSpriteAnimationClip clip = new tk2dSpriteAnimationClip() { name = clipName, frames = new tk2dSpriteAnimationFrame[0], fps = FPS };
-            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-            for (int i = 0; i < SpritePaths.Length; i++)
-            {
-                tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(SpritePaths[i], collection, Assembly.GetCallingAssembly());
-                tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
-                frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
-            }
-            clip.frames = frames.ToArray();
-            clip.wrapMode = wrapMode;
+            var clip = Shared.CreateAnimation(Assembly.GetCallingAssembly(), SpriteObjectSpriteCollection, new List<string>(SpritePaths),
+                clipName, wrapMode, FPS, offsetAnchor: tk2dBaseSprite.Anchor.LowerLeft);
             animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { clip }).ToArray();
             return clip;
         }
@@ -610,39 +601,33 @@ namespace Alexandria.BreakableAPI
             sprite.SetSprite(SpriteObjectSpriteCollection, spriteID);
 
             tk2dSpriteAnimator animator = gameObject.GetOrAddComponent<tk2dSpriteAnimator>();
-            tk2dSpriteAnimation animation = gameObject.AddComponent<tk2dSpriteAnimation>();
+            tk2dSpriteAnimation animation = gameObject.GetOrAddComponent<tk2dSpriteAnimation>();
             animation.clips = new tk2dSpriteAnimationClip[0];
             animator.Library = animation;
 
-            List<tk2dSpriteAnimationClip> clips = new List<tk2dSpriteAnimationClip>();
-            if (SpritePaths.Length >= 1)
+            if (SpritePaths.Length == 0)
+                return gameObject;
+
+            Assembly assembly = Assembly.GetCallingAssembly();
+            tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
+            tk2dSpriteAnimationClip idleClip = new tk2dSpriteAnimationClip() {
+                name = "idle",
+                frames = new tk2dSpriteAnimationFrame[SpritePaths.Length],
+                fps = AnimFPS,
+                wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop,
+            };
+            for (int i = 0; i < SpritePaths.Length; i++)
             {
-                tk2dSpriteAnimationClip idleClip = new tk2dSpriteAnimationClip() { name = "idle", frames = new tk2dSpriteAnimationFrame[0], fps = AnimFPS };
-                List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-                for (int i = 0; i < SpritePaths.Length; i++)
-                {
-                    tk2dSpriteCollectionData collection = SpriteObjectSpriteCollection;
-                    int frameSpriteId = SpriteBuilder.AddSpriteToCollection(SpritePaths[i], collection, Assembly.GetCallingAssembly());
-                    tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
-                    frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
-                }
-                idleClip.frames = frames.ToArray();
-                idleClip.wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop;
-                animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { idleClip }).ToArray();
-                animator.playAutomatically = true;
-                animator.DefaultClipId = animator.GetClipIdByName("idle");
-                clips.Add(idleClip);
-                tk2dSpriteAnimationClip[] array = clips.ToArray();
-                animator.Library.clips = array;
-                animator.playAutomatically = true;
-                animator.DefaultClipId = animator.GetClipIdByName("idle");
+                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(SpritePaths[i], collection, assembly);
+                tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
+                idleClip.frames[i] = new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection };
+                Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
             }
+            animator.Library.clips = new tk2dSpriteAnimationClip[]{idleClip};
+            animator.playAutomatically = true;
+            animator.DefaultClipId = animator.GetClipIdByName("idle");
             return gameObject;
         }
-
-
-
 
         /// <summary>
         /// Generates, and returns a KickableObject. This is for generating a basic one, it returns it so you can additionally modify it without cluttering up the setup method too much. Reminder, KickableObjects have a MinorBreakable component that you could modify as well!
@@ -775,7 +760,7 @@ namespace Alexandria.BreakableAPI
                     tk2dSpriteCollectionData collection = KickableSpriteCollection;
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                     frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                 }
                 idleClip.frames = frames.ToArray();
@@ -832,21 +817,10 @@ namespace Alexandria.BreakableAPI
         }
         private static tk2dSpriteAnimationClip AddAnimation(tk2dSpriteAnimator animator, tk2dSpriteCollectionData Tablecollection, string[] spritePaths, string clipName, int FPS, tk2dSpriteAnimationClip.WrapMode wrapMode)
         {
-            tk2dSpriteAnimation animation = animator.gameObject.AddComponent<tk2dSpriteAnimation>();
+            tk2dSpriteAnimation animation = animator.gameObject.AddComponent<tk2dSpriteAnimation>(); //NOTE: this doesn't seem right...
             animation.clips = new tk2dSpriteAnimationClip[0];
             animator.Library = animation;
-            tk2dSpriteAnimationClip idleClip = new tk2dSpriteAnimationClip() { name = clipName, frames = new tk2dSpriteAnimationFrame[0], fps = FPS };
-            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-            for (int i = 0; i < spritePaths.Length; i++)
-            {
-                tk2dSpriteCollectionData collection = Tablecollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(spritePaths[i], collection, Assembly.GetCallingAssembly());
-                tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
-                frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-            }
-            idleClip.frames = frames.ToArray();
-            idleClip.wrapMode = wrapMode;
-            return idleClip;
+            return Shared.CreateAnimation(Assembly.GetCallingAssembly(), Tablecollection, new List<string>(spritePaths), clipName, wrapMode, FPS);
         }
 
         /// <summary>
@@ -939,7 +913,7 @@ namespace Alexandria.BreakableAPI
                     tk2dSpriteCollectionData collection = TableCollection;
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                     tk2dSpriteDefinition frameDefMod = GenerateColliderForSpriteDefinition(frameDef, new Vector3(colliderSize.x, colliderSize.y), new Vector3(colliderOffset.x, colliderOffset.y));
                     frameDef = frameDefMod;
                     frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
@@ -1195,7 +1169,7 @@ namespace Alexandria.BreakableAPI
                 tk2dSpriteCollectionData collection = Tablecollection;
                 int frameSpriteId = SpriteBuilder.AddSpriteToCollection(spritePaths[i], collection, Assembly.GetCallingAssembly());
                 tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
-                frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
 
                 if (clipName.Contains("break"))
                 {
@@ -1415,7 +1389,7 @@ namespace Alexandria.BreakableAPI
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                     frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                 }
                 idleClip.frames = frames.ToArray();
                 idleClip.wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop;
@@ -1435,7 +1409,7 @@ namespace Alexandria.BreakableAPI
                     tk2dSpriteCollectionData collection = MajorBreakableSpriteCollection;
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(breakSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                     breakFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                 }
                 breakClip.frames = breakFrames.ToArray();
@@ -1578,7 +1552,7 @@ namespace Alexandria.BreakableAPI
                     tk2dSpriteCollectionData collection = MinorBreakableSpriteCollection;
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(idleSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                     frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                 }
                 idleClip.frames = frames.ToArray();
@@ -1599,7 +1573,7 @@ namespace Alexandria.BreakableAPI
                     tk2dSpriteCollectionData collection = MinorBreakableSpriteCollection;
                     int frameSpriteId = SpriteBuilder.AddSpriteToCollection(breakSpritePaths[i], collection, Assembly.GetCallingAssembly());
                     tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
-                    frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.LowerLeft);
+                    Shared.ConstructOffsetsFromAnchor(frameDef, tk2dBaseSprite.Anchor.LowerLeft);
                     breakFrames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
                 }
                 breakClip.frames = breakFrames.ToArray();

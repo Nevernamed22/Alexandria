@@ -23,10 +23,8 @@ namespace Alexandria.ItemAPI
         public static bool PosIsNearAnyBoneOnBeam(this BasicBeamController beam, Vector2 positionToCheck, float distance)
         {
             foreach (BasicBeamController.BeamBone bone in beam.m_bones)
-            {
-                Vector2 bonepos = beam.GetBonePosition(bone);
-                if (Vector2.Distance(positionToCheck, bonepos) < distance) return true;
-            }           
+                if (Vector2.Distance(positionToCheck, beam.GetBonePosition(bone)) < distance)
+                    return true;
             return false;
         }
 
@@ -36,8 +34,7 @@ namespace Alexandria.ItemAPI
         /// <param name="beam">The beam whose bones should be counted.</param>
         public static int GetBoneCount(this BasicBeamController beam)
         {
-            if (!beam.UsesBones) { return 1; }
-            else { return beam.m_bones.Count(); }
+            return beam.UsesBones ? beam.m_bones.Count() : 1;
         }
 
         /// <summary>
@@ -46,8 +43,7 @@ namespace Alexandria.ItemAPI
         /// <param name="beam">The beam to be checked.</param>
         public static float GetFinalBoneDirection(this BasicBeamController beam)
         {
-            if (!beam.UsesBones) { return beam.Direction.ToAngle(); }
-            else { return beam.m_bones.Last.Value.RotationAngle; }
+            return beam.UsesBones ? beam.m_bones.Last.Value.RotationAngle : beam.Direction.ToAngle();
         }
 
         /// <summary>
@@ -57,9 +53,12 @@ namespace Alexandria.ItemAPI
         /// <param name="boneIndex">The index whose bone should be returned..</param>
         public static BasicBeamController.BeamBone GetIndexedBone(this BasicBeamController beam, int boneIndex)
         {
-            if (beam.m_bones == null) return null;
-            if (beam.m_bones.ElementAt(boneIndex) == null) { Debug.LogError("Attempted to fetch a beam bone at an invalid index"); return null; }
-            return beam.m_bones.ElementAt(boneIndex);
+            if (beam.m_bones == null)
+                return null;
+            if (beam.m_bones.ElementAt(boneIndex) is BasicBeamController.BeamBone bone)
+                return bone;
+            Debug.LogError("Attempted to fetch a beam bone at an invalid index");
+            return null;
         }
 
         /// <summary>
@@ -70,16 +69,10 @@ namespace Alexandria.ItemAPI
         /// <param name="boneIndex">The index whose bone position should be returned..</param>
         public static Vector2 GetIndexedBonePosition(this BasicBeamController beam, int boneIndex)
         {
-            if (beam.m_bones.ElementAt(boneIndex) == null) { Debug.LogError("Attempted to fetch the position of a beam bone at an invalid index"); return Vector2.zero; }
-            if (!beam.UsesBones)
-            {
-                return beam.Origin + BraveMathCollege.DegreesToVector(beam.Direction.ToAngle(), beam.m_bones.ElementAt(boneIndex).PosX);
-            }
-            if (beam.ProjectileAndBeamMotionModule != null)
-            {
-                return beam.m_bones.ElementAt(boneIndex).Position + beam.ProjectileAndBeamMotionModule.GetBoneOffset(beam.m_bones.ElementAt(boneIndex), beam, beam.projectile.Inverted);
-            }
-            return beam.m_bones.ElementAt(boneIndex).Position;
+            if (beam.m_bones.ElementAt(boneIndex) is BasicBeamController.BeamBone bone)
+                return beam.GetBonePosition(bone);
+            Debug.LogError("Attempted to fetch the position of a beam bone at an invalid index");
+            return Vector2.zero;
         }
 
         /// <summary>
@@ -89,8 +82,10 @@ namespace Alexandria.ItemAPI
         /// <param name="bone">The bone whose position should be returned.</param>
         public static Vector2 GetBonePosition(this BasicBeamController beam, BasicBeamController.BeamBone bone)
         {
-            if (!beam.UsesBones) { return beam.Origin + BraveMathCollege.DegreesToVector(beam.Direction.ToAngle(), bone.PosX); }
-            if (beam.ProjectileAndBeamMotionModule != null) { return bone.Position + beam.ProjectileAndBeamMotionModule.GetBoneOffset(bone, beam, beam.projectile.Inverted); }
+            if (!beam.UsesBones)
+                return beam.Origin + BraveMathCollege.DegreesToVector(beam.Direction.ToAngle(), bone.PosX);
+            if (beam.ProjectileAndBeamMotionModule != null)
+                return bone.Position + beam.ProjectileAndBeamMotionModule.GetBoneOffset(bone, beam, beam.projectile.Inverted);
             return bone.Position;
         }
 
@@ -124,27 +119,20 @@ namespace Alexandria.ItemAPI
         {
             try
             {
-                projectile.specRigidbody.CollideWithOthers = false;
-                float convertedColliderX = colliderDimensions.x / 16f;
-                float convertedColliderY = colliderDimensions.y / 16f;
-                float convertedOffsetX = colliderOffsets.x / 16f;
-                float convertedOffsetY = colliderOffsets.y / 16f;
+                Assembly assembly = Assembly.GetCallingAssembly();
+
+                if (projectile.specRigidbody)
+                    projectile.specRigidbody.CollideWithOthers = false;
 
                 int spriteID = SpriteBuilder.AddSpriteToCollection(spritePath, ETGMod.Databases.Items.ProjectileCollection, Assembly.GetCallingAssembly());
                 tk2dTiledSprite tiledSprite = projectile.gameObject.GetOrAddComponent<tk2dTiledSprite>();
 
-
-
                 tiledSprite.SetSprite(ETGMod.Databases.Items.ProjectileCollection, spriteID);
                 tk2dSpriteDefinition def = tiledSprite.GetCurrentSpriteDef();
-                def.colliderVertices = new Vector3[]{
-                    new Vector3(convertedOffsetX, convertedOffsetY, 0f),
-                    new Vector3(convertedColliderX, convertedColliderY, 0f)
-                };
+                def.colliderVertices = new Vector3[]{ 0.0625f * colliderOffsets, 0.0625f * colliderDimensions };
 
-                def.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.MiddleLeft);
+                def.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.MiddleLeft); //NOTE: this seems right, but double check later
 
-                //tiledSprite.anchor = tk2dBaseSprite.Anchor.MiddleCenter;
                 tk2dSpriteAnimator animator = projectile.gameObject.GetOrAddComponent<tk2dSpriteAnimator>();
                 tk2dSpriteAnimation animation = projectile.gameObject.GetOrAddComponent<tk2dSpriteAnimation>();
                 animation.clips = new tk2dSpriteAnimationClip[0];
@@ -155,54 +143,41 @@ namespace Alexandria.ItemAPI
                 //---------------- Sets up the animation for the main part of the beam
                 if (beamAnimationPaths != null)
                 {
-                    tk2dSpriteAnimationClip clip = new tk2dSpriteAnimationClip() { name = "beam_idle", frames = new tk2dSpriteAnimationFrame[0], fps = beamFPS };
-                    List<string> spritePaths = beamAnimationPaths;
-
-                    List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-                    foreach (string path in spritePaths)
+                    tk2dSpriteAnimationClip clip = new tk2dSpriteAnimationClip() {
+                        name = "beam_idle", frames = new tk2dSpriteAnimationFrame[beamAnimationPaths.Count], fps = beamFPS };
+                    tk2dSpriteCollectionData collection = ETGMod.Databases.Items.ProjectileCollection;
+                    for (int i = 0; i < beamAnimationPaths.Count; ++i)
                     {
-                        tk2dSpriteCollectionData collection = ETGMod.Databases.Items.ProjectileCollection;
-                        int frameSpriteId = SpriteBuilder.AddSpriteToCollection(path, collection, Assembly.GetCallingAssembly());
+                        int frameSpriteId = SpriteBuilder.AddSpriteToCollection(beamAnimationPaths[i], collection, assembly);
                         tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                         frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.MiddleLeft);
                         frameDef.colliderVertices = def.colliderVertices;
-                        frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
+                        clip.frames[i] = new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection };
                     }
-                    clip.frames = frames.ToArray();
                     animation.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { clip }).ToArray();
                     beamController.beamAnimation = "beam_idle";
                 }
 
                 //------------- Sets up the animation for the part of the beam that touches the wall
                 if (endVFXAnimationPaths != null && endVFXColliderDimensions != null && endVFXColliderOffsets != null)
-                {
-                    SetupBeamPart(animation, endVFXAnimationPaths, "beam_end", beamEndFPS, Assembly.GetCallingAssembly(),(Vector2)endVFXColliderDimensions, (Vector2)endVFXColliderOffsets);
-                    beamController.beamEndAnimation = "beam_end";
-                }
+                    SetupBeamPart(animation, endVFXAnimationPaths, "beam_end", beamEndFPS, assembly, (Vector2)endVFXColliderDimensions, (Vector2)endVFXColliderOffsets);
                 else
-                {
-                    SetupBeamPart(animation, beamAnimationPaths, "beam_end", beamFPS, Assembly.GetCallingAssembly(), null, null, def.colliderVertices);
-                    beamController.beamEndAnimation = "beam_end";
-                }
+                    SetupBeamPart(animation, beamAnimationPaths, "beam_end", beamFPS, assembly, null, null, def.colliderVertices);
+                beamController.beamEndAnimation = "beam_end";
 
                 //---------------Sets up the animaton for the VFX that plays over top of the end of the beam where it hits stuff
                 if (impactVFXAnimationPaths != null && impactVFXColliderDimensions != null && impactVFXColliderOffsets != null)
                 {
-                    SetupBeamPart(animation, impactVFXAnimationPaths, "beam_impact", beamImpactFPS, Assembly.GetCallingAssembly(), (Vector2)impactVFXColliderDimensions, (Vector2)impactVFXColliderOffsets);
+                    SetupBeamPart(animation, impactVFXAnimationPaths, "beam_impact", beamImpactFPS, assembly, (Vector2)impactVFXColliderDimensions, (Vector2)impactVFXColliderOffsets);
                     beamController.impactAnimation = "beam_impact";
                 }
 
                 //--------------Sets up the animation for the very start of the beam
                 if (muzzleVFXAnimationPaths != null && muzzleVFXColliderDimensions != null && muzzleVFXColliderOffsets != null)
-                {
-                    SetupBeamPart(animation, muzzleVFXAnimationPaths, "beam_start", beamMuzzleFPS, Assembly.GetCallingAssembly(), (Vector2)muzzleVFXColliderDimensions, (Vector2)muzzleVFXColliderOffsets);
-                    beamController.beamStartAnimation = "beam_start";
-                }
+                    SetupBeamPart(animation, muzzleVFXAnimationPaths, "beam_start", beamMuzzleFPS, assembly, (Vector2)muzzleVFXColliderDimensions, (Vector2)muzzleVFXColliderOffsets);
                 else
-                {
-                    SetupBeamPart(animation, beamAnimationPaths, "beam_start", beamFPS, Assembly.GetCallingAssembly(), null, null, def.colliderVertices);
-                    beamController.beamStartAnimation = "beam_start";
-                }
+                    SetupBeamPart(animation, beamAnimationPaths, "beam_start", beamFPS, assembly, null, null, def.colliderVertices);
+                beamController.beamStartAnimation = "beam_start";
 
                 if (glowAmount > 0)
                 {
@@ -232,40 +207,7 @@ namespace Alexandria.ItemAPI
         /// <param name="overrideVertices">A set of override colliders, if applicable.</param>
         public static void SetupBeamPart(tk2dSpriteAnimation beamAnimation, List<string> animSpritePaths, string animationName, int fps, Assembly assembly, Vector2? colliderDimensions = null, Vector2? colliderOffsets = null, Vector3[] overrideVertices = null)
         {
-            tk2dSpriteAnimationClip clip = new tk2dSpriteAnimationClip() { name = animationName, frames = new tk2dSpriteAnimationFrame[0], fps = fps };
-            List<string> spritePaths = animSpritePaths;
-
-            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-            foreach (string path in spritePaths)
-            {
-                tk2dSpriteCollectionData collection = ETGMod.Databases.Items.ProjectileCollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(path, collection, assembly);
-                tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
-                frameDef.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.MiddleCenter);
-                if (overrideVertices != null)
-                {
-                    frameDef.colliderVertices = overrideVertices;
-                }
-                else
-                {
-                    if (colliderDimensions == null || colliderOffsets == null)
-                    {
-                        ETGModConsole.Log("<size=100><color=#ff0000ff>BEAM ERROR: colliderDimensions or colliderOffsets was null with no override vertices!</color></size>", false);
-                    }
-                    else
-                    {
-                        Vector2 actualDimensions = (Vector2)colliderDimensions;
-                        Vector2 actualOffsets = (Vector2)colliderDimensions;
-                        frameDef.colliderVertices = new Vector3[]{
-                            new Vector3(actualOffsets.x / 16, actualOffsets.y / 16, 0f),
-                            new Vector3(actualDimensions.x / 16, actualDimensions.y / 16, 0f)
-                        };
-                    }
-                }
-                frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-            }
-            clip.frames = frames.ToArray();
-            beamAnimation.clips = beamAnimation.clips.Concat(new tk2dSpriteAnimationClip[] { clip }).ToArray();
+            Shared.SetupBeamPart(beamAnimation, animSpritePaths, animationName, fps, assembly, colliderDimensions, colliderOffsets, overrideVertices, anchor: tk2dBaseSprite.Anchor.MiddleCenter);
         }
 
         //Methods and extensions related to spawning beam prefabs at runtime
@@ -286,35 +228,38 @@ namespace Alexandria.ItemAPI
         {
             Vector2 sourcePos = Vector2.zero;
             SpeculativeRigidbody rigidBod = null;
-            if (otherShooter == null) sourcePos = fixedPosition;
+            if (otherShooter == null)
+                sourcePos = fixedPosition;
             else
             {
-                if (otherShooter.GetComponent<SpeculativeRigidbody>()) rigidBod = otherShooter.GetComponent<SpeculativeRigidbody>();
-                else if (otherShooter.GetComponentInChildren<SpeculativeRigidbody>()) rigidBod = otherShooter.GetComponentInChildren<SpeculativeRigidbody>();
-
-                if (rigidBod) sourcePos = rigidBod.UnitCenter;
+                if (otherShooter.GetComponent<SpeculativeRigidbody>() is SpeculativeRigidbody body1)
+                    rigidBod = body1;
+                else if (otherShooter.GetComponentInChildren<SpeculativeRigidbody>() is SpeculativeRigidbody body2)
+                    rigidBod = body2;
+                if (rigidBod)
+                    sourcePos = rigidBod.UnitCenter;
             }
             if (sourcePos != Vector2.zero)
             {
-
                 GameObject gameObject = SpawnManager.SpawnProjectile(projectileToSpawn.gameObject, sourcePos, Quaternion.identity, true);
-                Projectile component = gameObject.GetComponent<Projectile>();
-                component.Owner = owner;
-                BeamController component2 = gameObject.GetComponent<BeamController>();
+                gameObject.GetComponent<Projectile>().Owner = owner;
+                BeamController beam = gameObject.GetComponent<BeamController>();
                 if (skipChargeTime)
                 {
-                    component2.chargeDelay = 0f;
-                    component2.usesChargeDelay = false;
+                    beam.chargeDelay = 0f;
+                    beam.usesChargeDelay = false;
                 }
-                component2.Owner = owner;
-                component2.HitsPlayers = false;
-                component2.HitsEnemies = true;
+                beam.Owner = owner;
+                beam.HitsPlayers = false;
+                beam.HitsEnemies = true;
                 Vector3 vector = BraveMathCollege.DegreesToVector(targetAngle, 1f);
-                if (otherShooter != null && otherShooter.GetComponent<Projectile>() && followDirOnProjectile) component2.Direction = (otherShooter.GetComponent<Projectile>().Direction.ToAngle() + angleOffsetFromProjectileAngle).DegreeToVector2();
-                else component2.Direction = vector;
-                component2.Origin = sourcePos;
-                GameManager.Instance.Dungeon.StartCoroutine(BeamAPI.HandleFreeFiringBeam(component2, rigidBod, fixedPosition, targetAngle, duration, followDirOnProjectile, angleOffsetFromProjectileAngle));
-                return component2;
+                if (otherShooter != null && otherShooter.GetComponent<Projectile>() && followDirOnProjectile)
+                    beam.Direction = (otherShooter.GetComponent<Projectile>().Direction.ToAngle() + angleOffsetFromProjectileAngle).DegreeToVector2();
+                else
+                    beam.Direction = vector;
+                beam.Origin = sourcePos;
+                GameManager.Instance.Dungeon.StartCoroutine(BeamAPI.HandleFreeFiringBeam(beam, rigidBod, fixedPosition, targetAngle, duration, followDirOnProjectile, angleOffsetFromProjectileAngle));
+                return beam;
             }
             else
             {
@@ -322,108 +267,85 @@ namespace Alexandria.ItemAPI
                 return null;
             }
         }
+
         private static IEnumerator HandleFreeFiringBeam(BeamController beam, SpeculativeRigidbody otherShooter, Vector2 fixedPosition, float targetAngle, float duration, bool followProjDir, float projFollowOffset)
         {
             bool parented = otherShooter != null;
-            float elapsed = 0f;
+            Projectile projToFollow = (followProjDir && otherShooter) ? otherShooter.GetComponent<Projectile>() : null;
+            Vector2 sourcePos = otherShooter ? otherShooter.UnitCenter : fixedPosition;
             yield return null;
-            while (elapsed < duration)
+            for (float elapsed = 0f; elapsed < duration; elapsed += BraveTime.DeltaTime)
             {
-                if (otherShooter == null && parented) { break; }
-                Vector2 sourcePos;
-                if (otherShooter == null) sourcePos = fixedPosition;
-                else sourcePos = otherShooter.UnitCenter;
-
-                elapsed += BraveTime.DeltaTime;
-                if (beam == null) { yield break; }
-                if (sourcePos != null)
+                if (!beam || (parented && !otherShooter))
+                    break;
+                if (otherShooter)
                 {
-                    if (otherShooter != null && otherShooter.GetComponent<Projectile>() && followProjDir)
-                    {
-                        beam.Direction = (otherShooter.GetComponent<Projectile>().Direction.ToAngle() + projFollowOffset).DegreeToVector2();
-                    }
+                    sourcePos = otherShooter.UnitCenter;
                     beam.Origin = sourcePos;
-                    beam.LateUpdatePosition(sourcePos);
                 }
-                else { ETGModConsole.Log("SOURCEPOS WAS NULL IN BEAM FIRING HANDLER"); }
+                if (projToFollow)
+                    beam.Direction = (projToFollow.Direction.ToAngle() + projFollowOffset).DegreeToVector2();
+                beam.LateUpdatePosition(sourcePos);
                 yield return null;
             }
-            if (beam){beam.CeaseAttack();}
+            if (beam)
+                beam.CeaseAttack();
             yield break;
         }
     }
+
     internal class EmmisiveBeams : MonoBehaviour
     {
-        public EmmisiveBeams()
-        {
-            this.EmissivePower = 100;
-            this.EmissiveColorPower = 1.55f;
-        }
         public void Start()
         {
-            Shader glowshader = ShaderCache.Acquire("Brave/LitTk2dCustomFalloffTiltedCutoutEmissive");
+            glowshader = ShaderCache.Acquire("Brave/LitTk2dCustomFalloffTiltedCutoutEmissive");
 
             foreach (Transform transform in base.transform)
             {
-                if (TransformList.Contains(transform.name))
-                {
-                    tk2dSprite sproot = transform.GetComponent<tk2dSprite>();
-                    if (sproot != null)
-                    {
-                        sproot.usesOverrideMaterial = true;
-                        sproot.renderer.material.shader = glowshader;
-                        sproot.renderer.material.EnableKeyword("BRIGHTNESS_CLAMP_ON");
-                        sproot.renderer.material.SetFloat("_EmissivePower", EmissivePower);
-                        sproot.renderer.material.SetFloat("_EmissiveColorPower", EmissiveColorPower);
-                    }
-                }
+                if (!TransformList.Contains(transform.name))
+                    continue;
+                if (transform.GetComponent<tk2dSprite>() is not tk2dSprite sproot)
+                    continue;
+
+                sproot.usesOverrideMaterial = true;
+                Material mat = sproot.renderer.material;
+                mat.shader = glowshader;
+                mat.EnableKeyword("BRIGHTNESS_CLAMP_ON");
+                mat.SetFloat("_EmissivePower", EmissivePower);
+                mat.SetFloat("_EmissiveColorPower", EmissiveColorPower);
             }
-            this.beamcont = base.GetComponent<BasicBeamController>();
-            BasicBeamController beam = this.beamcont;
-            beam.sprite.usesOverrideMaterial = true;
-            BasicBeamController component = beam.gameObject.GetComponent<BasicBeamController>();
-            bool flag = component != null;
-            bool flag2 = flag;
-            if (flag2)
-            {
-                component.sprite.renderer.material.shader = glowshader;
-                component.sprite.renderer.material.EnableKeyword("BRIGHTNESS_CLAMP_ON");
-                component.sprite.renderer.material.SetFloat("_EmissivePower", EmissivePower);
-                component.sprite.renderer.material.SetFloat("_EmissiveColorPower", EmissiveColorPower);
-            }
+            BasicBeamController cont = base.GetComponent<BasicBeamController>();
+            Material mat2 = cont.sprite.renderer.material;
+            mat2.shader = glowshader;
+            mat2.EnableKeyword("BRIGHTNESS_CLAMP_ON");
+            mat2.SetFloat("_EmissivePower", EmissivePower);
+            mat2.SetFloat("_EmissiveColorPower", EmissiveColorPower);
         }
 
+        public void Update()
+        {
+            if (base.transform.Find("beam pierce impact vfx") is not Transform t)
+                return;
+            if (t.GetComponent<tk2dSprite>() is not tk2dSprite sproot)
+                return;
 
-        private List<string> TransformList = new List<string>()
+            Material mat = sproot.renderer.material;
+            mat.shader = glowshader;
+            mat.EnableKeyword("BRIGHTNESS_CLAMP_ON");
+            mat.SetFloat("_EmissivePower", EmissivePower);
+            mat.SetFloat("_EmissiveColorPower", EmissiveColorPower);
+        }
+
+        private static List<string> TransformList = new List<string>()
         {
             "Sprite",
             "beam impact vfx 2",
             "beam impact vfx",
         };
 
-
-        public void Update()
-        {
-
-            Shader glowshader = ShaderCache.Acquire("Brave/LitTk2dCustomFalloffTiltedCutoutEmissive");
-            Transform trna = base.transform.Find("beam pierce impact vfx");
-            if (trna != null)
-            {
-                tk2dSprite sproot = trna.GetComponent<tk2dSprite>();
-                if (sproot != null)
-                {
-                    sproot.renderer.material.shader = glowshader;
-                    sproot.renderer.material.EnableKeyword("BRIGHTNESS_CLAMP_ON");
-                    sproot.renderer.material.SetFloat("_EmissivePower", EmissivePower);
-                    sproot.renderer.material.SetFloat("_EmissiveColorPower", EmissiveColorPower);
-                }
-            }
-
-        }
-
-        private BasicBeamController beamcont;
-        public float EmissivePower;
-        public float EmissiveColorPower;
+        private Shader glowshader;
+        public float EmissivePower = 100;
+        public float EmissiveColorPower = 1.55f;
     }
 }
 

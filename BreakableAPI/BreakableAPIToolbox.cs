@@ -1618,7 +1618,7 @@ namespace Alexandria.BreakableAPI
 
         public static WaftingDebrisObject GenerateWaftingDebrisObject(string shardSpritePath, Vector2 waftDuration, Vector2 waftDistance, Vector2 initialBurstDuration, bool debrisObjectsCanRotate = true, float LifeSpanMin = 0.33f, float LifeSpanMax = 2f, float AngularVelocity = 540, float AngularVelocityVariance = 180f, tk2dSprite shadowSprite = null, float Mass = 1, string AudioEventName = null, GameObject BounceVFX = null, int DebrisBounceCount = 0, bool DoesGoopOnRest = false, GoopDefinition GoopType = null, float GoopRadius = 1f)
         {
-            GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePath, null, Assembly.GetCallingAssembly());
+            GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePath, new GameObject(shardSpritePath+"_debris"), Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(debrisObject);
             tk2dSprite tk2dsprite = debrisObject.GetComponent<tk2dSprite>();
             WaftingDebrisObject DebrisObj = debrisObject.AddComponent<WaftingDebrisObject>();
@@ -1669,7 +1669,7 @@ namespace Alexandria.BreakableAPI
 
         public static WaftingDebrisObject GenerateAnimatedWaftingDebrisObject(string[] shardSpritePaths, Vector2 waftDuration, Vector2 waftDistance, Vector2 initialBurstDuration, int FPS = 12, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop, bool debrisObjectsCanRotate = true, float LifeSpanMin = 0.33f, float LifeSpanMax = 2f, float AngularVelocity = 540, float AngularVelocityVariance = 180f, tk2dSprite shadowSprite = null, float Mass = 1, string AudioEventName = null, GameObject BounceVFX = null, int DebrisBounceCount = 0, bool DoesGoopOnRest = false, GoopDefinition GoopType = null, float GoopRadius = 1f)
         {
-            GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[0], null, Assembly.GetCallingAssembly());
+            GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[0], new GameObject(shardSpritePaths[0]+"_debris"), Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(debrisObject);
             WaftingDebrisObject DebrisObj = debrisObject.AddComponent<WaftingDebrisObject>();
 
@@ -1744,7 +1744,7 @@ namespace Alexandria.BreakableAPI
             List<WaftingDebrisObject> DebrisObjectList = new List<WaftingDebrisObject>();
             for (int i = 0; i < shardSpritePaths.Length; i++)
             {
-                GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[i], null, Assembly.GetCallingAssembly());
+                GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[i], new GameObject(shardSpritePaths[i]+"_debris"), Assembly.GetCallingAssembly());
                 FakePrefab.MarkAsFakePrefab(debrisObject);
                 tk2dSprite tk2dsprite = debrisObject.GetComponent<tk2dSprite>();
                 WaftingDebrisObject DebrisObj = debrisObject.AddComponent<WaftingDebrisObject>();
@@ -1804,7 +1804,7 @@ namespace Alexandria.BreakableAPI
                 string[] paths = shardSpritePathsList[i];
                 for (int e = 0; e < paths.Length; e++)
                 {
-                    GameObject debrisObject = SpriteBuilder.SpriteFromResource(paths[0], null, Assembly.GetCallingAssembly());
+                    GameObject debrisObject = SpriteBuilder.SpriteFromResource(paths[0], new GameObject(paths[0]+"_debris"), Assembly.GetCallingAssembly());
                     FakePrefab.MarkAsFakePrefab(debrisObject);
                     WaftingDebrisObject DebrisObj = debrisObject.AddComponent<WaftingDebrisObject>();
                     tk2dSpriteCollectionData VFXSpriteCollection = SpriteBuilder.ConstructCollection(debrisObject, (paths[0] + "_Collection"));
@@ -1875,7 +1875,7 @@ namespace Alexandria.BreakableAPI
 
         public static DebrisObject GenerateDebrisObject(string shardSpritePath, bool debrisObjectsCanRotate = true, float LifeSpanMin = 0.33f, float LifeSpanMax = 2f, float AngularVelocity = 540, float AngularVelocityVariance = 180f, tk2dSprite shadowSprite = null, float Mass = 1, string AudioEventName = null, GameObject BounceVFX = null, int DebrisBounceCount = 0, bool DoesGoopOnRest = false, GoopDefinition GoopType = null, float GoopRadius = 1f)
         {
-            GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePath, null, Assembly.GetCallingAssembly());
+            GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePath, new GameObject(shardSpritePath+"_debris"), Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(debrisObject);
             tk2dSprite tk2dsprite = debrisObject.GetComponent<tk2dSprite>();
             DebrisObject DebrisObj = debrisObject.AddComponent<DebrisObject>();
@@ -1916,7 +1916,7 @@ namespace Alexandria.BreakableAPI
         /// <param name="GoopRadius">The radius of the spawned goop.</param>
         public static DebrisObject GenerateAnimatedDebrisObject(string[] shardSpritePaths, int FPS = 12, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop, bool debrisObjectsCanRotate = true, float LifeSpanMin = 0.33f, float LifeSpanMax = 2f, float AngularVelocity = 540, float AngularVelocityVariance = 180f, tk2dSprite shadowSprite = null, float Mass = 1, string AudioEventName = null, GameObject BounceVFX = null, int DebrisBounceCount = 0, bool DoesGoopOnRest = false, GoopDefinition GoopType = null, float GoopRadius = 1f)
         {
-            GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[0], null, Assembly.GetCallingAssembly());
+            GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[0], new GameObject(shardSpritePaths[0]+"_debris"), Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(debrisObject);
             DebrisObject DebrisObj = debrisObject.AddComponent<DebrisObject>();
 
@@ -1981,7 +1981,7 @@ namespace Alexandria.BreakableAPI
             List<DebrisObject> DebrisObjectList = new List<DebrisObject>();
             for (int i = 0; i < shardSpritePaths.Length; i++)
             {
-                GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[i], null, Assembly.GetCallingAssembly());
+                GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[i], new GameObject(shardSpritePaths[i]+"_debris"), Assembly.GetCallingAssembly());
                 FakePrefab.MarkAsFakePrefab(debrisObject);
                 tk2dSprite tk2dsprite = debrisObject.GetComponent<tk2dSprite>();
                 DebrisObject DebrisObj = debrisObject.AddComponent<DebrisObject>();
@@ -2033,7 +2033,7 @@ namespace Alexandria.BreakableAPI
                 string[] paths = shardSpritePathsList[i];
                 for (int e = 0; e < paths.Length; e++)
                 {
-                    GameObject debrisObject = SpriteBuilder.SpriteFromResource(paths[0], null, Assembly.GetCallingAssembly());
+                    GameObject debrisObject = SpriteBuilder.SpriteFromResource(paths[0], new GameObject(paths[0]+"_debris"), Assembly.GetCallingAssembly());
                     FakePrefab.MarkAsFakePrefab(debrisObject);
                     DebrisObject DebrisObj = debrisObject.AddComponent<DebrisObject>();
                     tk2dSpriteCollectionData VFXSpriteCollection = SpriteBuilder.ConstructCollection(debrisObject, (paths[0] + "_Collection"));

@@ -1031,26 +1031,7 @@ namespace Alexandria.DungeonAPI
 
                         SpeculativeRigidbody specBody = gameObject.GetOrAddComponent<SpeculativeRigidbody>();
                         specBody.CollideWithTileMap = false;
-                        if (specBody.PixelColliders == null) { specBody.PixelColliders = new List<PixelCollider>(); }
-                        specBody.PixelColliders.Add(new PixelCollider
-                        {
-                            ColliderGenerationMode = PixelCollider.PixelColliderGeneration.Manual,
-                            CollisionLayer = CollisionLayer.Pickup,
-                            IsTrigger = true,
-                            BagleUseFirstFrameOnly = false,
-                            SpecifyBagelFrame = string.Empty,
-                            BagelColliderNumber = 0,
-                            ManualOffsetX = 0,
-                            ManualOffsetY = 0,
-                            ManualWidth = 16 * X,
-                            ManualHeight = 16 * Y,
-                            ManualDiameter = 0,
-                            ManualLeftX = 0,
-                            ManualLeftY = 0,
-                            ManualRightX = 0,
-                            ManualRightY = 0,
-
-                        });
+                        specBody.AddCollider(CollisionLayer.Pickup, IntVector2.Zero, new IntVector2(16 * X, 16 * Y), isTrigger: true);
                         gameObject.GetOrAddComponent<WinchesterCameraHelper>();
                     }
                     if (assetPath == "WinchesterNPC")

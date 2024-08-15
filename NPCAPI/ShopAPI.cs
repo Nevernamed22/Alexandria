@@ -1869,35 +1869,12 @@ namespace Alexandria.NPCAPI
                     }
                 }
             }
-            PixelCollider item = new PixelCollider
-            {
-                ColliderGenerationMode = colliderGenerationMode,
-                CollisionLayer = collisionLayer,
-                IsTrigger = IsTrigger,
-                BagleUseFirstFrameOnly = (colliderGenerationMode == PixelCollider.PixelColliderGeneration.Tk2dPolygon),
-                SpecifyBagelFrame = string.Empty,
-                BagelColliderNumber = 0,
-                ManualOffsetX = intVector.x,
-                ManualOffsetY = intVector.y,
-                ManualWidth = intVector2.x,
-                ManualHeight = intVector2.y,
-                ManualDiameter = 0,
-                ManualLeftX = 0,
-                ManualLeftY = 0,
-                ManualRightX = 0,
-                ManualRightY = 0
-            };
-            if (replaceExistingColliders | orAddComponent.PixelColliders == null)
-            {
-                orAddComponent.PixelColliders = new List<PixelCollider>
-                {
-                    item
-                };
-            }
+            PixelCollider item = Shared.SetupCollider(collisionLayer, intVector, intVector2, isTrigger: IsTrigger, mode: colliderGenerationMode);
+            if (replaceExistingColliders || orAddComponent.PixelColliders == null)
+                orAddComponent.PixelColliders = new List<PixelCollider> { item };
             else
-            {
                 orAddComponent.PixelColliders.Add(item);
-            }
+
             if (orAddComponent.sprite && colliderGenerationMode == PixelCollider.PixelColliderGeneration.Tk2dPolygon)
             {
                 Bounds bounds = orAddComponent.sprite.GetBounds();

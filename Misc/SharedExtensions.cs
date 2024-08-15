@@ -404,5 +404,53 @@ namespace Alexandria.Misc
             data.spriteDefinitions[id] = def;
             return def;
         }
+
+        internal static PixelCollider SetupCollider(CollisionLayer layer, IntVector2 offset = default, IntVector2 dimensions = default,
+            bool enabled = true, bool isTrigger = false, PixelCollider.PixelColliderGeneration mode = PixelCollider.PixelColliderGeneration.Manual)
+        {
+            return new PixelCollider()
+            {
+                ColliderGenerationMode = mode,
+                CollisionLayer = layer,
+                ManualWidth = dimensions.x,
+                ManualHeight = dimensions.y,
+                ManualOffsetX = offset.x,
+                ManualOffsetY = offset.y,
+                Enabled = enabled,
+                IsTrigger = isTrigger,
+            };
+        }
+
+        internal static PixelCollider AddCollider(this SpeculativeRigidbody body, CollisionLayer layer, IntVector2 offset = default, IntVector2 dimensions = default,
+            bool enabled = true, bool isTrigger = false, PixelCollider.PixelColliderGeneration mode = PixelCollider.PixelColliderGeneration.Manual)
+        {
+            if (body.PixelColliders == null)
+                body.PixelColliders = new List<PixelCollider>();
+            PixelCollider collider = SetupCollider(layer, offset, dimensions, enabled, isTrigger, mode);
+            body.PixelColliders.Add(collider);
+            return collider;
+        }
+
+        internal static PixelCollider SetupPolygonCollider(CollisionLayer layer, IntVector2 offset, bool enabled = true, bool isTrigger = false)
+        {
+            return new PixelCollider()
+            {
+                ColliderGenerationMode = PixelCollider.PixelColliderGeneration.Tk2dPolygon,
+                CollisionLayer = layer,
+                ManualOffsetX = offset.x,
+                ManualOffsetY = offset.y,
+                Enabled = enabled,
+                IsTrigger = isTrigger,
+            };
+        }
+
+        internal static PixelCollider AddPolygonCollider(this SpeculativeRigidbody body, CollisionLayer layer, IntVector2 offset, bool enabled = true, bool isTrigger = false)
+        {
+            if (body.PixelColliders == null)
+                body.PixelColliders = new List<PixelCollider>();
+            PixelCollider collider = SetupPolygonCollider(layer, offset, enabled, isTrigger);
+            body.PixelColliders.Add(collider);
+            return collider;
+        }
     }
 }

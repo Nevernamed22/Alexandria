@@ -8,6 +8,7 @@ using MonoMod.RuntimeDetour;
 using System.Collections;
 using HarmonyLib;
 using Alexandria.DungeonAPI;
+using Alexandria.Misc;
 
 namespace Alexandria.cAPI
 {
@@ -134,15 +135,7 @@ namespace Alexandria.cAPI
 
     private static void MakeRigidBody(this GameObject g, IntVector2 dimensions, IntVector2 offset)
     {
-      g.AddComponent<SpeculativeRigidbody>().PixelColliders = new() { new ()
-      {
-          ColliderGenerationMode = PixelCollider.PixelColliderGeneration.Manual,
-          CollisionLayer = CollisionLayer.HighObstacle,
-          ManualOffsetX = offset.x,
-          ManualOffsetY = offset.y,
-          ManualWidth = dimensions.x,
-          ManualHeight = dimensions.y,
-      }};
+      g.AddComponent<SpeculativeRigidbody>().AddCollider(CollisionLayer.HighObstacle, offset, dimensions);
     }
 
     /// <summary>Mostly identical to the base game AddRuntimeRoom() function, with a hack to work around tiles failing to render when adding the room to the Breach</summary>

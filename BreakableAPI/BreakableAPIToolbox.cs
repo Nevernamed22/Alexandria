@@ -239,24 +239,7 @@ namespace Alexandria.BreakableAPI
             animator.Library = animation;
 
             SpeculativeRigidbody speculativeRigidbody = sprite.SetUpEmptySpeculativeRigidbody(new IntVector2(0, 0), new IntVector2(isNorthSouthDoor == true ? 32 : 16, isNorthSouthDoor == true ? 16 : 32));
-            speculativeRigidbody.PixelColliders.Add(new PixelCollider
-            {
-                ColliderGenerationMode = PixelCollider.PixelColliderGeneration.Manual,
-                CollisionLayer = CollisionLayer.HighObstacle,
-                IsTrigger = false,
-                BagleUseFirstFrameOnly = false,
-                SpecifyBagelFrame = string.Empty,
-                BagelColliderNumber = 0,
-                ManualOffsetX = 0,
-                ManualOffsetY = 0,
-                ManualWidth = 12,
-                ManualHeight = 12,
-                ManualDiameter = 0,
-                ManualLeftX = 0,
-                ManualLeftY = 0,
-                ManualRightX = 0,
-                ManualRightY = 0,
-            });
+            speculativeRigidbody.AddCollider(CollisionLayer.HighObstacle, IntVector2.Zero, new IntVector2(12, 12));
 
             List<tk2dSpriteAnimationClip> clips = new List<tk2dSpriteAnimationClip>();
 
@@ -699,52 +682,11 @@ namespace Alexandria.BreakableAPI
 
             SpeculativeRigidbody speculativeRigidbody = sprite.SetUpEmptySpeculativeRigidbody(colliderOffset, colliderSize);
             if (collisionLayerList == null)
-            {
-                speculativeRigidbody.PixelColliders.Add(new PixelCollider
-                {
-                    ColliderGenerationMode = PixelCollider.PixelColliderGeneration.Manual,
-                    CollisionLayer = CollisionLayer.HighObstacle,
-                    IsTrigger = false,
-                    BagleUseFirstFrameOnly = false,
-                    SpecifyBagelFrame = string.Empty,
-                    BagelColliderNumber = 0,
-                    ManualOffsetX = colliderOffset.x,
-                    ManualOffsetY = colliderOffset.y,
-                    ManualWidth = colliderSize.x,
-                    ManualHeight = colliderSize.y,
-                    ManualDiameter = 0,
-                    ManualLeftX = 0,
-                    ManualLeftY = 0,
-                    ManualRightX = 0,
-                    ManualRightY = 0,
-                });
-
-
-            }
+                speculativeRigidbody.AddCollider(CollisionLayer.HighObstacle, colliderOffset, colliderSize);
             else
-            {
                 foreach (CollisionLayer layer in collisionLayerList)
-                {
-                    speculativeRigidbody.PixelColliders.Add(new PixelCollider
-                    {
-                        ColliderGenerationMode = PixelCollider.PixelColliderGeneration.Manual,
-                        CollisionLayer = layer,
-                        IsTrigger = false,
-                        BagleUseFirstFrameOnly = false,
-                        SpecifyBagelFrame = string.Empty,
-                        BagelColliderNumber = 0,
-                        ManualOffsetX = colliderOffset.x,
-                        ManualOffsetY = colliderOffset.y,
-                        ManualWidth = colliderSize.x,
-                        ManualHeight = colliderSize.y,
-                        ManualDiameter = 0,
-                        ManualLeftX = 0,
-                        ManualLeftY = 0,
-                        ManualRightX = 0,
-                        ManualRightY = 0,
-                    });
-                }
-            }
+                    speculativeRigidbody.AddCollider(layer, colliderOffset, colliderSize);
+
             tk2dSpriteAnimator animator = gameObject.GetOrAddComponent<tk2dSpriteAnimator>();
             tk2dSpriteAnimation animation = gameObject.AddComponent<tk2dSpriteAnimation>();
             animation.clips = new tk2dSpriteAnimationClip[0];
@@ -976,29 +918,9 @@ namespace Alexandria.BreakableAPI
             animator.DefaultClipId = animator.GetClipIdByName("idle");
 
             SpeculativeRigidbody speculativeRigidbody = sprite.SetUpEmptySpeculativeRigidbody(colliderOffset, colliderSize);
-            speculativeRigidbody.PixelColliders.Add(new PixelCollider
-            {
-                ColliderGenerationMode = PixelCollider.PixelColliderGeneration.Tk2dPolygon,
-                CollisionLayer = CollisionLayer.LowObstacle,
+            speculativeRigidbody.AddPolygonCollider(CollisionLayer.LowObstacle, colliderOffset, enabled: true);
+            speculativeRigidbody.AddPolygonCollider(CollisionLayer.BulletBlocker, colliderOffset, enabled: false);
 
-                IsTrigger = false,
-                Enabled = true,
-                BagleUseFirstFrameOnly = true,
-                ManualOffsetX = colliderOffset.x,
-                ManualOffsetY = colliderOffset.y,
-                ManualDiameter = 0,
-            });
-            speculativeRigidbody.PixelColliders.Add(new PixelCollider
-            {
-                ColliderGenerationMode = PixelCollider.PixelColliderGeneration.Tk2dPolygon,
-                CollisionLayer = CollisionLayer.BulletBlocker,
-                IsTrigger = false,
-                Enabled = false,
-                BagleUseFirstFrameOnly = true,
-                ManualOffsetX = colliderOffset.x,
-                ManualOffsetY = colliderOffset.y,
-                ManualDiameter = 0,
-            });
             table.sprite = sprite;
             table.spriteAnimator = animator;
             table.specRigidbody = speculativeRigidbody;
@@ -1294,9 +1216,8 @@ namespace Alexandria.BreakableAPI
             tk2dSprite sprite = gameObject.GetOrAddComponent<tk2dSprite>();
             sprite.SetSprite(MajorBreakableSpriteCollection, spriteID);
 
-            IntVector2 intVector = new IntVector2(ColliderSizeX, ColliderSizeY);
             IntVector2 colliderOffset = new IntVector2(ColliderOffsetX, ColliderOffsetY);
-            IntVector2 colliderSize = new IntVector2(intVector.x, intVector.y);
+            IntVector2 colliderSize = new IntVector2(ColliderSizeX, ColliderSizeY);
 
             if (UsesCustomColliderValues == false)
             {
@@ -1307,71 +1228,12 @@ namespace Alexandria.BreakableAPI
             SpeculativeRigidbody speculativeRigidbody = sprite.SetUpEmptySpeculativeRigidbody(colliderOffset, colliderSize);
             if (collisionLayerList == null)
             {
-                speculativeRigidbody.PixelColliders.Add(new PixelCollider
-                {
-                    ColliderGenerationMode = PixelCollider.PixelColliderGeneration.Manual,
-                    CollisionLayer = CollisionLayer.HighObstacle,
-                    IsTrigger = false,
-                    BagleUseFirstFrameOnly = false,
-                    SpecifyBagelFrame = string.Empty,
-                    BagelColliderNumber = 0,
-                    ManualOffsetX = colliderOffset.x,
-                    ManualOffsetY = colliderOffset.y,
-                    ManualWidth = colliderSize.x,
-                    ManualHeight = colliderSize.y,
-                    ManualDiameter = 0,
-                    ManualLeftX = 0,
-                    ManualLeftY = 0,
-                    ManualRightX = 0,
-                    ManualRightY = 0,
-                });
-                speculativeRigidbody.PixelColliders.Add(new PixelCollider
-                {
-                    ColliderGenerationMode = PixelCollider.PixelColliderGeneration.Manual,
-                    CollisionLayer = CollisionLayer.BulletBlocker,
-                    IsTrigger = false,
-                    BagleUseFirstFrameOnly = false,
-                    SpecifyBagelFrame = string.Empty,
-                    BagelColliderNumber = 0,
-                    ManualOffsetX = colliderOffset.x,
-                    ManualOffsetY = colliderOffset.y,
-                    ManualWidth = colliderSize.x,
-                    ManualHeight = colliderSize.y,
-                    ManualDiameter = 0,
-                    ManualLeftX = 0,
-                    ManualLeftY = 0,
-                    ManualRightX = 0,
-                    ManualRightY = 0,
-                });
-
+                speculativeRigidbody.AddCollider(CollisionLayer.HighObstacle, colliderOffset, colliderSize);
+                speculativeRigidbody.AddCollider(CollisionLayer.BulletBlocker, colliderOffset, colliderSize);
             }
             else
-            {
                 foreach (CollisionLayer layer in collisionLayerList)
-                {
-                    speculativeRigidbody.PixelColliders.Add(new PixelCollider
-                    {
-                        ColliderGenerationMode = PixelCollider.PixelColliderGeneration.Manual,
-                        CollisionLayer = layer,
-                        IsTrigger = false,
-                        BagleUseFirstFrameOnly = false,
-                        SpecifyBagelFrame = string.Empty,
-                        BagelColliderNumber = 0,
-                        ManualOffsetX = colliderOffset.x,
-                        ManualOffsetY = colliderOffset.y,
-                        ManualWidth = colliderSize.x,
-                        ManualHeight = colliderSize.y,
-                        ManualDiameter = 0,
-                        ManualLeftX = 0,
-                        ManualLeftY = 0,
-                        ManualRightX = 0,
-                        ManualRightY = 0,
-                    });
-                }
-            }
-
-
-
+                   speculativeRigidbody.AddCollider(layer, colliderOffset, colliderSize);
 
             tk2dSpriteAnimator animator = gameObject.GetOrAddComponent<tk2dSpriteAnimator>();
             tk2dSpriteAnimation animation = gameObject.AddComponent<tk2dSpriteAnimation>();
@@ -1491,51 +1353,10 @@ namespace Alexandria.BreakableAPI
 
             SpeculativeRigidbody speculativeRigidbody = sprite.SetUpEmptySpeculativeRigidbody(colliderOffset, colliderSize);
             if (collisionLayerList == null)
-            {
-                speculativeRigidbody.PixelColliders.Add(new PixelCollider
-                {
-                    ColliderGenerationMode = PixelCollider.PixelColliderGeneration.Manual,
-                    CollisionLayer = CollisionLayer.HighObstacle,
-                    IsTrigger = false,
-                    BagleUseFirstFrameOnly = false,
-                    SpecifyBagelFrame = string.Empty,
-                    BagelColliderNumber = 0,
-                    ManualOffsetX = colliderOffset.x,
-                    ManualOffsetY = colliderOffset.y,
-                    ManualWidth = colliderSize.x,
-                    ManualHeight = colliderSize.y,
-                    ManualDiameter = 0,
-                    ManualLeftX = 0,
-                    ManualLeftY = 0,
-                    ManualRightX = 0,
-                    ManualRightY = 0,
-                });
-            }
+                speculativeRigidbody.AddCollider(CollisionLayer.HighObstacle, colliderOffset, colliderSize);
             else
-            {
                 foreach (CollisionLayer layer in collisionLayerList)
-                {
-                    speculativeRigidbody.PixelColliders.Add(new PixelCollider
-                    {
-                        ColliderGenerationMode = PixelCollider.PixelColliderGeneration.Manual,
-                        CollisionLayer = layer,
-                        IsTrigger = false,
-                        BagleUseFirstFrameOnly = false,
-                        SpecifyBagelFrame = string.Empty,
-                        BagelColliderNumber = 0,
-                        ManualOffsetX = colliderOffset.x,
-                        ManualOffsetY = colliderOffset.y,
-                        ManualWidth = colliderSize.x,
-                        ManualHeight = colliderSize.y,
-                        ManualDiameter = 0,
-                        ManualLeftX = 0,
-                        ManualLeftY = 0,
-                        ManualRightX = 0,
-                        ManualRightY = 0,
-                    });
-                }
-            }
-
+                    speculativeRigidbody.AddCollider(layer, colliderOffset, colliderSize);
 
             tk2dSpriteAnimator animator = gameObject.GetOrAddComponent<tk2dSpriteAnimator>();
             tk2dSpriteAnimation animation = gameObject.AddComponent<tk2dSpriteAnimation>();

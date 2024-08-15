@@ -5,6 +5,7 @@ using System.Reflection;
 using Gungeon;
 using MonoMod.RuntimeDetour;
 using UnityEngine;
+using Alexandria.Misc;
 
 namespace Alexandria.ItemAPI
 {
@@ -105,17 +106,7 @@ namespace Alexandria.ItemAPI
         {
             AIAnimator orAddComponent = obj.GetOrAddComponent<AIAnimator>();
             DirectionalAnimation directionalAnimation = orAddComponent.GetDirectionalAnimation(name, directionType, type);
-
-            if (directionalAnimation == null)
-            {
-                directionalAnimation = new DirectionalAnimation
-                {
-                    AnimNames = new string[0],
-                    Flipped = new DirectionalAnimation.FlipType[0],
-                    Type = directionType,
-                    Prefix = name
-                };
-            }
+            directionalAnimation ??= Shared.BlankDirectionalAnimation(prefix: name);
             directionalAnimation.AnimNames = directionalAnimation.AnimNames.Concat(new string[] { name }).ToArray<string>();
             directionalAnimation.Flipped = directionalAnimation.Flipped.Concat(new DirectionalAnimation.FlipType[] { flipType }).ToArray<DirectionalAnimation.FlipType>();
             orAddComponent.AssignDirectionalAnimation(name, directionalAnimation, type);

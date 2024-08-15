@@ -1468,116 +1468,44 @@ namespace Alexandria.NPCAPI
 
         public static string ReturnVoiceBox(VoiceBoxes voicebox)
         {
-            string voice = "oldman";
-            switch (voicebox)
+            return voicebox switch
             {
-                case VoiceBoxes.FEMALE:
-                    voice = "female";
-                    return voice;
-                case VoiceBoxes.BROTHER_ALBERN:
-                    voice = "truthknower";
-                    return voice;
-                case VoiceBoxes.FRUMP:
-                    voice = "frump";
-                    return voice;
-                case VoiceBoxes.SER_MANUEL:
-                    voice = "tutorialknight";
-                    return voice;
-                case VoiceBoxes.OLD_MAN:
-                    voice = "oldman";
-                    return voice;
-                case VoiceBoxes.AGUNIM:
-                    voice = "agunim";
-                    return voice;
-                case VoiceBoxes.BELLO:
-                    voice = "shopkeep";
-                    return voice;
-                case VoiceBoxes.MANLY:
-                    voice = "manly";
-                    return voice;
-                case VoiceBoxes.EMP_ROR:
-                    voice = "mainframe";
-                    return voice;
-                case VoiceBoxes.ROBOT:
-                    voice = "robot";
-                    return voice;
-                case VoiceBoxes.RESOURCEFUL_RAT:
-                    voice = "rat";
-                    return voice;
-                case VoiceBoxes.WITCH_1:
-                    voice = "witch1";
-                    return voice;
-                case VoiceBoxes.WITCH_2:
-                    voice = "witch2";
-                    return voice;
-                case VoiceBoxes.WITCH_3:
-                    voice = "witch3";
-                    return voice;
-                case VoiceBoxes.MALE:
-                    voice = "male";
-                    return voice;
-                case VoiceBoxes.DAISUKE:
-                    voice = "dice";
-                    return voice;
-                case VoiceBoxes.BOWLER:
-                    voice = "bower";
-                    return voice;
-                case VoiceBoxes.TONIC:
-                    voice = "goofy";
-                    return voice;
-                case VoiceBoxes.GUNSLING_KING:
-                    voice = "gunslingking";
-                    return voice;
-                case VoiceBoxes.TEEN:
-                    voice = "teen";
-                    return voice;
-                case VoiceBoxes.SYNERGRACE:
-                    voice = "Lady";
-                    return voice;
-                case VoiceBoxes.DOUG:
-                    voice = "bug";
-                    return voice;
-                case VoiceBoxes.ALIEN:
-                    voice = "alien";
-                    return voice;
-                case VoiceBoxes.WINCHESTER:
-                    voice = "gambler";
-                    return voice;
-                case VoiceBoxes.OX:
-                    voice = "golem";
-                    return voice;
-                case VoiceBoxes.BRAT:
-                    voice = "brat";
-                    return voice;
-                case VoiceBoxes.JOLLY:
-                    voice = "jolly";
-                    return voice;
-                case VoiceBoxes.MONSTER_MANUEL:
-                    voice = "owl";
-                    return voice;
-                case VoiceBoxes.FOOL:
-                    voice = "fool";
-                    return voice;
-                case VoiceBoxes.CONVICT:
-                    voice = "convict";
-                    return voice;
-                case VoiceBoxes.VAMPIRE:
-                    voice = "vampire";
-                    return voice;
-                case VoiceBoxes.CO_OP:
-                    voice = "coop";
-                    return voice;
-                case VoiceBoxes.SPACE_ROGUE:
-                    voice = "spacerogue";
-                    return voice;
-                case VoiceBoxes.COMPUTER:
-                    voice = "computer";
-                    return voice;
-                default:
-                    voice = "oldman";
-                    return voice;
-
-            }
+                VoiceBoxes.FEMALE          => "female",
+                VoiceBoxes.BROTHER_ALBERN  => "truthknower",
+                VoiceBoxes.FRUMP           => "frump",
+                VoiceBoxes.SER_MANUEL      => "tutorialknight",
+                VoiceBoxes.OLD_MAN         => "oldman",
+                VoiceBoxes.AGUNIM          => "agunim",
+                VoiceBoxes.BELLO           => "shopkeep",
+                VoiceBoxes.MANLY           => "manly",
+                VoiceBoxes.EMP_ROR         => "mainframe",
+                VoiceBoxes.ROBOT           => "robot",
+                VoiceBoxes.RESOURCEFUL_RAT => "rat",
+                VoiceBoxes.WITCH_1         => "witch1",
+                VoiceBoxes.WITCH_2         => "witch2",
+                VoiceBoxes.WITCH_3         => "witch3",
+                VoiceBoxes.MALE            => "male",
+                VoiceBoxes.DAISUKE         => "dice",
+                VoiceBoxes.BOWLER          => "bower",
+                VoiceBoxes.TONIC           => "goofy",
+                VoiceBoxes.GUNSLING_KING   => "gunslingking",
+                VoiceBoxes.TEEN            => "teen",
+                VoiceBoxes.SYNERGRACE      => "Lady",
+                VoiceBoxes.DOUG            => "bug",
+                VoiceBoxes.ALIEN           => "alien",
+                VoiceBoxes.WINCHESTER      => "gambler",
+                VoiceBoxes.OX              => "golem",
+                VoiceBoxes.BRAT            => "brat",
+                VoiceBoxes.JOLLY           => "jolly",
+                VoiceBoxes.MONSTER_MANUEL  => "owl",
+                VoiceBoxes.FOOL            => "fool",
+                VoiceBoxes.CONVICT         => "convict",
+                VoiceBoxes.VAMPIRE         => "vampire",
+                VoiceBoxes.CO_OP           => "coop",
+                VoiceBoxes.SPACE_ROGUE     => "spacerogue",
+                VoiceBoxes.COMPUTER        => "computer",
+                _                          => "oldman",
+            };
         }
 
         public static GameObject SetUpJailedNpc(string name, string prefix, List<string> idleSpritePaths, int idleFps, Vector3 talkPointOffset, GungeonFlags flag)
@@ -1768,41 +1696,11 @@ namespace Alexandria.NPCAPI
             aianimator.ForceKillVfxOnPreDeath = false;
             aianimator.SuppressAnimatorFallback = false;
             aianimator.IsBodySprite = true;
-            aianimator.IdleAnimation = new DirectionalAnimation
-            {
-                Type = DirectionalAnimation.DirectionType.None,
-                Prefix = string.Empty,
-                AnimNames = new string[0],
-                Flipped = new DirectionalAnimation.FlipType[0]
-            };
-            aianimator.MoveAnimation = new DirectionalAnimation
-            {
-                Type = DirectionalAnimation.DirectionType.None,
-                Prefix = string.Empty,
-                AnimNames = new string[0],
-                Flipped = new DirectionalAnimation.FlipType[0]
-            };
-            aianimator.FlightAnimation = new DirectionalAnimation
-            {
-                Type = DirectionalAnimation.DirectionType.None,
-                Prefix = string.Empty,
-                AnimNames = new string[0],
-                Flipped = new DirectionalAnimation.FlipType[0]
-            };
-            aianimator.HitAnimation = new DirectionalAnimation
-            {
-                Type = DirectionalAnimation.DirectionType.None,
-                Prefix = string.Empty,
-                AnimNames = new string[0],
-                Flipped = new DirectionalAnimation.FlipType[0]
-            };
-            aianimator.TalkAnimation = new DirectionalAnimation
-            {
-                Type = DirectionalAnimation.DirectionType.None,
-                Prefix = string.Empty,
-                AnimNames = new string[0],
-                Flipped = new DirectionalAnimation.FlipType[0]
-            };
+            aianimator.IdleAnimation = Shared.BlankDirectionalAnimation();
+            aianimator.MoveAnimation = Shared.BlankDirectionalAnimation();
+            aianimator.FlightAnimation = Shared.BlankDirectionalAnimation();
+            aianimator.HitAnimation = Shared.BlankDirectionalAnimation();
+            aianimator.TalkAnimation = Shared.BlankDirectionalAnimation();
             aianimator.OtherAnimations = new List<AIAnimator.NamedDirectionalAnimation>(0);
             aianimator.OtherVFX = new List<AIAnimator.NamedVFXPool>(0);
             aianimator.OtherScreenShake = new List<AIAnimator.NamedScreenShake>(0);

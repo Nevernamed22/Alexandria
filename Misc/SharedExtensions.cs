@@ -452,5 +452,16 @@ namespace Alexandria.Misc
             body.PixelColliders.Add(collider);
             return collider;
         }
+
+        internal static DirectionalAnimation BlankDirectionalAnimation(string prefix = null)
+        {
+            return new DirectionalAnimation
+            {
+                Type = DirectionalAnimation.DirectionType.None,
+                Prefix = prefix ?? string.Empty,
+                AnimNames = new string[0],
+                Flipped = new DirectionalAnimation.FlipType[0]
+            };
+        }
     }
 }

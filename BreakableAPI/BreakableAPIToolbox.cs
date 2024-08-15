@@ -1441,23 +1441,9 @@ namespace Alexandria.BreakableAPI
         {
             GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePath, new GameObject(shardSpritePath+"_debris"), Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(debrisObject);
-            tk2dSprite tk2dsprite = debrisObject.GetComponent<tk2dSprite>();
             WaftingDebrisObject DebrisObj = debrisObject.AddComponent<WaftingDebrisObject>();
-            DebrisObj.canRotate = debrisObjectsCanRotate;
-            DebrisObj.lifespanMin = LifeSpanMin;
-            DebrisObj.lifespanMax = LifeSpanMax;
-            DebrisObj.bounceCount = DebrisBounceCount;
-            DebrisObj.angularVelocity = AngularVelocity;
-            DebrisObj.angularVelocityVariance = AngularVelocityVariance;
-            if (AudioEventName != null) { DebrisObj.audioEventName = AudioEventName; }
-            if (BounceVFX != null) { DebrisObj.optionalBounceVFX = BounceVFX; }
-            DebrisObj.sprite = tk2dsprite;
-            DebrisObj.DoesGoopOnRest = DoesGoopOnRest;
-            if (GoopType != null) { DebrisObj.AssignedGoop = GoopType; } else if (GoopType == null && DebrisObj.DoesGoopOnRest == true) { DebrisObj.DoesGoopOnRest = false; }
-            DebrisObj.GoopRadius = GoopRadius;
-            if (shadowSprite != null) { DebrisObj.shadowSprite = shadowSprite; }
-            DebrisObj.inertialMass = Mass;
-
+            DebrisObj.SetupInternal(debrisObjectsCanRotate, shadowSprite, Mass, LifeSpanMin, LifeSpanMax, AngularVelocity,
+                AngularVelocityVariance, AudioEventName, BounceVFX, DebrisBounceCount, DoesGoopOnRest, GoopType, GoopRadius);
             DebrisObj.waftDuration = waftDuration;
             DebrisObj.waftDistance = waftDistance;
             DebrisObj.initialBurstDuration = initialBurstDuration;
@@ -1492,46 +1478,12 @@ namespace Alexandria.BreakableAPI
         {
             GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[0], new GameObject(shardSpritePaths[0]+"_debris"), Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(debrisObject);
+            debrisObject.SetupAnimatorInternal(Assembly.GetCallingAssembly(), shardSpritePaths, FPS, wrapMode);
+
             WaftingDebrisObject DebrisObj = debrisObject.AddComponent<WaftingDebrisObject>();
-
-            tk2dSpriteCollectionData VFXSpriteCollection = SpriteBuilder.ConstructCollection(debrisObject, (shardSpritePaths[0] + "_Collection"));
-            int spriteID = SpriteBuilder.AddSpriteToCollection(shardSpritePaths[0], VFXSpriteCollection, Assembly.GetCallingAssembly());
-            tk2dSprite sprite = debrisObject.GetOrAddComponent<tk2dSprite>();
-            sprite.SetSprite(VFXSpriteCollection, spriteID);
-
-            tk2dSpriteAnimator animator = debrisObject.GetOrAddComponent<tk2dSpriteAnimator>();
-            tk2dSpriteAnimation animation = debrisObject.AddComponent<tk2dSpriteAnimation>();
-            animation.clips = new tk2dSpriteAnimationClip[0];
-            animator.Library = animation;
-            tk2dSpriteAnimationClip idleClip = new tk2dSpriteAnimationClip() { name = "idle", frames = new tk2dSpriteAnimationFrame[0], fps = FPS };
-            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-            for (int i = 0; i < shardSpritePaths.Length; i++)
-            {
-                tk2dSpriteCollectionData collection = VFXSpriteCollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(shardSpritePaths[i], collection, Assembly.GetCallingAssembly());
-                tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
-                frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-            }
-            idleClip.frames = frames.ToArray();
-            idleClip.wrapMode = wrapMode;
-            animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { idleClip }).ToArray();
-            animator.DefaultClipId = animator.GetClipIdByName("idle");
+            DebrisObj.SetupInternal(debrisObjectsCanRotate, shadowSprite, Mass, LifeSpanMin, LifeSpanMax, AngularVelocity,
+                AngularVelocityVariance, AudioEventName, BounceVFX, DebrisBounceCount, DoesGoopOnRest, GoopType, GoopRadius);
             DebrisObj.waftAnimationName = "idle";
-            DebrisObj.canRotate = debrisObjectsCanRotate;
-            DebrisObj.lifespanMin = LifeSpanMin;
-            DebrisObj.lifespanMax = LifeSpanMax;
-            DebrisObj.bounceCount = DebrisBounceCount;
-            DebrisObj.angularVelocity = AngularVelocity;
-            DebrisObj.angularVelocityVariance = AngularVelocityVariance;
-            if (AudioEventName != null) { DebrisObj.audioEventName = AudioEventName; }
-            if (BounceVFX != null) { DebrisObj.optionalBounceVFX = BounceVFX; }
-            DebrisObj.sprite = sprite;
-            DebrisObj.DoesGoopOnRest = DoesGoopOnRest;
-            if (GoopType != null) { DebrisObj.AssignedGoop = GoopType; } else if (GoopType == null && DebrisObj.DoesGoopOnRest == true) { DebrisObj.DoesGoopOnRest = false; }
-            DebrisObj.GoopRadius = GoopRadius;
-            if (shadowSprite != null) { DebrisObj.shadowSprite = shadowSprite; }
-            DebrisObj.inertialMass = Mass;
-
             DebrisObj.waftDuration = waftDuration;
             DebrisObj.waftDistance = waftDistance;
             DebrisObj.initialBurstDuration = initialBurstDuration;
@@ -1567,22 +1519,9 @@ namespace Alexandria.BreakableAPI
             {
                 GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[i], new GameObject(shardSpritePaths[i]+"_debris"), Assembly.GetCallingAssembly());
                 FakePrefab.MarkAsFakePrefab(debrisObject);
-                tk2dSprite tk2dsprite = debrisObject.GetComponent<tk2dSprite>();
                 WaftingDebrisObject DebrisObj = debrisObject.AddComponent<WaftingDebrisObject>();
-                DebrisObj.canRotate = debrisObjectsCanRotate;
-                DebrisObj.lifespanMin = LifeSpanMin;
-                DebrisObj.lifespanMax = LifeSpanMax;
-                DebrisObj.bounceCount = DebrisBounceCount;
-                DebrisObj.angularVelocity = AngularVelocity;
-                DebrisObj.angularVelocityVariance = AngularVelocityVariance;
-                if (AudioEventName != null) { DebrisObj.audioEventName = AudioEventName; }
-                if (BounceVFX != null) { DebrisObj.optionalBounceVFX = BounceVFX; }
-                DebrisObj.sprite = tk2dsprite;
-                DebrisObj.DoesGoopOnRest = DoesGoopOnRest;
-                if (GoopType != null) { DebrisObj.AssignedGoop = GoopType; } else if (GoopType == null && DebrisObj.DoesGoopOnRest == true) { DebrisObj.DoesGoopOnRest = false; }
-                DebrisObj.GoopRadius = GoopRadius;
-                if (shadowSprite != null) { DebrisObj.shadowSprite = shadowSprite; }
-                DebrisObj.inertialMass = Mass;
+                DebrisObj.SetupInternal(debrisObjectsCanRotate, shadowSprite, Mass, LifeSpanMin, LifeSpanMax, AngularVelocity,
+                    AngularVelocityVariance, AudioEventName, BounceVFX, DebrisBounceCount, DoesGoopOnRest, GoopType, GoopRadius);
                 DebrisObj.waftDuration = waftDuration;
                 DebrisObj.waftDistance = waftDistance;
                 DebrisObj.initialBurstDuration = initialBurstDuration;
@@ -1627,44 +1566,13 @@ namespace Alexandria.BreakableAPI
                 {
                     GameObject debrisObject = SpriteBuilder.SpriteFromResource(paths[0], new GameObject(paths[0]+"_debris"), Assembly.GetCallingAssembly());
                     FakePrefab.MarkAsFakePrefab(debrisObject);
-                    WaftingDebrisObject DebrisObj = debrisObject.AddComponent<WaftingDebrisObject>();
-                    tk2dSpriteCollectionData VFXSpriteCollection = SpriteBuilder.ConstructCollection(debrisObject, (paths[0] + "_Collection"));
-                    int spriteID = SpriteBuilder.AddSpriteToCollection(paths[0], VFXSpriteCollection, Assembly.GetCallingAssembly());
-                    tk2dSprite sprite = debrisObject.GetOrAddComponent<tk2dSprite>();
-                    sprite.SetSprite(VFXSpriteCollection, spriteID);
+                    debrisObject.SetupAnimatorInternal(Assembly.GetCallingAssembly(), paths, FPS, wrapMode);
 
-                    tk2dSpriteAnimator animator = debrisObject.GetOrAddComponent<tk2dSpriteAnimator>();
-                    tk2dSpriteAnimation animation = debrisObject.AddComponent<tk2dSpriteAnimation>();
-                    animation.clips = new tk2dSpriteAnimationClip[0];
-                    animator.Library = animation;
-                    tk2dSpriteAnimationClip idleClip = new tk2dSpriteAnimationClip() { name = "idle", frames = new tk2dSpriteAnimationFrame[0], fps = FPS };
-                    List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-                    for (int q = 0; q < paths.Length; q++)
-                    {
-                        tk2dSpriteCollectionData collection = VFXSpriteCollection;
-                        int frameSpriteId = SpriteBuilder.AddSpriteToCollection(paths[q], collection, Assembly.GetCallingAssembly());
-                        tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
-                        frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                    }
-                    idleClip.frames = frames.ToArray();
-                    idleClip.wrapMode = wrapMode;
-                    animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { idleClip }).ToArray();
-                    animator.DefaultClipId = animator.GetClipIdByName("idle");
+                    WaftingDebrisObject DebrisObj = debrisObject.AddComponent<WaftingDebrisObject>();
+                    DebrisObj.SetupInternal(debrisObjectsCanRotate, shadowSprite, Mass, LifeSpanMin, LifeSpanMax,
+                        AngularVelocity, AngularVelocityVariance, AudioEventName, BounceVFX, DebrisBounceCount, DoesGoopOnRest, GoopType, GoopRadius);
+
                     DebrisObj.waftAnimationName = "idle";
-                    DebrisObj.canRotate = debrisObjectsCanRotate;
-                    DebrisObj.lifespanMin = LifeSpanMin;
-                    DebrisObj.lifespanMax = LifeSpanMax;
-                    DebrisObj.bounceCount = DebrisBounceCount;
-                    DebrisObj.angularVelocity = AngularVelocity;
-                    DebrisObj.angularVelocityVariance = AngularVelocityVariance;
-                    if (AudioEventName != null) { DebrisObj.audioEventName = AudioEventName; }
-                    if (BounceVFX != null) { DebrisObj.optionalBounceVFX = BounceVFX; }
-                    DebrisObj.sprite = sprite;
-                    DebrisObj.DoesGoopOnRest = DoesGoopOnRest;
-                    if (GoopType != null) { DebrisObj.AssignedGoop = GoopType; } else if (GoopType == null && DebrisObj.DoesGoopOnRest == true) { DebrisObj.DoesGoopOnRest = false; }
-                    DebrisObj.GoopRadius = GoopRadius;
-                    if (shadowSprite != null) { DebrisObj.shadowSprite = shadowSprite; }
-                    DebrisObj.inertialMass = Mass;
                     DebrisObj.waftDuration = waftDuration;
                     DebrisObj.waftDistance = waftDistance;
                     DebrisObj.initialBurstDuration = initialBurstDuration;
@@ -1698,22 +1606,9 @@ namespace Alexandria.BreakableAPI
         {
             GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePath, new GameObject(shardSpritePath+"_debris"), Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(debrisObject);
-            tk2dSprite tk2dsprite = debrisObject.GetComponent<tk2dSprite>();
             DebrisObject DebrisObj = debrisObject.AddComponent<DebrisObject>();
-            DebrisObj.canRotate = debrisObjectsCanRotate;
-            DebrisObj.lifespanMin = LifeSpanMin;
-            DebrisObj.lifespanMax = LifeSpanMax;
-            DebrisObj.bounceCount = DebrisBounceCount;
-            DebrisObj.angularVelocity = AngularVelocity;
-            DebrisObj.angularVelocityVariance = AngularVelocityVariance;
-            if (AudioEventName != null) { DebrisObj.audioEventName = AudioEventName; }
-            if (BounceVFX != null) { DebrisObj.optionalBounceVFX = BounceVFX; }
-            DebrisObj.sprite = tk2dsprite;
-            DebrisObj.DoesGoopOnRest = DoesGoopOnRest;
-            if (GoopType != null) { DebrisObj.AssignedGoop = GoopType; } else if (GoopType == null && DebrisObj.DoesGoopOnRest == true) { DebrisObj.DoesGoopOnRest = false; }
-            DebrisObj.GoopRadius = GoopRadius;
-            if (shadowSprite != null) { DebrisObj.shadowSprite = shadowSprite; }
-            DebrisObj.inertialMass = Mass;
+            DebrisObj.SetupInternal(debrisObjectsCanRotate, shadowSprite, Mass, LifeSpanMin, LifeSpanMax, AngularVelocity,
+                AngularVelocityVariance, AudioEventName, BounceVFX, DebrisBounceCount, DoesGoopOnRest, GoopType, GoopRadius);
             return DebrisObj;
         }
         /// <summary>
@@ -1739,45 +1634,11 @@ namespace Alexandria.BreakableAPI
         {
             GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[0], new GameObject(shardSpritePaths[0]+"_debris"), Assembly.GetCallingAssembly());
             FakePrefab.MarkAsFakePrefab(debrisObject);
+            debrisObject.SetupAnimatorInternal(Assembly.GetCallingAssembly(), shardSpritePaths, FPS, wrapMode);
+
             DebrisObject DebrisObj = debrisObject.AddComponent<DebrisObject>();
-
-            tk2dSpriteCollectionData VFXSpriteCollection = SpriteBuilder.ConstructCollection(debrisObject, (shardSpritePaths[0] + "_Collection"));
-            int spriteID = SpriteBuilder.AddSpriteToCollection(shardSpritePaths[0], VFXSpriteCollection, Assembly.GetCallingAssembly());
-            tk2dSprite sprite = debrisObject.GetOrAddComponent<tk2dSprite>();
-            sprite.SetSprite(VFXSpriteCollection, spriteID);
-
-            tk2dSpriteAnimator animator = debrisObject.GetOrAddComponent<tk2dSpriteAnimator>();
-            tk2dSpriteAnimation animation = debrisObject.AddComponent<tk2dSpriteAnimation>();
-            animation.clips = new tk2dSpriteAnimationClip[0];
-            animator.Library = animation;
-            tk2dSpriteAnimationClip idleClip = new tk2dSpriteAnimationClip() { name = "idle", frames = new tk2dSpriteAnimationFrame[0], fps = FPS };
-            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-            for (int i = 0; i < shardSpritePaths.Length; i++)
-            {
-                tk2dSpriteCollectionData collection = VFXSpriteCollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(shardSpritePaths[i], collection, Assembly.GetCallingAssembly());
-                tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
-                frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-            }
-            idleClip.frames = frames.ToArray();
-            idleClip.wrapMode = wrapMode;
-            animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { idleClip }).ToArray();
-            animator.playAutomatically = true;
-            animator.DefaultClipId = animator.GetClipIdByName("idle");
-            DebrisObj.canRotate = debrisObjectsCanRotate;
-            DebrisObj.lifespanMin = LifeSpanMin;
-            DebrisObj.lifespanMax = LifeSpanMax;
-            DebrisObj.bounceCount = DebrisBounceCount;
-            DebrisObj.angularVelocity = AngularVelocity;
-            DebrisObj.angularVelocityVariance = AngularVelocityVariance;
-            if (AudioEventName != null) { DebrisObj.audioEventName = AudioEventName; }
-            if (BounceVFX != null) { DebrisObj.optionalBounceVFX = BounceVFX; }
-            DebrisObj.sprite = sprite;
-            DebrisObj.DoesGoopOnRest = DoesGoopOnRest;
-            if (GoopType != null) { DebrisObj.AssignedGoop = GoopType; } else if (GoopType == null && DebrisObj.DoesGoopOnRest == true) { DebrisObj.DoesGoopOnRest = false; }
-            DebrisObj.GoopRadius = GoopRadius;
-            if (shadowSprite != null) { DebrisObj.shadowSprite = shadowSprite; }
-            DebrisObj.inertialMass = Mass;
+            DebrisObj.SetupInternal(debrisObjectsCanRotate, shadowSprite, Mass, LifeSpanMin, LifeSpanMax, AngularVelocity,
+                AngularVelocityVariance, AudioEventName, BounceVFX, DebrisBounceCount, DoesGoopOnRest, GoopType, GoopRadius);
             return DebrisObj;
         }
         /// <summary>
@@ -1804,22 +1665,9 @@ namespace Alexandria.BreakableAPI
             {
                 GameObject debrisObject = SpriteBuilder.SpriteFromResource(shardSpritePaths[i], new GameObject(shardSpritePaths[i]+"_debris"), Assembly.GetCallingAssembly());
                 FakePrefab.MarkAsFakePrefab(debrisObject);
-                tk2dSprite tk2dsprite = debrisObject.GetComponent<tk2dSprite>();
                 DebrisObject DebrisObj = debrisObject.AddComponent<DebrisObject>();
-                DebrisObj.canRotate = debrisObjectsCanRotate;
-                DebrisObj.lifespanMin = LifeSpanMin;
-                DebrisObj.lifespanMax = LifeSpanMax;
-                DebrisObj.bounceCount = DebrisBounceCount;
-                DebrisObj.angularVelocity = AngularVelocity;
-                DebrisObj.angularVelocityVariance = AngularVelocityVariance;
-                if (AudioEventName != null) { DebrisObj.audioEventName = AudioEventName; }
-                if (BounceVFX != null) { DebrisObj.optionalBounceVFX = BounceVFX; }
-                DebrisObj.sprite = tk2dsprite;
-                DebrisObj.DoesGoopOnRest = DoesGoopOnRest;
-                if (GoopType != null) { DebrisObj.AssignedGoop = GoopType; } else if (GoopType == null && DebrisObj.DoesGoopOnRest == true) { DebrisObj.DoesGoopOnRest = false; }
-                DebrisObj.GoopRadius = GoopRadius;
-                if (shadowSprite != null) { DebrisObj.shadowSprite = shadowSprite; }
-                DebrisObj.inertialMass = Mass;
+                DebrisObj.SetupInternal(debrisObjectsCanRotate, shadowSprite, Mass, LifeSpanMin, LifeSpanMax, AngularVelocity,
+                    AngularVelocityVariance, AudioEventName, BounceVFX, DebrisBounceCount, DoesGoopOnRest, GoopType, GoopRadius);
                 DebrisObjectList.Add(DebrisObj);
             }
             DebrisObject[] DebrisArray = DebrisObjectList.ToArray();
@@ -1856,51 +1704,63 @@ namespace Alexandria.BreakableAPI
                 {
                     GameObject debrisObject = SpriteBuilder.SpriteFromResource(paths[0], new GameObject(paths[0]+"_debris"), Assembly.GetCallingAssembly());
                     FakePrefab.MarkAsFakePrefab(debrisObject);
-                    DebrisObject DebrisObj = debrisObject.AddComponent<DebrisObject>();
-                    tk2dSpriteCollectionData VFXSpriteCollection = SpriteBuilder.ConstructCollection(debrisObject, (paths[0] + "_Collection"));
-                    int spriteID = SpriteBuilder.AddSpriteToCollection(paths[0], VFXSpriteCollection, Assembly.GetCallingAssembly());
-                    tk2dSprite sprite = debrisObject.GetOrAddComponent<tk2dSprite>();
-                    sprite.SetSprite(VFXSpriteCollection, spriteID);
+                    debrisObject.SetupAnimatorInternal(Assembly.GetCallingAssembly(), paths, FPS, wrapMode);
 
-                    tk2dSpriteAnimator animator = debrisObject.GetOrAddComponent<tk2dSpriteAnimator>();
-                    tk2dSpriteAnimation animation = debrisObject.AddComponent<tk2dSpriteAnimation>();
-                    animation.clips = new tk2dSpriteAnimationClip[0];
-                    animator.Library = animation;
-                    tk2dSpriteAnimationClip idleClip = new tk2dSpriteAnimationClip() { name = "idle", frames = new tk2dSpriteAnimationFrame[0], fps = FPS };
-                    List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-                    for (int q = 0; q < paths.Length; q++)
-                    {
-                        tk2dSpriteCollectionData collection = VFXSpriteCollection;
-                        int frameSpriteId = SpriteBuilder.AddSpriteToCollection(paths[q], collection, Assembly.GetCallingAssembly());
-                        tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
-                        frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection });
-                    }
-                    idleClip.frames = frames.ToArray();
-                    idleClip.wrapMode = wrapMode;
-                    animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { idleClip }).ToArray();
-                    animator.playAutomatically = true;
-                    animator.DefaultClipId = animator.GetClipIdByName("idle");
-                    DebrisObj.canRotate = debrisObjectsCanRotate;
-                    DebrisObj.lifespanMin = LifeSpanMin;
-                    DebrisObj.lifespanMax = LifeSpanMax;
-                    DebrisObj.bounceCount = DebrisBounceCount;
-                    DebrisObj.angularVelocity = AngularVelocity;
-                    DebrisObj.angularVelocityVariance = AngularVelocityVariance;
-                    if (AudioEventName != null) { DebrisObj.audioEventName = AudioEventName; }
-                    if (BounceVFX != null) { DebrisObj.optionalBounceVFX = BounceVFX; }
-                    DebrisObj.sprite = sprite;
-                    DebrisObj.DoesGoopOnRest = DoesGoopOnRest;
-                    if (GoopType != null) { DebrisObj.AssignedGoop = GoopType; } else if (GoopType == null && DebrisObj.DoesGoopOnRest == true) { DebrisObj.DoesGoopOnRest = false; }
-                    DebrisObj.GoopRadius = GoopRadius;
-                    if (shadowSprite != null) { DebrisObj.shadowSprite = shadowSprite; }
-                    DebrisObj.inertialMass = Mass;
+                    DebrisObject DebrisObj = debrisObject.AddComponent<DebrisObject>();
+                    DebrisObj.SetupInternal(debrisObjectsCanRotate, shadowSprite, Mass, LifeSpanMin, LifeSpanMax,
+                        AngularVelocity, AngularVelocityVariance, AudioEventName, BounceVFX, DebrisBounceCount, DoesGoopOnRest, GoopType, GoopRadius);
                    
                     DebrisObjectList.Add(DebrisObj);
                 }
             }
-            DebrisObject[] DebrisArray = DebrisObjectList.ToArray();
-            return DebrisArray;
+            return DebrisObjectList.ToArray();
         }
+
+        private static void SetupAnimatorInternal(this GameObject debrisObject, Assembly assembly, string[] paths, int FPS, tk2dSpriteAnimationClip.WrapMode wrapMode)
+        {
+            tk2dSpriteCollectionData VFXSpriteCollection = SpriteBuilder.ConstructCollection(debrisObject, (paths[0] + "_Collection"));
+            int spriteID = SpriteBuilder.AddSpriteToCollection(paths[0], VFXSpriteCollection, assembly);
+            tk2dSprite sprite = debrisObject.GetOrAddComponent<tk2dSprite>();
+            sprite.SetSprite(VFXSpriteCollection, spriteID);
+
+            tk2dSpriteAnimator animator = debrisObject.GetOrAddComponent<tk2dSpriteAnimator>();
+            tk2dSpriteAnimation animation = debrisObject.AddComponent<tk2dSpriteAnimation>();
+            animation.clips = new tk2dSpriteAnimationClip[0];
+            animator.Library = animation;
+            tk2dSpriteAnimationClip idleClip = new tk2dSpriteAnimationClip() { name = "idle", frames = new tk2dSpriteAnimationFrame[0], fps = FPS };
+            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
+            for (int q = 0; q < paths.Length; q++)
+            {
+                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(paths[q], VFXSpriteCollection, assembly);
+                frames.Add(new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = VFXSpriteCollection });
+            }
+            idleClip.frames = frames.ToArray();
+            idleClip.wrapMode = wrapMode;
+            animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { idleClip }).ToArray();
+            animator.playAutomatically = true;
+            animator.DefaultClipId = animator.GetClipIdByName("idle");
+        }
+
+        private static void SetupInternal(this DebrisObject DebrisObj, bool debrisObjectsCanRotate = true, tk2dSprite shadowSprite = null, float Mass = 1,
+            float LifeSpanMin = 0.33f, float LifeSpanMax = 2f, float AngularVelocity = 540, float AngularVelocityVariance = 180f, string AudioEventName = null,
+            GameObject BounceVFX = null, int DebrisBounceCount = 0, bool DoesGoopOnRest = false, GoopDefinition GoopType = null, float GoopRadius = 1f)
+        {
+            DebrisObj.canRotate = debrisObjectsCanRotate;
+            DebrisObj.lifespanMin = LifeSpanMin;
+            DebrisObj.lifespanMax = LifeSpanMax;
+            DebrisObj.bounceCount = DebrisBounceCount;
+            DebrisObj.angularVelocity = AngularVelocity;
+            DebrisObj.angularVelocityVariance = AngularVelocityVariance;
+            if (AudioEventName != null) { DebrisObj.audioEventName = AudioEventName; }
+            if (BounceVFX != null) { DebrisObj.optionalBounceVFX = BounceVFX; }
+            DebrisObj.sprite = DebrisObj.gameObject.GetComponent<tk2dSprite>();
+            DebrisObj.DoesGoopOnRest = DoesGoopOnRest;
+            if (GoopType != null) { DebrisObj.AssignedGoop = GoopType; } else if (GoopType == null && DebrisObj.DoesGoopOnRest == true) { DebrisObj.DoesGoopOnRest = false; }
+            DebrisObj.GoopRadius = GoopRadius;
+            if (shadowSprite != null) { DebrisObj.shadowSprite = shadowSprite; }
+            DebrisObj.inertialMass = Mass;
+        }
+
         /// <summary>
         /// Generates, and returns a ShardCluster that you can add to your breakable to have it create shards. 
         /// </summary>

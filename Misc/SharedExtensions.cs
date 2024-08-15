@@ -172,7 +172,7 @@ namespace Alexandria.Misc
         {
             bool constructOffsets = offsetAnchor.HasValue;
             tk2dSprite.Anchor anchor = offsetAnchor ?? default;
-            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
+            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>(spriteIDs.Count);
             for (int i = 0; i < spriteIDs.Count; i++)
             {
                 tk2dSpriteDefinition def = collection.spriteDefinitions[spriteIDs[i]];

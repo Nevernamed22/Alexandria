@@ -48,12 +48,8 @@ namespace Alexandria.EnemyAPI
 
         public static AIActor GetOrLoadByGuid(Func<string, AIActor> orig, string guid)
         {
-            foreach (var id in Dictionary.Keys)
-            {
-                if (id == guid)
-                    return Dictionary[id].GetComponent<AIActor>();
-            }
-
+            if (Dictionary.TryGetValue(guid, out GameObject companion))
+                return companion.GetComponent<AIActor>();
             return orig(guid);
         }
 

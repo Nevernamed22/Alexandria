@@ -463,5 +463,15 @@ namespace Alexandria.Misc
                 Flipped = new DirectionalAnimation.FlipType[0]
             };
         }
+
+        private static readonly Dictionary<string, List<string>> _SortedResourcesByAssembly = new();
+        internal static List<string> SortedResourceNames(Assembly assembly)
+        {
+            string assemblyName = assembly.FullName;
+            if (_SortedResourcesByAssembly.TryGetValue(assemblyName, out List<string> sorted))
+                return sorted;
+            string[] resources = ResourceExtractor.GetResourceNames(assembly);
+            return _SortedResourcesByAssembly[assemblyName] = resources.OrderBy(x => x).ToList();
+        }
     }
 }

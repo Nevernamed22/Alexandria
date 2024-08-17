@@ -13,73 +13,62 @@ namespace Alexandria.ItemAPI
         {
             // ETGModConsole.Log("Awake");
             m_gun = base.GetComponent<Gun>();
-            if (m_gun)
-            {
-                //ETGModConsole.Log("is gun");
-                m_gun.PostProcessVolley += HandleVolleyRebuild;
-                if (synergies.ToList().Find(x => x.ReplacesSourceProjectile) != null)
-                {
-                    m_gun.OnPreFireProjectileModifier += HandlePreFireProjectileReplacement;
-                }
-            }
+            if (!m_gun)
+                return;
+
+            //ETGModConsole.Log("is gun");
+            m_gun.PostProcessVolley += HandleVolleyRebuild;
+            if (synergies.ToList().Find(x => x.ReplacesSourceProjectile) != null)
+                m_gun.OnPreFireProjectileModifier += HandlePreFireProjectileReplacement;
         }
+
         private Projectile HandlePreFireProjectileReplacement(Gun sourceGun, Projectile sourceProjectile, ProjectileModule sourceModule)
         {
+            if (synergies == null)
+                return sourceProjectile;
+            if (sourceGun.GunPlayerOwner() is not PlayerController playerController)
+                return sourceProjectile;
+            if (sourceGun && sourceGun.IsCharging)
+                return sourceProjectile;
+
             Projectile result = sourceProjectile;
-            PlayerController playerController = sourceGun.GunPlayerOwner();
-            if (synergies != null)
+            for (int i = 0; i < synergies.Count; i++)
             {
-                for (int i = 0; i < synergies.Count; i++)
+                AdvancedVolleyModificationSynergyData data = synergies[i];
+                if (!data.ReplacesSourceProjectile || !playerController.PlayerHasActiveSynergy(data.RequiredSynergy))
+                    continue;
+                if (data.OnlyReplacesAdditionalProjectiles && !sourceModule.ignoredForReloadPurposes)
+                    continue;
+                if (data.ReplacementSkipsChargedShots && sourceModule.shootStyle == ProjectileModule.ShootStyle.Charged
+                    && sourceModule.chargeProjectiles != null && sourceModule.chargeProjectiles.Find(x => x.Projectile && x.ChargeTime > 0f) != null)
+                    continue;
+                if (UnityEngine.Random.value >= data.ReplacementChance)
+                    continue;
+
+                if (!data.UsesMultipleReplacementProjectiles)
+                    result = data.ReplacementProjectile;
+                else if (!data.MultipleReplacementsSequential)
+                    result = data.MultipleReplacementProjectiles[UnityEngine.Random.Range(0, data.MultipleReplacementProjectiles.Length)];
+                else
                 {
-                    AdvancedVolleyModificationSynergyData volleyModificationSynergyData = synergies[i];
-                    if (volleyModificationSynergyData.ReplacesSourceProjectile && playerController && playerController.PlayerHasActiveSynergy(volleyModificationSynergyData.RequiredSynergy))
-                    {
-                        if (!volleyModificationSynergyData.OnlyReplacesAdditionalProjectiles || sourceModule.ignoredForReloadPurposes)
-                        {
-                            if (!sourceGun || !sourceGun.IsCharging)
-                            {
-                                if (volleyModificationSynergyData.ReplacementSkipsChargedShots && sourceModule.shootStyle == ProjectileModule.ShootStyle.Charged)
-                                {
-                                    if (sourceModule.chargeProjectiles != null && sourceModule.chargeProjectiles.Find(x => x.Projectile && x.ChargeTime > 0f) != null) { goto IL_190; }
-                                }
-                                if (UnityEngine.Random.value < volleyModificationSynergyData.ReplacementChance)
-                                {
-                                    if (volleyModificationSynergyData.UsesMultipleReplacementProjectiles)
-                                    {
-                                        if (volleyModificationSynergyData.MultipleReplacementsSequential)
-                                        {
-                                            result = volleyModificationSynergyData.MultipleReplacementProjectiles[volleyModificationSynergyData.multipleSequentialReplacementIndex];
-                                            volleyModificationSynergyData.multipleSequentialReplacementIndex = (volleyModificationSynergyData.multipleSequentialReplacementIndex + 1) % volleyModificationSynergyData.MultipleReplacementProjectiles.Length;
-                                        }
-                                        else { result = volleyModificationSynergyData.MultipleReplacementProjectiles[UnityEngine.Random.Range(0, volleyModificationSynergyData.MultipleReplacementProjectiles.Length)]; }
-                                    }
-                                    else { result = volleyModificationSynergyData.ReplacementProjectile; }
-                                }
-                            }
-                        }
-                    }
-                IL_190:;
+                    result = data.MultipleReplacementProjectiles[data.multipleSequentialReplacementIndex];
+                    data.multipleSequentialReplacementIndex = (data.multipleSequentialReplacementIndex + 1) % data.MultipleReplacementProjectiles.Length;
                 }
             }
             return result;
         }
+
         private void HandleVolleyRebuild(ProjectileVolleyData targetVolley)
         {
             //ETGModConsole.Log("Volley Rebuild");
-            PlayerController playerController = null;
-            if (m_gun) { playerController = m_gun.GunPlayerOwner(); }
+            if (!m_gun || synergies == null || m_gun.GunPlayerOwner() is not PlayerController playerController)
+                return;
 
-            if (playerController && synergies != null)
-            {
-                for (int i = 0; i < synergies.Count; i++)
-                {
-                    if (playerController.PlayerHasActiveSynergy(synergies[i].RequiredSynergy))
-                    {
-                        ApplySynergy(targetVolley, synergies[i], playerController);
-                    }
-                }
-            }
+            for (int i = 0; i < synergies.Count; i++)
+                if (playerController.PlayerHasActiveSynergy(synergies[i].RequiredSynergy))
+                    ApplySynergy(targetVolley, synergies[i], playerController);
         }
+
         private void ApplySynergy(ProjectileVolleyData volley, AdvancedVolleyModificationSynergyData synergy, PlayerController owner)
         {
             //ETGModConsole.Log("Apply synergy");
@@ -111,29 +100,27 @@ namespace Alexandria.ItemAPI
             if (synergy.AddsDuplicatesOfBaseModule) { GunVolleyModificationItem.AddDuplicateOfBaseModule(volley, m_gun.GunPlayerOwner(), synergy.DuplicatesOfBaseModule, synergy.BaseModuleDuplicateAngle, 0f); }
             if (synergy.SetsNumberFinalProjectiles)
             {
-                bool flag2 = false;
+                bool hasOptionalFinalProjectile = false;
                 for (int j = 0; j < volley.projectiles.Count; j++)
                 {
-                    if (!flag2 && synergy.AddsNewFinalProjectile)
-                    {
-                        if (!volley.projectiles[j].usesOptionalFinalProjectile)
-                        {
-                            flag2 = true;
-                            this.m_gun.OverrideFinaleAudio = true;
-                            volley.projectiles[j].usesOptionalFinalProjectile = true;
-                            volley.projectiles[j].numberOfFinalProjectiles = 1;
-                            volley.projectiles[j].finalProjectile = synergy.NewFinalProjectile;
-                            volley.projectiles[j].finalAmmoType = GameUIAmmoType.AmmoType.CUSTOM;
-                            volley.projectiles[j].finalCustomAmmoType = synergy.NewFinalProjectileAmmoType;
-                            if (string.IsNullOrEmpty(this.m_gun.finalShootAnimation))
-                            {
-                                this.m_gun.finalShootAnimation = this.m_gun.shootAnimation;
-                            }
-                        }
-                    }
                     if (volley.projectiles[j].usesOptionalFinalProjectile)
                     {
                         volley.projectiles[j].numberOfFinalProjectiles = synergy.NumberFinalProjectiles;
+                        continue;
+                    }
+                    if (hasOptionalFinalProjectile || !synergy.AddsNewFinalProjectile)
+                        continue;
+
+                    hasOptionalFinalProjectile = true;
+                    this.m_gun.OverrideFinaleAudio = true;
+                    volley.projectiles[j].usesOptionalFinalProjectile = true;
+                    volley.projectiles[j].numberOfFinalProjectiles = synergy.NumberFinalProjectiles;
+                    volley.projectiles[j].finalProjectile = synergy.NewFinalProjectile;
+                    volley.projectiles[j].finalAmmoType = GameUIAmmoType.AmmoType.CUSTOM;
+                    volley.projectiles[j].finalCustomAmmoType = synergy.NewFinalProjectileAmmoType;
+                    if (string.IsNullOrEmpty(this.m_gun.finalShootAnimation))
+                    {
+                        this.m_gun.finalShootAnimation = this.m_gun.shootAnimation;
                     }
                 }
             }
@@ -145,17 +132,17 @@ namespace Alexandria.ItemAPI
                 }
                 for (int k = 0; k < volley.projectiles.Count; k++)
                 {
-                    if (volley.projectiles[k].shootStyle == ProjectileModule.ShootStyle.Burst)
+                    if (volley.projectiles[k].shootStyle != ProjectileModule.ShootStyle.Burst)
+                        continue;
+
+                    int burstShotCount = volley.projectiles[k].burstShotCount;
+                    int num = volley.projectiles[k].GetModNumberOfShotsInClip(owner);
+                    if (num < 0)
                     {
-                        int burstShotCount = volley.projectiles[k].burstShotCount;
-                        int num = volley.projectiles[k].GetModNumberOfShotsInClip(owner);
-                        if (num < 0)
-                        {
-                            num = int.MaxValue;
-                        }
-                        int burstShotCount2 = Mathf.Clamp(Mathf.RoundToInt((float)burstShotCount * synergy.BurstMultiplier) + synergy.BurstShift, 1, num);
-                        volley.projectiles[k].burstShotCount = burstShotCount2;
+                        num = int.MaxValue;
                     }
+                    int burstShotCount2 = Mathf.Clamp(Mathf.RoundToInt((float)burstShotCount * synergy.BurstMultiplier) + synergy.BurstShift, 1, num);
+                    volley.projectiles[k].burstShotCount = burstShotCount2;
                 }
             }
             if (synergy.AddsPossibleProjectileToPrimaryModule)
@@ -166,6 +153,7 @@ namespace Alexandria.ItemAPI
         public List<AdvancedVolleyModificationSynergyData> synergies = new List<AdvancedVolleyModificationSynergyData>();
         private Gun m_gun;
     }
+
     public class AdvancedVolleyModificationSynergyData : ScriptableObject
     {
         public string RequiredSynergy;
@@ -197,6 +185,5 @@ namespace Alexandria.ItemAPI
         public Projectile AdditionalModuleProjectile;
         public int multipleSequentialReplacementIndex;
     }
-
 }
 

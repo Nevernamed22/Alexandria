@@ -524,6 +524,8 @@ namespace Alexandria.DungeonAPI
             modifierData.roomTable.includedRoomTables = new List<GenericRoomTable>() { };
 
             data.chanceToSpawn = 0;
+            data.selectionWeight = 0;
+
             shared.InjectionData.Add(modifierData);
             return modifierData;
         }

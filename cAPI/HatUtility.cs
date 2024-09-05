@@ -7,6 +7,7 @@ using Gungeon;
 using Dungeonator;
 using System.Reflection;
 using Alexandria.ItemAPI;
+using Alexandria.Misc;
 using System.Collections;
 using System.Globalization;
 using System.IO;
@@ -272,22 +273,10 @@ namespace Alexandria.cAPI
                 int frameSpriteId = SpriteBuilder.AddSpriteToCollection(path, HatSpriteCollection, callingASM);
                 tk2dSpriteDefinition frameDef = HatSpriteCollection.spriteDefinitions[frameSpriteId];
                 frameDef.colliderVertices = def.colliderVertices;
-                frameDef.AdjustOffset(offset);
+                Shared.MakeOffset(frameDef, offset);
                 clip.frames[i] = new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = HatSpriteCollection };
             }
             animation.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { clip }).ToArray();
-        }
-
-        private static void AdjustOffset(this tk2dSpriteDefinition def, Vector3 offset)
-        {
-            def.position0 += offset;
-            def.position1 += offset;
-            def.position2 += offset;
-            def.position3 += offset;
-            def.boundsDataCenter += offset;
-            def.boundsDataExtents += offset;
-            def.untrimmedBoundsDataCenter += offset;
-            def.untrimmedBoundsDataExtents += offset;
         }
 
         private static void AddHatToDatabase(Hat hat, bool excludeFromHatRoom)

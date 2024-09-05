@@ -219,6 +219,7 @@
     <Compile Include="Misc\EnumUtility.cs" />
     <Compile Include="Misc\DebugUtility.cs" />
     <Compile Include="Misc\LootUtility.cs" />
+    <Compile Include="Misc\SharedExtensions.cs" />
     <Compile Include="Misc\MathAndLogicHelper.cs" />
     <Compile Include="Misc\ReflectionUtility.cs" />
     <Compile Include="Module.cs" />

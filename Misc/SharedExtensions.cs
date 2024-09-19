@@ -262,7 +262,8 @@ namespace Alexandria.Misc
                 tk2dSpriteDefinition def = tiledSprite.GetCurrentSpriteDef();
                 def.colliderVertices = new Vector3[]{ 0.0625f * colliderOffsets, 0.0625f * colliderDimensions };
 
-                def.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.MiddleLeft); //NOTE: this seems right, but double check later
+                if (constructOffsets)
+                    def.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.MiddleLeft); //NOTE: this seems right, but double check later
 
                 tk2dSpriteAnimator animator = projectile.gameObject.GetOrAddComponent<tk2dSpriteAnimator>();
                 animator._startingSpriteCollection = data;

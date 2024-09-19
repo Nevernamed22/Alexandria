@@ -172,7 +172,7 @@ namespace Alexandria.Misc
         {
             bool constructOffsets = offsetAnchor.HasValue;
             tk2dSprite.Anchor anchor = offsetAnchor ?? default;
-            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
+            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>(spriteIDs.Count);
             for (int i = 0; i < spriteIDs.Count; i++)
             {
                 tk2dSpriteDefinition def = collection.spriteDefinitions[spriteIDs[i]];
@@ -262,7 +262,8 @@ namespace Alexandria.Misc
                 tk2dSpriteDefinition def = tiledSprite.GetCurrentSpriteDef();
                 def.colliderVertices = new Vector3[]{ 0.0625f * colliderOffsets, 0.0625f * colliderDimensions };
 
-                def.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.MiddleLeft); //NOTE: this seems right, but double check later
+                if (constructOffsets)
+                    def.ConstructOffsetsFromAnchor(tk2dBaseSprite.Anchor.MiddleLeft); //NOTE: this seems right, but double check later
 
                 tk2dSpriteAnimator animator = projectile.gameObject.GetOrAddComponent<tk2dSpriteAnimator>();
                 animator._startingSpriteCollection = data;
@@ -403,6 +404,75 @@ namespace Alexandria.Misc
             def.name = name;
             data.spriteDefinitions[id] = def;
             return def;
+        }
+
+        internal static PixelCollider SetupCollider(CollisionLayer layer, IntVector2 offset = default, IntVector2 dimensions = default,
+            bool enabled = true, bool isTrigger = false, PixelCollider.PixelColliderGeneration mode = PixelCollider.PixelColliderGeneration.Manual)
+        {
+            return new PixelCollider()
+            {
+                ColliderGenerationMode = mode,
+                CollisionLayer = layer,
+                ManualWidth = dimensions.x,
+                ManualHeight = dimensions.y,
+                ManualOffsetX = offset.x,
+                ManualOffsetY = offset.y,
+                Enabled = enabled,
+                IsTrigger = isTrigger,
+            };
+        }
+
+        internal static PixelCollider AddCollider(this SpeculativeRigidbody body, CollisionLayer layer, IntVector2 offset = default, IntVector2 dimensions = default,
+            bool enabled = true, bool isTrigger = false, PixelCollider.PixelColliderGeneration mode = PixelCollider.PixelColliderGeneration.Manual)
+        {
+            if (body.PixelColliders == null)
+                body.PixelColliders = new List<PixelCollider>();
+            PixelCollider collider = SetupCollider(layer, offset, dimensions, enabled, isTrigger, mode);
+            body.PixelColliders.Add(collider);
+            return collider;
+        }
+
+        internal static PixelCollider SetupPolygonCollider(CollisionLayer layer, IntVector2 offset, bool enabled = true, bool isTrigger = false)
+        {
+            return new PixelCollider()
+            {
+                ColliderGenerationMode = PixelCollider.PixelColliderGeneration.Tk2dPolygon,
+                CollisionLayer = layer,
+                ManualOffsetX = offset.x,
+                ManualOffsetY = offset.y,
+                Enabled = enabled,
+                IsTrigger = isTrigger,
+            };
+        }
+
+        internal static PixelCollider AddPolygonCollider(this SpeculativeRigidbody body, CollisionLayer layer, IntVector2 offset, bool enabled = true, bool isTrigger = false)
+        {
+            if (body.PixelColliders == null)
+                body.PixelColliders = new List<PixelCollider>();
+            PixelCollider collider = SetupPolygonCollider(layer, offset, enabled, isTrigger);
+            body.PixelColliders.Add(collider);
+            return collider;
+        }
+
+        internal static DirectionalAnimation BlankDirectionalAnimation(string prefix = null)
+        {
+            return new DirectionalAnimation
+            {
+                Type = DirectionalAnimation.DirectionType.None,
+                Prefix = prefix ?? string.Empty,
+                AnimNames = new string[0],
+                Flipped = new DirectionalAnimation.FlipType[0]
+            };
+        }
+
+        private static readonly Dictionary<string, List<string>> _SortedResourcesByAssembly = new();
+        internal static List<string> SortedResourceNames(Assembly assembly)
+        {
+            string assemblyName = assembly.FullName;
+            if (_SortedResourcesByAssembly.TryGetValue(assemblyName, out List<string> sorted))
+                return sorted;
+            string[] resources = ResourceExtractor.GetResourceNames(assembly);
+            return _SortedResourcesByAssembly[assemblyName] = resources.OrderBy(x => x).ToList();
         }
     }
 }

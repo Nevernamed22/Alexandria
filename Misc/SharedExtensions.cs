@@ -454,11 +454,11 @@ namespace Alexandria.Misc
             return collider;
         }
 
-        internal static DirectionalAnimation BlankDirectionalAnimation(string prefix = null)
+        internal static DirectionalAnimation BlankDirectionalAnimation(string prefix = null, DirectionalAnimation.DirectionType direction = DirectionalAnimation.DirectionType.None)
         {
             return new DirectionalAnimation
             {
-                Type = DirectionalAnimation.DirectionType.None,
+                Type = direction,
                 Prefix = prefix ?? string.Empty,
                 AnimNames = new string[0],
                 Flipped = new DirectionalAnimation.FlipType[0]

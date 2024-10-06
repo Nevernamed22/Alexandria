@@ -148,7 +148,7 @@ namespace Alexandria.EnemyAPI
         {
             AIAnimator orAddComponent = obj.GetOrAddComponent<AIAnimator>();
             DirectionalAnimation directionalAnimation = orAddComponent.GetDirectionalAnimation(name, directionType, type);
-            directionalAnimation ??= Shared.BlankDirectionalAnimation(prefix: name);
+            directionalAnimation ??= Shared.BlankDirectionalAnimation(prefix: name, direction: directionType);
             directionalAnimation.AnimNames = directionalAnimation.AnimNames.Concat(new string[] { name }).ToArray<string>();
             directionalAnimation.Flipped = directionalAnimation.Flipped.Concat(new DirectionalAnimation.FlipType[] { flipType }).ToArray<DirectionalAnimation.FlipType>();
             orAddComponent.AssignDirectionalAnimation(name, directionalAnimation, type);

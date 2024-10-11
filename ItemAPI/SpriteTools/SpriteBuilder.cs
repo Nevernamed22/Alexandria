@@ -223,6 +223,7 @@ namespace Alexandria.ItemAPI
 		public static SpeculativeRigidbody SetUpSpeculativeRigidbody(this tk2dSprite sprite, IntVector2 offset, IntVector2 dimensions)
 		{
 			SpeculativeRigidbody body = sprite.gameObject.GetOrAddComponent<SpeculativeRigidbody>();
+			body.PixelColliders = new();
 			body.AddCollider(CollisionLayer.EnemyCollider, offset, dimensions);
 			return body;
 		}

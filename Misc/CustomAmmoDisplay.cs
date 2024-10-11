@@ -21,7 +21,8 @@ namespace Alexandria.Misc
               return false; // custom ammo override does not want to change vanilla behavior
 
             // we're definitely using the custom ammo display, so prepare it
-            uic.GunAmmoCountLabel.AutoSize = true; // enable dynamic width
+            if (uic.GunAmmoCountLabel.Size.x < 1000)
+              uic.GunAmmoCountLabel.Size = uic.GunAmmoCountLabel.Size.WithX(1000f); // uncap width so long labels can display
             uic.GunAmmoCountLabel.AutoHeight = true; // enable multiline text
             uic.GunAmmoCountLabel.ProcessMarkup = true; // enable multicolor text
 

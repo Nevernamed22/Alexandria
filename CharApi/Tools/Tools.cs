@@ -27,7 +27,6 @@ namespace Alexandria.CharacterAPI
         {
             FieldInfo _cachedOverrideMaterials = typeof(PlayerController).GetField("m_cachedOverrideMaterials", BindingFlags.NonPublic | BindingFlags.Instance);
 
-
             if ((_cachedOverrideMaterials.GetValue(player) as Material[]) == null)
             {
                 _cachedOverrideMaterials.SetValue(player, new Material[3]);
@@ -194,9 +193,6 @@ namespace Alexandria.CharacterAPI
             return result;
         }
 
-
-
-
         /// <summary>
         /// Gets the first empty space in <paramref name="atlas"/> that has at least the size of <paramref name="pixelScale"/>.
         /// </summary>
@@ -205,10 +201,6 @@ namespace Alexandria.CharacterAPI
         /// <returns>The rect of the empty space divided by the atlas texture's size.</returns>
         public static Rect FindFirstValidEmptySpace(this dfAtlas atlas, IntVector2 pixelScale)
         {
-
-
-
-
             if (atlas == null || atlas.Texture == null || !atlas.Texture.IsReadable())
             {
                 return new Rect(0f, 0f, 0f, 0f);

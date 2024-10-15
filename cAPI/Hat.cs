@@ -244,6 +244,8 @@ namespace Alexandria.cAPI
                     adjustedDir = HatDirection.EAST;
             }
 
+            if (!hatSpriteAnimator) // can be null on very first frame of existence (potential problem with dynamically swapped hats)
+                hatSpriteAnimator = base.GetComponent<tk2dSpriteAnimator>();
             // pick the appropriate animation
             switch (adjustedDir)
             {

@@ -15,6 +15,8 @@ namespace Alexandria.CharacterAPI
     //Utility methods
     public static class ToolsCharApi
     {
+        internal const float PIXELS_PER_UNIT = 16f;
+
         public static bool verbose = false;
         private static string defaultLog = Path.Combine(ETGMod.ResourcesDirectory, "customCharacterLog.txt");
         public static string modID = "CharAPI";
@@ -115,6 +117,31 @@ namespace Alexandria.CharacterAPI
             return obj;
         }
 
+        private static dfAtlas.ItemInfo AddNewItemToAtlasInternal(this dfAtlas atlas, Texture2D tex, string name, int texX, int texY, int texW, int texH, int offX, int offY, int regW, int regH)
+        {
+            if (string.IsNullOrEmpty(name))
+                name = tex.name;
+            if (atlas[name] != null)
+                return atlas[name];
+            dfAtlas.ItemInfo item = new dfAtlas.ItemInfo
+            {
+                border = new RectOffset(),
+                name = name,
+                region = atlas.FindFirstValidEmptySpace(new IntVector2(regW, regH)),
+                sizeInPixels = new Vector2(regW, regH),
+                texture = tex,
+                textureGUID = name
+            };
+            int startPointX = offX + Mathf.RoundToInt(item.region.x * atlas.Texture.width);
+            int startPointY = offY + Mathf.RoundToInt(item.region.y * atlas.Texture.height);
+            atlas.Texture.SetPixels(startPointX, startPointY, texW, texH, tex.GetPixels(texX, texY, texW, texH));
+
+            atlas.Texture.Apply();
+            //NOTE: circumventing a hopefully unnecessary call to atlas.RebuildIndexes(); change back to atlas.AddItem() if problems arise
+            atlas.items.Add(item);
+            atlas.map[item.name] = item;
+            return item;
+        }
 
         /// <summary>
         /// Builds and adds a new <see cref="dfAtlas.ItemInfo"/> to <paramref name="atlas"/> with the texture of <paramref name="tex"/> and the name of <paramref name="name"/>.
@@ -125,28 +152,55 @@ namespace Alexandria.CharacterAPI
         /// <returns>The built <see cref="dfAtlas.ItemInfo"/>.</returns>
         public static dfAtlas.ItemInfo AddNewItemToAtlas(this dfAtlas atlas, Texture2D tex, string name = null)
         {
-            if (string.IsNullOrEmpty(name))
-                name = tex.name;
-            if (atlas[name] != null)
-                return atlas[name];
-            dfAtlas.ItemInfo item = new dfAtlas.ItemInfo
-            {
-                border = new RectOffset(),
-                name = name,
-                region = atlas.FindFirstValidEmptySpace(new IntVector2(tex.width, tex.height)),
-                sizeInPixels = new Vector2(tex.width, tex.height),
-                texture = tex,
-                textureGUID = name
-            };
-            int startPointX = Mathf.RoundToInt(item.region.x * atlas.Texture.width);
-            int startPointY = Mathf.RoundToInt(item.region.y * atlas.Texture.height);
-            atlas.Texture.SetPixels(startPointX, startPointY, tex.width, tex.height, tex.GetPixels());
-            atlas.Texture.Apply();
-            //NOTE: circumventing a hopefully unnecessary call to atlas.RebuildIndexes(); change back to atlas.AddItem() if problems arise
-            atlas.items.Add(item);
-            atlas.map[item.name] = item;
-            return item;
+            return atlas.AddNewItemToAtlasInternal(tex, name, 0, 0, tex.width, tex.height, 0, 0, tex.width, tex.height);
         }
+
+        /// <summary>
+        /// Builds and adds a new <see cref="dfAtlas.ItemInfo"/> to <paramref name="atlas"/> with the sprite of <paramref name="def"/> and the name of <paramref name="name"/>.
+        /// </summary>
+        /// <param name="atlas">The <see cref="dfAtlas"/> to add the new <see cref="dfAtlas.ItemInfo"/> to.</param>
+        /// <param name="def">The sprite of the new <see cref="dfAtlas.ItemInfo"/>.</param>
+        /// <param name="name">The name of the new <see cref="dfAtlas.ItemInfo"/>. If <see langword="null"/>, it will default to <paramref name="def"/>'s name.</param>
+        /// <returns>The built <see cref="dfAtlas.ItemInfo"/>.</returns>
+        public static dfAtlas.ItemInfo AddNewItemToAtlas(this dfAtlas atlas, tk2dSpriteDefinition def, string name = null)
+        {
+            if (string.IsNullOrEmpty(name))
+                name = def.name;
+            if (atlas[name] != null)
+              return atlas[name];
+
+            Texture2D tex = def.material.mainTexture as Texture2D;
+            IntVector2 origin  = (new Vector2(tex.width * def.uvs[0].x, tex.height * def.uvs[0].y)).ToIntVector2();
+            IntVector2 dims = (new Vector2(tex.width * def.uvs[3].x, tex.height * def.uvs[3].y)).ToIntVector2() - origin;
+            IntVector2 offset = (PIXELS_PER_UNIT * def.position0.XY()).ToIntVector2();
+            IntVector2 region = (PIXELS_PER_UNIT * def.untrimmedBoundsDataExtents.XY()).ToIntVector2();
+            return atlas.AddNewItemToAtlasInternal(tex, name, origin.x, origin.y, dims.x, dims.y, offset.x, offset.y, region.x, region.y);
+        }
+
+        /// <summary>
+        /// Builds and adds a new <see cref="dfAtlas.ItemInfo"/> to <paramref name="atlas"/> with the specified <paramref name="resourcePath"/> and the name of <paramref name="name"/>.
+        /// </summary>
+        /// <param name="atlas">The <see cref="dfAtlas"/> to add the new <see cref="dfAtlas.ItemInfo"/> to.</param>
+        /// <param name="resourcePath">The resource path for the image of the new <see cref="dfAtlas.ItemInfo"/>.</param>
+        /// <param name="name">The name of the new <see cref="dfAtlas.ItemInfo"/>. If <see langword="null"/>, it will default to <paramref name="tex"/>'s name.</param>
+        /// <returns>The built <see cref="dfAtlas.ItemInfo"/>.</returns>
+        public static dfAtlas.ItemInfo AddNewItemToAtlas(this dfAtlas atlas, string resourcePath, string name = null, Assembly assembly = null)
+        {
+            Texture2D tex = ItemAPI.ResourceExtractor.GetTextureFromResource(resourcePath, assembly ?? Assembly.GetCallingAssembly());
+            return atlas.AddNewItemToAtlasInternal(tex, name, 0, 0, tex.width, tex.height, 0, 0, tex.width, tex.height);
+        }
+
+        /// <summary>Convenience function for adding a texture to the UI atlas.</summary>
+        public static dfAtlas.ItemInfo AddUISprite(Texture2D tex, string name = null)
+            => GameUIRoot.Instance.ConversationBar.portraitSprite.Atlas.AddNewItemToAtlas(tex, name);
+
+        /// <summary>Convenience function for adding a sprite to the UI atlas.</summary>
+        public static dfAtlas.ItemInfo AddUISprite(tk2dSpriteDefinition def, string name = null)
+            => GameUIRoot.Instance.ConversationBar.portraitSprite.Atlas.AddNewItemToAtlas(def, name);
+
+        /// <summary>Convenience function for adding an image resource to the UI atlas.</summary>
+        public static dfAtlas.ItemInfo AddUISprite(string resourcePath, string name = null)
+            => GameUIRoot.Instance.ConversationBar.portraitSprite.Atlas.AddNewItemToAtlas(resourcePath, name, Assembly.GetCallingAssembly());
 
         private static readonly Dictionary<dfAtlas, List<RectInt>> _CachedPixelRegions = new();
         /// <summary>
@@ -229,7 +283,8 @@ namespace Alexandria.CharacterAPI
             LinkedList<RectInt> freeRects = atlas.GetFreeRegions();
             LinkedListNode<RectInt> bestNode = null;
             int smallestWidth = tw;
-            for (LinkedListNode<RectInt> node = freeRects.First; node != null; node = node.Next)
+            // iterate starting from the last node added since we might be adding a lot of similarly sized sprites
+            for (LinkedListNode<RectInt> node = freeRects.Last; node != null; node = node.Previous)
             {
                 RectInt freeRect = node.Value;
                 if (freeRect.width < neededWidth || freeRect.height < neededHeight)

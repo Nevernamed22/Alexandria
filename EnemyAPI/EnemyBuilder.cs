@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Alexandria.ItemAPI;
+using Alexandria.Misc;
 using UnityEngine;
 using MonoMod.RuntimeDetour;
 using Brave.BulletScript;
@@ -48,12 +49,8 @@ namespace Alexandria.EnemyAPI
 
         public static AIActor GetOrLoadByGuid(Func<string, AIActor> orig, string guid)
         {
-            foreach (var id in Dictionary.Keys)
-            {
-                if (id == guid)
-                    return Dictionary[id].GetComponent<AIActor>();
-            }
-
+            if (Dictionary.TryGetValue(guid, out GameObject companion))
+                return companion.GetComponent<AIActor>();
             return orig(guid);
         }
 
@@ -151,17 +148,7 @@ namespace Alexandria.EnemyAPI
         {
             AIAnimator orAddComponent = obj.GetOrAddComponent<AIAnimator>();
             DirectionalAnimation directionalAnimation = orAddComponent.GetDirectionalAnimation(name, directionType, type);
-
-            if (directionalAnimation == null)
-            {
-                directionalAnimation = new DirectionalAnimation
-                {
-                    AnimNames = new string[0],
-                    Flipped = new DirectionalAnimation.FlipType[0],
-                    Type = directionType,
-                    Prefix = name
-                };
-            }
+            directionalAnimation ??= Shared.BlankDirectionalAnimation(prefix: name, direction: directionType);
             directionalAnimation.AnimNames = directionalAnimation.AnimNames.Concat(new string[] { name }).ToArray<string>();
             directionalAnimation.Flipped = directionalAnimation.Flipped.Concat(new DirectionalAnimation.FlipType[] { flipType }).ToArray<DirectionalAnimation.FlipType>();
             orAddComponent.AssignDirectionalAnimation(name, directionalAnimation, type);
@@ -197,32 +184,21 @@ namespace Alexandria.EnemyAPI
             if (!collection)
                 collection = SpriteBuilder.ConstructCollection(aiAnimator.gameObject, $"{aiAnimator.name}_collection");
 
-            string[] resources = ResourceExtractor.GetResourceNames(assembly ?? Assembly.GetCallingAssembly());                                                                                           
-            List<string> anims = new List<string>();
-            var animList = new List<tk2dSpriteAnimationClip>();                                 
+            var sortedList = Shared.SortedResourceNames(assembly ?? Assembly.GetCallingAssembly());
+            var animList = new List<tk2dSpriteAnimationClip>();
+            string prefix = $"{spriteDirectory.Replace('/', '.')}.{enemyName}_{name.ToLower()}";
             foreach (var a in DirectionalAnimation.m_combined[(int)directionType])
             {
                 List<int> indices = new List<int>();
-                var sortedList = resources.OrderBy(x => x).ToList();
                 for (int i = 0; i < sortedList.Count; i++)
-                {
+                    if (sortedList[i].Contains($"{prefix}_{a.suffix}_0", false))
+                        indices.Add(SpriteBuilder.AddSpriteToCollection(sortedList[i], collection, assembly ?? Assembly.GetCallingAssembly()));
+                if (indices.Count == 0)
+                    continue;
 
-                    if (sortedList[i].Contains(spriteDirectory.Replace('/', '.'), false))
-                    {
-
-                        if (sortedList[i].Contains(spriteDirectory.Replace('/', '.') + $".{enemyName}_{name.ToLower()}_{a.suffix}_0", false))
-                        {
-                            indices.Add(SpriteBuilder.AddSpriteToCollection(sortedList[i], collection, assembly ?? Assembly.GetCallingAssembly()));
-                        }
-
-                    }
-                }
-                if (indices.Count > 0)
-                {
-                    tk2dSpriteAnimationClip clip = SpriteBuilder.AddAnimation(aiAnimator.spriteAnimator, collection, indices, $"{name.ToLower()}_{a.suffix}", wrapMode);
-                    clip.fps = fps;
-                    animList.Add(clip);
-                }
+                tk2dSpriteAnimationClip clip = SpriteBuilder.AddAnimation(aiAnimator.spriteAnimator, collection, indices, $"{name.ToLower()}_{a.suffix}", wrapMode);
+                clip.fps = fps;
+                animList.Add(clip);
             }
             return animList.ToArray();
         }
@@ -233,20 +209,12 @@ namespace Alexandria.EnemyAPI
             if (!collection)
                 collection = SpriteBuilder.ConstructCollection(aiAnimator.gameObject, $"{aiAnimator.name}_collection");
 
-            string[] resources = ResourceExtractor.GetResourceNames(assembly ?? Assembly.GetCallingAssembly());
+            var sortedList = Shared.SortedResourceNames(assembly ?? Assembly.GetCallingAssembly());
             List<int> indices = new List<int>();
-
-
-            var sortedList = resources.OrderBy(x => x).ToList();
-
+            string prefix = spriteDirectory.Replace('/', '.');
             for (int i = 0; i < sortedList.Count; i++)
-            {
-               
-                if (sortedList[i].StartsWith(spriteDirectory.Replace('/', '.'), StringComparison.OrdinalIgnoreCase))
-                {
+                if (sortedList[i].StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
                     indices.Add(SpriteBuilder.AddSpriteToCollection(sortedList[i], collection, assembly ?? Assembly.GetCallingAssembly()));
-                }
-            }
             tk2dSpriteAnimationClip clip = SpriteBuilder.AddAnimation(aiAnimator.spriteAnimator, collection, indices, name, tk2dSpriteAnimationClip.WrapMode.Once);
             clip.fps = fps;
             return clip;
@@ -254,29 +222,15 @@ namespace Alexandria.EnemyAPI
 
         public static DirectionalAnimation GetDirectionalAnimation(this AIAnimator aiAnimator, string name, DirectionType directionType, AnimationType type)
         {
-            DirectionalAnimation result = null;
-            switch (type)
+            return type switch
             {
-                case AnimationType.Idle:
-                    result = aiAnimator.IdleAnimation;
-                    break;
-                case AnimationType.Move:
-                    result = aiAnimator.MoveAnimation;
-                    break;
-                case AnimationType.Flight:
-                    result = aiAnimator.FlightAnimation;
-                    break;
-                case AnimationType.Hit:
-                    result = aiAnimator.HitAnimation;
-                    break;
-                case AnimationType.Talk:
-                    result = aiAnimator.TalkAnimation;
-                    break;
-            }
-            if (result != null)
-                return result;
-
-            return null;
+                AnimationType.Idle => aiAnimator.IdleAnimation,
+                AnimationType.Move => aiAnimator.MoveAnimation,
+                AnimationType.Flight => aiAnimator.FlightAnimation,
+                AnimationType.Hit => aiAnimator.HitAnimation,
+                AnimationType.Talk => aiAnimator.TalkAnimation,
+                _ => null,
+            };
         }
 
         public static void AssignDirectionalAnimation(this AIAnimator aiAnimator, string name, DirectionalAnimation animation, AnimationType type)

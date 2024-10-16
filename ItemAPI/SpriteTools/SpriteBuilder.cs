@@ -222,19 +222,10 @@ namespace Alexandria.ItemAPI
 		// Token: 0x06000008 RID: 8 RVA: 0x0000238C File Offset: 0x0000058C
 		public static SpeculativeRigidbody SetUpSpeculativeRigidbody(this tk2dSprite sprite, IntVector2 offset, IntVector2 dimensions)
 		{
-			SpeculativeRigidbody orAddComponent = sprite.gameObject.GetOrAddComponent<SpeculativeRigidbody>();
-			PixelCollider pixelCollider = new PixelCollider();
-			pixelCollider.ColliderGenerationMode = PixelCollider.PixelColliderGeneration.Manual;
-			pixelCollider.CollisionLayer = CollisionLayer.EnemyCollider;
-			pixelCollider.ManualWidth = dimensions.x;
-			pixelCollider.ManualHeight = dimensions.y;
-			pixelCollider.ManualOffsetX = offset.x;
-			pixelCollider.ManualOffsetY = offset.y;
-			orAddComponent.PixelColliders = new List<PixelCollider>
-			{
-				pixelCollider
-			};
-			return orAddComponent;
+			SpeculativeRigidbody body = sprite.gameObject.GetOrAddComponent<SpeculativeRigidbody>();
+			body.PixelColliders = new();
+			body.AddCollider(CollisionLayer.EnemyCollider, offset, dimensions);
+			return body;
 		}
 
 		// Token: 0x06000009 RID: 9 RVA: 0x00002404 File Offset: 0x00000604

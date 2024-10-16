@@ -768,6 +768,8 @@ namespace Alexandria.DungeonAPI
             return -1;
         }*/
 
+        public static Func<string, GameObject, JObject, GameObject> OnCustomProperty;
+
         public static void AddPlaceableToRoom(PrototypeDungeonRoom room, Vector2 location, string assetPath, string attributes, Dictionary<int, PrototypeEventTriggerArea> prototypeEventTriggerAreas)
         {
             try
@@ -777,7 +779,10 @@ namespace Alexandria.DungeonAPI
                 if (!string.IsNullOrEmpty(attributes))
                 {
                     jobject = JObject.Parse(attributes);
-
+                    if (OnCustomProperty != null)
+                    {
+                        gameObject = OnCustomProperty(assetPath, gameObject, jobject);
+                    } 
                     if (assetPath == "godray")
                     {
                         gameObject = FakePrefab.Clone(RoomFactory.GetExoticGameObject("godray"));

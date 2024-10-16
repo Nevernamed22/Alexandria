@@ -15,6 +15,8 @@ namespace Alexandria.CharacterAPI
     //Utility methods
     public static class ToolsCharApi
     {
+        internal const float PIXELS_PER_UNIT = 16f;
+
         public static bool verbose = false;
         private static string defaultLog = Path.Combine(ETGMod.ResourcesDirectory, "customCharacterLog.txt");
         public static string modID = "CharAPI";
@@ -26,7 +28,6 @@ namespace Alexandria.CharacterAPI
         public static Material[] SetOverrideMaterial (this PlayerController player, Material overrideMaterial)
         {
             FieldInfo _cachedOverrideMaterials = typeof(PlayerController).GetField("m_cachedOverrideMaterials", BindingFlags.NonPublic | BindingFlags.Instance);
-
 
             if ((_cachedOverrideMaterials.GetValue(player) as Material[]) == null)
             {
@@ -116,6 +117,31 @@ namespace Alexandria.CharacterAPI
             return obj;
         }
 
+        private static dfAtlas.ItemInfo AddNewItemToAtlasInternal(this dfAtlas atlas, Texture2D tex, string name, int texX, int texY, int texW, int texH, int offX, int offY, int regW, int regH)
+        {
+            if (string.IsNullOrEmpty(name))
+                name = tex.name;
+            if (atlas[name] != null)
+                return atlas[name];
+            dfAtlas.ItemInfo item = new dfAtlas.ItemInfo
+            {
+                border = new RectOffset(),
+                name = name,
+                region = atlas.FindFirstValidEmptySpace(new IntVector2(regW, regH)),
+                sizeInPixels = new Vector2(regW, regH),
+                texture = tex,
+                textureGUID = name
+            };
+            int startPointX = offX + Mathf.RoundToInt(item.region.x * atlas.Texture.width);
+            int startPointY = offY + Mathf.RoundToInt(item.region.y * atlas.Texture.height);
+            atlas.Texture.SetPixels(startPointX, startPointY, texW, texH, tex.GetPixels(texX, texY, texW, texH));
+
+            atlas.Texture.Apply();
+            //NOTE: circumventing a hopefully unnecessary call to atlas.RebuildIndexes(); change back to atlas.AddItem() if problems arise
+            atlas.items.Add(item);
+            atlas.map[item.name] = item;
+            return item;
+        }
 
         /// <summary>
         /// Builds and adds a new <see cref="dfAtlas.ItemInfo"/> to <paramref name="atlas"/> with the texture of <paramref name="tex"/> and the name of <paramref name="name"/>.
@@ -126,39 +152,57 @@ namespace Alexandria.CharacterAPI
         /// <returns>The built <see cref="dfAtlas.ItemInfo"/>.</returns>
         public static dfAtlas.ItemInfo AddNewItemToAtlas(this dfAtlas atlas, Texture2D tex, string name = null)
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                name = tex.name;
-            }
-            if (atlas[name] != null)
-            {
-                return atlas[name];
-            }
-            dfAtlas.ItemInfo item = new dfAtlas.ItemInfo
-            {
-                border = new RectOffset(),
-                deleted = false,
-                name = name,
-                region = atlas.FindFirstValidEmptySpace(new IntVector2(tex.width, tex.height)),
-                rotated = false,
-                sizeInPixels = new Vector2(tex.width, tex.height),
-                texture = tex,
-                textureGUID = name
-            };
-            int startPointX = Mathf.RoundToInt(item.region.x * atlas.Texture.width);
-            int startPointY = Mathf.RoundToInt(item.region.y * atlas.Texture.height);
-            for (int x = startPointX; x < Mathf.RoundToInt(item.region.xMax * atlas.Texture.width); x++)
-            {
-                for (int y = startPointY; y < Mathf.RoundToInt(item.region.yMax * atlas.Texture.height); y++)
-                {
-                    atlas.Texture.SetPixel(x, y, tex.GetPixel(x - startPointX, y - startPointY));
-                }
-            }
-            atlas.Texture.Apply();
-            atlas.AddItem(item);
-            return item;
+            return atlas.AddNewItemToAtlasInternal(tex, name, 0, 0, tex.width, tex.height, 0, 0, tex.width, tex.height);
         }
 
+        /// <summary>
+        /// Builds and adds a new <see cref="dfAtlas.ItemInfo"/> to <paramref name="atlas"/> with the sprite of <paramref name="def"/> and the name of <paramref name="name"/>.
+        /// </summary>
+        /// <param name="atlas">The <see cref="dfAtlas"/> to add the new <see cref="dfAtlas.ItemInfo"/> to.</param>
+        /// <param name="def">The sprite of the new <see cref="dfAtlas.ItemInfo"/>.</param>
+        /// <param name="name">The name of the new <see cref="dfAtlas.ItemInfo"/>. If <see langword="null"/>, it will default to <paramref name="def"/>'s name.</param>
+        /// <returns>The built <see cref="dfAtlas.ItemInfo"/>.</returns>
+        public static dfAtlas.ItemInfo AddNewItemToAtlas(this dfAtlas atlas, tk2dSpriteDefinition def, string name = null)
+        {
+            if (string.IsNullOrEmpty(name))
+                name = def.name;
+            if (atlas[name] != null)
+              return atlas[name];
+
+            Texture2D tex = def.material.mainTexture as Texture2D;
+            IntVector2 origin  = (new Vector2(tex.width * def.uvs[0].x, tex.height * def.uvs[0].y)).ToIntVector2();
+            IntVector2 dims = (new Vector2(tex.width * def.uvs[3].x, tex.height * def.uvs[3].y)).ToIntVector2() - origin;
+            IntVector2 offset = (PIXELS_PER_UNIT * def.position0.XY()).ToIntVector2();
+            IntVector2 region = (PIXELS_PER_UNIT * def.untrimmedBoundsDataExtents.XY()).ToIntVector2();
+            return atlas.AddNewItemToAtlasInternal(tex, name, origin.x, origin.y, dims.x, dims.y, offset.x, offset.y, region.x, region.y);
+        }
+
+        /// <summary>
+        /// Builds and adds a new <see cref="dfAtlas.ItemInfo"/> to <paramref name="atlas"/> with the specified <paramref name="resourcePath"/> and the name of <paramref name="name"/>.
+        /// </summary>
+        /// <param name="atlas">The <see cref="dfAtlas"/> to add the new <see cref="dfAtlas.ItemInfo"/> to.</param>
+        /// <param name="resourcePath">The resource path for the image of the new <see cref="dfAtlas.ItemInfo"/>.</param>
+        /// <param name="name">The name of the new <see cref="dfAtlas.ItemInfo"/>. If <see langword="null"/>, it will default to <paramref name="tex"/>'s name.</param>
+        /// <returns>The built <see cref="dfAtlas.ItemInfo"/>.</returns>
+        public static dfAtlas.ItemInfo AddNewItemToAtlas(this dfAtlas atlas, string resourcePath, string name = null, Assembly assembly = null)
+        {
+            Texture2D tex = ItemAPI.ResourceExtractor.GetTextureFromResource(resourcePath, assembly ?? Assembly.GetCallingAssembly());
+            return atlas.AddNewItemToAtlasInternal(tex, name, 0, 0, tex.width, tex.height, 0, 0, tex.width, tex.height);
+        }
+
+        /// <summary>Convenience function for adding a texture to the UI atlas.</summary>
+        public static dfAtlas.ItemInfo AddUISprite(Texture2D tex, string name = null)
+            => GameUIRoot.Instance.ConversationBar.portraitSprite.Atlas.AddNewItemToAtlas(tex, name);
+
+        /// <summary>Convenience function for adding a sprite to the UI atlas.</summary>
+        public static dfAtlas.ItemInfo AddUISprite(tk2dSpriteDefinition def, string name = null)
+            => GameUIRoot.Instance.ConversationBar.portraitSprite.Atlas.AddNewItemToAtlas(def, name);
+
+        /// <summary>Convenience function for adding an image resource to the UI atlas.</summary>
+        public static dfAtlas.ItemInfo AddUISprite(string resourcePath, string name = null)
+            => GameUIRoot.Instance.ConversationBar.portraitSprite.Atlas.AddNewItemToAtlas(resourcePath, name, Assembly.GetCallingAssembly());
+
+        private static readonly Dictionary<dfAtlas, List<RectInt>> _CachedPixelRegions = new();
         /// <summary>
         /// Gets the pixel regions of <paramref name="atlas"/>.
         /// </summary>
@@ -166,14 +210,41 @@ namespace Alexandria.CharacterAPI
         /// <returns>A list with all pixel regions in <paramref name="atlas"/></returns>
         public static List<RectInt> GetPixelRegions(this dfAtlas atlas)
         {
-            return atlas.Items.Convert(delegate (dfAtlas.ItemInfo item)
+            if (!_CachedPixelRegions.TryGetValue(atlas, out List<RectInt> rects))
+                rects = _CachedPixelRegions[atlas] = new List<RectInt>(atlas.Items.Count);
+            for (int i = rects.Count; i < atlas.Items.Count; ++i)
             {
-                return new RectInt(
+                dfAtlas.ItemInfo item = atlas.Items[i];
+                rects.Add(new RectInt(
                     Mathf.RoundToInt(item.region.x * atlas.Texture.width),
                     Mathf.RoundToInt(item.region.y * atlas.Texture.height),
                     Mathf.RoundToInt(item.region.width * atlas.Texture.width),
-                    Mathf.RoundToInt(item.region.height * atlas.Texture.height));
-            });
+                    Mathf.RoundToInt(item.region.height * atlas.Texture.height)));
+            }
+            return rects;
+        }
+
+        private static readonly Dictionary<dfAtlas, LinkedList<RectInt>> _CachedFreeRegions = new();
+        /// <summary>
+        /// Gets the free regions of <paramref name="atlas"/>.
+        /// </summary>
+        /// <param name="atlas">The <see cref="dfAtlas"/> to get the free regions from.</param>
+        /// <returns>A list with all free regions in <paramref name="atlas"/></returns>
+        private static LinkedList<RectInt> GetFreeRegions(this dfAtlas atlas)
+        {
+            if (_CachedFreeRegions.TryGetValue(atlas, out LinkedList<RectInt> rects))
+                return rects;
+            int texW = atlas.Texture.width;
+            int texH = atlas.Texture.height;
+            int maxY = 0;
+            for (int i = 0; i < atlas.Items.Count; ++i)
+            {
+                dfAtlas.ItemInfo item = atlas.Items[i];
+                maxY = Mathf.Max(maxY, Mathf.RoundToInt(texH * (item.region.height + item.region.y)));
+            }
+            rects = _CachedFreeRegions[atlas] = new LinkedList<RectInt>();
+            rects.AddLast(new RectInt(0, maxY + 1, texW, texH - (maxY + 1)));
+            return rects;
         }
 
         /// <summary>
@@ -194,9 +265,9 @@ namespace Alexandria.CharacterAPI
             return result;
         }
 
+        private static readonly Rect _NullRect = new Rect(0f, 0f, 0f, 0f);
 
-
-
+        //WARNING: there might be off-by-one errors littered throughout this function, so keep an eye on it
         /// <summary>
         /// Gets the first empty space in <paramref name="atlas"/> that has at least the size of <paramref name="pixelScale"/>.
         /// </summary>
@@ -205,87 +276,43 @@ namespace Alexandria.CharacterAPI
         /// <returns>The rect of the empty space divided by the atlas texture's size.</returns>
         public static Rect FindFirstValidEmptySpace(this dfAtlas atlas, IntVector2 pixelScale)
         {
-
-
-
-
-            if (atlas == null || atlas.Texture == null || !atlas.Texture.IsReadable())
+            int tw = atlas.Texture.width;
+            int th = atlas.Texture.height;
+            int neededWidth = pixelScale.x;
+            int neededHeight = pixelScale.y;
+            LinkedList<RectInt> freeRects = atlas.GetFreeRegions();
+            LinkedListNode<RectInt> bestNode = null;
+            int smallestWidth = tw;
+            // iterate starting from the last node added since we might be adding a lot of similarly sized sprites
+            for (LinkedListNode<RectInt> node = freeRects.Last; node != null; node = node.Previous)
             {
-                return new Rect(0f, 0f, 0f, 0f);
-            }
-            Vector2Int point = new Vector2Int(0, 0);
-            int pointIndex = -1;
-            List<RectInt> rects = atlas.GetPixelRegions();
-
-
-            while (true)
-            {
-                bool shouldContinue = false;
-                foreach (RectInt rint in rects)
-                {
-
-                    if (rint.DoseOverlap(new RectInt(point, pixelScale.ToVector2Int())))
-                    {
-                        shouldContinue = true;
-                        pointIndex++;
-                        if (pointIndex >= rects.Count)
-                        {
-                            return new Rect(0f, 0f, 0f, 0f);
-                        }
-                        point = rects[pointIndex].max + Vector2Int.one;
-                        if (point.x > atlas.Texture.width || point.y > atlas.Texture.height)
-                        {
-                            atlas.ResizeAtlas(new IntVector2(atlas.Texture.width * 2, atlas.Texture.height * 2));
-                        }
-                        break;
-                    }
-                    bool shouldBreak = false;
-                    foreach (RectInt rint2 in rects)
-                    {
-                        RectInt currentRect = new RectInt(point, pixelScale.ToVector2Int());
-                        if (rint2.x < currentRect.x || rint2.y < currentRect.y)
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            if (currentRect.DoseOverlap(rint2))
-                            {
-                                shouldContinue = true;
-                                shouldBreak = true;
-                                pointIndex++;
-                                if (pointIndex >= rects.Count)
-                                {
-                                    return new Rect(0f, 0f, 0f, 0f);
-                                }
-                                point = rects[pointIndex].max + Vector2Int.one;
-                                if (point.x > atlas.Texture.width || point.y > atlas.Texture.height)
-                                {
-                                    atlas.ResizeAtlas(new IntVector2(atlas.Texture.width * 2, atlas.Texture.height * 2));
-                                }
-                                break;
-                            }
-                        }
-                    }
-                    if (shouldBreak)
-                    {
-                        break;
-                    }
-                }
-                if (shouldContinue)
-                {
+                RectInt freeRect = node.Value;
+                if (freeRect.width < neededWidth || freeRect.height < neededHeight)
                     continue;
-                }
-                RectInt currentRect2 = new RectInt(point, pixelScale.ToVector2Int());
-                if (currentRect2.xMax > atlas.Texture.width || currentRect2.yMax > atlas.Texture.height)
-                {
-                    atlas.ResizeAtlas(new IntVector2(atlas.Texture.width * 2, atlas.Texture.height * 2));
-                }
-                break;
+                if (freeRect.width > smallestWidth)
+                    continue;
+                smallestWidth = freeRect.width;
+                bestNode = node;
+                if (smallestWidth == neededWidth)
+                    break; // literally cannot do better, so stop looking now
             }
-            RectInt currentRect3 = new RectInt(point, pixelScale.ToVector2Int());
-            Rect rect = new Rect((float)currentRect3.x / atlas.Texture.width, (float)currentRect3.y / atlas.Texture.height, (float)currentRect3.width / atlas.Texture.width, (float)currentRect3.height / atlas.Texture.height);
-            return rect;
+            if (bestNode == null) // resize the atlas, recompute free rectangles, and retry finding an empty space
+            {
+                atlas.ResizeAtlas(new IntVector2(tw * 2, th * 2));
+                freeRects.Clear();
+                freeRects.AddLast(new RectInt(tw, 0, tw, th * 2)); // tall vertical rectangle on the right half
+                freeRects.AddLast(new RectInt(0, th, tw, th)); // square in the bottom left corner
+                return atlas.FindFirstValidEmptySpace(pixelScale);
+            }
+            // split the free rectangle into two, preferring tall rectangles to wide rectangles
+            RectInt bestFreeRect = bestNode.Value;
+            freeRects.Remove(bestNode);
+            RectInt currentRect = new RectInt(bestFreeRect.x, bestFreeRect.y, neededWidth, neededHeight);
+            if (bestFreeRect.width > neededWidth)
+                freeRects.AddLast(new RectInt(currentRect.xMax + 1, bestFreeRect.yMin, bestFreeRect.width - neededWidth, bestFreeRect.height));
+            if (bestFreeRect.height > neededHeight)
+                freeRects.AddLast(new RectInt(bestFreeRect.xMin, currentRect.yMax + 1, neededWidth, bestFreeRect.height - neededHeight));
+            return new Rect((float)currentRect.x / tw, (float)currentRect.y / th, (float)currentRect.width / tw, (float)currentRect.height / th);
         }
 
         /// <summary>

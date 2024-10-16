@@ -63,34 +63,23 @@ namespace Alexandria.EnemyAPI
         /// <param name="enemy">The target AIActor.</param>       
         public static void DoCorrectForWalls(this AIActor enemy)
         {
-            if (PhysicsEngine.Instance.OverlapCast(enemy.specRigidbody, null, true, false, null, null, false, null, null, new SpeculativeRigidbody[0]))
-            {
-                Vector2 vector = enemy.transform.position.XY();
-                IntVector2[] cardinalsAndOrdinals = IntVector2.CardinalsAndOrdinals;
-                int num = 0;
-                int num2 = 1;
-                for (; ; )
-                {
-                    for (int i = 0; i < cardinalsAndOrdinals.Length; i++)
-                    {
-                        enemy.transform.position = vector + PhysicsEngine.PixelToUnit(cardinalsAndOrdinals[i] * num2);
-                        enemy.specRigidbody.Reinitialize();
-                        if (!PhysicsEngine.Instance.OverlapCast(enemy.specRigidbody, null, true, false, null, null, false, null, null, new SpeculativeRigidbody[0]))
-                        {
-                            return;
-                        }
-                    }
-                    num2++;
-                    num++;
-                    if (num > 200)
-                    {
-                        goto Block_4;
-                    }
-                }
-            Block_4:
-                Debug.LogError("FREEZE AVERTED!  TELL RUBEL!  (you're welcome) 147");
+            if (!PhysicsEngine.Instance.OverlapCast(enemy.specRigidbody, null, true, false, null, null, false, null, null, new SpeculativeRigidbody[0]))
                 return;
+
+            Vector2 vector = enemy.transform.position.XY();
+            IntVector2[] cardinalsAndOrdinals = IntVector2.CardinalsAndOrdinals;
+            for (int num2 = 1; num2 <= 201; ++num2)
+            {
+                for (int i = 0; i < cardinalsAndOrdinals.Length; i++)
+                {
+                    enemy.transform.position = vector + PhysicsEngine.PixelToUnit(cardinalsAndOrdinals[i] * num2);
+                    enemy.specRigidbody.Reinitialize();
+                    if (!PhysicsEngine.Instance.OverlapCast(enemy.specRigidbody, null, true, false, null, null, false, null, null, new SpeculativeRigidbody[0]))
+                        return;
+                }
             }
+            Debug.LogError("FREEZE AVERTED!  TELL RUBEL!  (you're welcome) 147");
+            return;
         }
 
         /// <summary>
@@ -99,15 +88,12 @@ namespace Alexandria.EnemyAPI
         /// <param name="target">The target AIActor.</param>
         public static bool IsInMinecart(this AIActor target)
         {
-            if (target && target.behaviorSpeculator)
-            {
-                foreach (MovementBehaviorBase behavbase in target.behaviorSpeculator.MovementBehaviors)
-                {
-                    if (behavbase is RideInCartsBehavior) { return (behavbase as RideInCartsBehavior).m_ridingCart; }
-                }
+            if (!target || !target.behaviorSpeculator)
                 return false;
-            }
-            else return false;
+            foreach (MovementBehaviorBase behavbase in target.behaviorSpeculator.MovementBehaviors)
+                if (behavbase is RideInCartsBehavior)
+                    return (behavbase as RideInCartsBehavior).m_ridingCart;
+            return false;
         }
 
         /// <summary>
@@ -146,23 +132,19 @@ namespace Alexandria.EnemyAPI
         /// <param name="target">The AIActor to be checked.</param>
         public static bool IsSecretlyTheMineFlayer(this AIActor target)
         {
-            if (target)
-            {
-                foreach (AIActor maybeFlayer in StaticReferenceManager.AllEnemies)
-                {
-                    if (maybeFlayer && maybeFlayer.EnemyGuid == "8b0dd96e2fe74ec7bebc1bc689c0008a" && maybeFlayer.behaviorSpeculator)
-                    {
-                        List<MineFlayerShellGameBehavior> activeShellGames = maybeFlayer.behaviorSpeculator.FindAttackBehaviors<MineFlayerShellGameBehavior>();
-                        if (activeShellGames.Count > 0)
-                        {
-                            foreach (MineFlayerShellGameBehavior behav in activeShellGames)
-                            {
-                                if (behav.m_myBell != null && behav.m_myBell == target) return true;
-                            }
+            if (!target)
+                return false;
 
-                        }
-                    }
-                }
+            foreach (AIActor maybeFlayer in StaticReferenceManager.AllEnemies)
+            {
+                if (!maybeFlayer || maybeFlayer.EnemyGuid != "8b0dd96e2fe74ec7bebc1bc689c0008a" || !maybeFlayer.behaviorSpeculator)
+                    continue;
+                List<MineFlayerShellGameBehavior> activeShellGames = maybeFlayer.behaviorSpeculator.FindAttackBehaviors<MineFlayerShellGameBehavior>();
+                if (activeShellGames.Count == 0)
+                    continue;
+                foreach (MineFlayerShellGameBehavior behav in activeShellGames)
+                    if (behav.m_myBell == target)
+                        return true;
             }
             return false;
         }

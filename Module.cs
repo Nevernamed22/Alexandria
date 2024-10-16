@@ -69,13 +69,13 @@ namespace Alexandria
                 //Low Priority
                 ChamberGunAPI.Init();
                 GenericItemAPIHooks.InitHooks();
-                AlexandriaTags.InitGenericTags();
+                AlexandriaTags.InitGenericTagsInternal();
                 ChestSpawnHelper.Init();
                 Commands.Init();
                 BreachShopTools.Init();
                 AmmoPickupFixer.Init();
-                LabelablePlayerItemSetup.InitLabelHook();
-                MasteryOverrideHandler.Init();
+                LabelablePlayerItemSetup.InitLabelHookInternal();
+                MasteryOverrideHandler.InitInternal();
                 RoomRewardAPI.Init();
 
 

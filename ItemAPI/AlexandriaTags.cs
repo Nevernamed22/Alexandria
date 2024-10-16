@@ -8,9 +8,9 @@ namespace Alexandria.ItemAPI
     public static class AlexandriaTags
     {
         /// <summary>
-        /// The setup method which adds tags to basegame items and enemies. DO NOT CALL THIS METHOD.
+        /// The setup method which adds tags to basegame items and enemies.
         /// </summary>
-        public static void InitGenericTags()
+        internal static void InitGenericTagsInternal()
         {
             //Items
             List<int> bulletModifierIDs = new List<int>() { 579, 627, 298, 640, 111, 113, 172, 277, 278, 284, 286, 288, 323, 352, 373, 374, 375, 410, 521, 523, 528, 530, 531, 532, 533, 538, 568, 569, 630, 655, 661, 822, 298, 304, 527, 638, 636, 241, 204, 295, 241, 524, 287 };
@@ -422,5 +422,7 @@ namespace Alexandria.ItemAPI
             else return false;
         }
 
+        [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
+        public static void InitGenericTags() {}
     }
 }

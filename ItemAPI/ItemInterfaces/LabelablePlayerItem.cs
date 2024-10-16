@@ -14,20 +14,20 @@ namespace Alexandria.ItemAPI
     class LabelablePlayerItemSetup
     {
         /// <summary>
-        /// Initialises the hooks necessary to make labelable player items functional. DO NOT RUN THIS METHOD.
+        /// Initialises the hooks necessary to make labelable player items functional.
         /// </summary>
-        public static void InitLabelHook()
+        internal static void InitLabelHookInternal()
         {
             new Hook(
                 typeof(GameUIItemController).GetMethod("UpdateItem", BindingFlags.Instance | BindingFlags.Public),
-                typeof(LabelablePlayerItemSetup).GetMethod("UpdateCustomLabelHook")
+                typeof(LabelablePlayerItemSetup).GetMethod("UpdateCustomLabelHookInternal", BindingFlags.Static | BindingFlags.NonPublic)
             );
         }
 
         /// <summary>
-        /// A hook method involved in making labelable player items functional. DO NOT RUN THIS METHOD.
+        /// A hook method involved in making labelable player items functional.
         /// </summary>
-        public static void UpdateCustomLabelHook(Action<GameUIItemController, PlayerItem, List<PlayerItem>> orig, GameUIItemController self, PlayerItem current, List<PlayerItem> items)
+        internal static void UpdateCustomLabelHookInternal(Action<GameUIItemController, PlayerItem, List<PlayerItem>> orig, GameUIItemController self, PlayerItem current, List<PlayerItem> items)
         {
             orig(self, current, items);
             if (current && current is ILabelItem)
@@ -47,5 +47,11 @@ namespace Alexandria.ItemAPI
                 }
             }            
         }
+
+        [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
+        public static void InitLabelHook() { }
+
+        [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
+        public static void UpdateCustomLabelHook(Action<GameUIItemController, PlayerItem, List<PlayerItem>> orig, GameUIItemController self, PlayerItem current, List<PlayerItem> items) { }
     }
 }

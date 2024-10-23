@@ -26,14 +26,9 @@ namespace Alexandria
     [BepInPlugin(GUID, NAME, VERSION)]
     public class Alexandria : BaseUnityPlugin
     {
-
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
-
         public const string VERSION = "0.4.14";
-
-
-
 
         public void Start()
         {

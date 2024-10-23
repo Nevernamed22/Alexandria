@@ -26,14 +26,9 @@ namespace Alexandria
     [BepInPlugin(GUID, NAME, VERSION)]
     public class Alexandria : BaseUnityPlugin
     {
-
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
-
-        public const string VERSION = "0.4.14";
-
-
-
+        public const string VERSION = "0.4.15";
 
         public void Start()
         {
@@ -69,13 +64,13 @@ namespace Alexandria
                 //Low Priority
                 ChamberGunAPI.Init();
                 GenericItemAPIHooks.InitHooks();
-                AlexandriaTags.InitGenericTags();
+                AlexandriaTags.InitGenericTagsInternal();
                 ChestSpawnHelper.Init();
                 Commands.Init();
                 BreachShopTools.Init();
                 AmmoPickupFixer.Init();
-                LabelablePlayerItemSetup.InitLabelHook();
-                MasteryOverrideHandler.Init();
+                LabelablePlayerItemSetup.InitLabelHookInternal();
+                MasteryOverrideHandler.InitInternal();
                 RoomRewardAPI.Init();
 
 

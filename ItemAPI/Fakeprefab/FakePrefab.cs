@@ -71,36 +71,9 @@ namespace Alexandria.ItemAPI
         public static UnityEngine.Object Instantiate(UnityEngine.Object o, UnityEngine.Object new_o)
         {
             if (o is GameObject go && ExistingFakePrefabs.Contains(go))
-            {
-                GameObject new_go = (GameObject)new_o;
-                new_go.SetActive(true);
-                if (new_go.GetComponent<CustomShopController>() is CustomShopController newCsc)
-                {
-                    CustomShopController cscPrefab = go.GetComponent<CustomShopController>();
-                    newCsc.customCanBuy   = cscPrefab.customCanBuy;
-                    newCsc.customPrice    = cscPrefab.customPrice;
-                    newCsc.removeCurrency = cscPrefab.removeCurrency;
-                    newCsc.OnSteal        = cscPrefab.OnSteal;
-                    newCsc.OnPurchase     = cscPrefab.OnPurchase;
-                    // newCsc.customCurrencyAtlas = cscPrefab.customCurrencyAtlas;
-                }
-            }
+                ((GameObject)new_o).SetActive(true);
             else if (o is Component c && ExistingFakePrefabs.Contains(c.gameObject))
-            {
-                GameObject new_go = ((Component)new_o).gameObject;
-                new_go.SetActive(true);
-                if (new_o is CustomShopController newCsc)
-                {
-                    CustomShopController cscPrefab = (CustomShopController)o;
-                    newCsc.customCanBuy   = cscPrefab.customCanBuy;
-                    newCsc.customPrice    = cscPrefab.customPrice;
-                    newCsc.removeCurrency = cscPrefab.removeCurrency;
-                    newCsc.OnSteal        = cscPrefab.OnSteal;
-                    newCsc.OnPurchase     = cscPrefab.OnPurchase;
-                    // newCsc.customCurrencyAtlas = cscPrefab.customCurrencyAtlas;
-                }
-            }
-
+                ((Component)new_o).gameObject.SetActive(true);
             return new_o;
         }
 

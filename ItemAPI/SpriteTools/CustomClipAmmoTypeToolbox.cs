@@ -12,9 +12,6 @@ namespace Alexandria.ItemAPI
     {
         public static List<GameUIAmmoType> addedAmmoTypes = new List<GameUIAmmoType>();
 
-        [ObsoleteAttribute("This method is obsolete and does nothing; it exists for backwards compatability only.", false)]
-        public static void Init() { }
-
         public static string AddCustomAmmoType(string name, string ammoTypeSpritePath, string ammoBackgroundSpritePath)
         {
             Texture2D fgTexture = ResourceExtractor.GetTextureFromResource(ammoTypeSpritePath + ".png", Assembly.GetCallingAssembly());
@@ -75,6 +72,9 @@ namespace Alexandria.ItemAPI
             list.Add(toAdd);
             array = list.ToArray<T>();
         }
+
+        [Obsolete("This method is obsolete and does nothing; it exists for backwards compatability only.", false)]
+        public static void Init() { }
     }
 
     [HarmonyPatch(typeof(GameUIAmmoController), nameof(GameUIAmmoController.Initialize))]

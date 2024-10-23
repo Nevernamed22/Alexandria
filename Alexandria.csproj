@@ -70,6 +70,10 @@
     <Compile Include="CharApi\Tools\Tools.cs" />
     <Compile Include="ChestAPI\ChestSpawnHelper.cs" />
     <Compile Include="ChestAPI\ChestUtility.cs" />
+    <Compile Include="CustomDodgeRollAPI\CustomDodgeRoll.cs" />
+    <Compile Include="CustomDodgeRollAPI\CustomDodgeRollItem.cs" />
+    <Compile Include="CustomDodgeRollAPI\CustomDodgeRollPatches.cs" />
+    <Compile Include="CustomDodgeRollAPI\CustomDodgeRollPrivate.cs" />
     <Compile Include="DungeonAPI\BreachExtensions.cs" />
     <Compile Include="DungeonAPI\DungeonPatches.cs" />
     <Compile Include="DungeonAPI\MasteryOverrideHandler.cs" />

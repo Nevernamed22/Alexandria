@@ -21,6 +21,16 @@
             ETGMod asset management.
             </summary>
         </member>
+        <member name="F:ETGMod.Assets.DEFINITION_METADATA_EXTENSION">
+            <summary>
+            The extension for tk2dSpriteDefinition metadata files, without the . at the start.
+            </summary>
+        </member>
+        <member name="F:ETGMod.Assets.FULL_DEFINITION_METADATA_EXTENSION">
+            <summary>
+            The extension for tk2dSpriteDefinition metadata files, with the . at the start.
+            </summary>
+        </member>
         <member name="P:ETGMod.Assets.Collections">
             <summary>
             All loaded sprite collections.
@@ -46,6 +56,42 @@
             <param name="width">The width of your target texture.</param>
             <param name="height">The height of your target texture.</param>
             <returns>The created UVs.</returns>
+        </member>
+        <member name="M:ETGMod.Assets.SetupSprites(System.Collections.Generic.Dictionary{System.String,UnityEngine.Texture2D},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.Dictionary{System.String,UnityEngine.Texture2D}},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.Dictionary{System.String,AssetSpriteData}})">
+            <summary>
+            Sets up sprites using manual lists, adding sprites to collections or replacing existing sprites.
+            </summary>
+            <param name="sheetReplacements">A dictionary where the keys are collction names and the values are the spritesheet replacements for those collections.</param>
+            <param name="definitionReplacements">A ditionary where the keys are collection namse and the values are dictionaries with definition names as keys and definition sprites as values.</param>
+            <param name="spriteData">A ditionary where the keys are collection namse and the values are dictionaries with definition names as keys and definition attach point information as values.</param>
+        </member>
+        <member name="M:ETGMod.Assets.FindCollectionOfName(System.String)">
+            <summary>
+            Attempts to find a collection with a given name. Returns null if no collection is found.
+            </summary>
+            <param name="name">The name of the collection to find.</param>
+            <returns>The found collection or null if no collection was found.</returns>
+        </member>
+        <member name="M:ETGMod.Assets.HandleCollectionSheetReplacement(tk2dSpriteCollectionData,UnityEngine.Texture2D)">
+            <summary>
+            Replaces all sprites in a collection using a spritesheet.
+            </summary>
+            <param name="coll">The target collection.</param>
+            <param name="sheetTex">The spritesheet used for replacements.</param>
+        </member>
+        <member name="M:ETGMod.Assets.HandleCollectionDefinitionReplacements(tk2dSpriteCollectionData,System.Collections.Generic.Dictionary{System.String,UnityEngine.Texture2D})">
+            <summary>
+            Replaces or adds specific sprites to a collection.
+            </summary>
+            <param name="coll">The target collection.</param>
+            <param name="sprites">Sprites to replace or add. Keys are definition names and values are the sprites.</param>
+        </member>
+        <member name="M:ETGMod.Assets.HandleCollectionAttachPoints(tk2dSpriteCollectionData,System.Collections.Generic.Dictionary{System.String,AssetSpriteData})">
+            <summary>
+            Replaces or adds attach points to a collection.
+            </summary>
+            <param name="coll">The target collection.</param>
+            <param name="attachPoint">Attach points to replace or add. Keys are definition names and values are the attach point information.</param>
         </member>
         <member name="M:ETGMod.Assets.SetupSpritesFromFolder(System.String)">
             <summary>
@@ -327,6 +373,17 @@
             Sprite collection used by items.
             </summary>
         </member>
+        <member name="M:ItemDB.AddSpecific(System.Boolean,PickupObject,System.Boolean,System.String)">
+            <summary>
+            Adds an item to the list of items in the game.
+            </summary>
+            <param name="proxy">Whether the EncounterDatabaseEntry assigned to the item should be proxy or not. If an encounter database entry is proxy, the item's EncounterTrackable will get all of its values from the proxy 
+            EncounterDatabaseEntry.</param>
+            <param name="value">The item to add.</param>
+            <param name="dontDestroyOnLoad">If true, the item won't be destroyed when a scene is loaded. Only use for fake prefab items.</param>
+            <param name="floor">The floor to the fallback loot table of which the gun will be added.</param>
+            <returns>The id of the added item.</returns>
+        </member>
         <member name="M:ItemDB.AddSpecific(PickupObject,System.Boolean,System.String)">
             <summary>
             Adds an item to the list of items in the game.
@@ -410,19 +467,24 @@
             The string table that has all of the text in the intro.
             </summary>
         </member>
-        <member name="F:StringDB.UI">
-            <summary>
-            The string table that has ui text. Unused in the base game.
-            </summary>
-        </member>
         <member name="F:StringDB.Synergy">
             <summary>
             The string table that has all of the synergy names.
             </summary>
         </member>
+        <member name="F:StringDB.UI">
+            <summary>
+            The string table that has all of the UI text.
+            </summary>
+        </member>
         <member name="F:StringDB.OnLanguageChanged">
             <summary>
-            
+            Runs when the game's language is changed.
+            </summary>
+        </member>
+        <member name="F:StringDB.OnUILanguageChanged">
+            <summary>
+            Runs for each UI language manager when the game's language is changed or when a UI language manager is created.
             </summary>
         </member>
         <member name="T:StringDBTable">
@@ -448,6 +510,14 @@
             <param name="key">The key to the string collection.</param>
             <returns>The string table found.</returns>
         </member>
+        <member name="P:StringDBTable.Item(System.String,StringTableManager.GungeonSupportedLanguages)">
+            <summary>
+            Sets a string collection to this table for a specific language.
+            </summary>
+            <param name="key">The key to the string collection.</param>
+            <param name="lang">The language for which to set the string collection</param>
+            <returns>The string table found.</returns>
+        </member>
         <member name="M:StringDBTable.ContainsKey(System.String)">
             <summary>
             Returns true if the table contains a collection with the given key, false otherwise.
@@ -462,10 +532,69 @@
             <param name="key">The key to the string.</param>
             <param name="value">The new value for the string.</param>
         </member>
+        <member name="M:StringDBTable.Set(StringTableManager.GungeonSupportedLanguages,System.String,System.String)">
+            <summary>
+            Sets a string with the given key to the given value for a specific language.
+            </summary>
+            <param name="lang">The language for which to set the string.</param>
+            <param name="key">The key to the string.</param>
+            <param name="value">The new value for the string.</param>
+        </member>
+        <member name="M:StringDBTable.SetComplex(System.String,System.String[])">
+            <summary>
+            Sets a string with the given key to the given values that all have the weight 1.
+            </summary>
+            <param name="key">The key to the string.</param>
+            <param name="values">The new values for the string that all have the weight 1.</param>
+        </member>
+        <member name="M:StringDBTable.SetComplex(StringTableManager.GungeonSupportedLanguages,System.String,System.String[])">
+            <summary>
+            Sets a string with the given key to the given values that all have the weight 1 for a specific language.
+            </summary>
+            <param name="lang">The language for which to set the string.</param>
+            <param name="key">The key to the string.</param>
+            <param name="values">The new values for the string that all have the weight 1.</param>
+        </member>
+        <member name="M:StringDBTable.SetComplex(System.String,Tuple{System.String,System.Single}[])">
+            <summary>
+            Sets a string with the given key to the given values.
+            </summary>
+            <param name="key">The key to the string.</param>
+            <param name="values">The new values and weights for the string where the strings are values and floats are weights.</param>
+        </member>
+        <member name="M:StringDBTable.SetComplex(StringTableManager.GungeonSupportedLanguages,System.String,Tuple{System.String,System.Single}[])">
+            <summary>
+            Sets a string with the given key to the given values for a specific language.
+            </summary>
+            <param name="lang">The language for which to set the string.</param>
+            <param name="key">The key to the string.</param>
+            <param name="values">The new values and weights for the string where the strings are values and floats are weights.</param>
+        </member>
         <member name="M:StringDBTable.LanguageChanged">
             <summary>
             Reloads the table and reapplies all of the changes made.
             </summary>
+        </member>
+        <member name="M:UIStringDBTable.LanguageChanged(dfLanguageManager)">
+            <summary>
+            Reapplies all of the changes made to the given manager.
+            </summary>
+            <param name="man">The manager to reapply the changes to.</param>
+        </member>
+        <member name="M:UIStringDBTable.Set(System.String,System.String)">
+            <summary>
+            Sets a string with the given key to the given value.
+            </summary>
+            <param name="key">The key to the string.</param>
+            <param name="value">The new value for the string.</param>
+        </member>
+        <member name="M:UIStringDBTable.Set(dfLanguageCode,System.String,System.String)">
+            <summary>
+            Sets a string with the given key to the given value for a specific language.
+            </summary>
+            <param name="lang">The language for which to set the string.</param>
+            <param name="key">The key to the string.</param>
+            <param name="value">The new value for the string.</param>
         </member>
         <member name="F:ETGModConsole.ModdedChests">
             <summary>
@@ -644,6 +773,14 @@
             <param name="item">The item to rename.</param>
             <param name="text">The new name for the item.</param>
         </member>
+        <member name="M:GunExt.SetName(PickupObject,StringTableManager.GungeonSupportedLanguages,System.String)">
+            <summary>
+            Sets the given item's name to the given string for a specific language.
+            </summary>
+            <param name="lang">The language for which to set the name.</param>
+            <param name="item">The item to rename.</param>
+            <param name="text">The new name for the item.</param>
+        </member>
         <member name="M:GunExt.SetShortDescription(PickupObject,System.String)">
             <summary>
             Sets the given item's short description to the given string.
@@ -651,10 +788,26 @@
             <param name="item">The item to rename.</param>
             <param name="text">The new short description for the item.</param>
         </member>
+        <member name="M:GunExt.SetShortDescription(PickupObject,StringTableManager.GungeonSupportedLanguages,System.String)">
+            <summary>
+            Sets the given item's short description to the given string for a specific language.
+            </summary>
+            <param name="lang">The language for which to set the short description.</param>
+            <param name="item">The item to rename.</param>
+            <param name="text">The new short description for the item.</param>
+        </member>
         <member name="M:GunExt.SetLongDescription(PickupObject,System.String)">
             <summary>
             Sets the given item's long description to the given string.
             </summary>
+            <param name="item">The item to rename.</param>
+            <param name="text">The new long description for the item.</param>
+        </member>
+        <member name="M:GunExt.SetLongDescription(PickupObject,StringTableManager.GungeonSupportedLanguages,System.String)">
+            <summary>
+            Sets the given item's long description to the given string.
+            </summary>
+            <param name="lang">The language for which to set the long description.</param>
             <param name="item">The item to rename.</param>
             <param name="text">The new long description for the item.</param>
         </member>
@@ -772,6 +925,29 @@
             <summary>
             Base class for gun modifier behaviours.
             </summary>
+        </member>
+        <member name="M:GunBehaviour.OnDestroy">
+            <summary>
+            Runs when either this or the gun this is applied to is destroyed. Note that after this method runs both <see cref="F:GunBehaviour.gun"/> and <see cref="F:GunBehaviour.LastRegisteredOwner"/> are set to null.
+            </summary>
+        </member>
+        <member name="M:GunBehaviour.DisableEffect(GameActor)">
+            <summary>
+            Runs when the gun is either dropped or destroyed.
+            </summary>
+            <param name="owner">The owner of the gun when it was dropped or destroyed.</param>
+        </member>
+        <member name="M:GunBehaviour.DisableEffectPlayer(PlayerController)">
+            <summary>
+            Runs when the gun is either dropped or destroyed while owned by a player.
+            </summary>
+            <param name="player">The player owner of the gun when it was dropped or destroyed.</param>
+        </member>
+        <member name="M:GunBehaviour.DisableEffectEnemy(AIActor)">
+            <summary>
+            Runs when the gun is either dropped or destroyed while owned by a player.
+            </summary>
+            <param name="enemy">The enemy owner of the gun when it was dropped or destroyed.</param>
         </member>
         <member name="M:GunBehaviour.OnDroppedByPlayer(PlayerController)">
             <summary>
@@ -969,6 +1145,174 @@
             </summary>
             <param name="beam">The beam fired by the gun this behaviour is applied to.</param>
         </member>
+        <member name="M:GunBehaviour.PostProcessBeamTick(BeamController,SpeculativeRigidbody,System.Single)">
+            <summary>
+            Runs every tick when a beam fired by the gun this behaviour is applied to hits a rigidbody.
+            </summary>
+            <param name="beam">The beam fired by the gun this behaviour is applied to.</param>
+            <param name="hitRigidbody">The rigidbody hit by the beam.</param>
+            <param name="tickRate">Delta time.</param>
+        </member>
+        <member name="M:GunBehaviour.OnSwitchedTo(GameActor,GunInventory,Gun,System.Boolean)">
+            <summary>
+            Runs when this gun is switched to.
+            </summary>
+            <param name="owner">The owner of the gun.</param>
+            <param name="inventory">The inventory owner of the gun.</param>
+            <param name="oldGun">The old current gun that was switched away from.</param>
+            <param name="isNewGun">True if this gun was just added to the inventory.</param>
+        </member>
+        <member name="M:GunBehaviour.OnSwitchedToPlayer(PlayerController,GunInventory,Gun,System.Boolean)">
+            <summary>
+            Runs when a player switches to this gun.
+            </summary>
+            <param name="owner">The player owner.</param>
+            <param name="inventory">The inventory owner of the gun.</param>
+            <param name="oldGun">The old current gun that was switched away from.</param>
+            <param name="isNewGun">True if this gun was just added to the inventory.</param>
+        </member>
+        <member name="M:GunBehaviour.OnSwitchedAwayFrom(GameActor,GunInventory,Gun,System.Boolean)">
+            <summary>
+            Runs when this gun is switched away from.
+            </summary>
+            <param name="owner">THe owner of the gun.</param>
+            <param name="inventory">The inventory owner of the gun.</param>
+            <param name="newGun">The new current gun that was switched to.</param>
+            <param name="isNewGun">True if the new current gun was just added to the inventory</param>
+        </member>
+        <member name="M:GunBehaviour.OnSwitchedAwayFromPlayer(PlayerController,GunInventory,Gun,System.Boolean)">
+            <summary>
+            Runs when a player switches away from this gun.
+            </summary>
+            <param name="owner">THe player owner.</param>
+            <param name="inventory">The inventory owner of the gun.</param>
+            <param name="newGun">The new current gun that was switched to.</param>
+            <param name="isNewGun">True if the new current gun was just added to the inventory</param>
+        </member>
+        <member name="M:GunBehaviour.OnReloaded(GameActor,Gun)">
+            <summary>
+            Runs when this gun successfully starts reloading.
+            </summary>
+            <param name="owner">The owner of the gun.</param>
+            <param name="gun">This gun.</param>
+        </member>
+        <member name="M:GunBehaviour.OnReloadedPlayer(PlayerController,Gun)">
+            <summary>
+            Runs when a player successfully starts reloading this gun.
+            </summary>
+            <param name="owner">The player owner.</param>
+            <param name="gun">This gun.</param>
+        </member>
+        <member name="M:GunBehaviour.OnReloadedEnemy(AIActor,Gun)">
+            <summary>
+            Runs when an enemy successfully starts reloading this gun.
+            </summary>
+            <param name="owner">The enemy owner.</param>
+            <param name="gun">This gun.</param>
+        </member>
+        <member name="M:GunBehaviour.OnReloadEnded(GameActor,Gun)">
+            <summary>
+            Runs when this gun finishes reloading.
+            </summary>
+            <param name="owner">The owner of the gun.</param>
+            <param name="gun">This gun.</param>
+        </member>
+        <member name="M:GunBehaviour.OnReloadEndedPlayer(PlayerController,Gun)">
+            <summary>
+            Runs when a player finishes reloading this gun.
+            </summary>
+            <param name="owner">The player owner.</param>
+            <param name="gun">This gun.</param>
+        </member>
+        <member name="M:GunBehaviour.OnReloadEndedEnemy(AIActor,Gun)">
+            <summary>
+            Runs when a enemy finishes reloading this gun.
+            </summary>
+            <param name="owner">The enemy owner.</param>
+            <param name="gun">This gun.</param>
+        </member>
+        <member name="M:GunBehaviour.OnInventoryReload(GameActor,GunInventory,Gun)">
+            <summary>
+            Runs when this gun automatically reloads from being stored in the inventory.
+            </summary>
+            <param name="owner">The owner of the gun.</param>
+            <param name="inventory">The owner's inventory.</param>
+            <param name="gun">This gun.</param>
+        </member>
+        <member name="M:GunBehaviour.OnInventoryReloadPlayer(PlayerController,GunInventory,Gun)">
+            <summary>
+            Runs when this gun automatically reloads from being stored in a player's inventory.
+            </summary>
+            <param name="owner">The player owner.</param>
+            <param name="inventory">The owner's inventory.</param>
+            <param name="gun">This gun.</param>
+        </member>
+        <member name="M:GunBehaviour.OnInventoryReloadEnemy(AIActor,GunInventory,Gun)">
+            <summary>
+            Runs when this gun automatically reloads from being stored in an enemy's inventory.
+            </summary>
+            <param name="owner">The enemy owner.</param>
+            <param name="inventory">The owner's inventory.</param>
+            <param name="gun">This gun.</param>
+        </member>
+        <member name="M:GunBehaviour.CanCollectAmmoPickup(PlayerController,Gun,AmmoPickup,System.Boolean@,System.Boolean@)">
+            <summary>
+            Runs to check whether or not this gun can collect an ammo box pickup.
+            </summary>
+            <param name="owner">The player owner.</param>
+            <param name="gun">This gun.</param>
+            <param name="ammo">The ammo box that is about to be collected.</param>
+            <param name="canCollect">Whether the ammo box can normally be collected.</param>
+            <param name="displayAmmoFullMessage">Whether the ammo box will display the "FULL" message above the player. Only matters if the box can't be collected.</param>
+            <returns></returns>
+        </member>
+        <member name="M:GunBehaviour.OnAmmoCollected(PlayerController,Gun,AmmoPickup)">
+            <summary>
+            Runs when an ammo box is successfully collected by this gun. 
+            </summary>
+            <param name="owner">The player owner.</param>
+            <param name="gun">This gun.</param>
+            <param name="ammo">The collected ammo box.</param>
+        </member>
+        <member name="M:GunBehaviour.OwnedUpdate(GameActor,GunInventory)">
+            <summary>
+            Runs every frame while the gun is owned, even when not selected.
+            </summary>
+            <param name="owner">The owner of this gun.</param>
+            <param name="inventory">The inventory owner of this gun.</param>
+        </member>
+        <member name="M:GunBehaviour.OwnedUpdatePlayer(PlayerController,GunInventory)">
+            <summary>
+            Runs every frame while the gun is owned by a player, even when not selected.
+            </summary>
+            <param name="owner">The player owner.</param>
+            <param name="inventory">The inventory owner of this gun.</param>
+        </member>
+        <member name="M:GunBehaviour.OwnedUpdateEnemy(AIActor,GunInventory)">
+            <summary>
+            Runs every frame while the gun is owned by an enemy, even when not selected.
+            </summary>
+            <param name="owner">The enemy owner.</param>
+            <param name="inventory">The inventory owner of this gun.</param>
+        </member>
+        <member name="M:GunBehaviour.AutoreloadOnEmptyClip(GameActor,Gun,System.Boolean@)">
+            <summary>
+            Runs to check whether or not this gun should automatically reload on an empty clip.
+            </summary>
+            <param name="owner">The owner of this gun.</param>
+            <param name="gun">This gun.</param>
+            <param name="autoreload">Whether or not this gun should automatically reload.</param>
+        </member>
+        <member name="M:GunBehaviour.ModifyClipCount(Gun,ProjectileModule,PlayerController,System.Int32@,System.Int32@)">
+            <summary>
+            Modifies the amount of current shots left in the clip and the max clip capacity that's visually displayed in the clip UI.
+            </summary>
+            <param name="gun">The gun that the clip belongs to.</param>
+            <param name="mod">The module on which the clip is based.</param>
+            <param name="player">The owner of the gun.</param>
+            <param name="currentModuleAmmo">The current value of the current shots left in the clip.</param>
+            <param name="maxModuleAmmo">The current value of the max clip capacity.</param>
+        </member>
         <member name="M:GunBehaviour.DeserializeObject``1(System.Collections.Generic.List{System.Object},System.Int32@)">
             <summary>
             Get data from the given list of data, cast it to the type T and increment the data index.
@@ -1008,6 +1352,11 @@
         <member name="P:GunBehaviour.EverPickedUp">
             <summary>
             True if the gun was ever picked up, false otherwise.
+            </summary>
+        </member>
+        <member name="F:GunBehaviour.LastRegisteredOwner">
+            <summary>
+            The current owner of the gun this is applied to. Unlike gun.CurrentOwner, this is reset after OnDropped instead of before.
             </summary>
         </member>
         <member name="T:Gungeon.Game">

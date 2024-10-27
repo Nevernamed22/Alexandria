@@ -5,34 +5,14 @@ using System.Text;
 
 namespace Alexandria.TranslationAPI
 {
-    /// <summary>
-    /// Type of string tables.
-    /// </summary>
+    [Obsolete("TranslationAPI is deprecated, use ETGMod.Databases.Strings for translations instead.", true)]
     public enum StringTableType
     {
-        /// <summary>
-        /// Core strings.
-        /// </summary>
         Core,
-        /// <summary>
-        /// Item strings.
-        /// </summary>
         Items,
-        /// <summary>
-        /// Enemy strings.
-        /// </summary>
         Enemies,
-        /// <summary>
-        /// UI strings.
-        /// </summary>
         UI,
-        /// <summary>
-        /// Intro strings.
-        /// </summary>
         Intro,
-        /// <summary>
-        /// Synergy strings.
-        /// </summary>
         Synergy
     }
 }

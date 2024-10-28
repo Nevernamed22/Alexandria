@@ -40,7 +40,8 @@ namespace Alexandria.DungeonAPI
         private static FieldInfo m_cellData = typeof(PrototypeDungeonRoom).GetField("m_cellData", BindingFlags.Instance | BindingFlags.NonPublic);
         private static RoomEventDefinition sealOnEnterWithEnemies = new RoomEventDefinition(RoomEventTriggerCondition.ON_ENTER_WITH_ENEMIES, RoomEventTriggerAction.SEAL_ROOM);
         private static RoomEventDefinition unsealOnRoomClear = new RoomEventDefinition(RoomEventTriggerCondition.ON_ENEMIES_CLEARED, RoomEventTriggerAction.UNSEAL_ROOM);
-
+        internal static bool _AggregateMissingAssetErrors = false;
+        internal static readonly Dictionary<string, int> _MissingAssetsByGuid = new Dictionary<string, int>();
 
         /// <summary>
         /// Loads all rooms in a given folder, similar to how Gun Sprites are setup (Example: LoadRoomsFromRoomDirectory("Alex", this.FolderPath() + "/newRooms");
@@ -50,6 +51,8 @@ namespace Alexandria.DungeonAPI
         /// <returns></returns>
         public static Dictionary<string, RoomData> LoadRoomsFromRoomDirectory(string modPrefix, string roomDirectory)
         {
+            _AggregateMissingAssetErrors = true;
+            _MissingAssetsByGuid.Clear();
             var loadedRooms = new Dictionary<string, RoomData>();
             Directory.CreateDirectory(roomDirectory);
             foreach (string g in Directory.GetFiles(roomDirectory, "*", SearchOption.AllDirectories))
@@ -92,6 +95,10 @@ namespace Alexandria.DungeonAPI
                 }
             }
 
+            foreach (KeyValuePair<string, int> kvp in _MissingAssetsByGuid)
+                ShrineTools.PrintError<string>($"Unable to find asset in asset bundles: {kvp.Key} (x{kvp.Value})", "FF0000");
+            _MissingAssetsByGuid.Clear();
+            _AggregateMissingAssetErrors = false;
             return loadedRooms;
         }
 
@@ -1697,7 +1704,12 @@ namespace Alexandria.DungeonAPI
                     }
                     else
                     {
-                        ShrineTools.PrintError<string>("Unable to find asset in asset bundles: " + assetPath, "FF0000");
+                        if (!_AggregateMissingAssetErrors)
+                            ShrineTools.PrintError<string>("Unable to find asset in asset bundles: " + assetPath, "FF0000");
+                        else if (_MissingAssetsByGuid.ContainsKey(assetPath))
+                            ++_MissingAssetsByGuid[assetPath];
+                        else
+                            _MissingAssetsByGuid[assetPath] = 1;
                     }
                 }
             }

@@ -23,6 +23,5 @@ namespace Alexandria.TranslationAPI
         public StringTableManager.GungeonSupportedLanguages language;
         public Dictionary<string, StringTableManager.StringCollection> strings;
         public Func<Dictionary<string, StringTableManager.StringCollection>> getTable;
-        private Dictionary<string, StringTableManager.StringCollection> currentTable;
     }
 }

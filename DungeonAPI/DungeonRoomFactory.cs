@@ -524,7 +524,12 @@ namespace Alexandria.DungeonAPI
                     }
                     else
                     {
-                        Tools.PrintError("Unable to find asset in asset bundles: " + assetPath, "FF0000");
+                        if (!_AggregateMissingAssetErrors)
+                            ShrineTools.PrintError<string>("Unable to find asset in asset bundles: " + assetPath, "FF0000");
+                        else if (_MissingAssetsByGuid.ContainsKey(assetPath))
+                            ++_MissingAssetsByGuid[assetPath];
+                        else
+                            _MissingAssetsByGuid[assetPath] = 1;
                     }
                 }
                 

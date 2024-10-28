@@ -289,7 +289,7 @@ namespace Alexandria.Misc
 		public Dictionary<string, Dictionary<string, object>> m_customEnums;
 		
 		[fsIgnore]
-		public SaveManager.SaveSlot cachedSaveSlot;
+		public SaveManager.SaveSlot cachedSaveSlot = default;
 	}
 
 }

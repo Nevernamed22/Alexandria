@@ -634,7 +634,7 @@ namespace Alexandria.NPCAPI
 		public new bool IsResourcefulRatKey;
 
 		private bool pickedUp;
-		private CustomShopController m_parentShop;
+		private CustomShopController m_parentShop = null;
 		private CustomShopController m_baseParentShop;
 		private float THRESHOLD_CUTOFF_PRIMARY;
 		private float THRESHOLD_CUTOFF_SECONDARY;

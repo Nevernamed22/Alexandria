@@ -160,7 +160,7 @@ namespace Alexandria.cAPI
                 foreach(DungeonPrerequisite prereq in unlockPrereqs)
                     hat.AddUnlockPrerequisite(prereq);
 
-            hat.SetupHatSprites(spritePaths: spritePaths, fps: fps);
+            hat.SetupHatSprites(spritePaths: spritePaths, fps: fps, callingASM: Assembly.GetCallingAssembly());
             hat.flipHorizontalWithPlayer = flipHorizontalWithPlayer ??
                 (hat.hatDirectionality == Hat.HatDirectionality.NONE || hat.hatDirectionality == Hat.HatDirectionality.TWO_WAY_VERTICAL);
 
@@ -204,12 +204,11 @@ namespace Alexandria.cAPI
         }
 
         private static tk2dSpriteCollectionData HatSpriteCollection = null;
-		private static void SetupHatSprites(this Hat hat, List<string> spritePaths, int fps)
+		private static void SetupHatSprites(this Hat hat, List<string> spritePaths, int fps, Assembly callingASM)
         {
             GameObject hatObj = hat.gameObject;
 
             HatSpriteCollection ??= SpriteBuilder.ConstructCollection(new GameObject(), "HatCollection");
-            Assembly callingASM = Assembly.GetCallingAssembly();
             int spriteID = SpriteBuilder.AddSpriteToCollection(spritePaths[0], HatSpriteCollection, callingASM);
             tk2dSprite hatBaseSprite = hatObj.GetOrAddComponent<tk2dSprite>();
             hatBaseSprite.SetSprite(HatSpriteCollection, spriteID);
@@ -265,6 +264,7 @@ namespace Alexandria.cAPI
             if (spriteNames == null || spriteNames.Count == 0)
                 return; // nothing to do
 
+            spriteNames.Sort();
             tk2dSpriteAnimationClip clip = new tk2dSpriteAnimationClip() { name = animName, frames = new tk2dSpriteAnimationFrame[spriteNames.Count], fps = fps };
             List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
             for (int i = 0; i < spriteNames.Count; ++i)

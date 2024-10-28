@@ -41,8 +41,6 @@ namespace Alexandria.CharacterAPI
                 hasInitialized = true;
             }
 
-
-
             List<FoyerCharacterSelectFlag> list = new List<FoyerCharacterSelectFlag>();
 
             foreach (var character in CharacterBuilder.storedCharacters)
@@ -56,8 +54,6 @@ namespace Alexandria.CharacterAPI
 
                     if (selectCharacter.PrerequisitesFulfilled())
                     {
-                        
-                        sortedByX.Insert(6, selectCharacter);
                         list.Add(selectCharacter);
                         Foyer.Instance.OnPlayerCharacterChanged += selectCharacter.OnSelectedCharacterCallback;
                     }

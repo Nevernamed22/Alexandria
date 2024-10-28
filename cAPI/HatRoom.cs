@@ -299,8 +299,10 @@ namespace Alexandria.cAPI
               sprite.renderer.material.shader = ShaderCache.Acquire("Brave/Internal/Black");
             }
             sprite.PlaceAtLocalPositionByAnchor(
-              new Vector2(pedObj.GetComponent<tk2dSprite>().WorldCenter.x, pedY + 1.3f).ToVector3ZisY(0f),
+              new Vector2(pedObj.GetComponent<tk2dSprite>().WorldCenter.x, pedY + 1.25f).ToVector3ZisY(0f),
               tk2dBaseSprite.Anchor.LowerCenter);
+            if (Mathf.RoundToInt(sprite.WorldBottomLeft.x * 32f) % 2 == 1) // if bottomleft pixel is not on the 1/16 unit pixel grid, realign it
+              sprite.transform.localPosition = sprite.transform.localPosition.WithX(sprite.transform.localPosition.x - 1f / 32f);
             sprite.HeightOffGround = HAT_Z_OFFSET;
             sprite.UpdateZDepth();
             SpriteOutlineManager.AddOutlineToSprite(pedestalHatObject.GetComponent<tk2dSprite>(), Color.black, zOffset: HAT_Z_OFFSET);

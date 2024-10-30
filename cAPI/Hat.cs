@@ -50,6 +50,7 @@ namespace Alexandria.cAPI
         private float                rollLength           = 0.65f;
         private float                startRolTime         = 0.0f;
         private Vector2              playerSpecificOffset = Vector2.zero;
+        private Vector2              playerFlippedOffset  = Vector2.zero;
         private Vector2              hatFlipOffset        = Vector2.zero;
         private int                  hatWidth             = 0;
         private bool                 ownerIsModdedChar    = false;
@@ -87,31 +88,30 @@ namespace Alexandria.cAPI
             HandleAttachedSpriteDepth();
         }
 
-        public void DeterminePlayerSpecificOffsets()
+        private void DeterminePlayerSpecificOffsets()
         {
             bool onEyes = (attachLevel == HatAttachLevel.EYE_LEVEL);
             var headOffsets = onEyes ? Hatabase.EyeLevel : Hatabase.HeadLevel;
             ownerIsModdedChar = !headOffsets.TryGetValue(hatOwner.sprite.spriteAnimator.library.name, out playerSpecificOffset);
-            if (ownerIsModdedChar)
-            {
-                HatUtility.LazyLoadModdedHatData();
-                // ETGModConsole.Log($"attempting to get hat offsets for modded character {hatOwner.gameObject.name}");
-                if (!headOffsets.TryGetValue(hatOwner.gameObject.name, out playerSpecificOffset))
-                {
-                    // ETGModConsole.Log($"  no default head level offset for {hatOwner.gameObject.name}");
-                    playerSpecificOffset = onEyes ? Hatabase.defaultEyeLevelOffset : Hatabase.defaultHeadLevelOffset;
-                }
-                var moddedFrameOffsets = onEyes ? Hatabase.ModdedEyeFrameOffsets : Hatabase.ModdedHeadFrameOffsets;
-                if (!moddedFrameOffsets.TryGetValue(hatOwner.gameObject.name, out offsetDict))
-                {
-                    // ETGModConsole.Log($"  no frame offset data for {hatOwner.gameObject.name}");
-                    offsetDict = onEyes ? Hatabase.EyeFrameOffsets : Hatabase.HeadFrameOffsets;
-                }
-            }
-            else
+            if (!ownerIsModdedChar)
             {
                 offsetDict = onEyes ? Hatabase.EyeFrameOffsets : Hatabase.HeadFrameOffsets;
+                playerFlippedOffset = playerSpecificOffset;
+                return;
             }
+
+            var flippedOffsets = onEyes ? Hatabase.FlippedEyeLevel : Hatabase.FlippedHeadLevel;
+            HatUtility.LazyLoadModdedHatData();
+            // ETGModConsole.Log($"attempting to get hat offsets for modded character {hatOwner.gameObject.name}");
+            if (!headOffsets.TryGetValue(hatOwner.gameObject.name, out playerSpecificOffset))
+                playerSpecificOffset = onEyes ? Hatabase.defaultEyeLevelOffset : Hatabase.defaultHeadLevelOffset;
+            if (!flippedOffsets.TryGetValue(hatOwner.gameObject.name, out playerFlippedOffset))
+                playerFlippedOffset = playerSpecificOffset;
+            var moddedFrameOffsets = onEyes ? Hatabase.ModdedEyeFrameOffsets : Hatabase.ModdedHeadFrameOffsets;
+            if (!moddedFrameOffsets.TryGetValue(hatOwner.gameObject.name, out offsetDict))
+                offsetDict = onEyes ? Hatabase.EyeFrameOffsets : Hatabase.HeadFrameOffsets;
+            foreach (var kvp in offsetDict)
+                ETGModConsole.Log($"{kvp.Key} -> {kvp.Value.offset}");
         }
 
         /// <summary>Patch for recalculating hat offsets when the player swaps costumes in the Breach</summary>
@@ -261,17 +261,20 @@ namespace Alexandria.cAPI
             }
         }
 
-        private static HatDirection GetBaseDirectionForSprite(string animName)
+        private HatDirection GetBaseDirectionForSprite(string animName)
         {
             if (animName.Contains("front_right_")) return HatDirection.EAST;
             if (animName.Contains("right_front_")) return HatDirection.EAST;
-            if (animName.Contains("forward_"))     return HatDirection.EAST;
+            //HACK: charAPI mixed up sprite names and we can't change it now without breaking tons of CCs, so now we get to do this ._.
+            if (animName.Contains("forward_"))     return ownerIsModdedChar ? HatDirection.SOUTH : HatDirection.EAST;
             if (animName.Contains("back_right_"))  return HatDirection.NORTHEAST;
             if (animName.Contains("bright_"))      return HatDirection.NORTHEAST;
             if (animName.Contains("backwards_"))   return HatDirection.NORTHEAST;
-            if (animName.Contains("backward_"))    return HatDirection.NORTHEAST;
+            //HACK: charAPI compatibility AGAIN
+            if (animName.Contains("backward_"))    return ownerIsModdedChar ? HatDirection.NORTH : HatDirection.NORTHEAST;
             if (animName.Contains("bw_"))          return HatDirection.NORTHEAST;
             if (animName.Contains("north_"))       return HatDirection.NORTH;
+            if (animName.Contains("up_"))          return HatDirection.NORTH; // only used by CharAPI characters
             if (animName.Contains("back_"))        return HatDirection.NORTH;
             if (animName.Contains("south_"))       return HatDirection.SOUTH;
             if (animName.Contains("front_"))       return HatDirection.SOUTH;
@@ -296,16 +299,6 @@ namespace Alexandria.cAPI
                 return HatDirection.NORTHWEST;
 
             return hatDir;
-        }
-
-        private static readonly Dictionary<string, string> CachedSpriteBaseNames = new();
-        private static string GetSpriteBaseName(string name)
-        {
-            if (!CachedSpriteBaseNames.TryGetValue(name, out string baseName)) // string replacements are slow so cache the results as necessary
-                baseName = CachedSpriteBaseNames[name] = name.Replace("_hands2","").Replace("_hands","").Replace("_hand_left","")
-                    .Replace("_hand_right","").Replace("_hand","").Replace("_twohands","").Replace("_armorless","")
-                    .Replace("_0h","").Replace("_1h","").Replace("_2h","");
-            return baseName;
         }
 
         private static float GetDefOffset(tk2dSpriteDefinition def)
@@ -341,11 +334,14 @@ namespace Alexandria.cAPI
 
             // get the animation frame specific offset, if one is available
             Vector2 animationFrameSpecificOffset = new(0, GetDefOffset(cachedDef));
-            if (offsetDict.TryGetValue(GetSpriteBaseName(cachedDef.name), out Hatabase.FrameOffset frameOffset))
+            if (offsetDict.TryGetValue(HatUtility.GetSpriteBaseName(cachedDef.name), out Hatabase.FrameOffset frameOffset))
                 animationFrameSpecificOffset += flipped ? frameOffset.flipOffset : frameOffset.offset;
 
             // combine everything and return
-            return baseOffset + animationFrameSpecificOffset + ((flipped && flipHorizontalWithPlayer) ? hatFlipOffset : hatOffset) + playerSpecificOffset;
+            return baseOffset // world position of top-center of player's sprite
+                + animationFrameSpecificOffset  // offset for player's animation frame
+                + ((flipped && flipHorizontalWithPlayer) ? hatFlipOffset : hatOffset) // offset for the hat itself
+                + (flipped ? playerFlippedOffset : playerSpecificOffset); // offset for the player's head
         }
 
         internal void StickHatToPlayer(PlayerController player)

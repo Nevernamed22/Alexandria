@@ -180,8 +180,28 @@ namespace Alexandria.cAPI
         {
             Hatabase.HeadLevel[characterObjectName] = new Vector2(0.0625f * defaultHeadXOffset, 0.0625f * defaultHeadYOffset);
             Hatabase.EyeLevel[characterObjectName] = new Vector2(0.0625f * defaultEyeXOffset, 0.0625f * defaultEyeYOffset);
-            Hatabase.ModdedHeadFrameOffsets[characterObjectName] = new();
-            Hatabase.ModdedEyeFrameOffsets[characterObjectName] = new();
+            if (!Hatabase.ModdedHeadFrameOffsets.ContainsKey(characterObjectName))
+                Hatabase.ModdedHeadFrameOffsets[characterObjectName] = new();
+            if (!Hatabase.ModdedEyeFrameOffsets.ContainsKey(characterObjectName))
+                Hatabase.ModdedEyeFrameOffsets[characterObjectName] = new();
+        }
+
+        /// <summary>Set up default flipped hat offsets for a custom character</summary>
+        /// <param name="characterObjectName">
+        /// The name of the player prefab, as accessed by `prefabObject.name`. Will usually be "PlayerXXXX(Clone)".
+        /// </param>
+        /// <param name="defaultHeadXOffset">Default flipped head-top hat pixel x-offset for the character.></param>
+        /// <param name="defaultHeadYOffset">Default flipped head-top hat pixel y-offset for the character.></param>
+        /// <param name="defaultEyeXOffset">Default flipped eye-level hat pixel x-offset for the character.></param>
+        /// <param name="defaultEyeYOffset">Default flipped eye-level hat pixel y-offset for the character.></param>
+        public static void SetupFlippedHatOffsets(string characterObjectName, int defaultHeadXOffset, int defaultHeadYOffset, int defaultEyeXOffset, int defaultEyeYOffset)
+        {
+            Hatabase.FlippedHeadLevel[characterObjectName] = new Vector2(0.0625f * defaultHeadXOffset, 0.0625f * defaultHeadYOffset);
+            Hatabase.FlippedEyeLevel[characterObjectName] = new Vector2(0.0625f * defaultEyeXOffset, 0.0625f * defaultEyeYOffset);
+            if (!Hatabase.ModdedHeadFrameOffsets.ContainsKey(characterObjectName))
+                Hatabase.ModdedHeadFrameOffsets[characterObjectName] = new();
+            if (!Hatabase.ModdedEyeFrameOffsets.ContainsKey(characterObjectName))
+                Hatabase.ModdedEyeFrameOffsets[characterObjectName] = new();
         }
 
         /// <summary>Create additional frame-specific hat offsets for a custom character</summary>
@@ -201,6 +221,20 @@ namespace Alexandria.cAPI
                 new Hatabase.FrameOffset(headXOffset, headYOffset);
             Hatabase.ModdedEyeFrameOffsets[characterObjectName][animationFrameName] =
                 new Hatabase.FrameOffset(eyeXOffset ?? headXOffset, eyeYOffset ?? headYOffset);
+        }
+
+        private static readonly HashSet<string> _TempNames = new();
+        /// <summary>
+        /// Print out a list of all unique base animation frames for a character that can be set by <see cref="AddHatOffset"/> to the console.
+        /// </summary>
+        /// <param name="player">The PlayerController whose animation frames should be printed.></param>
+        public static void PrintAnimationFramesForHats(PlayerController player)
+        {
+            _TempNames.Clear();
+            foreach (var def in player.sprite.collection.spriteDefinitions)
+                _TempNames.Add(GetSpriteBaseName(def.name));
+            foreach (var name in _TempNames)
+                ETGModConsole.Log($"  {_TempNames}");
         }
 
         private static tk2dSpriteCollectionData HatSpriteCollection = null;
@@ -377,6 +411,16 @@ namespace Alexandria.cAPI
             }
 
             loadedModdedHatData = true;
+        }
+
+        private static readonly Dictionary<string, string> CachedSpriteBaseNames = new();
+        internal static string GetSpriteBaseName(string name)
+        {
+            if (!CachedSpriteBaseNames.TryGetValue(name, out string baseName)) // string replacements are slow so cache the results as necessary
+                baseName = CachedSpriteBaseNames[name] = name.Replace("_hands2","").Replace("_hands","").Replace("_hand_left","")
+                    .Replace("_hand_right","").Replace("_hand","").Replace("_twohands","").Replace("_armorless","")
+                    .Replace("_0h","").Replace("_1h","").Replace("_2h","");
+            return baseName;
         }
     }
 }

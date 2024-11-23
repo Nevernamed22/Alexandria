@@ -35,10 +35,14 @@ namespace Alexandria.cAPI
         public bool              flipHorizontalWithPlayer = true;
         public string            unlockHint               = null;
         public bool              showSilhouetteWhenLocked = false;
+        public bool              excludeFromHatRoom       = false;
         public OverridableBool   vanishOverrides          = new(false);
 
         public bool   HasBeenUnlocked => unlockPrereqs.All(p => p.CheckConditionsFulfilled());
         public string UnlockText      => string.IsNullOrEmpty(unlockHint) ? LOCKED_TEXT : $"{LOCKED_TEXT}\n\n{unlockHint}";
+
+        internal bool                addedToHatabase      = false;
+        internal bool                autoDetectFlipType   = false;
 
         private PlayerController     hatOwner             = null;
         private HatDirection         currentDirection     = HatDirection.NONE;

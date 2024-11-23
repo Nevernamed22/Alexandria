@@ -24,9 +24,15 @@ namespace Alexandria.cAPI
         internal static void SetupConsoleCommands()
         {
             ETGModConsole.Commands.AddGroup("capi");
+
             ETGModConsole.Commands.GetGroup("capi").AddUnit("sethat", new Action<string[]>(SetHat1), HatAutoCompletionSettings);
+            ETGModConsole.CommandDescriptions.Add("capi sethat", "Set the current hat for player one.");
+
             ETGModConsole.Commands.GetGroup("capi").AddUnit("2sethat", new Action<string[]>(SetHat2), HatAutoCompletionSettings);
+            ETGModConsole.CommandDescriptions.Add("capi 2sethat", "Set the current hat for player two.");
+
             ETGModConsole.Commands.GetGroup("capi").AddUnit("reload_offsets", new Action<string[]>(ReloadHatOffsets), HatAutoCompletionSettings);
+            ETGModConsole.CommandDescriptions.Add("capi reload_offsets", "Reload Custom Character Mod hat offsets from disk.");
         }
 
         private static void SetHat1(string[] args) => SetHat(args, GameManager.Instance.PrimaryPlayer);

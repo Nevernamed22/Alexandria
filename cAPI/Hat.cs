@@ -213,6 +213,8 @@ namespace Alexandria.cAPI
 
             if (!Visible && !shouldBeVanished)
             {
+                if (hatOwner)
+                    StickHatToPlayer(hatOwner);
                 SpriteOutlineManager.AddOutlineToSprite(hatSprite, Color.black, 1);
                 HandleAttachedSpriteDepth();
             }

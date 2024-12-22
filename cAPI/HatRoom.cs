@@ -21,7 +21,7 @@ namespace Alexandria.cAPI
     private const float PEDESTAL_X_SPACING = 3.125f;
     private const float PEDESTAL_Y_SPACING = 3.125f;
     private const float PEDESTAL_Z         = 10.8f;
-    private const float HAT_Z_OFFSET       = 1f;
+    private const float HAT_Z_OFFSET       = 10f;
 
     private static readonly Vector3 ENTRANCE_POSITION = new Vector3(60.0f - 1f/16f, 36.5f, 36.875f);
 

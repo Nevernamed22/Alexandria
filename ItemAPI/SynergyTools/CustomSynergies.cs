@@ -25,7 +25,7 @@ namespace Alexandria.ItemAPI
             }
             return false;
         }
-        public static AdvancedSynergyEntry Add(string name, List<string> mandatoryConsoleIDs, List<string> optionalConsoleIDs = null, bool ignoreLichEyeBullets = false)
+        public static AdvancedSynergyEntry Add(string name, List<string> mandatoryConsoleIDs, List<string> optionalConsoleIDs = null, bool affectedByLichesEye = true)
         {
             if (mandatoryConsoleIDs == null || mandatoryConsoleIDs.Count == 0) { ETGModConsole.Log($"Synergy {name} has no mandatory items/guns."); return null; }
             List<int>
@@ -64,7 +64,7 @@ namespace Alexandria.ItemAPI
                 OptionalGunIDs = optGunIDs,
                 bonusSynergies = new List<CustomSynergyType>(),
                 statModifiers = new List<StatModifier>(),
-                IgnoreLichEyeBullets = ignoreLichEyeBullets,
+                IgnoreLichEyeBullets = !affectedByLichesEye,
             };
             Add(entry);
             return entry;

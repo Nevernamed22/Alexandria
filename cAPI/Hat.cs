@@ -114,8 +114,8 @@ namespace Alexandria.cAPI
             var moddedFrameOffsets = onEyes ? Hatabase.ModdedEyeFrameOffsets : Hatabase.ModdedHeadFrameOffsets;
             if (!moddedFrameOffsets.TryGetValue(hatOwner.gameObject.name, out offsetDict))
                 offsetDict = onEyes ? Hatabase.EyeFrameOffsets : Hatabase.HeadFrameOffsets;
-            foreach (var kvp in offsetDict)
-                ETGModConsole.Log($"{kvp.Key} -> {kvp.Value.offset}");
+            // foreach (var kvp in offsetDict)
+            //     ETGModConsole.Log($"{kvp.Key} -> {kvp.Value.offset}");
         }
 
         /// <summary>Patch for recalculating hat offsets when the player swaps costumes in the Breach</summary>

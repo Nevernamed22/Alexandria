@@ -5,110 +5,73 @@ using System.Text;
 
 namespace Alexandria.TranslationAPI
 {
-	/// <summary>
-	/// Handles custom strings for UI and synergy tables.
-	/// </summary>
+    [Obsolete("TranslationAPI is deprecated, use ETGMod.Databases.Strings for translations instead.", true)]
     public class CustomStringDBTable
     {
-		/// <summary>
-		/// The string table.
-		/// </summary>
-		public Dictionary<string, StringTableManager.StringCollection> Table
-		{
-			get
-			{
-				Dictionary<string, StringTableManager.StringCollection> result;
-				if ((result = _cachedTable) == null)
-				{
-					result = (_cachedTable = _getTable());
-				}
-				return result;
-			}
-		}
+        public Dictionary<string, StringTableManager.StringCollection> Table
+        {
+            get
+            {
+                if (mtgTable != null)
+                    return mtgTable.Table;
 
-		/// <summary>
-		/// Gets a string with the key of <paramref name="key"/> from the table.
-		/// </summary>
-		/// <param name="key">The string's key</param>
-		/// <returns>The string with the key of <paramref name="key"/>.</returns>
-		public StringTableManager.StringCollection this[string key]
-		{
-			get
-			{
-				return Table[key];
-			}
-		}
+                return new();
+            }
+        }
 
-		/// <summary>
-		/// Sets a string with the key of <paramref name="key"/> in the table.
-		/// </summary>
-		/// <param name="key">The string's key.</param>
-		/// <param name="value">The string value.</param>
-		public void SetValue(string key, StringTableManager.StringCollection value)
-		{
-			Table[key] = value;
-			_changes[key] = value;
-			JournalEntry.ReloadDataSemaphore++;
-			TranslationManager.ForceUpdateTranslation();
-		}
+        public StringTableManager.StringCollection this[string key]
+        {
+            get
+            {
+                if (mtgTable != null)
+                    return mtgTable[key];
 
-		/// <summary>
-		/// Builds a new <see cref="CustomStringDBTable"/> with the table get function of <paramref name="getTable"/>.
-		/// </summary>
-		/// <param name="getTable">The function that gets the table for this <see cref="CustomStringDBTable"/></param>
-		public CustomStringDBTable(Func<Dictionary<string, StringTableManager.StringCollection>> getTable)
-		{
-			_getTable = getTable;
-			_changes = new Dictionary<string, StringTableManager.StringCollection>();
-		}
+                return null;
+            }
+        }
 
-		/// <summary>
-		/// Returns <see langword="true"/> if the table contains <paramref name="key"/>.
-		/// </summary>
-		/// <param name="key">The key to check</param>
-		/// <returns><see langword="true"/> if the table contains <paramref name="key"/>.</returns>
-		public bool ContainsKey(string key)
-		{
-			return Table.ContainsKey(key);
-		}
+        public void SetValue(string key, StringTableManager.StringCollection value)
+        {
+            if (mtgTable != null)
+                mtgTable[key] = value;
+        }
 
-		/// <summary>
-		/// Sets a string with the key of <paramref name="key"/> in the table.
-		/// </summary>
-		/// <param name="key">The string's key.</param>
-		/// <param name="value">The string value.</param>
-		public void Set(string key, string value)
-		{
-			StringTableManager.SimpleStringCollection simpleStringCollection = new StringTableManager.SimpleStringCollection();
-			simpleStringCollection.AddString(value, 1f);
-			SetValue(key, simpleStringCollection);
-		}
+        public CustomStringDBTable(Func<Dictionary<string, StringTableManager.StringCollection>> getTable)
+        {
+        }
 
-		/// <summary>
-		/// Gets a string with the key of <paramref name="key"/>.
-		/// </summary>
-		/// <param name="key">The string's key.</param>
-		/// <returns>The string with the key of <paramref name="key"/>.</returns>
-		public string Get(string key)
-		{
-			return StringTableManager.GetString(key);
-		}
+        internal CustomStringDBTable(StringDBTable table)
+        {
+            mtgTable = table;
+        }
 
-		/// <summary>
-		/// Applies all the string changes to the tables of the new language.
-		/// </summary>
-		public void LanguageChanged()
-		{
-			_cachedTable = null;
-			Dictionary<string, StringTableManager.StringCollection> table = Table;
-			foreach (KeyValuePair<string, StringTableManager.StringCollection> keyValuePair in _changes)
-			{
-				table[keyValuePair.Key] = keyValuePair.Value;
-			}
-		}
+        internal CustomStringDBTable()
+        {
+        }
 
-		private readonly Func<Dictionary<string, StringTableManager.StringCollection>> _getTable;
-		private readonly Dictionary<string, StringTableManager.StringCollection> _changes;
-		private Dictionary<string, StringTableManager.StringCollection> _cachedTable;
-	}
+        public bool ContainsKey(string key)
+        {
+            if(mtgTable != null)
+                return mtgTable.ContainsKey(key);
+
+            return false;
+        }
+
+        public void Set(string key, string value)
+        {
+            if(mtgTable != null)
+                mtgTable.Set(key, value);
+        }
+
+        public string Get(string key)
+        {
+            return StringTableManager.GetString(key);
+        }
+
+        public void LanguageChanged()
+        {
+        }
+
+        private StringDBTable mtgTable;
+    }
 }

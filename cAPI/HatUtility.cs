@@ -24,17 +24,23 @@ namespace Alexandria.cAPI
         internal static void SetupConsoleCommands()
         {
             ETGModConsole.Commands.AddGroup("capi");
+
             ETGModConsole.Commands.GetGroup("capi").AddUnit("sethat", new Action<string[]>(SetHat1), HatAutoCompletionSettings);
+            ETGModConsole.CommandDescriptions.Add("capi sethat", "Set the current hat for player one.");
+
             ETGModConsole.Commands.GetGroup("capi").AddUnit("2sethat", new Action<string[]>(SetHat2), HatAutoCompletionSettings);
+            ETGModConsole.CommandDescriptions.Add("capi 2sethat", "Set the current hat for player two.");
+
             ETGModConsole.Commands.GetGroup("capi").AddUnit("reload_offsets", new Action<string[]>(ReloadHatOffsets), HatAutoCompletionSettings);
+            ETGModConsole.CommandDescriptions.Add("capi reload_offsets", "Reload Custom Character Mod hat offsets from disk.");
         }
 
         private static void SetHat1(string[] args) => SetHat(args, GameManager.Instance.PrimaryPlayer);
         private static void SetHat2(string[] args) => SetHat(args, GameManager.Instance.SecondaryPlayer);
         private static void ReloadHatOffsets(string[] args) => LazyLoadModdedHatData(force: true);
 
-		private static void SetHat(string[] args, PlayerController playa)
-		{
+        private static void SetHat(string[] args, PlayerController playa)
+        {
             if (!playa || playa.GetComponent<HatController>() is not HatController HatCont)
             {
                 ETGModConsole.Log("<size=100><color=#ff0000ff>Error: No HatController found.</color></size>", false);
@@ -67,7 +73,7 @@ namespace Alexandria.cAPI
         /// <param name="spritePaths">
         /// A list of sprite paths for the hat. Sprite paths must end with [direction]_###.png, where ### is a three digit number starting with 001 and [direction]
         ///  is one of "south", "north", "east", "west", "northeast", and "northwest". Hat directionality and animations are set up automatically depending on
-        ///  the list of sprite paths passed during set up. Mandatory parameter.
+        ///  the list of sprite paths passed during set up. Mandatory parameter, but can be null, in which case SetupHatSprites() must be called manually later.
         /// </param>
         /// <param name="pixelOffset">
         /// The pixel offset of the hat relative to the default hat / eyewear position. Positve x is right, negative x is left, positive y is up, negative y is down.
@@ -152,6 +158,11 @@ namespace Alexandria.cAPI
             hat.goldenPedestal = false; // TODO: might need to add this back in later
             hat.unlockHint = unlockHint;
             hat.showSilhouetteWhenLocked = showSilhouetteWhenLocked;
+            hat.excludeFromHatRoom = excludeFromHatRoom;
+            if (flipHorizontalWithPlayer.HasValue)
+                hat.flipHorizontalWithPlayer = flipHorizontalWithPlayer.Value;
+            else
+                hat.autoDetectFlipType = true;
 
             if (unlockFlags != null)
                 foreach(GungeonFlags flag in unlockFlags)
@@ -160,11 +171,9 @@ namespace Alexandria.cAPI
                 foreach(DungeonPrerequisite prereq in unlockPrereqs)
                     hat.AddUnlockPrerequisite(prereq);
 
-            hat.SetupHatSprites(spritePaths: spritePaths, fps: fps);
-            hat.flipHorizontalWithPlayer = flipHorizontalWithPlayer ??
-                (hat.hatDirectionality == Hat.HatDirectionality.NONE || hat.hatDirectionality == Hat.HatDirectionality.TWO_WAY_VERTICAL);
+            if (spritePaths != null) // if sprites aren't set up here, hat is unusable until calling SetupHatSprites() manually later
+                hat.SetupHatSprites(spritePaths: spritePaths, fps: fps, callingASM: Assembly.GetCallingAssembly());
 
-            AddHatToDatabase(hat, excludeFromHatRoom: excludeFromHatRoom);
             return hat;
         }
 
@@ -172,16 +181,36 @@ namespace Alexandria.cAPI
         /// <param name="characterObjectName">
         /// The name of the player prefab, as accessed by `prefabObject.name`. Will usually be "PlayerXXXX(Clone)".
         /// </param>
-        /// <param name="defaultHeadXOffset">Default head-top hat pixel x-offset for the character.></param>
-        /// <param name="defaultHeadYOffset">Default head-top hat pixel y-offset for the character.></param>
-        /// <param name="defaultEyeXOffset">Default eye-level hat pixel x-offset for the character.></param>
-        /// <param name="defaultEyeYOffset">Default eye-level hat pixel y-offset for the character.></param>
+        /// <param name="defaultHeadXOffset">Default head-top hat pixel x-offset for the character.</param>
+        /// <param name="defaultHeadYOffset">Default head-top hat pixel y-offset for the character.</param>
+        /// <param name="defaultEyeXOffset">Default eye-level hat pixel x-offset for the character.</param>
+        /// <param name="defaultEyeYOffset">Default eye-level hat pixel y-offset for the character.</param>
         public static void SetupHatOffsets(string characterObjectName, int defaultHeadXOffset, int defaultHeadYOffset, int defaultEyeXOffset, int defaultEyeYOffset)
         {
             Hatabase.HeadLevel[characterObjectName] = new Vector2(0.0625f * defaultHeadXOffset, 0.0625f * defaultHeadYOffset);
             Hatabase.EyeLevel[characterObjectName] = new Vector2(0.0625f * defaultEyeXOffset, 0.0625f * defaultEyeYOffset);
-            Hatabase.ModdedHeadFrameOffsets[characterObjectName] = new();
-            Hatabase.ModdedEyeFrameOffsets[characterObjectName] = new();
+            if (!Hatabase.ModdedHeadFrameOffsets.ContainsKey(characterObjectName))
+                Hatabase.ModdedHeadFrameOffsets[characterObjectName] = new();
+            if (!Hatabase.ModdedEyeFrameOffsets.ContainsKey(characterObjectName))
+                Hatabase.ModdedEyeFrameOffsets[characterObjectName] = new();
+        }
+
+        /// <summary>Set up default flipped hat offsets for a custom character</summary>
+        /// <param name="characterObjectName">
+        /// The name of the player prefab, as accessed by `prefabObject.name`. Will usually be "PlayerXXXX(Clone)".
+        /// </param>
+        /// <param name="defaultHeadXOffset">Default flipped head-top hat pixel x-offset for the character.</param>
+        /// <param name="defaultHeadYOffset">Default flipped head-top hat pixel y-offset for the character.</param>
+        /// <param name="defaultEyeXOffset">Default flipped eye-level hat pixel x-offset for the character.</param>
+        /// <param name="defaultEyeYOffset">Default flipped eye-level hat pixel y-offset for the character.</param>
+        public static void SetupFlippedHatOffsets(string characterObjectName, int defaultHeadXOffset, int defaultHeadYOffset, int defaultEyeXOffset, int defaultEyeYOffset)
+        {
+            Hatabase.FlippedHeadLevel[characterObjectName] = new Vector2(0.0625f * defaultHeadXOffset, 0.0625f * defaultHeadYOffset);
+            Hatabase.FlippedEyeLevel[characterObjectName] = new Vector2(0.0625f * defaultEyeXOffset, 0.0625f * defaultEyeYOffset);
+            if (!Hatabase.ModdedHeadFrameOffsets.ContainsKey(characterObjectName))
+                Hatabase.ModdedHeadFrameOffsets[characterObjectName] = new();
+            if (!Hatabase.ModdedEyeFrameOffsets.ContainsKey(characterObjectName))
+                Hatabase.ModdedEyeFrameOffsets[characterObjectName] = new();
         }
 
         /// <summary>Create additional frame-specific hat offsets for a custom character</summary>
@@ -191,10 +220,10 @@ namespace Alexandria.cAPI
         /// <param name="animationFrameName">
         /// The name of the frame of animation whose offset should be adjusted.
         /// </param>
-        /// <param name="headXOffset">Head-top hat pixel x-offset for the animation frame.></param>
-        /// <param name="headYOffset">Head-top hat pixel y-offset for the animation frame.></param>
-        /// <param name="eyeXOffset">Eye-level hat pixel x-offset for the animation frame.></param>
-        /// <param name="eyeYOffset">Eye-level hat pixel y-offset for the animation frame.></param>
+        /// <param name="headXOffset">Head-top hat pixel x-offset for the animation frame.</param>
+        /// <param name="headYOffset">Head-top hat pixel y-offset for the animation frame.</param>
+        /// <param name="eyeXOffset">Eye-level hat pixel x-offset for the animation frame.</param>
+        /// <param name="eyeYOffset">Eye-level hat pixel y-offset for the animation frame.</param>
         public static void AddHatOffset(string characterObjectName, string animationFrameName, int headXOffset, int headYOffset, int? eyeXOffset = null, int? eyeYOffset = null)
         {
             Hatabase.ModdedHeadFrameOffsets[characterObjectName][animationFrameName] =
@@ -203,14 +232,63 @@ namespace Alexandria.cAPI
                 new Hatabase.FrameOffset(eyeXOffset ?? headXOffset, eyeYOffset ?? headYOffset);
         }
 
-        private static tk2dSpriteCollectionData HatSpriteCollection = null;
-		private static void SetupHatSprites(this Hat hat, List<string> spritePaths, int fps)
+        private static readonly HashSet<string> _TempNames = new();
+        /// <summary>
+        /// Print out a list of all unique base animation frames for a character that can be set by <see cref="AddHatOffset"/> to the console.
+        /// </summary>
+        /// <param name="player">The PlayerController whose animation frames should be printed.></param>
+        public static void PrintAnimationFramesForHats(PlayerController player)
         {
+            _TempNames.Clear();
+            foreach (var def in player.sprite.collection.spriteDefinitions)
+                _TempNames.Add(GetSpriteBaseName(def.name));
+            foreach (var name in _TempNames)
+                ETGModConsole.Log($"  {_TempNames}");
+        }
+
+        private static List<string> SortStrings(this List<string> strings)
+        {
+            strings.Sort();
+            return strings;
+        }
+
+        private static List<tk2dSpriteDefinition> SortDefs(this List<tk2dSpriteDefinition> defs)
+        {
+            defs.Sort((a, b) => a.name.CompareTo(b.name));
+            return defs;
+        }
+
+        private static tk2dSpriteCollectionData HatSpriteCollection = null;
+
+        /// <summary>Sets up a hat's sprites from a list of sprite paths or sprite definitions. Exactle one of spritePaths or spriteDefs must be non-null.</summary>
+        /// <param name="hat">The hat for which sprites should be set up.</param>
+        /// <param name="spritePaths">A list of resource paths within callingASM from which the hat's sprites should be created.</param>
+        /// <param name="spriteDefs">A list of preconfigured sprite definitions from which the hat's sprites should be created.</param>
+        /// <param name="fps">The fps for all animations for this hat.</param>
+        /// <param name="callingASM">If using spritePaths, the assembly from which the image resources should be loaded.</param>
+        public static void SetupHatSprites(this Hat hat, List<string> spritePaths = null, List<tk2dSpriteDefinition> spriteDefs = null,
+            int fps = 4, Assembly callingASM = null)
+        {
+            if (hat.addedToHatabase)
+            {
+                ETGModConsole.Log($"<size=100><color=#ff0000ff>Error: trying to set up sprites for hat {hat.name} when sprites have already been set up.</color></size>", false);
+                return;
+            }
+            if ((spritePaths == null) == (spriteDefs == null))
+            {
+                ETGModConsole.Log($"<size=100><color=#ff0000ff>Error: exactly one of spritePaths or spriteDefs must be specified when calling SetupHatSprites() for hat {hat.name}.</color></size>", false);
+                return;
+            }
+
+            bool usingDefs = (spriteDefs != null);
+
             GameObject hatObj = hat.gameObject;
 
             HatSpriteCollection ??= SpriteBuilder.ConstructCollection(new GameObject(), "HatCollection");
-            Assembly callingASM = Assembly.GetCallingAssembly();
-            int spriteID = SpriteBuilder.AddSpriteToCollection(spritePaths[0], HatSpriteCollection, callingASM);
+            callingASM ??= Assembly.GetCallingAssembly();
+            int spriteID = usingDefs
+                ? SpriteBuilder.AddSpriteToCollection(spriteDefs[0], HatSpriteCollection)
+                : SpriteBuilder.AddSpriteToCollection(spritePaths[0], HatSpriteCollection, callingASM);
             tk2dSprite hatBaseSprite = hatObj.GetOrAddComponent<tk2dSprite>();
             hatBaseSprite.SetSprite(HatSpriteCollection, spriteID);
             tk2dSpriteDefinition def = hatBaseSprite.GetCurrentSpriteDef();
@@ -221,49 +299,77 @@ namespace Alexandria.cAPI
             hatBaseSprite.UpdateZDepth();
             hatBaseSprite.HeightOffGround = 0.2f;
 
-            List<string> SouthAnimation = spritePaths.Where(path => path.ToLower().Contains("_south_")).ToList();
-            List<string> NorthAnimation = spritePaths.Where(path => path.ToLower().Contains("_north_")).ToList();
-            List<string> EastAnimation = spritePaths.Where(path => path.ToLower().Contains("_east_")).ToList();
-            List<string> WestAnimation = spritePaths.Where(path => path.ToLower().Contains("_west_")).ToList();
-            List<string> NorthWestAnimation = spritePaths.Where(path => path.ToLower().Contains("_northwest_")).ToList();
-            List<string> NorthEastAnimation = spritePaths.Where(path => path.ToLower().Contains("_northeast_")).ToList();
-
-            if (SouthAnimation.Count == 0)
-            {
-                if (EastAnimation.Count == 0 || WestAnimation.Count == 0)
-                    throw new Exception("Hat Does Not Have Proper Animations");
-                else
-                    hat.hatDirectionality = Hat.HatDirectionality.TWO_WAY_HORIZONTAL;
-            }
-            else if (NorthAnimation.Count == 0)
-                hat.hatDirectionality = Hat.HatDirectionality.NONE;
-            else if (EastAnimation.Count == 0 || WestAnimation.Count == 0)
-                hat.hatDirectionality = Hat.HatDirectionality.TWO_WAY_VERTICAL;
-            else if (NorthEastAnimation.Count == 0 || NorthWestAnimation.Count == 0)
-                hat.hatDirectionality = Hat.HatDirectionality.FOUR_WAY;
-            else
-                hat.hatDirectionality = Hat.HatDirectionality.SIX_WAY;
-
-            //SET UP THE ANIMATOR AND THE ANIMATION
             tk2dSpriteAnimation animation = hatObj.GetOrAddComponent<tk2dSpriteAnimation>();
             animation.clips = new tk2dSpriteAnimationClip[0];
             hatObj.GetOrAddComponent<tk2dSpriteAnimator>().Library = animation;
 
             // use the same offset for every sprite for a hat to avoid alignment jankiness
             Vector2 lowerCenterOffset = new Vector2(-def.untrimmedBoundsDataCenter.x, 0);
-            animation.AddHatAnimation(animName: "hat_south",     spriteNames: SouthAnimation,     fps: fps, callingASM: callingASM, def: def, offset: lowerCenterOffset);
-            animation.AddHatAnimation(animName: "hat_north",     spriteNames: NorthAnimation,     fps: fps, callingASM: callingASM, def: def, offset: lowerCenterOffset);
-            animation.AddHatAnimation(animName: "hat_west",      spriteNames: WestAnimation,      fps: fps, callingASM: callingASM, def: def, offset: lowerCenterOffset);
-            animation.AddHatAnimation(animName: "hat_east",      spriteNames: EastAnimation,      fps: fps, callingASM: callingASM, def: def, offset: lowerCenterOffset);
-            animation.AddHatAnimation(animName: "hat_northeast", spriteNames: NorthEastAnimation, fps: fps, callingASM: callingASM, def: def, offset: lowerCenterOffset);
-            animation.AddHatAnimation(animName: "hat_northwest", spriteNames: NorthWestAnimation, fps: fps, callingASM: callingASM, def: def, offset: lowerCenterOffset);
+
+            bool south, north, west, east, northwest, northeast;
+            if (usingDefs)
+            {
+                south = animation.AddHatAnimation(animName: "hat_south",     fps: fps, def: def, offset: lowerCenterOffset,
+                    spriteDefs: spriteDefs.Where(def => def.name.ToLower().Contains("_south_")).ToList().SortDefs());
+                north = animation.AddHatAnimation(animName: "hat_north",     fps: fps, def: def, offset: lowerCenterOffset,
+                    spriteDefs: spriteDefs.Where(def => def.name.ToLower().Contains("_north_")).ToList().SortDefs());
+                west = animation.AddHatAnimation(animName: "hat_west",      fps: fps, def: def, offset: lowerCenterOffset,
+                    spriteDefs: spriteDefs.Where(def => def.name.ToLower().Contains("_west_")).ToList().SortDefs());
+                east = animation.AddHatAnimation(animName: "hat_east",      fps: fps, def: def, offset: lowerCenterOffset,
+                    spriteDefs: spriteDefs.Where(def => def.name.ToLower().Contains("_east_")).ToList().SortDefs());
+                northwest = animation.AddHatAnimation(animName: "hat_northwest", fps: fps, def: def, offset: lowerCenterOffset,
+                    spriteDefs: spriteDefs.Where(def => def.name.ToLower().Contains("_northwest_")).ToList().SortDefs());
+                northeast = animation.AddHatAnimation(animName: "hat_northeast", fps: fps, def: def, offset: lowerCenterOffset,
+                    spriteDefs: spriteDefs.Where(def => def.name.ToLower().Contains("_northeast_")).ToList().SortDefs());
+            }
+            else
+            {
+                south = animation.AddHatAnimation(animName: "hat_south",     fps: fps, callingASM: callingASM, def: def, offset: lowerCenterOffset,
+                    spriteNames: spritePaths.Where(path => path.ToLower().Contains("_south_")).ToList().SortStrings());
+                north = animation.AddHatAnimation(animName: "hat_north",     fps: fps, callingASM: callingASM, def: def, offset: lowerCenterOffset,
+                    spriteNames: spritePaths.Where(path => path.ToLower().Contains("_north_")).ToList().SortStrings());
+                west = animation.AddHatAnimation(animName: "hat_west",      fps: fps, callingASM: callingASM, def: def, offset: lowerCenterOffset,
+                    spriteNames: spritePaths.Where(path => path.ToLower().Contains("_west_")).ToList().SortStrings());
+                east = animation.AddHatAnimation(animName: "hat_east",      fps: fps, callingASM: callingASM, def: def, offset: lowerCenterOffset,
+                    spriteNames: spritePaths.Where(path => path.ToLower().Contains("_east_")).ToList().SortStrings());
+                northwest = animation.AddHatAnimation(animName: "hat_northwest", fps: fps, callingASM: callingASM, def: def, offset: lowerCenterOffset,
+                    spriteNames: spritePaths.Where(path => path.ToLower().Contains("_northwest_")).ToList().SortStrings());
+                northeast = animation.AddHatAnimation(animName: "hat_northeast", fps: fps, callingASM: callingASM, def: def, offset: lowerCenterOffset,
+                    spriteNames: spritePaths.Where(path => path.ToLower().Contains("_northeast_")).ToList().SortStrings());
+            }
+
+            // auto-detect animation types based on available animation names
+            if (!south)
+            {
+                if (!east || !west)
+                    throw new Exception("Hat Does Not Have Proper Animations");
+                else
+                    hat.hatDirectionality = Hat.HatDirectionality.TWO_WAY_HORIZONTAL;
+            }
+            else if (!north)
+                hat.hatDirectionality = Hat.HatDirectionality.NONE;
+            else if (!east || !west)
+                hat.hatDirectionality = Hat.HatDirectionality.TWO_WAY_VERTICAL;
+            else if (!northeast || !northwest)
+                hat.hatDirectionality = Hat.HatDirectionality.FOUR_WAY;
+            else
+                hat.hatDirectionality = Hat.HatDirectionality.SIX_WAY;
+            if (hat.autoDetectFlipType)
+            {
+                hat.autoDetectFlipType = false;
+                hat.flipHorizontalWithPlayer =
+                    (hat.hatDirectionality == Hat.HatDirectionality.NONE || hat.hatDirectionality == Hat.HatDirectionality.TWO_WAY_VERTICAL);
+            }
+
+            // add the hat to the Hatabase
+            AddHatToDatabase(hat);
         }
 
-        private static void AddHatAnimation(this tk2dSpriteAnimation animation, string animName, List<string> spriteNames, int fps,
+        private static bool AddHatAnimation(this tk2dSpriteAnimation animation, string animName, List<string> spriteNames, int fps,
             Assembly callingASM, tk2dSpriteDefinition def, Vector2 offset)
         {
             if (spriteNames == null || spriteNames.Count == 0)
-                return; // nothing to do
+                return false; // nothing to do
 
             tk2dSpriteAnimationClip clip = new tk2dSpriteAnimationClip() { name = animName, frames = new tk2dSpriteAnimationFrame[spriteNames.Count], fps = fps };
             List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
@@ -277,13 +383,36 @@ namespace Alexandria.cAPI
                 clip.frames[i] = new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = HatSpriteCollection };
             }
             animation.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { clip }).ToArray();
+            return true;
         }
 
-        private static void AddHatToDatabase(Hat hat, bool excludeFromHatRoom)
+        private static bool AddHatAnimation(this tk2dSpriteAnimation animation, string animName, List<tk2dSpriteDefinition> spriteDefs, int fps,
+            tk2dSpriteDefinition def, Vector2 offset)
+        {
+            if (spriteDefs == null || spriteDefs.Count == 0)
+                return false; // nothing to do
+
+            tk2dSpriteAnimationClip clip = new tk2dSpriteAnimationClip() { name = animName, frames = new tk2dSpriteAnimationFrame[spriteDefs.Count], fps = fps };
+            List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
+            for (int i = 0; i < spriteDefs.Count; ++i)
+            {
+                tk2dSpriteDefinition origDef = spriteDefs[i];
+                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(origDef, HatSpriteCollection);
+                tk2dSpriteDefinition frameDef = HatSpriteCollection.spriteDefinitions[frameSpriteId];
+                frameDef.colliderVertices = def.colliderVertices;
+                Shared.MakeOffset(frameDef, offset);
+                clip.frames[i] = new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = HatSpriteCollection };
+            }
+            animation.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { clip }).ToArray();
+            return true;
+        }
+
+        private static void AddHatToDatabase(Hat hat)
         {
             Hatabase.Hats[hat.hatName.GetDatabaseFriendlyHatName()] = hat;
-            if (!excludeFromHatRoom)
+            if (!hat.excludeFromHatRoom)
                 Hatabase.HatRoomHats.Add(hat);
+            hat.addedToHatabase = true;
         }
 
         /// <summary>Converts a hat's display name to the format it's stored in within the hat database</summary>
@@ -377,6 +506,16 @@ namespace Alexandria.cAPI
             }
 
             loadedModdedHatData = true;
+        }
+
+        private static readonly Dictionary<string, string> CachedSpriteBaseNames = new();
+        internal static string GetSpriteBaseName(string name)
+        {
+            if (!CachedSpriteBaseNames.TryGetValue(name, out string baseName)) // string replacements are slow so cache the results as necessary
+                baseName = CachedSpriteBaseNames[name] = name.Replace("_hands2","").Replace("_hands","").Replace("_hand_left","")
+                    .Replace("_hand_right","").Replace("_hand","").Replace("_twohands","").Replace("_armorless","")
+                    .Replace("_0h","").Replace("_1h","").Replace("_2h","");
+            return baseName;
         }
     }
 }

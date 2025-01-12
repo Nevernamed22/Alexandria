@@ -39,15 +39,41 @@ namespace Alexandria.NPCAPI
 		public DungeonPrerequisite[] prerequisites = new DungeonPrerequisite[0];
 		public bool AllowedToSpawnOnRainbowMode;
 
+		// list of known CustomShopController prefabs (for setting up custom functions, since those aren't serialized)
+		private static readonly List<CustomShopController> _Prefabs = new();
 
-        public override void ConfigureOnPlacement(RoomHandler room)
-        {			
+		[SerializeField]
+		private int _prefabIndex = -1; // index of the CustomShopController instance's corresponding prefab in the _Prefabs list
+
+		private void Awake()
+		{
+			if (_prefabIndex == -1) // if we don't have a serialized _prefabIndex, we are ourself a prefab, so get a _prefabIndex and add to known prefabs
+			{
+				_prefabIndex = _Prefabs.Count;
+				_Prefabs.Add(this);
+				// ETGModConsole.Log($"new CustomShopController created at index {_prefabIndex}");
+			}
+			else // if our _prefabIndex is >= 0, we have been instantiated from a prefab, so fetch delegates from the prefab
+			{
+				CustomShopController cscPrefab = _Prefabs[_prefabIndex];
+				customCanBuy   = cscPrefab.customCanBuy;
+				customPrice    = cscPrefab.customPrice;
+				removeCurrency = cscPrefab.removeCurrency;
+				OnSteal        = cscPrefab.OnSteal;
+				OnPurchase     = cscPrefab.OnPurchase;
+				// customCurrencyAtlas = cscPrefab.customCurrencyAtlas;
+				// ETGModConsole.Log($"instantiated prefab CustomShopController at index {_prefabIndex}");
+			}
+		}
+
+	  public override void ConfigureOnPlacement(RoomHandler room)
+	  {
 			base.ConfigureOnPlacement(room);
 			room.IsShop = true;
 			this.m_room = room;
 		}
 
-        public int CustomPriceMethod(CustomShopController shop, CustomShopItemController shopItem, PickupObject item)
+		public int CustomPriceMethod(CustomShopController shop, CustomShopItemController shopItem, PickupObject item)
 		{
 			if (customPrice != null)
 				return customPrice(shop, shopItem, item);

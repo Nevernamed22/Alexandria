@@ -4,6 +4,7 @@ using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
 using Alexandria.ItemAPI;
 using Alexandria.Misc;
+using Alexandria.CharacterAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1634,13 +1635,8 @@ namespace Alexandria.NPCAPI
 
         public static string AddCustomCurrencyType(string ammoTypeSpritePath, string name, Assembly assembly = null)
         {
-            return GameUIRoot.Instance.ConversationBar.portraitSprite.Atlas.AddNewItemToAtlas(ResourceExtractor.GetTextureFromResource(ammoTypeSpritePath, assembly ?? Assembly.GetCallingAssembly()), name).name;
+            return ToolsCharApi.AddUISprite(ResourceExtractor.GetTextureFromResource(ammoTypeSpritePath, assembly ?? Assembly.GetCallingAssembly()), name).name;
         }
-
-
-
-
-
 
         public static void RegisterShopRoom(GameObject shop, PrototypeDungeonRoom protoroom, Vector2 vector)
         {

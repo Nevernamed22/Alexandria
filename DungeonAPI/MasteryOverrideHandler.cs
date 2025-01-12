@@ -14,16 +14,15 @@ namespace Alexandria.DungeonAPI
     {
         /// <summary>
         /// Initialises the hooks which allow the mastery override system to function.
-        /// DO NOT CALL THIS METHOD YOURSELF. IT WILL BREAK.
         /// </summary>
-        public static void Init()
+        internal static void InitInternal()
         {
             OublietteRegistered = false;
             AbbeyRegistered = false;
             RNGRegistered = false;
             new Hook(
                 typeof(DungeonDatabase).GetMethod("GetOrLoadByName", BindingFlags.Static | BindingFlags.Public),
-                typeof(MasteryOverrideHandler).GetMethod("GetOrLoadByNameHook", BindingFlags.Static | BindingFlags.Public));
+                typeof(MasteryOverrideHandler).GetMethod("GetOrLoadByNameHookInternal", BindingFlags.Static | BindingFlags.NonPublic));
         }
 
         /// <summary>
@@ -52,11 +51,10 @@ namespace Alexandria.DungeonAPI
 
         /// <summary>
         /// The hook method which allows the mastery override system to function.
-        /// DO NOT CALL THIS METHOD YOURSELF. IT WILL BREAK.
         /// </summary>
         /// <param name="orig">The original method.</param>
         /// <param name="name">The dungeon name being loaded..</param>
-        public static Dungeon GetOrLoadByNameHook(Func<string, Dungeon> orig, string name)
+        internal static Dungeon GetOrLoadByNameHookInternal(Func<string, Dungeon> orig, string name)
         {
             Dungeon dungeon = null;
             if (name.ToLower() == "base_cathedral" && AbbeyRegistered) { dungeon = SetMasteryTokenDungeon(GetOrLoadByName_Orig(name)); }
@@ -102,5 +100,11 @@ namespace Alexandria.DungeonAPI
             DebugTime.Log("AssetBundle.LoadAsset<Dungeon>({0})", new object[] { name });
             return component;
         }
+
+        [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
+        public static void Init() {}
+
+        [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
+        public static Dungeon GetOrLoadByNameHook(Func<string, Dungeon> orig, string name) => null;
     }
 }

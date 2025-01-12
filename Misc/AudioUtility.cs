@@ -46,7 +46,7 @@ namespace Alexandria.Misc
                 AkSoundEngine.LoadAndDecodeBankFromMemory((IntPtr)p, (uint)array.Length, false, name, false, out _);
 		}
 
-        [ObsoleteAttribute("StreamToByteArray() is obsolete and exists for backwards compatability only.", false)]
+        [Obsolete("StreamToByteArray() is obsolete and exists for backwards compatability only.", false)]
 		public static byte[] StreamToByteArray(Stream input)
 		{
 			byte[] array = new byte[16384];

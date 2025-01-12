@@ -724,10 +724,20 @@ namespace Alexandria.cAPI
             {"bullet_player_move_back_006",          new FrameOffset(-1,  1)},
         };
 
-        // Offsets for where head-top hats should be placed on different modded characters (using character gameObject name)
+        // Offsets for where head-top hats should be placed on modded characters with flipped sprites
+        //   (all vanilla sprites are symmetrical so this is unnecessary for them)
+        public static readonly Dictionary<string, Vector2> FlippedHeadLevel = new();
+
+        // Offsets for where eye-level hats should be placed on modded characters with flipped sprites
+        //   (all vanilla sprites are symmetrical so this is unnecessary for them)
+        public static readonly Dictionary<string, Vector2> FlippedEyeLevel = new();
+
+        // Animation frame-specific offsets for where head-top hats should be placed on different modded characters
+        //   (using character gameObject name)
         public static readonly Dictionary<string, Dictionary<string, FrameOffset>> ModdedHeadFrameOffsets = new();
 
-        // Offsets for where eye-level hats should be placed on different modded characters (using character gameObject name)
+        // Animation frame-specific offsets for where eye-level hats should be placed on different modded characters
+        //   (using character gameObject name)
         public static readonly Dictionary<string, Dictionary<string, FrameOffset>> ModdedEyeFrameOffsets = new();
     }
 }

@@ -70,6 +70,11 @@
     <Compile Include="CharApi\Tools\Tools.cs" />
     <Compile Include="ChestAPI\ChestSpawnHelper.cs" />
     <Compile Include="ChestAPI\ChestUtility.cs" />
+    <Compile Include="CustomDodgeRollAPI\CustomDodgeRoll.cs" />
+    <Compile Include="CustomDodgeRollAPI\CustomDodgeRollItem.cs" />
+    <Compile Include="CustomDodgeRollAPI\CustomDodgeRollPatches.cs" />
+    <Compile Include="CustomDodgeRollAPI\CustomDodgeRollPrivate.cs" />
+    <Compile Include="CustomDodgeRollAPI\ExtraDodgeRollItem.cs" />
     <Compile Include="DungeonAPI\BreachExtensions.cs" />
     <Compile Include="DungeonAPI\DungeonPatches.cs" />
     <Compile Include="DungeonAPI\MasteryOverrideHandler.cs" />
@@ -251,16 +256,16 @@
       <HintPath>packages\HarmonyX.2.7.0\lib\net35\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\EtG.GameLibs.2.1.9-r.0\lib\net35\Assembly-CSharp.dll</HintPath>
+      <HintPath>packages\EtG.GameLibs.2.1.9.1\lib\net35\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\EtG.GameLibs.2.1.9-r.0\lib\net35\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>packages\EtG.GameLibs.2.1.9.1\lib\net35\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx, Version=5.4.21.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\BepInEx.BaseLib.5.4.21\lib\net35\BepInEx.dll</HintPath>
     </Reference>
     <Reference Include="ModTheGungeonAPI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\EtG.ModTheGungeonAPI.1.5.3\lib\net35\ModTheGungeonAPI.dll</HintPath>
+      <HintPath>packages\EtG.ModTheGungeonAPI.1.9.0\lib\net35\ModTheGungeonAPI.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
       <HintPath>packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.dll</HintPath>
@@ -284,7 +289,7 @@
       <HintPath>packages\Newtonsoft.Json.13.0.1\lib\net35\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PlayMaker, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\EtG.GameLibs.2.1.9-r.0\lib\net35\PlayMaker.dll</HintPath>
+      <HintPath>packages\EtG.GameLibs.2.1.9.1\lib\net35\PlayMaker.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">

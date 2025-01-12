@@ -306,6 +306,7 @@ namespace Alexandria.CharacterAPI
             try
             {
                 CharacterBuilder.BuildCharacterBundle(data, d1, SteveData1, d2, SteveData2, hasAltSkin, paradoxUsesSprites, removeFoyerExtras, hasArmourlessAnimations, usesArmourNotHealth, hasCustomPast, customPast, metaCost, useGlow, glowVars, altGlowVars, Assembly.GetCallingAssembly());
+                data.pathForSprites = filePath;
                 myPlayableCharacters.Add(data.identity);
             }
             catch (Exception e)

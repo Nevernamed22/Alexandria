@@ -196,13 +196,13 @@ namespace Alexandria.CustomDodgeRollAPI
         private static void CheckAdditionalMidairDodgeRolls(PlayerController player, ref int oldRolls)
         {
             for (int i = 0, n = player.passiveItems.Count; i < n; ++i)
-                if (player.passiveItems[i].GetComponent<ExtraDodgeRollItem>() is ExtraDodgeRollItem dri)
+                if (player.passiveItems[i] && player.passiveItems[i].GetComponent<ExtraDodgeRollItem>() is ExtraDodgeRollItem dri)
                     oldRolls += Mathf.Max(0, dri.ExtraMidairDodgeRolls());
             for (int i = 0, n = player.activeItems.Count; i < n; ++i)
-                if (player.activeItems[i].GetComponent<ExtraDodgeRollItem>() is ExtraDodgeRollItem dri2)
+                if (player.activeItems[i] && player.activeItems[i].GetComponent<ExtraDodgeRollItem>() is ExtraDodgeRollItem dri2)
                     oldRolls += Mathf.Max(0, dri2.ExtraMidairDodgeRolls());
             for (int i = 0, n = player.inventory.AllGuns.Count; i < n; ++i)
-                if (player.inventory.AllGuns[i].GetComponent<ExtraDodgeRollItem>() is ExtraDodgeRollItem dri3)
+                if (player.inventory.AllGuns[i] && player.inventory.AllGuns[i].GetComponent<ExtraDodgeRollItem>() is ExtraDodgeRollItem dri3)
                     oldRolls += Mathf.Max(0, dri3.ExtraMidairDodgeRolls());
         }
 

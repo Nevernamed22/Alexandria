@@ -28,7 +28,7 @@ namespace Alexandria
     {
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
-        public const string VERSION = "0.4.18";
+        public const string VERSION = "0.4.19";
 
         public void Start()
         {
@@ -80,6 +80,7 @@ namespace Alexandria
 
                 //cAPI
                 HatUtility.SetupConsoleCommands();
+                Brimsly.Init();
 
                 this.StartCoroutine(this.delayedstarthandler());
                 ETGModConsole.Log("AlexandriaLib started correctly. Ver. : "+VERSION);

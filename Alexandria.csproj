@@ -49,6 +49,7 @@
     <Compile Include="Assetbundle\JsonEmbedder.cs" />
     <Compile Include="Assetbundle\ProjectileBuilders.cs" />
     <Compile Include="BreakableAPI\BreakableAPIToolbox.cs" />
+    <Compile Include="cAPI\Brimsly.cs" />
     <Compile Include="cAPI\Hat.cs" />
     <Compile Include="cAPI\Hatabase.cs" />
     <Compile Include="cAPI\HatController.cs" />
@@ -457,6 +458,20 @@
     <EmbeddedResource Include="cAPI\hat_pedestal.png" />
     <EmbeddedResource Include="cAPI\hat_room_entrance.png" />
     <EmbeddedResource Include="cAPI\hat_room_exit.png" />
+    <EmbeddedResource Include="cAPI\brimsly_sprites\brimsly_idle_001.png" />
+    <EmbeddedResource Include="cAPI\brimsly_sprites\brimsly_idle_002.png" />
+    <EmbeddedResource Include="cAPI\brimsly_sprites\brimsly_idle_003.png" />
+    <EmbeddedResource Include="cAPI\brimsly_sprites\brimsly_idle_004.png" />
+    <EmbeddedResource Include="cAPI\brimsly_sprites\brimsly_idle_005.png" />
+    <EmbeddedResource Include="cAPI\brimsly_sprites\brimsly_idle_006.png" />
+    <EmbeddedResource Include="cAPI\brimsly_sprites\brimsly_idle_007.png" />
+    <EmbeddedResource Include="cAPI\brimsly_sprites\brimsly_idle_008.png" />
+    <EmbeddedResource Include="cAPI\brimsly_sprites\brimsly_talk_001.png" />
+    <EmbeddedResource Include="cAPI\brimsly_sprites\brimsly_talk_002.png" />
+    <EmbeddedResource Include="cAPI\brimsly_sprites\brimsly_talk_003.png" />
+    <EmbeddedResource Include="cAPI\brimsly_sprites\brimsly_talk_004.png" />
+    <EmbeddedResource Include="cAPI\brimsly_sprites\brimsly_talk_005.png" />
+
     <EmbeddedResource Include="NativeResources\debugfloor.png" />
     <EmbeddedResource Include="NativeResources\debugnorthwall.png" />
     <EmbeddedResource Include="NativeResources\debugwalls.png" />

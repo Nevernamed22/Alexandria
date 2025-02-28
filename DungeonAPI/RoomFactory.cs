@@ -1559,13 +1559,16 @@ namespace Alexandria.DungeonAPI
                     jobject = JObject.Parse(attributes);
                     if (OnCustomProperty != null)
                     {
-                        gameObject = OnCustomProperty(assetPath, gameObject, jobject);
+                        foreach (var entry in OnCustomProperty.GetInvocationList())
+                        {
+                            gameObject = (GameObject)entry.DynamicInvoke(assetPath, gameObject, jobject);
+                        }
                     }
                 }
 
 
 
-                    if (gameObject)
+                if (gameObject)
                 {
                     if (jobject != null) gameObject = RoomFactory.MaybeModifyAsset(assetPath, jobject, gameObject);
                     DungeonPrerequisite[] array = new DungeonPrerequisite[0];

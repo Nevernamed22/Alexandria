@@ -1,4 +1,4 @@
-﻿using Alexandria.Misc;
+using Alexandria.Misc;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -70,6 +70,7 @@ namespace Alexandria.ItemAPI
             instSlash.OnHitBullet += SlashHitBullet;
             instSlash.OnHitMajorBreakable += SlashHitMajorBreakable;
             instSlash.OnHitMinorBreakable += SlashHitMinorBreakable;
+            instSlash.OnHitTargetDamageContext += SlashHitTargetDamageContext;
 
             angle += UnityEngine.Random.Range(angleVariance, -angleVariance);
 
@@ -106,6 +107,13 @@ namespace Alexandria.ItemAPI
         /// </summary>
         /// <param name="target">The object that has been hit by the slash.</param>
         public virtual void SlashHitMajorBreakable(MajorBreakable target) { }
+        /// <summary>
+        /// Called when the slash hits a GameActor. Also includes the damage done.
+        /// </summary>
+        /// <param name="target">The game actor that has been hit by the slash.</param>
+        /// <param name="damageDealt">The damage dealt.</param>
+        /// <param name="fatal">Whether or not the slash killed the actor it hit.</param>
+        public virtual void SlashHitTargetDamageContext(GameActor target, float damageDealt, bool fatal) { }
 
         /// <summary>
         /// How long should the projectile wait after spawning before doing it's first slash. Zero by default, meaning it occurs instantly.

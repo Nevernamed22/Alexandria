@@ -37,6 +37,7 @@ namespace Alexandria.ItemAPI
             newData.OnHitBullet = original.OnHitBullet;
             newData.OnHitMinorBreakable = original.OnHitMinorBreakable;
             newData.OnHitMajorBreakable = original.OnHitMajorBreakable;
+            newData.OnHitTargetDamageContext = original.OnHitTargetDamageContext;
             return newData;
         }
 
@@ -57,10 +58,12 @@ namespace Alexandria.ItemAPI
         public float damage = 5f;
         public bool damagesBreakables = true;
         public string soundEvent = "Play_WPN_blasphemy_shot_01";
-        public Action<GameActor, bool, float> OnHitTarget = null;
+        public Action<GameActor, bool> OnHitTarget = null;
         public Action<Projectile> OnHitBullet = null;
         public Action<MinorBreakable> OnHitMinorBreakable = null;
         public Action<MajorBreakable> OnHitMajorBreakable = null;
+        public Action<GameActor, float, bool> OnHitTargetDamageContext = null;
+        
     }
     public class SlashDoer
     {
@@ -367,7 +370,9 @@ namespace Alexandria.ItemAPI
                     bool fatal = false;
                     if (wasAlivePreviously && targetEnemy.healthHaver.IsDead) fatal = true;
 
-                    if (slashParameters.OnHitTarget != null) slashParameters.OnHitTarget(targetEnemy, fatal, damageToDeal);
+                    if (slashParameters.OnHitTarget != null) slashParameters.OnHitTarget(targetEnemy, fatal);
+
+                    if (slashParameters.OnHitTargetDamageContext != null) slashParameters.OnHitTargetDamageContext(targetEnemy, damageToDeal, fatal);
 
                 }
                 if (targetEnemy.knockbackDoer)

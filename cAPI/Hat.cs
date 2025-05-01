@@ -58,6 +58,7 @@ namespace Alexandria.cAPI
         private Vector2              hatFlipOffset        = Vector2.zero;
         private int                  hatWidth             = 0;
         private bool                 ownerIsModdedChar    = false;
+        private bool                 forwardMeansSouth    = false;
         private List<DungeonPrerequisite> unlockPrereqs   = new();
         private Dictionary<string, Hatabase.FrameOffset> offsetDict = null;
 
@@ -107,10 +108,23 @@ namespace Alexandria.cAPI
             }
         }
 
+        /// <summary>Due to CharAPI and possibly CCM mixing up animation names, we need to determine whether our "forward" sprites correspond to facing south or east.</summary>
+        private void DetermineIfForwardMeansSouthOrEast()
+        {
+            if (hatOwner.spriteAnimator.GetClipByName("idle_forward") is not tk2dSpriteAnimationClip southClip)
+            {
+                Debug.Log($"  {hatOwner.gameObject.name} doesn't have an idle_forward animation for hat purposes");
+                return;
+            }
+            tk2dSpriteAnimationFrame southFrame = southClip.frames[0];
+            forwardMeansSouth = southFrame.spriteCollection.spriteDefinitions[southFrame.spriteId].name.Contains("forward");
+        }
+
         private void DeterminePlayerSpecificOffsets()
         {
             bool onEyes = (attachLevel == HatAttachLevel.EYE_LEVEL);
             var headOffsets = onEyes ? Hatabase.EyeLevel : Hatabase.HeadLevel;
+            DetermineIfForwardMeansSouthOrEast();
             ownerIsModdedChar = !headOffsets.TryGetValue(hatOwner.sprite.spriteAnimator.library.name, out playerSpecificOffset);
             if (!ownerIsModdedChar)
             {
@@ -289,23 +303,23 @@ namespace Alexandria.cAPI
             }
         }
 
-        private HatDirection GetBaseDirectionForSprite(string animName)
+        private HatDirection GetBaseDirectionForSprite(string spriteName)
         {
-            if (animName.Contains("front_right_")) return HatDirection.EAST;
-            if (animName.Contains("right_front_")) return HatDirection.EAST;
+            if (spriteName.Contains("front_right_")) return HatDirection.EAST;
+            if (spriteName.Contains("right_front_")) return HatDirection.EAST;
             //HACK: charAPI mixed up sprite names and we can't change it now without breaking tons of CCs, so now we get to do this ._.
-            if (animName.Contains("forward_"))     return ownerIsModdedChar ? HatDirection.SOUTH : HatDirection.EAST;
-            if (animName.Contains("back_right_"))  return HatDirection.NORTHEAST;
-            if (animName.Contains("bright_"))      return HatDirection.NORTHEAST;
-            if (animName.Contains("backwards_"))   return HatDirection.NORTHEAST;
+            if (spriteName.Contains("forward_"))     return forwardMeansSouth ? HatDirection.SOUTH : HatDirection.EAST;
+            if (spriteName.Contains("back_right_"))  return HatDirection.NORTHEAST;
+            if (spriteName.Contains("bright_"))      return HatDirection.NORTHEAST;
+            if (spriteName.Contains("backwards_"))   return HatDirection.NORTHEAST;
             //HACK: charAPI compatibility AGAIN
-            if (animName.Contains("backward_"))    return ownerIsModdedChar ? HatDirection.NORTH : HatDirection.NORTHEAST;
-            if (animName.Contains("bw_"))          return HatDirection.NORTHEAST;
-            if (animName.Contains("north_"))       return HatDirection.NORTH;
-            if (animName.Contains("up_"))          return HatDirection.NORTH; // only used by CharAPI characters
-            if (animName.Contains("back_"))        return HatDirection.NORTH;
-            if (animName.Contains("south_"))       return HatDirection.SOUTH;
-            if (animName.Contains("front_"))       return HatDirection.SOUTH;
+            if (spriteName.Contains("backward_"))    return forwardMeansSouth ? HatDirection.NORTH : HatDirection.NORTHEAST;
+            if (spriteName.Contains("bw_"))          return HatDirection.NORTHEAST;
+            if (spriteName.Contains("north_"))       return HatDirection.NORTH;
+            if (spriteName.Contains("up_"))          return HatDirection.NORTH; // only used by CharAPI characters
+            if (spriteName.Contains("back_"))        return HatDirection.NORTH;
+            if (spriteName.Contains("south_"))       return HatDirection.SOUTH;
+            if (spriteName.Contains("front_"))       return HatDirection.SOUTH;
             return HatDirection.EAST; // return a sane default
         }
 

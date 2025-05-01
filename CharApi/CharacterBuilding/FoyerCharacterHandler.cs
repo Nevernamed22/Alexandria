@@ -331,10 +331,13 @@ namespace Alexandria.CharacterAPI
 
                 //Create new card instance
                 selectCharacter.ClearOverheadElement();
-                var theCauseOfMySuffering = FakePrefab.Clone(selectCharacter.OverheadElement.GetComponentInChildren<CharacterSelectFacecardIdleDoer>().gameObject);
-                selectCharacter.OverheadElement = PrefabBuilder.Clone(selectCharacter.OverheadElement);
-                selectCharacter.OverheadElement.name = $"CHR_{data.nameShort}Panel";
-                selectCharacter.OverheadElement.GetComponent<FoyerInfoPanelController>().followTransform = selectCharacter.transform;
+
+                GameObject newOverheadElement = UnityEngine.Object.Instantiate(selectCharacter.OverheadElement);
+                GameObject.DontDestroyOnLoad(newOverheadElement);
+                newOverheadElement.SetActive(false);
+
+                newOverheadElement.name = $"CHR_{data.nameShort}Panel";
+                newOverheadElement.GetComponent<FoyerInfoPanelController>().followTransform = selectCharacter.transform;
 
                 var customFoyerController = selectCharacter.gameObject.AddComponent<CustomCharacterFoyerController>();
                 customFoyerController.metaCost = data.metaCost;
@@ -352,9 +355,8 @@ namespace Alexandria.CharacterAPI
                 if (data.baseCharacter == PlayableCharacters.Eevee)
                     replaceKey = "PARADOX";
 
-
                 //Change text
-                var infoPanel = selectCharacter.OverheadElement.GetComponent<FoyerInfoPanelController>();
+                var infoPanel = newOverheadElement.GetComponent<FoyerInfoPanelController>();
                 dfLabel nameLabel = infoPanel.textPanel.transform.Find("NameLabel").GetComponent<dfLabel>();
                 nameLabel.Text = "#CHAR_" + data.nameShort.ToString().ToUpper();
                 dfLabel pastKilledLabel = infoPanel.textPanel.transform.Find("PastKilledLabel").GetComponent<dfLabel>();
@@ -365,7 +367,6 @@ namespace Alexandria.CharacterAPI
                     pastKilledLabel.ModifyLocalizedText(pastKilledLabel.Text + " (" + data.metaCost.ToString() + "[sprite \"hbux_text_icon\"])");
                     pastKilledLabel.ModifyLocalizedText("(Past Killed)" + " (" + data.metaCost.ToString() + "[sprite \"hbux_text_icon\"])");
                 }
-
 
                 infoPanel.itemsPanel.enabled = true;
                 var spriteObject = FakePrefab.Clone(infoPanel.itemsPanel.GetComponentInChildren<dfSprite>().gameObject);
@@ -384,21 +385,15 @@ namespace Alexandria.CharacterAPI
                     sprite.transform.position = new Vector3(1 + ((i + 0.1f) * 0.1f), -((i + 0.1f) * 0.1f), 0);
                     sprite.transform.localPosition = new Vector3(((i + 0.1f) * 0.1f), 0, 0);
                 }
-
                 
                 if (data.foyerCardSprites != null)
                 {
-                    var facecard = selectCharacter.OverheadElement.GetComponentInChildren<CharacterSelectFacecardIdleDoer>();
-                    theCauseOfMySuffering.transform.parent = facecard.transform.parent;
-                    theCauseOfMySuffering.transform.localPosition = new Vector3(0, 1.687546f, 0.2250061f);
-                    theCauseOfMySuffering.transform.parent.localPosition = new Vector3(0, 0, 0);
-                    theCauseOfMySuffering.transform.parent.localScale *= 7;
-
-                    facecard.gameObject.SetActive(false);
-                    facecard.transform.parent = null;
-                    UnityEngine.Object.Destroy(facecard.gameObject);
-                    facecard = theCauseOfMySuffering.GetComponent<CharacterSelectFacecardIdleDoer>();
+                    CharacterSelectFacecardIdleDoer facecard = newOverheadElement.GetComponentInChildren<CharacterSelectFacecardIdleDoer>();
                     facecard.gameObject.name = data.nameShort + " Sprite FaceCard";// <---------------- this object needs to be shrank
+                    facecard.spriteAnimator = facecard.gameObject.GetComponent<tk2dSpriteAnimator>();
+                    facecard.transform.localPosition = new Vector3(0, 1.687546f, 0.2250061f);
+                    facecard.transform.parent.localPosition = Vector3.zero;
+                    facecard.spriteAnimator.sprite.scale = 8f * Vector3.one; //TODO: magic number, why does this work (Alexandria uses 7f)
 
                     if (ToolsCharApi.EnableDebugLogging == true)
                     {
@@ -485,6 +480,9 @@ namespace Alexandria.CharacterAPI
 
                     if (ToolsCharApi.EnableDebugLogging == true)
                         Debug.Log($"foyer card done");
+
+                    FakePrefab.MakeFakePrefab(newOverheadElement);
+                    selectCharacter.OverheadElement = newOverheadElement;
                 }
             }
 

@@ -133,18 +133,20 @@ namespace Alexandria.cAPI
                 return;
             }
 
-            var flippedOffsets = onEyes ? Hatabase.FlippedEyeLevel : Hatabase.FlippedHeadLevel;
             HatUtility.LazyLoadModdedHatData();
-            // ETGModConsole.Log($"attempting to get hat offsets for modded character {hatOwner.gameObject.name}");
-            if (!headOffsets.TryGetValue(hatOwner.gameObject.name, out playerSpecificOffset))
+            string lookupKey = hatOwner.gameObject.name;
+            if (!headOffsets.TryGetValue(lookupKey, out playerSpecificOffset))
+                lookupKey = lookupKey.Replace("(Clone)", ""); // try looking up without the "(Clone)" in our name, if we have it
+            if (!headOffsets.TryGetValue(lookupKey, out playerSpecificOffset))
                 playerSpecificOffset = onEyes ? Hatabase.defaultEyeLevelOffset : Hatabase.defaultHeadLevelOffset;
-            if (!flippedOffsets.TryGetValue(hatOwner.gameObject.name, out playerFlippedOffset))
+
+            var flippedOffsets = onEyes ? Hatabase.FlippedEyeLevel : Hatabase.FlippedHeadLevel;
+            if (!flippedOffsets.TryGetValue(lookupKey, out playerFlippedOffset))
                 playerFlippedOffset = playerSpecificOffset;
+
             var moddedFrameOffsets = onEyes ? Hatabase.ModdedEyeFrameOffsets : Hatabase.ModdedHeadFrameOffsets;
-            if (!moddedFrameOffsets.TryGetValue(hatOwner.gameObject.name, out offsetDict))
+            if (!moddedFrameOffsets.TryGetValue(lookupKey, out offsetDict))
                 offsetDict = onEyes ? Hatabase.EyeFrameOffsets : Hatabase.HeadFrameOffsets;
-            // foreach (var kvp in offsetDict)
-            //     ETGModConsole.Log($"{kvp.Key} -> {kvp.Value.offset}");
         }
 
         /// <summary>Patch for recalculating hat offsets when the player swaps costumes in the Breach</summary>

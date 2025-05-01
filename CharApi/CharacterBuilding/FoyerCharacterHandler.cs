@@ -310,9 +310,10 @@ namespace Alexandria.CharacterAPI
             //idler.talkDoer.OnExitRange(null); 
         }
 
+        private static readonly Dictionary<CustomCharacterData, GameObject> _CachedOverheadPrefabs = new();
+
         private static void CreateOverheadCard(FoyerCharacterSelectFlag selectCharacter, CustomCharacterData data)
         {
-            System.Diagnostics.Stopwatch tempWatchWatch = System.Diagnostics.Stopwatch.StartNew();
             try
             {
                 if (selectCharacter.OverheadElement == null)
@@ -326,6 +327,12 @@ namespace Alexandria.CharacterAPI
                 {
                     if (ToolsCharApi.EnableDebugLogging == true)
                         ETGModConsole.Log($"CHR_{data.nameShort}Panel already exists");
+                    return;
+                }
+
+                if (_CachedOverheadPrefabs.TryGetValue(data, out GameObject overheadPrefab))
+                {
+                    selectCharacter.OverheadElement = overheadPrefab;
                     return;
                 }
 
@@ -482,15 +489,14 @@ namespace Alexandria.CharacterAPI
                         Debug.Log($"foyer card done");
 
                     FakePrefab.MakeFakePrefab(newOverheadElement);
+                    _CachedOverheadPrefabs[data] = newOverheadElement;
                     selectCharacter.OverheadElement = newOverheadElement;
                 }
             }
-
             catch (Exception e)
             {
                 ETGModConsole.Log("Overhead setup code broke: " + e);
             }
-            tempWatchWatch.Stop(); System.Console.WriteLine($"    {tempWatchWatch.ElapsedMilliseconds,4}ms for setting up character {data.name}");
         }
 
         private static void OnPlayerCharacterChanged(PlayerController player, FoyerCharacterSelectFlag selectCharacter, string characterPath)

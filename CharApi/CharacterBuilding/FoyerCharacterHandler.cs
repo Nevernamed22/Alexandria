@@ -311,6 +311,10 @@ namespace Alexandria.CharacterAPI
         }
 
         private static readonly Dictionary<CustomCharacterData, GameObject> _CachedOverheadPrefabs = new();
+        private static readonly List<int> _ToCopyAppearAnimIds = new List<int> { 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, };
+        private static readonly List<int> _ToCopyIdleAnimIds = new List<int> { 241, 242, 243, 244, };
+        private static readonly Vector3 _BasegameFacecardPosition = new Vector3(0, 1.687546f, 0.2250061f);
+        private static readonly Vector3 _FacecardScale = 6.5f * Vector3.one; // magic number determined through experimentation
 
         private static void CreateOverheadCard(FoyerCharacterSelectFlag selectCharacter, CustomCharacterData data)
         {
@@ -330,6 +334,7 @@ namespace Alexandria.CharacterAPI
                     return;
                 }
 
+                selectCharacter.ClearOverheadElement();
                 if (_CachedOverheadPrefabs.TryGetValue(data, out GameObject overheadPrefab))
                 {
                     selectCharacter.OverheadElement = overheadPrefab;
@@ -337,15 +342,13 @@ namespace Alexandria.CharacterAPI
                 }
 
                 //Create new card instance
-                selectCharacter.ClearOverheadElement();
-
                 GameObject newOverheadElement = UnityEngine.Object.Instantiate(selectCharacter.OverheadElement);
                 GameObject.DontDestroyOnLoad(newOverheadElement);
                 newOverheadElement.SetActive(false);
-
                 newOverheadElement.name = $"CHR_{data.nameShort}Panel";
-                newOverheadElement.GetComponent<FoyerInfoPanelController>().followTransform = selectCharacter.transform;
+                newOverheadElement.GetComponent<FoyerInfoPanelController>().followTransform = selectCharacter.transform; //NOTE: verify this is correct after instantiation
 
+                // Custom foyer controller setup
                 var customFoyerController = selectCharacter.gameObject.AddComponent<CustomCharacterFoyerController>();
                 customFoyerController.metaCost = data.metaCost;
                 customFoyerController.useGlow = data.useGlow;
@@ -354,53 +357,44 @@ namespace Alexandria.CharacterAPI
                 customFoyerController.emissivePower = data.emissivePower;
                 customFoyerController.data = data;
 
-                string replaceKey = data.baseCharacter.ToString().ToUpper();
-                if (data.baseCharacter == PlayableCharacters.Soldier)
-                    replaceKey = "MARINE";
-                if (data.baseCharacter == PlayableCharacters.Pilot)
-                    replaceKey = "ROGUE";
-                if (data.baseCharacter == PlayableCharacters.Eevee)
-                    replaceKey = "PARADOX";
-
                 //Change text
                 var infoPanel = newOverheadElement.GetComponent<FoyerInfoPanelController>();
                 dfLabel nameLabel = infoPanel.textPanel.transform.Find("NameLabel").GetComponent<dfLabel>();
                 nameLabel.Text = "#CHAR_" + data.nameShort.ToString().ToUpper();
-                dfLabel pastKilledLabel = infoPanel.textPanel.transform.Find("PastKilledLabel").GetComponent<dfLabel>();
-                pastKilledLabel.ProcessMarkup = true;
-                pastKilledLabel.ColorizeSymbols = true;
                 if (data.metaCost != 0)
                 {
+                    dfLabel pastKilledLabel = infoPanel.textPanel.transform.Find("PastKilledLabel").GetComponent<dfLabel>();
+                    pastKilledLabel.ProcessMarkup = true;
+                    pastKilledLabel.ColorizeSymbols = true;
                     pastKilledLabel.ModifyLocalizedText(pastKilledLabel.Text + " (" + data.metaCost.ToString() + "[sprite \"hbux_text_icon\"])");
                     pastKilledLabel.ModifyLocalizedText("(Past Killed)" + " (" + data.metaCost.ToString() + "[sprite \"hbux_text_icon\"])");
                 }
 
-                infoPanel.itemsPanel.enabled = true;
+                // Loadout setup
                 var spriteObject = FakePrefab.Clone(infoPanel.itemsPanel.GetComponentInChildren<dfSprite>().gameObject);
                 foreach (var child in infoPanel.itemsPanel.GetComponentsInChildren<dfSprite>())
                     UnityEngine.Object.DestroyImmediate(child.gameObject);
+                dfAtlas uiAtlas = GameUIRoot.Instance.ConversationBar.portraitSprite.Atlas;
                 for (int i = 0; i < data.loadoutSpriteNames.Count; i++)
                 {
-
                     var sprite = FakePrefab.Clone(spriteObject).GetComponent<dfSprite>();
-                    sprite.gameObject.SetActive(true);
                     sprite.SpriteName = data.loadoutSpriteNames[i];
                     sprite.Size = new Vector2(data.loadoutSprites[i].width * 3, data.loadoutSprites[i].height * 3);
-                    sprite.Atlas = GameUIRoot.Instance.ConversationBar.portraitSprite.Atlas;
+                    sprite.Atlas = uiAtlas;
                     sprite.transform.parent = infoPanel.itemsPanel.transform;
-                    infoPanel.itemsPanel.Controls.Add(sprite);
-                    sprite.transform.position = new Vector3(1 + ((i + 0.1f) * 0.1f), -((i + 0.1f) * 0.1f), 0);
                     sprite.transform.localPosition = new Vector3(((i + 0.1f) * 0.1f), 0, 0);
+                    infoPanel.itemsPanel.Controls.Add(sprite);
                 }
                 
+                // Facecard setup
                 if (data.foyerCardSprites != null)
                 {
                     CharacterSelectFacecardIdleDoer facecard = newOverheadElement.GetComponentInChildren<CharacterSelectFacecardIdleDoer>();
                     facecard.gameObject.name = data.nameShort + " Sprite FaceCard";// <---------------- this object needs to be shrank
                     facecard.spriteAnimator = facecard.gameObject.GetComponent<tk2dSpriteAnimator>();
-                    facecard.transform.localPosition = new Vector3(0, 1.687546f, 0.2250061f);
+                    facecard.transform.localPosition = _BasegameFacecardPosition;
                     facecard.transform.parent.localPosition = Vector3.zero;
-                    facecard.spriteAnimator.sprite.scale = 8f * Vector3.one; //TODO: magic number, why does this work (Alexandria uses 7f)
+                    facecard.spriteAnimator.sprite.scale = _FacecardScale;
 
                     if (ToolsCharApi.EnableDebugLogging == true)
                     {
@@ -409,34 +403,10 @@ namespace Alexandria.CharacterAPI
                     }
 
                     var orig = facecard.sprite.Collection;
-
                     var idleAnimName = $"{data.nameShort}_facecard_idle";
                     var appearAnimName = $"{data.nameShort}_facecard_appear";
-
                     List<int> idleAnimIds = new List<int>();
                     List<int> appearAnimIds = new List<int>();
-
-                    List<int> toCopyAppearAnimIds = new List<int>
-                    {
-                        230,
-                        231,
-                        232,
-                        233,
-                        234,
-                        235,
-                        236,
-                        237,
-                        238,
-                        239,
-                        240,
-                    };
-                    List<int> toCopyIdleAnimIds = new List<int>
-                    {
-                        241,
-                        242,
-                        243,
-                        244,
-                    };
 
                     foreach (var sprite in data.foyerCardSprites)
                     {
@@ -448,39 +418,41 @@ namespace Alexandria.CharacterAPI
                     if (ToolsCharApi.EnableDebugLogging == true)
                         Debug.Log($"anchors done");
 
+                    var oDefs = orig.spriteDefinitions;
                     for (int i = 0; i < appearAnimIds.Count; i++)
                     {
-                        orig.spriteDefinitions[appearAnimIds[i]].position0 = i >= toCopyAppearAnimIds.Count || orig.spriteDefinitions[toCopyAppearAnimIds[i]] == null ? orig.spriteDefinitions[toCopyAppearAnimIds[9]].position0 : orig.spriteDefinitions[toCopyAppearAnimIds[i]].position0;
-                        orig.spriteDefinitions[appearAnimIds[i]].position1 = i >= toCopyAppearAnimIds.Count || orig.spriteDefinitions[toCopyAppearAnimIds[i]] == null ? orig.spriteDefinitions[toCopyAppearAnimIds[9]].position1 : orig.spriteDefinitions[toCopyAppearAnimIds[i]].position1;
-                        orig.spriteDefinitions[appearAnimIds[i]].position2 = i >= toCopyAppearAnimIds.Count || orig.spriteDefinitions[toCopyAppearAnimIds[i]] == null ? orig.spriteDefinitions[toCopyAppearAnimIds[9]].position2 : orig.spriteDefinitions[toCopyAppearAnimIds[i]].position2;
-                        orig.spriteDefinitions[appearAnimIds[i]].position3 = i >= toCopyAppearAnimIds.Count || orig.spriteDefinitions[toCopyAppearAnimIds[i]] == null ? orig.spriteDefinitions[toCopyAppearAnimIds[9]].position3 : orig.spriteDefinitions[toCopyAppearAnimIds[i]].position3;
+                        bool invalid = (i >= _ToCopyAppearAnimIds.Count || oDefs[_ToCopyAppearAnimIds[i]] == null);
+                        var def = oDefs[appearAnimIds[i]];
+                        var defToCopy = oDefs[_ToCopyAppearAnimIds[invalid ? 9 : i]];
+                        def.position0 = defToCopy.position0;
+                        def.position1 = defToCopy.position1;
+                        def.position2 = defToCopy.position2;
+                        def.position3 = defToCopy.position3;
                     }
                     if (ToolsCharApi.EnableDebugLogging == true)
                         Debug.Log($"appearAnimIds position0-3 done");
 
                     for (int i = 0; i < idleAnimIds.Count; i++)
                     {
-                        orig.spriteDefinitions[idleAnimIds[i]].position0 = i >= toCopyIdleAnimIds.Count || orig.spriteDefinitions[toCopyIdleAnimIds[i]] == null ? orig.spriteDefinitions[toCopyIdleAnimIds[3]].position0 : orig.spriteDefinitions[toCopyIdleAnimIds[i]].position0;
-                        orig.spriteDefinitions[idleAnimIds[i]].position1 = i >= toCopyIdleAnimIds.Count || orig.spriteDefinitions[toCopyIdleAnimIds[i]] == null ? orig.spriteDefinitions[toCopyIdleAnimIds[3]].position1 : orig.spriteDefinitions[toCopyIdleAnimIds[i]].position1;
-                        orig.spriteDefinitions[idleAnimIds[i]].position2 = i >= toCopyIdleAnimIds.Count || orig.spriteDefinitions[toCopyIdleAnimIds[i]] == null ? orig.spriteDefinitions[toCopyIdleAnimIds[3]].position2 : orig.spriteDefinitions[toCopyIdleAnimIds[i]].position2;
-                        orig.spriteDefinitions[idleAnimIds[i]].position3 = i >= toCopyIdleAnimIds.Count || orig.spriteDefinitions[toCopyIdleAnimIds[i]] == null ? orig.spriteDefinitions[toCopyIdleAnimIds[3]].position3 : orig.spriteDefinitions[toCopyIdleAnimIds[i]].position3;
+                        bool invalid = (i >= _ToCopyIdleAnimIds.Count || oDefs[_ToCopyIdleAnimIds[i]] == null);
+                        var def = oDefs[idleAnimIds[i]];
+                        var defToCopy = oDefs[_ToCopyIdleAnimIds[invalid ? 3 : i]];
+                        def.position0 = defToCopy.position0;
+                        def.position1 = defToCopy.position1;
+                        def.position2 = defToCopy.position2;
+                        def.position3 = defToCopy.position3;
                     }
                     if (ToolsCharApi.EnableDebugLogging == true)
                         Debug.Log($"idleAnimIds position0-3 done");
 
-                    facecard.gameObject.SetActive(true);
-                    facecard.spriteAnimator = facecard.gameObject.GetComponent<tk2dSpriteAnimator>();
+                    int oldLength = infoPanel.scaledSprites.Length;
+                    Array.Resize(ref infoPanel.scaledSprites, oldLength + 1);
+                    infoPanel.scaledSprites[oldLength] = facecard.spriteAnimator.sprite.GetComponent<tk2dSprite>();
 
-                    var listSp = new List<tk2dSprite>();
-                    listSp.AddRange(infoPanel.scaledSprites.ToList());
-                    listSp.Add(facecard.spriteAnimator.sprite.GetComponent<tk2dSprite>());
-                    infoPanel.scaledSprites = listSp.ToArray();
-
-                    SpriteBuilder.AddAnimation(facecard.spriteAnimator, orig, idleAnimIds, idleAnimName, tk2dSpriteAnimationClip.WrapMode.Loop).fps = 4;
-                    var name = SpriteBuilder.AddAnimation(facecard.spriteAnimator, orig, appearAnimIds, appearAnimName, tk2dSpriteAnimationClip.WrapMode.Once);
+                    SpriteBuilder.AddAnimation(facecard.spriteAnimator, orig, idleAnimIds, idleAnimName, tk2dSpriteAnimationClip.WrapMode.Loop, 4);
+                    SpriteBuilder.AddAnimation(facecard.spriteAnimator, orig, appearAnimIds, appearAnimName, tk2dSpriteAnimationClip.WrapMode.Once, 17);
                     if (ToolsCharApi.EnableDebugLogging == true)
                         Debug.Log($"anims added");
-                    name.fps = 17;
                     facecard.spriteAnimator.DefaultClipId = facecard.spriteAnimator.Library.GetClipIdByName(appearAnimName);
                     facecard.appearAnimation = appearAnimName;
                     facecard.coreIdleAnimation = idleAnimName;

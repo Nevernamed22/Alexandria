@@ -198,8 +198,8 @@ namespace Alexandria.CharacterAPI
                 }
             }
 
-
-            MakeSkinSwapper(customCharacter.First);
+            if (customCharacter.First.altObjSprite1 != null && customCharacter.First.altObjSprite2 != null)
+                MakeSkinSwapper(customCharacter.First);
             //DebugUtility.Print("    Added swapper");
 
             //Make interactable

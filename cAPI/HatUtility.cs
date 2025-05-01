@@ -195,6 +195,19 @@ namespace Alexandria.cAPI
                 Hatabase.ModdedEyeFrameOffsets[characterObjectName] = new();
         }
 
+        /// <summary>Set up default hat offsets for a custom character</summary>
+        /// <param name="player">
+        /// The PlayerController component of your custom character.
+        /// </param>
+        /// <param name="defaultHeadXOffset">Default head-top hat pixel x-offset for the character.</param>
+        /// <param name="defaultHeadYOffset">Default head-top hat pixel y-offset for the character.</param>
+        /// <param name="defaultEyeXOffset">Default eye-level hat pixel x-offset for the character.</param>
+        /// <param name="defaultEyeYOffset">Default eye-level hat pixel y-offset for the character.</param>
+        public static void SetupHatOffsets(this PlayerController player, int defaultHeadXOffset, int defaultHeadYOffset, int defaultEyeXOffset, int defaultEyeYOffset)
+        {
+            SetupHatOffsets(player.gameObject.name, defaultHeadXOffset, defaultHeadYOffset, defaultEyeXOffset, defaultEyeYOffset);
+        }
+
         /// <summary>Set up default flipped hat offsets for a custom character</summary>
         /// <param name="characterObjectName">
         /// The name of the player prefab, as accessed by `prefabObject.name`. Will usually be "PlayerXXXX(Clone)".
@@ -211,6 +224,19 @@ namespace Alexandria.cAPI
                 Hatabase.ModdedHeadFrameOffsets[characterObjectName] = new();
             if (!Hatabase.ModdedEyeFrameOffsets.ContainsKey(characterObjectName))
                 Hatabase.ModdedEyeFrameOffsets[characterObjectName] = new();
+        }
+
+        /// <summary>Set up default flipped hat offsets for a custom character</summary>
+        /// <param name="player">
+        /// The PlayerController component of your custom character.
+        /// </param>
+        /// <param name="defaultHeadXOffset">Default flipped head-top hat pixel x-offset for the character.</param>
+        /// <param name="defaultHeadYOffset">Default flipped head-top hat pixel y-offset for the character.</param>
+        /// <param name="defaultEyeXOffset">Default flipped eye-level hat pixel x-offset for the character.</param>
+        /// <param name="defaultEyeYOffset">Default flipped eye-level hat pixel y-offset for the character.</param>
+        public static void SetupFlippedHatOffsets(this PlayerController player, int defaultHeadXOffset, int defaultHeadYOffset, int defaultEyeXOffset, int defaultEyeYOffset)
+        {
+            SetupFlippedHatOffsets(player.gameObject.name, defaultHeadXOffset, defaultHeadYOffset, defaultEyeXOffset, defaultEyeYOffset);
         }
 
         /// <summary>Create additional frame-specific hat offsets for a custom character</summary>
@@ -232,9 +258,25 @@ namespace Alexandria.cAPI
                 new Hatabase.FrameOffset(eyeXOffset ?? headXOffset, eyeYOffset ?? headYOffset);
         }
 
+        /// <summary>Create additional frame-specific hat offsets for a custom character</summary>
+        /// <param name="player">
+        /// The PlayerController component of your custom character.
+        /// </param>
+        /// <param name="animationFrameName">
+        /// The name of the frame of animation whose offset should be adjusted.
+        /// </param>
+        /// <param name="headXOffset">Head-top hat pixel x-offset for the animation frame.</param>
+        /// <param name="headYOffset">Head-top hat pixel y-offset for the animation frame.</param>
+        /// <param name="eyeXOffset">Eye-level hat pixel x-offset for the animation frame.</param>
+        /// <param name="eyeYOffset">Eye-level hat pixel y-offset for the animation frame.</param>
+        public static void AddHatOffset(this PlayerController player, string animationFrameName, int headXOffset = 0, int headYOffset = 0, int? eyeXOffset = null, int? eyeYOffset = null)
+        {
+            AddHatOffset(player.gameObject.name, animationFrameName, headXOffset, headYOffset, eyeXOffset, eyeYOffset);
+        }
+
         private static readonly HashSet<string> _TempNames = new();
         /// <summary>
-        /// Print out a list of all unique base animation frames for a character that can be set by <see cref="AddHatOffset"/> to the console.
+        /// Print out a list of all unique base animation frames for a character that can be set by <see cref="AddHatOffset(PlayerController, string, int, int, int?, int?)"/> to the console.
         /// </summary>
         /// <param name="player">The PlayerController whose animation frames should be printed.></param>
         public static void PrintAnimationFramesForHats(PlayerController player)

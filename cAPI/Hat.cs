@@ -234,7 +234,7 @@ namespace Alexandria.cAPI
             if (hatDirectionality == HatDirectionality.NONE)
                 adjustedDir = HatDirection.SOUTH;
             else if (hatDirectionality == HatDirectionality.TWO_WAY_HORIZONTAL)
-                adjustedDir = hatOwner.sprite.FlipX ? HatDirection.WEST : HatDirection.EAST;
+                adjustedDir = (hatOwner && hatOwner.sprite.FlipX) ? HatDirection.WEST : HatDirection.EAST;
             else if (hatDirectionality == HatDirectionality.TWO_WAY_VERTICAL)
             {
                 if (targetDir == HatDirection.NORTHWEST || targetDir == HatDirection.NORTHEAST || targetDir == HatDirection.NORTH)
@@ -251,7 +251,14 @@ namespace Alexandria.cAPI
             }
 
             if (!hatSpriteAnimator) // can be null on very first frame of existence (potential problem with dynamically swapped hats)
+            {
                 hatSpriteAnimator = base.GetComponent<tk2dSpriteAnimator>();
+                if (!hatSpriteAnimator)
+                {
+                    Debug.LogWarning("Failed to get hat animator in UpdateHatFacingDirection(), this really shouldn't happen...");
+                    return;
+                }
+            }
             // pick the appropriate animation
             switch (adjustedDir)
             {
@@ -297,7 +304,7 @@ namespace Alexandria.cAPI
             if (!CachedSpriteDirections.TryGetValue(cachedDef.name, out HatDirection hatDir)) // Contains() is slow so cache the results as necessary
                 hatDir = CachedSpriteDirections[cachedDef.name] = GetBaseDirectionForSprite(cachedDef.name);
 
-            if (!hatOwner.sprite.FlipX)
+            if (!hatOwner || !hatOwner.sprite.FlipX)
                 return hatDir;
             if (hatDir == HatDirection.EAST)
                 return HatDirection.WEST;

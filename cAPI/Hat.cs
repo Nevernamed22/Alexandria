@@ -92,6 +92,21 @@ namespace Alexandria.cAPI
             HandleAttachedSpriteDepth();
         }
 
+        /// <summary>Make sure Paradox's hat offsets update when the underlying animation library changes.</summary>
+        [HarmonyPatch]
+        private static class CharacterAnimationRandomizerHandleAnimationCompletedSwapPatch
+        {
+            [HarmonyPatch(typeof(CharacterAnimationRandomizer), nameof(CharacterAnimationRandomizer.HandleAnimationCompletedSwap))]
+            static void Postfix(CharacterAnimationRandomizer __instance, tk2dSpriteAnimator arg1, tk2dSpriteAnimationClip arg2)
+            {
+                if (!__instance.m_player || !__instance.m_player.IsVisible || !__instance.m_animator || !__instance.m_animator.Library)
+                    return;
+                if (__instance.m_player.gameObject.GetComponent<HatController>() is not HatController hc || hc.CurrentHat is not Hat hat)
+                    return;
+                hat.DeterminePlayerSpecificOffsets();
+            }
+        }
+
         private void DeterminePlayerSpecificOffsets()
         {
             bool onEyes = (attachLevel == HatAttachLevel.EYE_LEVEL);

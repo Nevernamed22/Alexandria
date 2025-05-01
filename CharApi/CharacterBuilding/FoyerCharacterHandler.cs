@@ -312,24 +312,20 @@ namespace Alexandria.CharacterAPI
 
         private static void CreateOverheadCard(FoyerCharacterSelectFlag selectCharacter, CustomCharacterData data)
         {
+            System.Diagnostics.Stopwatch tempWatchWatch = System.Diagnostics.Stopwatch.StartNew();
             try
             {
-
                 if (selectCharacter.OverheadElement == null)
                 {
                     if (ToolsCharApi.EnableDebugLogging == true)
-                    {
                         ETGModConsole.Log($"CHR_{data.nameShort}Panel is null");
-                    }
                     return;
                 }
 
                 if (selectCharacter.OverheadElement?.name == $"CHR_{data.nameShort}Panel")
                 {
                     if (ToolsCharApi.EnableDebugLogging == true)
-                    {
                         ETGModConsole.Log($"CHR_{data.nameShort}Panel already exists");
-                    }
                     return;
                 }
 
@@ -337,18 +333,11 @@ namespace Alexandria.CharacterAPI
                 selectCharacter.ClearOverheadElement();
                 var theCauseOfMySuffering = FakePrefab.Clone(selectCharacter.OverheadElement.GetComponentInChildren<CharacterSelectFacecardIdleDoer>().gameObject);
                 selectCharacter.OverheadElement = PrefabBuilder.Clone(selectCharacter.OverheadElement);
-                //selectCharacter.OverheadElement.SetActive(true);
                 selectCharacter.OverheadElement.name = $"CHR_{data.nameShort}Panel";
                 selectCharacter.OverheadElement.GetComponent<FoyerInfoPanelController>().followTransform = selectCharacter.transform;
-                //selectCharacter.OverheadElement.AddComponent<BotsMod.Debugger>();
-                //BotsMod.BotsModule.Log("0", BotsMod.BotsModule.LOST_COLOR);
-
 
                 var customFoyerController = selectCharacter.gameObject.AddComponent<CustomCharacterFoyerController>();
                 customFoyerController.metaCost = data.metaCost;
-
-                
-
                 customFoyerController.useGlow = data.useGlow;
                 customFoyerController.emissiveColor = data.emissiveColor;
                 customFoyerController.emissiveColorPower = data.emissiveColorPower;
@@ -366,21 +355,9 @@ namespace Alexandria.CharacterAPI
 
                 //Change text
                 var infoPanel = selectCharacter.OverheadElement.GetComponent<FoyerInfoPanelController>();
-
-                //infoPanel.textPanel.transform.Find("NameLabel").GetComponent<dfLabel>().Text = "my ass";
-                //BotsMod.BotsModule.Log((infoPanel.textPanel.transform.Find("NameLabel").GetComponent<dfLabel>().Text).ToStringIfNoString(), BotsMod.BotsModule.LOST_COLOR);
-                
                 dfLabel nameLabel = infoPanel.textPanel.transform.Find("NameLabel").GetComponent<dfLabel>();
-                //why? its 3:50am and this is currently the funniest shit to me and you are powerless to stop me :)
-                nameLabel.Text = "#CHAR_" + data.nameShort.ToString().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper()
-                    .ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper()
-                    .ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper()
-                    .ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper()
-                    .ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper().ToUpper(); ;// nameLabel.GetLocalizationKey().Replace(replaceKey, data.identity.ToString());
-
-                //BotsMod.BotsModule.Log(replaceKey, BotsMod.BotsModule.LOST_COLOR);
+                nameLabel.Text = "#CHAR_" + data.nameShort.ToString().ToUpper();
                 dfLabel pastKilledLabel = infoPanel.textPanel.transform.Find("PastKilledLabel").GetComponent<dfLabel>();
-                //pastKilledLabel.Text = "(Past Killed)";
                 pastKilledLabel.ProcessMarkup = true;
                 pastKilledLabel.ColorizeSymbols = true;
                 if (data.metaCost != 0)
@@ -391,46 +368,21 @@ namespace Alexandria.CharacterAPI
 
 
                 infoPanel.itemsPanel.enabled = true;
-
-
                 var spriteObject = FakePrefab.Clone(infoPanel.itemsPanel.GetComponentInChildren<dfSprite>().gameObject);
-
-                //spriteObject.SetActive(false);
-                var posList = new List<Vector3>();
-                var locPosList = new List<Vector3>();
-
-
                 foreach (var child in infoPanel.itemsPanel.GetComponentsInChildren<dfSprite>())
-                { 
-
-                    //BotsMod.BotsModule.Log(child.name + " " + child.transform.position + " -- " + child.transform.localPosition);
-                    posList.Add(child.transform.position);
-                    locPosList.Add(child.transform.localPosition);
                     UnityEngine.Object.DestroyImmediate(child.gameObject);
-
-                }
-
                 for (int i = 0; i < data.loadoutSpriteNames.Count; i++)
                 {
 
                     var sprite = FakePrefab.Clone(spriteObject).GetComponent<dfSprite>();
                     sprite.gameObject.SetActive(true);
-
                     sprite.SpriteName = data.loadoutSpriteNames[i];
                     sprite.Size = new Vector2(data.loadoutSprites[i].width * 3, data.loadoutSprites[i].height * 3);
                     sprite.Atlas = GameUIRoot.Instance.ConversationBar.portraitSprite.Atlas;
-
-
                     sprite.transform.parent = infoPanel.itemsPanel.transform;
-
                     infoPanel.itemsPanel.Controls.Add(sprite);
-                    
-
                     sprite.transform.position = new Vector3(1 + ((i + 0.1f) * 0.1f), -((i + 0.1f) * 0.1f), 0);
                     sprite.transform.localPosition = new Vector3(((i + 0.1f) * 0.1f), 0, 0);
-
-                    //BotsMod.BotsModule.Log(data.loadoutSpriteNames[i] + sprite.transform.position + " -- " + sprite.transform.localPosition);
-
                 }
 
                 
@@ -438,14 +390,8 @@ namespace Alexandria.CharacterAPI
                 {
                     var facecard = selectCharacter.OverheadElement.GetComponentInChildren<CharacterSelectFacecardIdleDoer>();
                     theCauseOfMySuffering.transform.parent = facecard.transform.parent;
-                    
-                    //theCauseOfMySuffering.transform.localScale = new Vector3(1, 1, 1);
                     theCauseOfMySuffering.transform.localPosition = new Vector3(0, 1.687546f, 0.2250061f);
                     theCauseOfMySuffering.transform.parent.localPosition = new Vector3(0, 0, 0);
-                    
-                    //theCauseOfMySuffering.transform.parent.localScale = new Vector3(0.2f, 0.2f, 1);
-                    //theCauseOfMySuffering.transform.parent.localScale = new Vector3(0.1975309f, 0.1975309f, 1);
-
                     theCauseOfMySuffering.transform.parent.localScale *= 7;
 
                     facecard.gameObject.SetActive(false);
@@ -454,15 +400,11 @@ namespace Alexandria.CharacterAPI
                     facecard = theCauseOfMySuffering.GetComponent<CharacterSelectFacecardIdleDoer>();
                     facecard.gameObject.name = data.nameShort + " Sprite FaceCard";// <---------------- this object needs to be shrank
 
-
-                    //facecard.gameObject.transform.world
-
                     if (ToolsCharApi.EnableDebugLogging == true)
                     {
                         Debug.Log($"foyer cards arent null. {facecard.gameObject.transform.parent.position}");
                         Debug.Log($"foyer cards arent null. {facecard.gameObject.activeSelf}");
                     }
-
 
                     var orig = facecard.sprite.Collection;
 
@@ -497,20 +439,12 @@ namespace Alexandria.CharacterAPI
                     foreach (var sprite in data.foyerCardSprites)
                     {
                         if (sprite.name.ToLower().Contains("appear"))
-                        {
                             appearAnimIds.Add(SpriteHandler.AddSpriteToCollectionWithAnchor(sprite, orig, tk2dBaseSprite.Anchor.LowerCenter, $"{data.nameShort}_{sprite.name}"));
-                            
-                        }
                         else if (sprite.name.ToLower().Contains("idle"))
-                        {
                             idleAnimIds.Add(SpriteHandler.AddSpriteToCollectionWithAnchor(sprite, orig, tk2dBaseSprite.Anchor.LowerCenter, $"{data.nameShort}_{sprite.name}"));
-                        }
-                        //ETGModConsole.Log(sprite.name);
                     }
                     if (ToolsCharApi.EnableDebugLogging == true)
-                    {
                         Debug.Log($"anchors done");
-                    }
 
                     for (int i = 0; i < appearAnimIds.Count; i++)
                     {
@@ -518,70 +452,20 @@ namespace Alexandria.CharacterAPI
                         orig.spriteDefinitions[appearAnimIds[i]].position1 = i >= toCopyAppearAnimIds.Count || orig.spriteDefinitions[toCopyAppearAnimIds[i]] == null ? orig.spriteDefinitions[toCopyAppearAnimIds[9]].position1 : orig.spriteDefinitions[toCopyAppearAnimIds[i]].position1;
                         orig.spriteDefinitions[appearAnimIds[i]].position2 = i >= toCopyAppearAnimIds.Count || orig.spriteDefinitions[toCopyAppearAnimIds[i]] == null ? orig.spriteDefinitions[toCopyAppearAnimIds[9]].position2 : orig.spriteDefinitions[toCopyAppearAnimIds[i]].position2;
                         orig.spriteDefinitions[appearAnimIds[i]].position3 = i >= toCopyAppearAnimIds.Count || orig.spriteDefinitions[toCopyAppearAnimIds[i]] == null ? orig.spriteDefinitions[toCopyAppearAnimIds[9]].position3 : orig.spriteDefinitions[toCopyAppearAnimIds[i]].position3;
-
-                        /*
-                        var safeForLaterName = orig.spriteDefinitions[appearAnimIds[i]].name;
-                        var safeForLaterBoundsDataCenter = orig.spriteDefinitions[appearAnimIds[i]].boundsDataCenter;
-                        var safeForLaterBoundsDataExtents = orig.spriteDefinitions[appearAnimIds[i]].boundsDataExtents;
-                        var safeForLaterUntrimmedBoundsDataCenter = orig.spriteDefinitions[appearAnimIds[i]].untrimmedBoundsDataCenter;
-                        var safeForLaterUntrimmedBoundsDataExtents = orig.spriteDefinitions[appearAnimIds[i]].untrimmedBoundsDataExtents;
-                        var safeForLaterUv = orig.spriteDefinitions[appearAnimIds[i]].uvs;
-
-                        
-
-                        def.name = safeForLaterName;
-                        def.boundsDataCenter = safeForLaterBoundsDataCenter;
-                        def.boundsDataExtents = safeForLaterBoundsDataExtents;
-                        def.untrimmedBoundsDataCenter = safeForLaterUntrimmedBoundsDataCenter;
-                        def.untrimmedBoundsDataExtents = safeForLaterUntrimmedBoundsDataExtents;
-                        def.uvs = safeForLaterUv;
-
-                        orig.spriteDefinitions[appearAnimIds[i]] = def;*/
                     }
                     if (ToolsCharApi.EnableDebugLogging == true)
-                    {
                         Debug.Log($"appearAnimIds position0-3 done");
-                    }
 
                     for (int i = 0; i < idleAnimIds.Count; i++)
                     {
-
                         orig.spriteDefinitions[idleAnimIds[i]].position0 = i >= toCopyIdleAnimIds.Count || orig.spriteDefinitions[toCopyIdleAnimIds[i]] == null ? orig.spriteDefinitions[toCopyIdleAnimIds[3]].position0 : orig.spriteDefinitions[toCopyIdleAnimIds[i]].position0;
                         orig.spriteDefinitions[idleAnimIds[i]].position1 = i >= toCopyIdleAnimIds.Count || orig.spriteDefinitions[toCopyIdleAnimIds[i]] == null ? orig.spriteDefinitions[toCopyIdleAnimIds[3]].position1 : orig.spriteDefinitions[toCopyIdleAnimIds[i]].position1;
                         orig.spriteDefinitions[idleAnimIds[i]].position2 = i >= toCopyIdleAnimIds.Count || orig.spriteDefinitions[toCopyIdleAnimIds[i]] == null ? orig.spriteDefinitions[toCopyIdleAnimIds[3]].position2 : orig.spriteDefinitions[toCopyIdleAnimIds[i]].position2;
                         orig.spriteDefinitions[idleAnimIds[i]].position3 = i >= toCopyIdleAnimIds.Count || orig.spriteDefinitions[toCopyIdleAnimIds[i]] == null ? orig.spriteDefinitions[toCopyIdleAnimIds[3]].position3 : orig.spriteDefinitions[toCopyIdleAnimIds[i]].position3;
-
-                        /*
-                        var safeForLaterName = orig.spriteDefinitions[idleAnimIds[i]].name;
-                        var safeForLaterBoundsDataCenter = orig.spriteDefinitions[idleAnimIds[i]].boundsDataCenter;
-                        var safeForLaterBoundsDataExtents = orig.spriteDefinitions[idleAnimIds[i]].boundsDataExtents;
-                        var safeForLaterUntrimmedBoundsDataCenter = orig.spriteDefinitions[idleAnimIds[i]].untrimmedBoundsDataCenter;
-                        var safeForLaterUntrimmedBoundsDataExtents = orig.spriteDefinitions[idleAnimIds[i]].untrimmedBoundsDataExtents;
-                        var safeForLaterUv = orig.spriteDefinitions[idleAnimIds[i]].uvs;
-
-                       
-
-                        def.name = safeForLaterName;
-                        def.boundsDataCenter = safeForLaterBoundsDataCenter;
-                        def.boundsDataExtents = safeForLaterBoundsDataExtents;
-                        def.untrimmedBoundsDataCenter = safeForLaterUntrimmedBoundsDataCenter;
-                        def.untrimmedBoundsDataExtents = safeForLaterUntrimmedBoundsDataExtents;
-                        def.uvs = safeForLaterUv;
-
-                        orig.spriteDefinitions[idleAnimIds[i]] = def;*/
                     }
                     if (ToolsCharApi.EnableDebugLogging == true)
-                    {
                         Debug.Log($"idleAnimIds position0-3 done");
-                    }
 
-                    foreach (var def in orig.spriteDefinitions)
-                    {
-                        if (def.name.ToLower().Contains("appear") || def.name.ToLower().Contains("idle"))
-                        {
-                            //ETGModConsole.Log($"{def.name} [{orig.GetSpriteIdByName(def.name)}]: {def.position0} - {def.position1} - {def.position2} - {def.position3}");
-                        }
-                    }
                     facecard.gameObject.SetActive(true);
                     facecard.spriteAnimator = facecard.gameObject.GetComponent<tk2dSpriteAnimator>();
 
@@ -593,33 +477,22 @@ namespace Alexandria.CharacterAPI
                     SpriteBuilder.AddAnimation(facecard.spriteAnimator, orig, idleAnimIds, idleAnimName, tk2dSpriteAnimationClip.WrapMode.Loop).fps = 4;
                     var name = SpriteBuilder.AddAnimation(facecard.spriteAnimator, orig, appearAnimIds, appearAnimName, tk2dSpriteAnimationClip.WrapMode.Once);
                     if (ToolsCharApi.EnableDebugLogging == true)
-                    {
                         Debug.Log($"anims added");
-                    }
                     name.fps = 17;
                     facecard.spriteAnimator.DefaultClipId = facecard.spriteAnimator.Library.GetClipIdByName(appearAnimName);
-
-                    foreach(var anim in facecard.spriteAnimator.Library.clips)
-                    {
-                        //ETGModConsole.Log($"{anim.name}: {anim.frames.Length}");
-                    }
-                    
                     facecard.appearAnimation = appearAnimName;
                     facecard.coreIdleAnimation = idleAnimName;
+
                     if (ToolsCharApi.EnableDebugLogging == true)
-                    {
                         Debug.Log($"foyer card done");
-                    }
                 }
-
-                    //selectCharacter.CreateOverheadElement();
-
             }
 
             catch (Exception e)
             {
                 ETGModConsole.Log("Overhead setup code broke: " + e);
             }
+            tempWatchWatch.Stop(); System.Console.WriteLine($"    {tempWatchWatch.ElapsedMilliseconds,4}ms for setting up character {data.name}");
         }
 
         private static void OnPlayerCharacterChanged(PlayerController player, FoyerCharacterSelectFlag selectCharacter, string characterPath)

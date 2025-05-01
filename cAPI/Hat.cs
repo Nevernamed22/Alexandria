@@ -365,17 +365,19 @@ namespace Alexandria.cAPI
 
         private void HandleAttachedSpriteDepth()
         {
+            const float FRONT_DEPTH = 0.01f;
+            const float BACK_DEPTH = -0.6f;
             if (hatDepthType == HatDepthType.ALWAYS_IN_FRONT)
-                hatSprite.HeightOffGround = 0.1f;
+                hatSprite.HeightOffGround = FRONT_DEPTH;
             else if (hatDepthType == HatDepthType.ALWAYS_BEHIND)
-                hatSprite.HeightOffGround = -0.6f;
+                hatSprite.HeightOffGround = BACK_DEPTH;
             else
             {
                 bool facingBack = (currentDirection == HatDirection.NORTH || currentDirection == HatDirection.NORTHEAST || currentDirection == HatDirection.NORTHWEST);
                 if (hatDepthType == HatDepthType.BEHIND_WHEN_FACING_BACK)
-    			    hatSprite.HeightOffGround = facingBack ? -0.6f :  0.1f;
+    			    hatSprite.HeightOffGround = facingBack ? BACK_DEPTH :  FRONT_DEPTH;
                 else
-                    hatSprite.HeightOffGround = facingBack ?  0.1f : -0.6f;
+                    hatSprite.HeightOffGround = facingBack ?  FRONT_DEPTH : BACK_DEPTH;
             }
             hatSprite.UpdateZDepth();
         }

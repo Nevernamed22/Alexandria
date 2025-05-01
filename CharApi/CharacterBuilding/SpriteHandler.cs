@@ -321,34 +321,29 @@ namespace Alexandria.CharacterAPI
             if ((data.altSprites != null || data.altPlayerSheet != null) && string.IsNullOrEmpty(data.pathForAltSprites))
                 HandleAltAnimations(player, data);
 
-
-
-
-
             if ((data.sprites != null || data.playerSheet != null) && string.IsNullOrEmpty(data.pathForSprites))
                 HandleAnimations(player, data);
 
-            player.primaryHand.sprite.Collection = spr1 ?? data.collection;
-            player.secondaryHand.sprite.Collection = spr1 ?? data.collection;
-
-            if (data.altHandName != null)
+            if ((spr1 ?? data.collection) is tk2dSpriteCollectionData handCollection)
             {
-                player.altHandName  = data.altHandName;
+                player.primaryHand.sprite.Collection = handCollection;
+                player.secondaryHand.sprite.Collection = handCollection;
+                int handId = handCollection.GetSpriteIdByName("hand_001", -1);
+                if (handId >= 0)
+                {
+                    player.primaryHand.sprite.SetSprite(handId);
+                    player.secondaryHand.sprite.SetSprite(handId);
+                }
             }
 
-           
-            player.primaryHand.sprite.SetSprite(player.primaryHand.sprite.Collection.GetSpriteIdByName("hand_001"));
-            player.secondaryHand.sprite.SetSprite(player.secondaryHand.sprite.Collection.GetSpriteIdByName("hand_001"));
+            if (data.altHandName != null)
+                player.altHandName  = data.altHandName;
 
             if (d2 != null && spr2 != null)
                 SetupLitterallyEverythingPremade(player, spr2, d2, data, data.pathForAltSprites, true, assembly ?? Assembly.GetCallingAssembly());
-
-
             if (d1 != null && spr1 != null)
                 SetupLitterallyEverythingPremade(player, spr1, d1, data, data.pathForSprites, false, assembly ?? Assembly.GetCallingAssembly());
             
-
-
             //face card stuff
             uiAtlas = GameUIRoot.Instance.ConversationBar.portraitSprite.Atlas;
             if (data.faceCard != null)
@@ -360,7 +355,6 @@ namespace Alexandria.CharacterAPI
                 SetupLitterallyEverythingForPunchOut2(data);
             }
 
-
             if (data.loadoutSprites != null)
                 HandleLoudoutSprites(player, data);
 
@@ -371,10 +365,13 @@ namespace Alexandria.CharacterAPI
                 //ToolsCharApi.ExportTexture(ToolsCharApi.LoadAssetFromAnywhere<GameObject>("Ammonomicon Atlas").GetComponent<dfAtlas>().Texture.GetReadable(), "ihateyou", "YoumadeashitofpiecewithyourtrashMTG");
             }
 
-            Default_Punchout_Material = new Material(EnemyDatabase.GetOrLoadByName("GunNut").sprite.renderer.material);
-            Default_Punchout_Material.SetColor("_EmissiveColor", new Color32(0, 0, 0, 0));
-            Default_Punchout_Material.SetFloat("_EmissiveColorPower", 0f);
-            Default_Punchout_Material.SetFloat("_EmissivePower", 0);
+            if (Default_Punchout_Material == null)
+            {
+                Default_Punchout_Material = new Material(EnemyDatabase.GetOrLoadByName("GunNut").sprite.renderer.material);
+                Default_Punchout_Material.SetColor("_EmissiveColor", new Color32(0, 0, 0, 0));
+                Default_Punchout_Material.SetFloat("_EmissiveColorPower", 0f);
+                Default_Punchout_Material.SetFloat("_EmissivePower", 0);
+            }
         }
 
 

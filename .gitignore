@@ -360,3 +360,4 @@ local.props
 
 *.sublime-project
 *.sublime-workspace
+*.nupkg

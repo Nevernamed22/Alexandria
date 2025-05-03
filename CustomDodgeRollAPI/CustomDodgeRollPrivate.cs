@@ -12,6 +12,8 @@ namespace Alexandria.CustomDodgeRollAPI
         /// <summary>The last time a dodge roll input was buffered.</summary>
         internal float _bufferTime { get; set; }
 
+        private bool _isEnabledInternal = true;
+
         internal bool TryBeginDodgeRoll(Vector2 direction, bool buffered)
         {
             if (!canDodge || (_isDodging && !canMultidodge) || (!canDodgeInPlace && direction == Vector2.zero))

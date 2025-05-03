@@ -7,6 +7,7 @@ using System.Reflection;
 using System;
 using UnityEngine;
 using static PlayerController; // DodgeRollState
+using Priority = Alexandria.CustomDodgeRollAPI.CustomDodgeRoll.Priority;
 
 namespace Alexandria.CustomDodgeRollAPI
 {
@@ -109,6 +110,8 @@ namespace Alexandria.CustomDodgeRollAPI
         [HarmonyPrefix]
         private static void HandleDodgeRollBuffering(PlayerController __instance)
         {
+            if (GameManager.Instance.IsPaused || GameManager.Instance.IsLoadingLevel)
+                return;
             int pid = __instance.PlayerIDX;
             if (pid < 0)
                 return;
@@ -144,7 +147,12 @@ namespace Alexandria.CustomDodgeRollAPI
         /// <summary>Recompute active dodge roll items when the player's stats are recomputed.</summary>
         [HarmonyPatch(typeof(PlayerStats), nameof(PlayerStats.RecalculateStatsInternal))]
         [HarmonyPostfix]
-        private static void RecomputeActiveDodgeRoll(PlayerStats __instance, PlayerController owner)
+        private static void RecomputeActiveDodgeRollWhenStatsAreRecalculated(PlayerStats __instance, PlayerController owner)
+        {
+            RecomputeActiveDodgeRoll(owner);
+        }
+
+        internal static void RecomputeActiveDodgeRoll(PlayerController owner)
         {
             if (!owner)
                 return;
@@ -156,15 +164,48 @@ namespace Alexandria.CustomDodgeRollAPI
             CustomDodgeRollData data = _CustomDodgeRollData[pid];
             data._Overrides.Clear();
             data._BloodiedScarfActive = false;
+            Priority maxPriority = Priority.Low;
             foreach (PassiveItem p in owner.passiveItems)
             {
+                if (maxPriority == Priority.Exclusive)
+                    break;  // we're done looking if we have an exclusive item
                 if (p is BlinkPassiveItem) // bloodied scarf
-                    data._BloodiedScarfActive = true;
-                else if (p is CustomDodgeRollItem dri && dri.CustomDodgeRoll() is CustomDodgeRoll overrideDodgeRoll)
                 {
-                    data._Overrides.Add(overrideDodgeRoll);
-                    overrideDodgeRoll._owner = owner;
+                    if (maxPriority > Priority.Default)
+                        continue; // we already have a dodge roll with higher priority than Bloodied Scarf
+                    data._BloodiedScarfActive = true;
+                    if (maxPriority < Priority.Default)
+                        data._Overrides.Clear(); // clear existing overrides if they had lower priority than Blooded scarf
+                    maxPriority = Priority.Default; // set max priority to that of Bloodied Scarf
+                }
+                else if (p is CustomDodgeRollItem dri && dri.CustomDodgeRoll() is CustomDodgeRoll roll && roll.IsEnabled)
+                {
+                    Priority rollPriority = roll.priority;
+                    if (maxPriority > rollPriority)
+                        continue; // we already have a dodge roll with higher priority than this one
+                    if (maxPriority < rollPriority)
+                        data._Overrides.Clear(); // clear existing overrides if they had lower priority than the current dodge roll
+                    data._Overrides.Add(roll);
+                    roll._owner = owner;
                     data._BloodiedScarfActive = false; // bloodied scarf is active iff it's the last dodge roll modifier we picked up
+                    maxPriority = rollPriority; // set max priority to that of the current dodge roll
+                }
+            }
+            foreach (PlayerItem p in owner.activeItems)
+            {
+                if (maxPriority == Priority.Exclusive)
+                    break;  // we're done looking if we have an exclusive item
+                if (p is CustomDodgeRollActiveItem dri && dri.CustomDodgeRoll() is CustomDodgeRoll roll && roll.IsEnabled)
+                {
+                    Priority rollPriority = roll.priority;
+                    if (maxPriority > rollPriority)
+                        continue; // we already have a dodge roll with higher priority than this one
+                    if (maxPriority < rollPriority)
+                        data._Overrides.Clear(); // clear existing overrides if they had lower priority than the current dodge roll
+                    data._Overrides.Add(roll);
+                    roll._owner = owner;
+                    data._BloodiedScarfActive = false; // bloodied scarf is active iff it's the last dodge roll modifier we picked up
+                    maxPriority = rollPriority; // set max priority to that of the current dodge roll
                 }
             }
 

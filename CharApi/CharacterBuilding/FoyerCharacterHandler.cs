@@ -314,7 +314,7 @@ namespace Alexandria.CharacterAPI
         private static readonly List<int> _ToCopyAppearAnimIds = new List<int> { 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, };
         private static readonly List<int> _ToCopyIdleAnimIds = new List<int> { 241, 242, 243, 244, };
         private static readonly Vector3 _BasegameFacecardPosition = new Vector3(0, 1.687546f, 0.2250061f);
-        private static readonly Vector3 _FacecardScale = 6.5f * Vector3.one; // magic number determined through experimentation
+        private static readonly float _FacecardScaleFactor = 7f; // magic number determined through experimentation
 
         private static void CreateOverheadCard(FoyerCharacterSelectFlag selectCharacter, CustomCharacterData data)
         {
@@ -394,7 +394,7 @@ namespace Alexandria.CharacterAPI
                     facecard.spriteAnimator = facecard.gameObject.GetComponent<tk2dSpriteAnimator>();
                     facecard.transform.localPosition = _BasegameFacecardPosition;
                     facecard.transform.parent.localPosition = Vector3.zero;
-                    facecard.spriteAnimator.sprite.scale = _FacecardScale;
+                    facecard.transform.parent.localScale *= _FacecardScaleFactor;
 
                     if (ToolsCharApi.EnableDebugLogging == true)
                     {
@@ -445,9 +445,10 @@ namespace Alexandria.CharacterAPI
                     if (ToolsCharApi.EnableDebugLogging == true)
                         Debug.Log($"idleAnimIds position0-3 done");
 
-                    int oldLength = infoPanel.scaledSprites.Length;
-                    Array.Resize(ref infoPanel.scaledSprites, oldLength + 1);
-                    infoPanel.scaledSprites[oldLength] = facecard.spriteAnimator.sprite.GetComponent<tk2dSprite>();
+                    // NOTE: this doesn't seem to be needed any more after caching the prefab...maybe it's handled automatically somewhere...idk
+                    // int oldLength = infoPanel.scaledSprites.Length;
+                    // Array.Resize(ref infoPanel.scaledSprites, oldLength + 1);
+                    // infoPanel.scaledSprites[oldLength] = facecard.spriteAnimator.sprite.GetComponent<tk2dSprite>();
 
                     SpriteBuilder.AddAnimation(facecard.spriteAnimator, orig, idleAnimIds, idleAnimName, tk2dSpriteAnimationClip.WrapMode.Loop, 4);
                     SpriteBuilder.AddAnimation(facecard.spriteAnimator, orig, appearAnimIds, appearAnimName, tk2dSpriteAnimationClip.WrapMode.Once, 17);

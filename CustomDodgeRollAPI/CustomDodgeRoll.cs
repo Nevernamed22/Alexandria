@@ -6,6 +6,22 @@ namespace Alexandria.CustomDodgeRollAPI
     /// <summary>Public API surface for <see cref="CustomDodgeRoll"/></summary>
     public partial class CustomDodgeRoll : MonoBehaviour
     {
+        /// <summary>
+        /// Priority of the dodge roll, used to determine which custom dodge roll takes precedence when multiple custom dodge roll items are available.
+        /// When items are tied for the highest priority, active items take priority over passive items, then items picked up later take priority over items picked up earlier.
+        /// </summary>
+        public enum Priority
+        {
+            /// <summary>Lower priority than Default. Has less priority than the Bloodied Scarf.</summary>
+            Low,
+            /// <summary>The default priority with no special rules or exceptions. Has the same priority as the Bloodied Scarf.</summary>
+            Default,
+            /// <summary>Higher priority than Default. Has more priority than the Bloodied Scarf.</summary>
+            High,
+            /// <summary>Special priority intended for starter items. Higher than all other priorities. If multiple dodge roll items have Exclusive priority, the first one found in the inventory will always be used.</summary>
+            Exclusive,
+        };
+
         /// <summary>The PlayerController owner of this dodge roll.</summary>
         public PlayerController _owner  { get; internal set; }
         /// <summary>Whether <see cref="ContinueDodgeRoll()"/> is currently running.</summary>
@@ -46,7 +62,23 @@ namespace Alexandria.CustomDodgeRollAPI
         public virtual float fireReduction        => 0.5f;
         /// <summary>How many seconds in advance the dodge roll can be buffered. Set to 0 to disable buffering.</summary>
         public virtual float bufferWindow         => 0.0f;
+        /// <summary>The priority of this custom dodge roll, used to determine which dodge roll to use when multiple dodge roll items are available. See <see cref="CustomDodgeRoll.Priority"/>.</summary>
+        public virtual Priority priority          => Priority.Default;
 
+        /// <summary>Whether this dodge roll is currently enabled. If false, this dodge roll cannot be the active dodge roll.</summary>
+        public bool IsEnabled {
+            get {
+                return _isEnabledInternal;
+            }
+            set {
+                if (value == _isEnabledInternal)
+                    return;
+                _isEnabledInternal = value;
+                if (!_owner)
+                    _owner = base.gameObject.GetComponentInParent<PlayerController>();
+                CustomDodgeRollPatches.RecomputeActiveDodgeRoll(_owner);
+            }
+        }
 
         /// <summary>Called automatically when the player successfully begins the custom dodge roll.</summary>
         /// <param name="direction">The direction the player initiated the dodge roll in.</param>

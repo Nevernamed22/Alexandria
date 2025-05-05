@@ -103,6 +103,11 @@ namespace Alexandria.cAPI
 
     private static PrototypeDungeonRoom CreateEmptyLitHatRoom(int width, int height)
     {
+      // width and height of room must be even or door gets misplaced and symmetry gets messed up
+      if ((width % 2) == 1)
+        ++width;
+      if ((height % 2) == 1)
+        ++height;
       PrototypeDungeonRoom room = RoomFactory.GetNewPrototypeDungeonRoom(width, height);
       room.usesProceduralLighting = false;
       room.overrideRoomVisualType = 1; // 0 = stone, 1 = wood, 2 = brick

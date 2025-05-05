@@ -7,9 +7,10 @@ namespace Alexandria.NPCAPI
 {
     public static class NpcTools
     {
+        [Obsolete("This method has been obsoleted since NPCHooks.Init() is called directly in Module.cs; it exists for backwards compatability only.", false)]
         public static void Init()
         {
-            NPCHooks.Init();
+            // NPCHooks.Init();
         }
 
         public static void AddComplex(this StringDBTable stringdb, string key, string value)

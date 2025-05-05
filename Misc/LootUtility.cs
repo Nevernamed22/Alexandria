@@ -8,8 +8,6 @@ namespace Alexandria.Misc
 {
     public static class LootUtility
     {
-
-
         public static GameObject SelectByWeightNoExclusions(this GenericLootTable table, bool useSeedRandom = false)
         {
             int outIndex = -1;
@@ -18,23 +16,8 @@ namespace Alexandria.Misc
             for (int i = 0; i < table.defaultItemDrops.elements.Count; i++)
             {
                 WeightedGameObject weightedGameObject = table.defaultItemDrops.elements[i];
-                bool flag = true;
-                if (weightedGameObject.additionalPrerequisites != null)
-                {
-                    for (int j = 0; j < weightedGameObject.additionalPrerequisites.Length; j++)
-                    {
-
-                    }
-                }
-                if (weightedGameObject.gameObject != null)
-                {
-
-                }
-                if (flag)
-                {
-                    list.Add(weightedGameObject);
-                    num += weightedGameObject.weight;
-                }
+                list.Add(weightedGameObject);
+                num += weightedGameObject.weight;
             }
             float num2 = ((!useSeedRandom) ? UnityEngine.Random.value : BraveRandom.GenerationRandomValue()) * num;
             float num3 = 0f;

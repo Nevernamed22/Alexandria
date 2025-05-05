@@ -19,7 +19,15 @@ namespace Alexandria.Misc
         /// <summary>Convenience method for calling an internal / private static function with an ILCursor</summary>
         internal static void CallPrivate(this ILCursor cursor, Type t, string name)
         {
-          cursor.Emit(OpCodes.Call, t.GetMethod(name, BindingFlags.Static | BindingFlags.NonPublic));
+            cursor.Emit(OpCodes.Call, t.GetMethod(name, BindingFlags.Static | BindingFlags.NonPublic));
+        }
+
+        /// <summary>Declare a local variable in an ILManipulator</summary>
+        public static VariableDefinition DeclareLocal<T>(this ILContext il)
+        {
+            VariableDefinition v = new VariableDefinition(il.Import(typeof(T)));
+            il.Body.Variables.Add(v);
+            return v;
         }
 
         internal static void MakeOffset(this tk2dSpriteDefinition def, Vector3 offset, bool changesCollider = false)

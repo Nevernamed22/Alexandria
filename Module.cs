@@ -71,8 +71,6 @@ namespace Alexandria
                 AmmoPickupFixer.Init();
                 LabelablePlayerItemSetup.InitLabelHookInternal();
                 MasteryOverrideHandler.InitInternal();
-                RoomRewardAPI.Init();
-
 
                 //Character API
                 CharacterAPI.Hooks.Init();

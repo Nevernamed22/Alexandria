@@ -267,7 +267,6 @@ namespace Alexandria.CharacterAPI
 
         private static readonly Rect _NullRect = new Rect(0f, 0f, 0f, 0f);
 
-        //WARNING: there might be off-by-one errors littered throughout this function, so keep an eye on it
         /// <summary>
         /// Gets the first empty space in <paramref name="atlas"/> that has at least the size of <paramref name="pixelScale"/>.
         /// </summary>
@@ -307,11 +306,14 @@ namespace Alexandria.CharacterAPI
             // split the free rectangle into two, preferring tall rectangles to wide rectangles
             RectInt bestFreeRect = bestNode.Value;
             freeRects.Remove(bestNode);
+            //NOTE: rectangle widths and heights are calculated as the distance between their bounds, so, e.g., a 6x4 pixel region has a width of 5 and height of 3
+            //      this requires being very careful with off by one errors, and ignoring the right and bottom borders of a RectInt for the purpose of free rectangle
+            //      calculation. this is why free rects are added at xMax / yMax instead of xMax + 1 / yMax + 1
             RectInt currentRect = new RectInt(bestFreeRect.x, bestFreeRect.y, neededWidth, neededHeight);
             if (bestFreeRect.width > neededWidth)
-                freeRects.AddLast(new RectInt(currentRect.xMax + 1, bestFreeRect.yMin, bestFreeRect.width - neededWidth, bestFreeRect.height));
+                freeRects.AddLast(new RectInt(currentRect.xMax, bestFreeRect.yMin, bestFreeRect.width - neededWidth, bestFreeRect.height));
             if (bestFreeRect.height > neededHeight)
-                freeRects.AddLast(new RectInt(bestFreeRect.xMin, currentRect.yMax + 1, neededWidth, bestFreeRect.height - neededHeight));
+                freeRects.AddLast(new RectInt(bestFreeRect.xMin, currentRect.yMax, neededWidth, bestFreeRect.height - neededHeight));
             return new Rect((float)currentRect.x / tw, (float)currentRect.y / th, (float)currentRect.width / tw, (float)currentRect.height / th);
         }
 

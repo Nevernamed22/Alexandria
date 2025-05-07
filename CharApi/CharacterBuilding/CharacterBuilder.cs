@@ -467,22 +467,20 @@ namespace Alexandria.CharacterAPI
 
         public static void StripPlayer(PlayerController player)
         {
-            List<int> starters = player.startingPassiveItemIds; //remove all the starter passives
-            foreach (int passiveid in starters)
-            {
-                player.RemovePassiveItem(passiveid);
-            }
+            if (player.passiveItems != null)
+                player.RemoveAllPassiveItems();
             player.passiveItems = new List<PassiveItem>();
             player.startingPassiveItemIds = new List<int>();
-            player.RemoveAllPassiveItems(); //removes all passives except starters
+
+            if (player.activeItems != null)
+                player.RemoveAllActiveItems();
+            player.activeItems = new List<PlayerItem>();
+            player.startingActiveItemIds = new List<int>();
 
             if (player.inventory != null)
-                player.inventory.DestroyAllGuns(); //clear guns
+                player.inventory.DestroyAllGuns();
             player.startingGunIds = new List<int>();
             player.startingAlternateGunIds = new List<int>();
-
-            player.activeItems.Clear(); //clear actives
-            player.startingActiveItemIds = new List<int>();
         }
 
         public static void HandleStats(PlayerController player, Dictionary<PlayerStats.StatType, float> stats)

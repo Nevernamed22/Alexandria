@@ -220,12 +220,15 @@ namespace Alexandria.cAPI
                 return true;
             if(!hatOwnerAnimator || hatOwnerAnimator.CurrentClip.name == "doorway" || hatOwnerAnimator.CurrentClip.name == "spinfall")
                 return true;
-            if (hatOwner.HasPickupID(436)) // 436 == Bloodied Scarf
-                return true;
             if ((hatRollReaction == HatRollReaction.VANISH) && hatOwner.IsDodgeRolling)
                 return true;
             if (hatOwner.IsSlidingOverSurface)
                 return true;
+            List<PassiveItem> passives = hatOwner.passiveItems;
+            if (passives != null)
+                for (int i = passives.Count - 1; i >= 0; --i)
+                    if (passives[i].PickupObjectId == 436) // 436 == Bloodied Scarf
+                        return true;
             return false;
         }
 

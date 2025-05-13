@@ -145,6 +145,7 @@ namespace Alexandria.cAPI
         {
             Hat hat = UnityEngine.Object.Instantiate(new GameObject()).AddComponent<Hat>();
             UnityEngine.Object.DontDestroyOnLoad(hat.gameObject);
+            FakePrefab.MarkAsFakePrefab(hat.gameObject);
 
             hat.hatName = name;
             hat.hatOffset = 0.0625f * ((pixelOffset ?? IntVector2.Zero).ToVector2());
@@ -174,6 +175,7 @@ namespace Alexandria.cAPI
             if (spritePaths != null) // if sprites aren't set up here, hat is unusable until calling SetupHatSprites() manually later
                 hat.SetupHatSprites(spritePaths: spritePaths, fps: fps, callingASM: Assembly.GetCallingAssembly());
 
+            hat.gameObject.SetActive(false);
             return hat;
         }
 

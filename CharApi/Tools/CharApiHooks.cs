@@ -2061,7 +2061,7 @@ namespace Alexandria.CharacterAPI
         //Used to add in strings 
         public static string DFGetLocalizedValue(Func<dfControl, string, string> orig, dfControl self, string key)
         {
-            if (StringHandler.customStringDictionary.TryGetValue(key.ToLower(), out string val))
+            if (StringHandler.customStringDictionary.TryGetValue(key, out string val))
                 return val;
             return orig(self, key);
         }

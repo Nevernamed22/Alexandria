@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 
-using UnityEngine;
 namespace Alexandria.CharacterAPI
 {
     //This basically does nothing
@@ -21,9 +20,8 @@ namespace Alexandria.CharacterAPI
 
         public static void AddDFStringDefinition(string key, string value)
         {
-            string lowerKey = key.ToLower();
-            if (!customStringDictionary.ContainsKey(lowerKey))
-                customStringDictionary.Add(lowerKey, value);
+            if (!customStringDictionary.ContainsKey(key))
+                customStringDictionary.Add(key, value);
         }
     }
 }

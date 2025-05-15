@@ -20,7 +20,9 @@ namespace Alexandria.EnemyAPI
         public static void Init()
         {
             var actor = EnemyDatabase.GetOrLoadByGuid("f905765488874846b7ff257ff81d6d0c");
+            actor.gameObject.SetActive(false); // temporarily deactivate so instantiating doesn't call Awake() on everything
             behaviorSpeculatorPrefab = GameObject.Instantiate(actor.gameObject);
+            actor.gameObject.SetActive(true);
 
             foreach (Transform child in behaviorSpeculatorPrefab.transform)
             {

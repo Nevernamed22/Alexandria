@@ -144,7 +144,6 @@ namespace Alexandria.ItemAPI
         /// </summary>
         public static Texture2D GetTextureFromResource(string resourceName, Assembly assembly = null)
         {          
-
             byte[] bytes = ExtractEmbeddedResource(resourceName, assembly ?? Assembly.GetCallingAssembly());
             if (bytes == null)
             {

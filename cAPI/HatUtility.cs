@@ -327,6 +327,7 @@ namespace Alexandria.cAPI
             bool usingDefs = (spriteDefs != null);
 
             GameObject hatObj = hat.gameObject;
+            hatObj.SetActive(true);
 
             HatSpriteCollection ??= SpriteBuilder.ConstructCollection(new GameObject(), "HatCollection");
             callingASM ??= Assembly.GetCallingAssembly();
@@ -407,6 +408,7 @@ namespace Alexandria.cAPI
 
             // add the hat to the Hatabase
             AddHatToDatabase(hat);
+            hatObj.SetActive(false);
         }
 
         private static bool AddHatAnimation(this tk2dSpriteAnimation animation, string animName, List<string> spriteNames, int fps,

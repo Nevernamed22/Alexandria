@@ -490,5 +490,19 @@ namespace Alexandria.Misc
             string[] resources = ResourceExtractor.GetResourceNames(assembly);
             return _SortedResourcesByAssembly[assemblyName] = resources.OrderBy(x => x).ToList();
         }
+
+        internal static int AddSpriteToCollection(tk2dSpriteDefinition spriteDefinition, tk2dSpriteCollectionData collection)
+        {
+            //Add definition to collection
+            int nextIndex = collection.spriteDefinitions.Length;
+            Array.Resize(ref collection.spriteDefinitions, nextIndex + 1);
+            collection.spriteDefinitions[nextIndex] = spriteDefinition;
+            //Reset lookup dictionary
+            if (collection.spriteNameLookupDict == null)
+                collection.InitDictionary();
+            else
+                collection.spriteNameLookupDict[spriteDefinition.name] = nextIndex;
+            return nextIndex;
+        }
     }
 }

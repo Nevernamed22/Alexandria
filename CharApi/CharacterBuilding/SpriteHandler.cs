@@ -1720,17 +1720,7 @@ namespace Alexandria.CharacterAPI
 
         public static int AddSpriteToCollection(tk2dSpriteDefinition spriteDefinition, tk2dSpriteCollectionData collection)
         {
-            //Add definition to collection
-            var defs = collection.spriteDefinitions;
-            var newDefs = defs.Concat(new tk2dSpriteDefinition[] { spriteDefinition }).ToArray();
-            collection.spriteDefinitions = newDefs;
-
-            //Reset lookup dictionary
-            if (collection.spriteNameLookupDict == null)
-                collection.InitDictionary();
-            else
-                collection.spriteNameLookupDict[spriteDefinition.name] = newDefs.Length - 1;
-            return newDefs.Length - 1;
+            return Shared.AddSpriteToCollection(spriteDefinition, collection);
         }
     }
 

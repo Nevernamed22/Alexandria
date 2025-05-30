@@ -26,9 +26,10 @@ namespace Alexandria.Misc
             uic.GunAmmoCountLabel.AutoHeight = true; // enable multiline text
             uic.GunAmmoCountLabel.ProcessMarkup = true; // enable multicolor text
 
-            if (uic.m_cachedGun && uic.m_cachedGun.GetComponent<CustomAmmoDisplay>())
-              return true; // our custom ammo overrides already account for positioning weirdness, so don't adjust if our last gun had an override
-                           // NOTE: without this, ammo displays for guns that toggle infinite ammo (e.g., with magazine rack) shift slowly offscreen
+            //NOTE: this workaround has been obsoleted by the uic.m_cachedMaxAmmo != int.MaxValue check below
+            // if (uic.m_cachedGun && uic.m_cachedGun.GetComponent<CustomAmmoDisplay>())
+            //   return true; // our custom ammo overrides already account for positioning weirdness, so don't adjust if our last gun had an override
+            //                // NOTE: without this, ammo displays for guns that toggle infinite ammo (e.g., with magazine rack) shift slowly offscreen
 
             // Need to do some vanilla postprocessing to make sure label alignment doesn't get all screwed up
             Gun currentGun = guns.CurrentGun;
@@ -39,13 +40,10 @@ namespace Alexandria.Misc
             }
             else if (currentGun.InfiniteAmmo)
             {
-              if (!uic.IsLeftAligned && (!uic.m_cachedGun || !uic.m_cachedGun.InfiniteAmmo))
+              //NOTE: when currentGun and uic.m_cachedGun are the same, the old version of this caused leftward drift when toggling infinite ammo
+              //      (e.g., when using Magazine Rack or switching between projectile types in the same gun)
+              if (!uic.IsLeftAligned && (!uic.m_cachedGun || uic.m_cachedMaxAmmo != int.MaxValue /*!uic.m_cachedGun.InfiniteAmmo*/))
                 uic.GunAmmoCountLabel.RelativePosition += new Vector3(-3f, 0f, 0f);
-            }
-            else if (currentGun.AdjustedMaxAmmo > 0)
-            {
-              if (!uic.IsLeftAligned && uic.m_cachedMaxAmmo == int.MaxValue)
-                uic.GunAmmoCountLabel.RelativePosition += new Vector3(3f, 0f, 0f);
             }
             else
             {

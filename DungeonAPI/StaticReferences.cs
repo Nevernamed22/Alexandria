@@ -306,7 +306,12 @@ namespace Alexandria.DungeonAPI
             RoomTables.Add("synergrace", ProcessRoomTableThing(StaticInjections.NPC_injections, StaticInjections.NPC_injections.InjectionData[4]).roomTable);
 
             StaticInjections.Black_Market_injections = LoadHelper.LoadAssetFromAnywhere<SharedInjectionData>("black market injection data");
+
+            ETGModConsole.Log(StaticInjections.Black_Market_injections.AttachedInjectionData.Count);
             RoomTables.Add("black_market", ProcessRoomTableThing(StaticInjections.Black_Market_injections, StaticInjections.Black_Market_injections.InjectionData[0]).roomTable);
+
+            var room =  LoadHelper.LoadAssetFromAnywhere<PrototypeDungeonRoom>("Shrine_DemonFace_Room");
+            room.requiredInjectionData = StaticInjections.Black_Market_injections;
 
             StaticInjections.Miniboss_injections = LoadHelper.LoadAssetFromAnywhere<SharedInjectionData>("phantom agunim injection data");
             RoomTables.Add("fuselier", ProcessRoomTableThing(StaticInjections.Miniboss_injections, StaticInjections.Miniboss_injections.InjectionData[2]).roomTable);
@@ -402,19 +407,27 @@ namespace Alexandria.DungeonAPI
             return newTable;
 
         }
-        private static GenericRoomTable ConvertRoomIntoNewRoomTable(ProceduralFlowModifierData roomTableToAddTo, GenericRoomTable roomTableToPullFrom, int entry)
+        private static GenericRoomTable ConvertRoomIntoNewRoomTable(ProceduralFlowModifierData roomTableToAddTo, GenericRoomTable roomTableToPullFrom, int entry, bool debug  = false)
         {
             var roomEntry = roomTableToPullFrom.includedRooms.elements[entry];
-            if (DebugSpawns == true)
+
+            if (DebugSpawns == true || debug == true)
             {
                 roomTableToAddTo.chanceToLock = 0;
                 roomTableToAddTo.chanceToSpawn = 1;
                 roomTableToAddTo.selectionWeight = 1;
+
                 roomTableToAddTo.prerequisites = new DungeonPrerequisite[0];
                 roomTableToAddTo.OncePerRun = false;
                 roomTableToAddTo.RequiresMasteryToken = false;
                 roomTableToAddTo.DEBUG_FORCE_SPAWN = true;
+                roomTableToAddTo.RandomNodeChildMinDistanceFromEntrance = 0;
+                roomTableToAddTo.IsWarpWing = false;
+                roomTableToAddTo.placementRules = new List<ProceduralFlowModifierData.FlowModifierPlacementType>() { ProceduralFlowModifierData.FlowModifierPlacementType.BEFORE_ANY_COMBAT_ROOM };
             }
+
+
+
             var newTable = ScriptableObject.CreateInstance<GenericRoomTable>();
             newTable.includedRoomTables = new List<GenericRoomTable>() { };
             newTable.includedRooms = new WeightedRoomCollection()
@@ -471,14 +484,15 @@ namespace Alexandria.DungeonAPI
 
         private static ProceduralFlowModifierData ProcessRoomTableThing(SharedInjectionData shared , ProceduralFlowModifierData data, float defaultWeight = 1, bool debug = false)
         {
+
             ProceduralFlowModifierData modifierData = new ProceduralFlowModifierData()
             {
                 annotation = data.annotation,
                 CanBeForcedSecret = data.CanBeForcedSecret,
-                chanceToLock = DebugSpawns == true ? 0 : data.chanceToLock,
-                chanceToSpawn = DebugSpawns == true ? 1 : data.chanceToSpawn,
-                selectionWeight = DebugSpawns == true ? 1 : data.selectionWeight,
-                DEBUG_FORCE_SPAWN = DebugSpawns == true ? true : data.DEBUG_FORCE_SPAWN,
+                chanceToLock = DebugSpawns == true || debug ? 0 : data.chanceToLock,
+                chanceToSpawn = DebugSpawns == true || debug == true ? 1 : data.chanceToSpawn,
+                selectionWeight = DebugSpawns == true || debug == true ? 1 : data.selectionWeight,
+                DEBUG_FORCE_SPAWN = DebugSpawns == true || debug == true ? true : data.DEBUG_FORCE_SPAWN,
                 exactRoom = null,
                 exactSecondaryRoom = data.exactSecondaryRoom,
                 framedCombatNodes = data.framedCombatNodes,
@@ -486,7 +500,7 @@ namespace Alexandria.DungeonAPI
                 OncePerRun = DebugSpawns == true ? false : data.OncePerRun,
                 placementRules = data.placementRules,
                 prerequisites = DebugSpawns == true ? new DungeonPrerequisite[0]: data.prerequisites.ToArray(),       
-                RandomNodeChildMinDistanceFromEntrance = data.RandomNodeChildMinDistanceFromEntrance,
+                RandomNodeChildMinDistanceFromEntrance = DebugSpawns == true ? 0 : data.RandomNodeChildMinDistanceFromEntrance,
                 RequiredValidPlaceable = data.RequiredValidPlaceable,
                 RequiresMasteryToken = DebugSpawns == true ? false : data.RequiresMasteryToken,
                 
@@ -510,7 +524,7 @@ namespace Alexandria.DungeonAPI
 
             modifierData.roomTable.includedRooms = new WeightedRoomCollection()
             {
-                elements = new()
+                elements = new ()
                 {
                     new WeightedRoom()
                     {
@@ -525,7 +539,6 @@ namespace Alexandria.DungeonAPI
 
             data.chanceToSpawn = 0;
             data.selectionWeight = 0;
-
             shared.InjectionData.Add(modifierData);
             return modifierData;
         }

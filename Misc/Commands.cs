@@ -147,7 +147,46 @@ namespace Alexandria.Misc
                 GameManager.Instance.QuickRestart();
             });
             ETGModConsole.CommandDescriptions.Add("alexandria forceresetrun", "Forcefully restarts the players run. Only to be used in softlock situations.");
+
+
+
+            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("clearallprojectiles", (args) =>
+            {
+                StaticReferenceManager.DestroyAllProjectiles();
+                ETGModConsole.Log(UnityEngine.Random.value < 0.05f ? "Only A Simple Memory Remains." : "Cleared All Projectiles!");
+            });
+            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("clearenemyprojectiles", (args) =>
+            {
+                StaticReferenceManager.DestroyAllEnemyProjectiles();
+                ETGModConsole.Log(UnityEngine.Random.value < 0.05f ? "*poof*" : "Cleared All Enemy Projectiles!");
+
+            });
+            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("clearplayerprojectiles", (args) =>
+            {
+                List<Projectile> list = new List<Projectile>();
+                for (int i = 0; i < StaticReferenceManager.m_allProjectiles.Count; i++)
+                {
+                    Projectile projectile = StaticReferenceManager.m_allProjectiles[i];
+                    if (projectile)
+                    {
+                        if (!(projectile.Owner is AIActor))
+                        {
+                            if (projectile.collidesWithEnemies || projectile.Owner is PlayerController)
+                            {
+                                list.Add(projectile);
+                            }
+                        }
+                    }
+                }
+                for (int j = 0; j < list.Count; j++)
+                {
+                    list[j].DieInAir(false, false, true, false);
+                }
+                ETGModConsole.Log(UnityEngine.Random.value < 0.05f ? "LIKE IT WAS NEVER THERE." : "Cleared All Player Projectiles!");
+            });
         }
+
+
 
         public static void StoredObject(string level, bool ignoreDictionary)
         {

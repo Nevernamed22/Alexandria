@@ -167,18 +167,13 @@ namespace Alexandria.Misc
                 for (int i = 0; i < StaticReferenceManager.m_allProjectiles.Count; i++)
                 {
                     Projectile projectile = StaticReferenceManager.m_allProjectiles[i];
-                    if (projectile)
+                    if (projectile != null)
                     {
-                        if (!(projectile.Owner is AIActor))
-                        {
-                            if (projectile.collidesWithEnemies || projectile.Owner is PlayerController)
-                            {
-                                list.Add(projectile);
-                            }
-                        }
+                        if (projectile.Owner != null && projectile.Owner is PlayerController)
+                            list.Add(projectile);
                     }
                 }
-                for (int j = 0; j < list.Count; j++)
+                for (int j = list.Count - 1; j > -1; j--)
                 {
                     list[j].DieInAir(false, false, true, false);
                 }

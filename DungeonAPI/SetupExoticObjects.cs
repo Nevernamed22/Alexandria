@@ -844,9 +844,10 @@ namespace Alexandria.DungeonAPI
 
 			SetupExoticObjects.BulletPast_PitfallTrap = dungeon9.PatternSettings.flows[0].AllNodes[3].overrideExactRoom.placedObjects[1].nonenemyBehaviour.gameObject;
 
-            SetupExoticObjects.MouseTrap_North = EnemyDatabase.GetOrLoadByGuid("6868795625bd46f3ae3e4377adce288b").GetComponent<ResourcefulRatController>().MouseTraps[0];
-            SetupExoticObjects.MouseTrap_East = EnemyDatabase.GetOrLoadByGuid("6868795625bd46f3ae3e4377adce288b").GetComponent<ResourcefulRatController>().MouseTraps[1];
-            SetupExoticObjects.MouseTrap_West = EnemyDatabase.GetOrLoadByGuid("6868795625bd46f3ae3e4377adce288b").GetComponent<ResourcefulRatController>().MouseTraps[2];
+			var rat = EnemyDatabase.GetOrLoadByGuid("6868795625bd46f3ae3e4377adce288b").GetComponent<ResourcefulRatController>();
+            SetupExoticObjects.MouseTrap_North = rat.MouseTraps[0];
+            SetupExoticObjects.MouseTrap_East = rat.MouseTraps[1];
+            SetupExoticObjects.MouseTrap_West = rat.MouseTraps[2];
 
 
             SetupExoticObjects.Spinning_Log_Horizontal = ((DungeonPlaceable)BraveResources.Load("RobotDaveTraps", ".asset")).variantTiers[5].nonDatabasePlaceable;
@@ -867,6 +868,31 @@ namespace Alexandria.DungeonAPI
 
 			SetupExoticObjects.Sewer_Entrance = orLoadByName.PatternSettings.flows[0].sharedInjectionData[1].InjectionData[0].exactRoom.placedObjects[0].nonenemyBehaviour.gameObject;
             SetupExoticObjects.Sewer_Entrace_Angry_Button = orLoadByName.PatternSettings.flows[0].sharedInjectionData[1].InjectionData[0].exactRoom.placedObjects[1].nonenemyBehaviour.gameObject;
+			/*
+            foreach (var entry in orLoadByName2.PatternSettings.flows[0].sharedInjectionData[1].InjectionData)
+			{
+				ETGModConsole.Log("=====");
+				ETGModConsole.Log(entry.exactRoom != null ? entry.exactRoom.name : "nullName");
+				if (entry.exactRoom != null)
+				{
+                    int i = 0;
+                    foreach (var entry_2 in entry.exactRoom.placedObjects)
+					{
+						if (entry_2.nonenemyBehaviour != null)
+						{
+                            ETGModConsole.Log($"{entry_2.nonenemyBehaviour.name} | {i}");
+                        }
+                        i++;
+					}
+
+                }
+                ETGModConsole.Log("=====");
+            }
+			*/
+            //CryoCathedralButton
+            SetupExoticObjects.Abbey_Entrace_Angry_Button = orLoadByName2.PatternSettings.flows[0].sharedInjectionData[1].InjectionData[0].exactRoom.placedObjects[7].nonenemyBehaviour.gameObject;
+
+
             SetupExoticObjects.Keep_Fireplace = LoadHelper.LoadAssetFromAnywhere<GameObject>("fireplace");
 
 			SetupExoticObjects.Moving_Platform_Proper = LoadHelper.LoadAssetFromAnywhere<GameObject>("default_platform_3x3");
@@ -1257,6 +1283,10 @@ namespace Alexandria.DungeonAPI
                 {
                     "Sewer_Entrace_Angry_Button",
                     SetupExoticObjects.Sewer_Entrace_Angry_Button
+                },
+                {
+                    "Abbey_Entrace_Angry_Button",
+                    SetupExoticObjects.Abbey_Entrace_Angry_Button
                 },
                 {
                     "Sewer_Entrance",
@@ -2521,6 +2551,10 @@ namespace Alexandria.DungeonAPI
 
         public static GameObject Sewer_Entrance;
         public static GameObject Sewer_Entrace_Angry_Button;
+
+        public static GameObject Abbey_Entrace_Angry_Button;
+
+
         public static GameObject Keep_Fireplace;
 
         public static GameObject Moving_Platform_Proper;

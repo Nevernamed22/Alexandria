@@ -133,14 +133,14 @@ namespace Alexandria.Misc
             ETGModConsole.CommandDescriptions.Add("alexandria showhitboxes", "Shows the hitboxes of nearby SpeculativeRigidbodies.");
 
 
-            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("spawnobject_custom", x => { if (x.Length <= 0) { DebugUtility.Log("No Object Given!"); return; } ObjectCheck(x[0], false); }, ETGModConsole.AutocompletionFromCollectionGetter(() => DungeonAPI.StaticReferences.customObjects.Keys));
-            ETGModConsole.CommandDescriptions.Add("alexandria spawnobject_custom", "Spawns a given gameObject from Alexandrias StaticReferences.customObjects list.");
+            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("spawnobjectcustom", x => { if (x.Length <= 0) { DebugUtility.Log("No Object Given!"); return; } ObjectCheck(x[0], false); }, ETGModConsole.AutocompletionFromCollectionGetter(() => DungeonAPI.StaticReferences.customObjects.Keys));
+            ETGModConsole.CommandDescriptions.Add("alexandria spawnobjectcustom", "Spawns a given gameObject from Alexandrias StaticReferences.customObjects list.");
 
-            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("spawnplaceable_custom", x => { if (x.Length <= 0) { DebugUtility.Log("No Placeable Given!"); return; } PlaceableCheck(x[0], false); }, ETGModConsole.AutocompletionFromCollectionGetter(() => DungeonAPI.StaticReferences.customPlaceables.Keys));
-            ETGModConsole.CommandDescriptions.Add("alexandria spawnplaceable_custom", "Spawns a given dungeonPlaceable from Alexandrias StaticReferences.customPlaceables list.");
+            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("spawnplaceablecustom", x => { if (x.Length <= 0) { DebugUtility.Log("No Placeable Given!"); return; } PlaceableCheck(x[0], false); }, ETGModConsole.AutocompletionFromCollectionGetter(() => DungeonAPI.StaticReferences.customPlaceables.Keys));
+            ETGModConsole.CommandDescriptions.Add("alexandria spawnplaceablecustom", "Spawns a given dungeonPlaceable from Alexandrias StaticReferences.customPlaceables list.");
 
-            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("spawnstored_object", x => { if (x.Length <= 0) { DebugUtility.Log("No Stored Object Given!"); return; } StoredObject(x[0], false); }, ETGModConsole.AutocompletionFromCollectionGetter(() => DungeonAPI.SetupExoticObjects.objects.Keys));
-            ETGModConsole.CommandDescriptions.Add("alexandria spawnstored_object", "Spawns a given gameObject from Alexandrias SetupExoticObjects.objects list.");
+            ETGModConsole.Commands.GetGroup("alexandria").AddUnit("spawnstoredobject", x => { if (x.Length <= 0) { DebugUtility.Log("No Stored Object Given!"); return; } StoredObject(x[0], false); }, ETGModConsole.AutocompletionFromCollectionGetter(() => DungeonAPI.SetupExoticObjects.objects.Keys));
+            ETGModConsole.CommandDescriptions.Add("alexandria spawnstoredobject", "Spawns a given gameObject from Alexandrias SetupExoticObjects.objects list.");
 
             ETGModConsole.Commands.GetGroup("alexandria").AddUnit("forceresetrun", (args) =>
             {

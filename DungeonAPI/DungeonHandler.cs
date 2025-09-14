@@ -221,6 +221,8 @@ namespace Alexandria.DungeonAPI
                         StaticReferences.RoomTables["miscreward"].includedRooms.Add(wRoom);
                         break;
                     case "fireplace":
+                        wRoom.room.injectionFlags = wRoom.room.injectionFlags ?? new RuntimeInjectionFlags();
+                        wRoom.room.injectionFlags.CastleFireplace = true;
                         StaticReferences.RoomTables["fireplace"].includedRooms.Add(wRoom);
                         break;
 

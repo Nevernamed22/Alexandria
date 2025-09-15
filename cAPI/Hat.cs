@@ -454,9 +454,10 @@ namespace Alexandria.cAPI
                 return; // don't do anything while time is frozen
             if (currentState != HatState.FLIPPING)
                 return; // not flipping, so nothing to do
-            if (hatRollReaction != HatRollReaction.FLIP || vanishOverrides.Value)
-                return; // no flipping needed
+            if (vanishOverrides.Value)
+                return; // not visible, so no flipping needed
 
+            //NOTE: we still need to handle this since HatRollReaction.None looks bad unless we freeze the position when we start rolling and unfreeze it here
             if (((BraveTime.ScaledTimeSinceStartup - startRolTime) >= rollLength) || hatOwner.IsSlidingOverSurface || !hatOwner.IsDodgeRolling)
             {
                 StickHatToPlayer(hatOwner);
@@ -464,6 +465,9 @@ namespace Alexandria.cAPI
                     AkSoundEngine.PostEvent(flipEndedSound, gameObject);
                 return;
             }
+
+            if (hatRollReaction != HatRollReaction.FLIP)
+                return; // hat doesn't flip
 
             // logic for doing the actual flipping
             float rollAmount = 360f * (BraveTime.DeltaTime / rollLength);

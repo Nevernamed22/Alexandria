@@ -1751,3 +1751,26 @@ namespace Alexandria.CharacterAPI
         }
     }
 }
+
+/// <summary>Allows CharAPI characters to be saved / loaded properly by the elevator button.</summary>
+[HarmonyPatch]
+internal static class MidGameSaveDataGetPlayerOnePrefabPatcher
+{
+  [HarmonyPatch(typeof(MidGameSaveData), nameof(MidGameSaveData.GetPlayerOnePrefab))]
+  [HarmonyPrefix]
+  private static bool MidGameSaveDataGetPlayerOnePrefabPatch(MidGameSaveData __instance, ref GameObject __result)
+  {
+    PlayableCharacters id = __instance.playerOneData.CharacterIdentity;
+    if (id <= PlayableCharacters.Gunslinger)
+      return true;
+    foreach (var tup in Alexandria.CharacterAPI.CharacterBuilder.storedCharacters.Values)
+    {
+      if (tup.Second.GetComponent<PlayerController>().characterIdentity == id)
+      {
+        __result = tup.Second;
+        return false;
+      }
+    }
+    return true;
+  }
+}

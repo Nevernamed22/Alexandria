@@ -11,8 +11,11 @@ using IEnumerator = System.Collections.IEnumerator;
 
 
 using Alexandria.ItemAPI;
+using Alexandria.Misc;
 using Dungeonator;
 using HarmonyLib;
+using MonoMod.Cil;
+using Mono.Cecil.Cil;
 using FullInspector;
 
 namespace Alexandria.CharacterAPI
@@ -177,12 +180,6 @@ namespace Alexandria.CharacterAPI
                     typeof(PunchoutController).GetMethod("Init", BindingFlags.Instance | BindingFlags.Public),
                     typeof(Hooks).GetMethod("InitHook", BindingFlags.Static | BindingFlags.Public)
                 );
-
-                Hook HandleClockhairHook = new Hook(
-                    typeof(ArkController).GetMethod("HandleClockhair", BindingFlags.Instance | BindingFlags.NonPublic),
-                    typeof(Hooks).GetMethod("HandleClockhairHook", BindingFlags.Static | BindingFlags.Public)
-                );
-
 
                 Hook ProcessPlayerEnteredFoyerHook = new Hook(
                     typeof(Foyer).GetMethod("ProcessPlayerEnteredFoyer", BindingFlags.Instance | BindingFlags.Public),
@@ -799,462 +796,37 @@ namespace Alexandria.CharacterAPI
             return result;
         }
 
-
-        public static IEnumerator HandleClockhairHook(Func<ArkController, PlayerController, IEnumerator> orig, ArkController self, PlayerController interactor)
+        [HarmonyPatch]
+        private static class CustomPastHandlerPatches
         {
-
-            //yield return null;
-            if (interactor.GetComponent<CustomCharacter>() == null)
+            [HarmonyPatch(typeof(ArkController), nameof(ArkController.HandleClockhair), MethodType.Enumerator)]
+            [HarmonyILManipulator]
+            private static void ArkControllerHandleClockhairPatchIL(ILContext il, MethodBase original)
             {
-                Transform clockhairTransform = ((GameObject)UnityEngine.Object.Instantiate(BraveResources.Load("Clockhair", ".prefab"))).transform;
-                ClockhairController clockhair = clockhairTransform.GetComponent<ClockhairController>();
-                float elapsed = 0f;
-                float duration = clockhair.ClockhairInDuration;
-                Vector3 clockhairTargetPosition = interactor.CenterPosition;
-                Vector3 clockhairStartPosition = clockhairTargetPosition + new Vector3(-20f, 5f, 0f);
-                clockhair.renderer.enabled = true;
-                clockhair.spriteAnimator.alwaysUpdateOffscreen = true;
-                clockhair.spriteAnimator.Play("clockhair_intro");
-                clockhair.hourAnimator.Play("hour_hand_intro");
-                clockhair.minuteAnimator.Play("minute_hand_intro");
-                clockhair.secondAnimator.Play("second_hand_intro");
-                BraveInput currentInput = BraveInput.GetInstanceForPlayer(interactor.PlayerIDX);
-                while (elapsed < duration)
-                {
-                    self.UpdateCameraPositionDuringClockhair(interactor.CenterPosition);
-                    if (GameManager.INVARIANT_DELTA_TIME == 0f)
-                    {
-                        elapsed += 0.05f;
-                    }
-                    elapsed += GameManager.INVARIANT_DELTA_TIME;
-                    float t = elapsed / duration;
-                    float smoothT = Mathf.SmoothStep(0f, 1f, t);
-                    clockhairTargetPosition = self.GetTargetClockhairPosition(currentInput, clockhairTargetPosition);
-                    Vector3 currentPosition = Vector3.Slerp(clockhairStartPosition, clockhairTargetPosition, smoothT);
-                    clockhairTransform.position = currentPosition.WithZ(0f);
-                    if (t > 0.5f)
-                    {
-                        clockhair.renderer.enabled = true;
-                    }
-                    if (t > 0.75f)
-                    {
-                        clockhair.hourAnimator.GetComponent<Renderer>().enabled = true;
-                        clockhair.minuteAnimator.GetComponent<Renderer>().enabled = true;
-                        clockhair.secondAnimator.GetComponent<Renderer>().enabled = true;
-                        GameCursorController.CursorOverride.SetOverride("ark", true, null);
-                    }
-                    clockhair.sprite.UpdateZDepth();
-                    self.PointGunAtClockhair(interactor, clockhairTransform);
-                    yield return null;
-                }
-                clockhair.SetMotionType(1f);
-                float shotTargetTime = 0f;
-                float holdDuration = 4f;
-                PlayerController shotPlayer = null;
-                bool didShootHellTrigger = false;
-                Vector3 lastJitterAmount = Vector3.zero;
-                bool m_isPlayingChargeAudio = false;
-                for (; ; )
-                {
-                    self.UpdateCameraPositionDuringClockhair(interactor.CenterPosition);
-                    clockhair.transform.position = clockhair.transform.position - lastJitterAmount;
-                    clockhair.transform.position = self.GetTargetClockhairPosition(currentInput, clockhair.transform.position.XY());
-                    clockhair.sprite.UpdateZDepth();
-                    bool isTargetingValidTarget = self.CheckPlayerTarget(GameManager.Instance.PrimaryPlayer, clockhairTransform);
-                    shotPlayer = GameManager.Instance.PrimaryPlayer;
-                    if (!isTargetingValidTarget && GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER)
-                    {
-                        isTargetingValidTarget = self.CheckPlayerTarget(GameManager.Instance.SecondaryPlayer, clockhairTransform);
-                        shotPlayer = GameManager.Instance.SecondaryPlayer;
-                    }
-                    if (!isTargetingValidTarget && GameStatsManager.Instance.AllCorePastsBeaten())
-                    {
-                        isTargetingValidTarget = self.CheckHellTarget(self.HellCrackSprite, clockhairTransform);
-                        didShootHellTrigger = isTargetingValidTarget;
-                    }
-                    if (isTargetingValidTarget)
-                    {
-                        clockhair.SetMotionType(-10f);
-                    }
-                    else
-                    {
-                        clockhair.SetMotionType(1f);
-                    }
-                    if ((currentInput.ActiveActions.ShootAction.IsPressed || currentInput.ActiveActions.InteractAction.IsPressed) && isTargetingValidTarget)
-                    {
-                        if (!m_isPlayingChargeAudio)
-                        {
-                            m_isPlayingChargeAudio = true;
-                            AkSoundEngine.PostEvent("Play_OBJ_pastkiller_charge_01", self.gameObject);
-                        }
-                        shotTargetTime += BraveTime.DeltaTime;
-                    }
-                    else
-                    {
-                        shotTargetTime = Mathf.Max(0f, shotTargetTime - BraveTime.DeltaTime * 3f);
-                        if (m_isPlayingChargeAudio)
-                        {
-                            m_isPlayingChargeAudio = false;
-                            AkSoundEngine.PostEvent("Stop_OBJ_pastkiller_charge_01", self.gameObject);
-                        }
-                    }
-                    if ((currentInput.ActiveActions.ShootAction.WasReleased || currentInput.ActiveActions.InteractAction.WasReleased) && isTargetingValidTarget && shotTargetTime > holdDuration && !GameManager.Instance.IsPaused)
-                    {
-                        break;
-                    }
-                    if (shotTargetTime > 0f)
-                    {
-                        float distortionPower = Mathf.Lerp(0f, 0.35f, shotTargetTime / holdDuration);
-                        float distortRadius = 0.5f;
-                        float edgeRadius = Mathf.Lerp(4f, 7f, shotTargetTime / holdDuration);
-                        clockhair.UpdateDistortion(distortionPower, distortRadius, edgeRadius);
-                        float desatRadiusUV = Mathf.Lerp(2f, 0.25f, shotTargetTime / holdDuration);
-                        clockhair.UpdateDesat(true, desatRadiusUV);
-                        shotTargetTime = Mathf.Min(holdDuration + 0.25f, shotTargetTime + BraveTime.DeltaTime);
-                        float d = Mathf.Lerp(0f, 0.5f, (shotTargetTime - 1f) / (holdDuration - 1f));
-                        Vector3 vector = (UnityEngine.Random.insideUnitCircle * d).ToVector3ZUp(0f);
-                        BraveInput.DoSustainedScreenShakeVibration(shotTargetTime / holdDuration * 0.8f);
-                        clockhair.transform.position = clockhair.transform.position + vector;
-                        lastJitterAmount = vector;
-                        clockhair.SetMotionType(Mathf.Lerp(-10f, -2400f, shotTargetTime / holdDuration));
-                    }
-                    else
-                    {
-                        lastJitterAmount = Vector3.zero;
-                        clockhair.UpdateDistortion(0f, 0f, 0f);
-                        clockhair.UpdateDesat(false, 0f);
-                        shotTargetTime = 0f;
-                        BraveInput.DoSustainedScreenShakeVibration(0f);
-                    }
-                    self.PointGunAtClockhair(interactor, clockhairTransform);
-                    yield return null;
-                }
-                BraveInput.DoSustainedScreenShakeVibration(0f);
-                BraveInput.DoVibrationForAllPlayers(Vibration.Time.Normal, Vibration.Strength.Hard);
-                clockhair.StartCoroutine(clockhair.WipeoutDistortionAndFade(0.5f));
-                clockhair.gameObject.SetLayerRecursively(LayerMask.NameToLayer("Unoccluded"));
-                Pixelator.Instance.FadeToColor(1f, Color.white, true, 0.2f);
-                Pixelator.Instance.DoRenderGBuffer = false;
-                clockhair.spriteAnimator.Play("clockhair_fire");
-                clockhair.hourAnimator.GetComponent<Renderer>().enabled = false;
-                clockhair.minuteAnimator.GetComponent<Renderer>().enabled = false;
-                clockhair.secondAnimator.GetComponent<Renderer>().enabled = false;
-                yield return null;
-                TimeTubeCreditsController ttcc = new TimeTubeCreditsController();
-                bool isShortTunnel = didShootHellTrigger || shotPlayer.characterIdentity == PlayableCharacters.CoopCultist || self.CharacterStoryComplete(shotPlayer.characterIdentity);
-                UnityEngine.Object.Destroy(self.m_heldPastGun.gameObject);
-                interactor.ToggleGunRenderers(true, "ark");
-                GameCursorController.CursorOverride.RemoveOverride("ark");
-                Pixelator.Instance.LerpToLetterbox(0.35f, 0.25f);
-                yield return self.StartCoroutine(ttcc.HandleTimeTubeCredits(clockhair.sprite.WorldCenter, isShortTunnel, clockhair.spriteAnimator, (!didShootHellTrigger) ? shotPlayer.PlayerIDX : 0, false));
-                if (isShortTunnel)
-                {
-                    Pixelator.Instance.FadeToBlack(1f, false, 0f);
-                    yield return new WaitForSeconds(1f);
-                }
-                if (didShootHellTrigger)
-                {
-                    GameManager.DoMidgameSave(GlobalDungeonData.ValidTilesets.HELLGEON);
-                    GameManager.Instance.LoadCustomLevel("tt_bullethell");
-                }
-                else if (shotPlayer.characterIdentity == PlayableCharacters.CoopCultist)
-                {
-                    GameManager.IsCoopPast = true;
-                    self.ResetPlayers(false);
-                    GameManager.Instance.LoadCustomLevel("fs_coop");
-                }
-                else if (self.CharacterStoryComplete(shotPlayer.characterIdentity) && shotPlayer.characterIdentity == PlayableCharacters.Gunslinger)
-                {
-                    GameManager.DoMidgameSave(GlobalDungeonData.ValidTilesets.FINALGEON);
-                    GameManager.IsGunslingerPast = true;
-                    self.ResetPlayers(true);
-                    GameManager.Instance.LoadCustomLevel("tt_bullethell");
-                }
-                else if (self.CharacterStoryComplete(shotPlayer.characterIdentity))
-                {
-                    bool flag = false;
-                    GameManager.DoMidgameSave(GlobalDungeonData.ValidTilesets.FINALGEON);
-                    switch (shotPlayer.characterIdentity)
-                    {
-                        case PlayableCharacters.Pilot:
-                            flag = true;
-                            self.ResetPlayers(false);
-                            GameManager.Instance.LoadCustomLevel("fs_pilot");
-                            break;
-                        case PlayableCharacters.Convict:
-                            flag = true;
-                            self.ResetPlayers(false);
-                            GameManager.Instance.LoadCustomLevel("fs_convict");
-                            break;
-                        case PlayableCharacters.Robot:
-                            flag = true;
-                            self.ResetPlayers(false);
-                            GameManager.Instance.LoadCustomLevel("fs_robot");
-                            break;
-                        case PlayableCharacters.Soldier:
-                            flag = true;
-                            self.ResetPlayers(false);
-                            GameManager.Instance.LoadCustomLevel("fs_soldier");
-                            break;
-                        case PlayableCharacters.Guide:
-                            flag = true;
-                            self.ResetPlayers(false);
-                            GameManager.Instance.LoadCustomLevel("fs_guide");
-                            break;
-                        case PlayableCharacters.Bullet:
-                            flag = true;
-                            self.ResetPlayers(false);
-                            GameManager.Instance.LoadCustomLevel("fs_bullet");
-                            break;
-                    }
-                    if (!flag)
-                    {
-                        AmmonomiconController.Instance.OpenAmmonomicon(true, true);
-                    }
-                    else
-                    {
-                        GameUIRoot.Instance.ToggleUICamera(false);
-                    }
-                }
-                else
-                {
-                    AmmonomiconController.Instance.OpenAmmonomicon(true, true);
-                }
-                for (; ; )
-                {
-                    yield return null;
-                }
-                //yield break;
-                /*
-                IEnumerator origEnum = orig(self, interactor);
-                while (origEnum.MoveNext()) 
-                { 
-                    yield return null; 
-                }
-                */
-            }
-            else
-            {
-                FieldInfo _heldPastGun = typeof(ArkController).GetField("m_heldPastGun", BindingFlags.NonPublic | BindingFlags.Instance);
-
-                Transform clockhairTransform = ((GameObject)UnityEngine.Object.Instantiate(BraveResources.Load("Clockhair", ".prefab"))).transform;
-                ClockhairController clockhair = clockhairTransform.GetComponent<ClockhairController>();
-                float elapsed = 0f;
-                float duration = clockhair.ClockhairInDuration;
-                Vector2 clockhairTargetPosition = interactor.CenterPosition;
-                Vector2 clockhairStartPosition = clockhairTargetPosition + new Vector2(-20f, 5f);
-                clockhair.renderer.enabled = true;
-                clockhair.spriteAnimator.alwaysUpdateOffscreen = true;
-                clockhair.spriteAnimator.Play("clockhair_intro");
-                clockhair.hourAnimator.Play("hour_hand_intro");
-                clockhair.minuteAnimator.Play("minute_hand_intro");
-                clockhair.secondAnimator.Play("second_hand_intro");
-                BraveInput currentInput = BraveInput.GetInstanceForPlayer(interactor.PlayerIDX);
-                while (elapsed < duration)
-                {
-                    typeof(ArkController).GetMethod("UpdateCameraPositionDuringClockhair", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { interactor.CenterPosition });
-
-
-                    if (GameManager.INVARIANT_DELTA_TIME == 0f)
-                    {
-                        elapsed += 0.05f;
-                    }
-                    elapsed += GameManager.INVARIANT_DELTA_TIME;
-                    float t = elapsed / duration;
-                    float smoothT = Mathf.SmoothStep(0f, 1f, t);
-                    if (currentInput == null)
-                    {
-                        if (ToolsCharApi.EnableDebugLogging == true)
-                        {
-                            ETGModConsole.Log("currentInput null");
-                        }
-                    }
-
-                    if (clockhairTargetPosition == null)
-                    {
-                        if (ToolsCharApi.EnableDebugLogging == true)
-                        {
-                            ETGModConsole.Log("clockhairTargetPosition null");
-                        }
-                    }
-                    clockhairTargetPosition = (Vector2)typeof(ArkController).GetMethod("GetTargetClockhairPosition", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { currentInput, clockhairTargetPosition });
-                    //clockhairTargetPosition = self.GetTargetClockhairPosition(currentInput, clockhairTargetPosition);
-                    Vector3 currentPosition = Vector3.Slerp(clockhairStartPosition, clockhairTargetPosition, smoothT);
-                    clockhairTransform.position = currentPosition.WithZ(0f);
-                    if (t > 0.5f)
-                    {
-                        clockhair.renderer.enabled = true;
-                    }
-                    if (t > 0.75f)
-                    {
-                        clockhair.hourAnimator.GetComponent<Renderer>().enabled = true;
-                        clockhair.minuteAnimator.GetComponent<Renderer>().enabled = true;
-                        clockhair.secondAnimator.GetComponent<Renderer>().enabled = true;
-                        GameCursorController.CursorOverride.SetOverride("ark", true, null);
-                    }
-                    clockhair.sprite.UpdateZDepth();
-                    typeof(ArkController).GetMethod("PointGunAtClockhair", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { interactor, clockhairTransform });
-                    yield return null;
-                }
-                clockhair.SetMotionType(1f);
-                float shotTargetTime = 0f;
-                float holdDuration = 4f;
-                PlayerController shotPlayer = null;
-                bool didShootHellTrigger = false;
-                Vector3 lastJitterAmount = Vector3.zero;
-                bool m_isPlayingChargeAudio = false;
-                for (; ; )
-                {
-                    typeof(ArkController).GetMethod("UpdateCameraPositionDuringClockhair", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { interactor.CenterPosition });
-                    clockhair.transform.position = clockhair.transform.position - lastJitterAmount;
-                    clockhair.transform.position = (Vector2)typeof(ArkController).GetMethod("GetTargetClockhairPosition", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { currentInput, clockhair.transform.position.XY() });
-                    clockhair.sprite.UpdateZDepth();
-                    bool isTargetingValidTarget = (bool)typeof(ArkController).GetMethod("CheckPlayerTarget", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { GameManager.Instance.PrimaryPlayer, clockhairTransform });
-                    shotPlayer = GameManager.Instance.PrimaryPlayer;
-                    if (!isTargetingValidTarget && GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER)
-                    {
-                        isTargetingValidTarget = (bool)typeof(ArkController).GetMethod("CheckPlayerTarget", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { GameManager.Instance.SecondaryPlayer, clockhairTransform });
-                        shotPlayer = GameManager.Instance.SecondaryPlayer;
-                    }
-                    if (!isTargetingValidTarget && GameStatsManager.Instance.AllCorePastsBeaten())
-                    {
-                        isTargetingValidTarget = (bool)typeof(ArkController).GetMethod("CheckHellTarget", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { self.HellCrackSprite, clockhairTransform });
-                        didShootHellTrigger = isTargetingValidTarget;
-                    }
-                    if (isTargetingValidTarget)
-                    {
-                        clockhair.SetMotionType(-10f);
-                    }
-                    else
-                    {
-                        clockhair.SetMotionType(1f);
-                    }
-                    if ((currentInput.ActiveActions.ShootAction.IsPressed || currentInput.ActiveActions.InteractAction.IsPressed) && isTargetingValidTarget)
-                    {
-                        if (!m_isPlayingChargeAudio)
-                        {
-                            m_isPlayingChargeAudio = true;
-                            AkSoundEngine.PostEvent("Play_OBJ_pastkiller_charge_01", self.gameObject);
-                        }
-                        shotTargetTime += BraveTime.DeltaTime;
-                    }
-                    else
-                    {
-                        shotTargetTime = Mathf.Max(0f, shotTargetTime - BraveTime.DeltaTime * 3f);
-                        if (m_isPlayingChargeAudio)
-                        {
-                            m_isPlayingChargeAudio = false;
-                            AkSoundEngine.PostEvent("Stop_OBJ_pastkiller_charge_01", self.gameObject);
-                        }
-                    }
-                    if ((currentInput.ActiveActions.ShootAction.WasReleased || currentInput.ActiveActions.InteractAction.WasReleased) && isTargetingValidTarget && shotTargetTime > holdDuration && !GameManager.Instance.IsPaused)
-                    {
-                        break;
-                    }
-                    if (shotTargetTime > 0f)
-                    {
-                        float distortionPower = Mathf.Lerp(0f, 0.35f, shotTargetTime / holdDuration);
-                        float distortRadius = 0.5f;
-                        float edgeRadius = Mathf.Lerp(4f, 7f, shotTargetTime / holdDuration);
-                        clockhair.UpdateDistortion(distortionPower, distortRadius, edgeRadius);
-                        float desatRadiusUV = Mathf.Lerp(2f, 0.25f, shotTargetTime / holdDuration);
-                        clockhair.UpdateDesat(true, desatRadiusUV);
-                        shotTargetTime = Mathf.Min(holdDuration + 0.25f, shotTargetTime + BraveTime.DeltaTime);
-                        float d = Mathf.Lerp(0f, 0.5f, (shotTargetTime - 1f) / (holdDuration - 1f));
-                        Vector3 vector = (UnityEngine.Random.insideUnitCircle * d).ToVector3ZUp(0f);
-                        BraveInput.DoSustainedScreenShakeVibration(shotTargetTime / holdDuration * 0.8f);
-                        clockhair.transform.position = clockhair.transform.position + vector;
-                        lastJitterAmount = vector;
-                        clockhair.SetMotionType(Mathf.Lerp(-10f, -2400f, shotTargetTime / holdDuration));
-                    }
-                    else
-                    {
-                        lastJitterAmount = Vector3.zero;
-                        clockhair.UpdateDistortion(0f, 0f, 0f);
-                        clockhair.UpdateDesat(false, 0f);
-                        shotTargetTime = 0f;
-                        BraveInput.DoSustainedScreenShakeVibration(0f);
-                    }
-                    typeof(ArkController).GetMethod("PointGunAtClockhair", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { interactor, clockhairTransform });
-                    yield return null;
-                }
-                BraveInput.DoSustainedScreenShakeVibration(0f);
-                BraveInput.DoVibrationForAllPlayers(Vibration.Time.Normal, Vibration.Strength.Hard);
-                clockhair.StartCoroutine(clockhair.WipeoutDistortionAndFade(0.5f));
-                clockhair.gameObject.SetLayerRecursively(LayerMask.NameToLayer("Unoccluded"));
-                Pixelator.Instance.FadeToColor(1f, Color.white, true, 0.2f);
-                Pixelator.Instance.DoRenderGBuffer = false;
-                clockhair.spriteAnimator.Play("clockhair_fire");
-                clockhair.hourAnimator.GetComponent<Renderer>().enabled = false;
-                clockhair.minuteAnimator.GetComponent<Renderer>().enabled = false;
-                clockhair.secondAnimator.GetComponent<Renderer>().enabled = false;
-                yield return null;
-                TimeTubeCreditsController ttcc = new TimeTubeCreditsController();
-                bool isShortTunnel = didShootHellTrigger || shotPlayer.characterIdentity == PlayableCharacters.CoopCultist || (bool)typeof(ArkController).GetMethod("CharacterStoryComplete", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { shotPlayer.characterIdentity });
-                UnityEngine.Object.Destroy((_heldPastGun.GetValue(self) as Transform).gameObject);
-                interactor.ToggleGunRenderers(true, "ark");
-                GameCursorController.CursorOverride.RemoveOverride("ark");
-                Pixelator.Instance.LerpToLetterbox(0.35f, 0.25f);
-                yield return self.StartCoroutine(ttcc.HandleTimeTubeCredits(clockhair.sprite.WorldCenter, isShortTunnel, clockhair.spriteAnimator, (!didShootHellTrigger) ? shotPlayer.PlayerIDX : 0, false));
-                if (isShortTunnel)
-                {
-                    Pixelator.Instance.FadeToBlack(1f, false, 0f);
-                    yield return new WaitForSeconds(1f);
-                }
-                if (didShootHellTrigger)
-                {
-                    GameManager.DoMidgameSave(GlobalDungeonData.ValidTilesets.HELLGEON);
-                    GameManager.Instance.LoadCustomLevel("tt_bullethell");
-                }
-                else if (shotPlayer.characterIdentity == PlayableCharacters.CoopCultist)
-                {
-                    GameManager.IsCoopPast = true;
-                    typeof(ArkController).GetMethod("ResetPlayers", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { false });
-
-                    GameManager.Instance.LoadCustomLevel("fs_coop");
-                }
-                else if ((bool)typeof(ArkController).GetMethod("CharacterStoryComplete", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { shotPlayer.characterIdentity }) && shotPlayer.characterIdentity == PlayableCharacters.Gunslinger)
-                {
-                    GameManager.DoMidgameSave(GlobalDungeonData.ValidTilesets.FINALGEON);
-                    GameManager.IsGunslingerPast = true;
-                    typeof(ArkController).GetMethod("ResetPlayers", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { true });
-                    GameManager.Instance.LoadCustomLevel("tt_bullethell");
-                }
-                else if ((bool)typeof(ArkController).GetMethod("CharacterStoryComplete", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { shotPlayer.characterIdentity }))
-                {
-                    bool flag = false;
-                    GameManager.DoMidgameSave(GlobalDungeonData.ValidTilesets.FINALGEON);
-
-                    if (shotPlayer.GetComponent<CustomCharacter>() != null)
-                    {
-                        flag = true;
-                        typeof(ArkController).GetMethod("ResetPlayers", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, new object[] { false });
-                        GameManager.Instance.LoadCustomLevel(shotPlayer.GetComponent<CustomCharacter>().past);
-                    }
-
-                    if (!flag)
-                    {
-                        AmmonomiconController.Instance.OpenAmmonomicon(true, true);
-                    }
-                    else
-                    {
-                        GameUIRoot.Instance.ToggleUICamera(false);
-                    }
-                }
-                else
-                {
-                    AmmonomiconController.Instance.OpenAmmonomicon(true, true);
-                }
-                for (; ; )
-                {
-                    yield return null;
-                }
-                //yield break;
+                ILCursor cursor = new ILCursor(il);
+                ILLabel toggleUICameraLabel = null; // executed if past is valid
+                if (!cursor.TryGotoNext(MoveType.After,
+                  instr => instr.MatchLdloc(8), // flag
+                  instr => instr.MatchBrtrue(out toggleUICameraLabel)
+                  ))
+                  return;
+                cursor.Emit(OpCodes.Ldarg_0); // load enumerator type
+                cursor.Emit(OpCodes.Ldfld, original.DeclaringType.GetEnumeratorField("$this")); // load actual "$this" field
+                cursor.Emit(OpCodes.Ldarg_0); // load enumerator type
+                cursor.Emit(OpCodes.Ldfld, original.DeclaringType.GetEnumeratorField("shotPlayer")); // load shotPlayer field
+                cursor.CallPrivate(typeof(CustomPastHandlerPatches), nameof(DoCustomPastChecks));
+                cursor.Emit(OpCodes.Brtrue, toggleUICameraLabel);
             }
 
+            private static bool DoCustomPastChecks(ArkController ark, PlayerController shotPlayer)
+            {
+              if (shotPlayer.GetComponent<CustomCharacter>() is not CustomCharacter cc || string.IsNullOrEmpty(cc.past))
+                return false;
+              ark.ResetPlayers(false);
+              GameManager.Instance.LoadCustomLevel(cc.past);
+              return true;
+            }
         }
-
-
 
         public static void PunchoutUpdateUI(Action<PunchoutPlayerController> orig, PunchoutPlayerController self)
         {
@@ -2178,4 +1750,27 @@ namespace Alexandria.CharacterAPI
                 PreventStartingOwnerFromDropping;
         }
     }
+}
+
+/// <summary>Allows CharAPI characters to be saved / loaded properly by the elevator button.</summary>
+[HarmonyPatch]
+internal static class MidGameSaveDataGetPlayerOnePrefabPatcher
+{
+  [HarmonyPatch(typeof(MidGameSaveData), nameof(MidGameSaveData.GetPlayerOnePrefab))]
+  [HarmonyPrefix]
+  private static bool MidGameSaveDataGetPlayerOnePrefabPatch(MidGameSaveData __instance, ref GameObject __result)
+  {
+    PlayableCharacters id = __instance.playerOneData.CharacterIdentity;
+    if (id <= PlayableCharacters.Gunslinger)
+      return true;
+    foreach (var tup in Alexandria.CharacterAPI.CharacterBuilder.storedCharacters.Values)
+    {
+      if (tup.Second.GetComponent<PlayerController>().characterIdentity == id)
+      {
+        __result = tup.Second;
+        return false;
+      }
+    }
+    return true;
+  }
 }

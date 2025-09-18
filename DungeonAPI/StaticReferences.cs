@@ -307,7 +307,7 @@ namespace Alexandria.DungeonAPI
 
             StaticInjections.Black_Market_injections = LoadHelper.LoadAssetFromAnywhere<SharedInjectionData>("black market injection data");
 
-            ETGModConsole.Log(StaticInjections.Black_Market_injections.AttachedInjectionData.Count);
+            // ETGModConsole.Log(StaticInjections.Black_Market_injections.AttachedInjectionData.Count);
             RoomTables.Add("black_market", ProcessRoomTableThing(StaticInjections.Black_Market_injections, StaticInjections.Black_Market_injections.InjectionData[0]).roomTable);
 
             var room =  LoadHelper.LoadAssetFromAnywhere<PrototypeDungeonRoom>("Shrine_DemonFace_Room");

@@ -38,9 +38,8 @@ namespace Alexandria.NPCAPI
                 var SpeechPoint = PrefabAPI.PrefabBuilder.BuildObject("SpeechPoint");
                 SpeechPoint.transform.position = talkPointOffset;
 
-
-
-                var npcObj = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], PrefabAPI.PrefabBuilder.BuildObject(prefix + ":" + name), Assembly.GetCallingAssembly());
+                Assembly assembly = Assembly.GetCallingAssembly();
+                var npcObj = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], PrefabAPI.PrefabBuilder.BuildObject(prefix + ":" + name), assembly);
 
                 npcObj.layer = 22;
 
@@ -57,12 +56,12 @@ namespace Alexandria.NPCAPI
 
                 foreach (string sprite in idleSpritePaths)
                 {
-                    idleIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, Assembly.GetCallingAssembly()));
+                    idleIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly));
                 }
 
                 foreach (string sprite in talkSpritePaths)
                 {
-                    talkIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, Assembly.GetCallingAssembly()));
+                    talkIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly));
                 }
 
                 tk2dSpriteAnimator spriteAnimator = npcObj.AddComponent<tk2dSpriteAnimator>();
@@ -667,14 +666,15 @@ namespace Alexandria.NPCAPI
                 var idleIdsList = new List<int>();
                 var talkIdsList = new List<int>();
 
+                Assembly assembly = Assembly.GetCallingAssembly();
                 foreach (string sprite in idleSpritePaths)
                 {
-                    idleIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, Assembly.GetCallingAssembly()));
+                    idleIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly));
                 }
 
                 foreach (string sprite in talkSpritePaths)
                 {
-                    talkIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, Assembly.GetCallingAssembly()));
+                    talkIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly));
                 }
 
                 tk2dSpriteAnimator spriteAnimator = npcObj.AddComponent<tk2dSpriteAnimator>();
@@ -999,8 +999,8 @@ namespace Alexandria.NPCAPI
                 SpeechPoint.transform.position = talkPointOffset;
 
 
-
-                var npcObj = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], new GameObject(prefix + ":" + name), Assembly.GetCallingAssembly());
+                Assembly assembly = Assembly.GetCallingAssembly();
+                var npcObj = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], new GameObject(prefix + ":" + name), assembly);
 
                 FakePrefab.MarkAsFakePrefab(npcObj);
                 UnityEngine.Object.DontDestroyOnLoad(npcObj);
@@ -1021,12 +1021,12 @@ namespace Alexandria.NPCAPI
 
                 foreach (string sprite in idleSpritePaths)
                 {
-                    idleIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, Assembly.GetCallingAssembly()));
+                    idleIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly));
                 }
 
                 foreach (string sprite in talkSpritePaths)
                 {
-                    talkIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, Assembly.GetCallingAssembly()));
+                    talkIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly));
                 }
 
                 tk2dSpriteAnimator spriteAnimator = npcObj.AddComponent<tk2dSpriteAnimator>();
@@ -1162,7 +1162,7 @@ namespace Alexandria.NPCAPI
                 {
                     if (!string.IsNullOrEmpty(currencyIconPath))
                     {
-                        shopObj.customPriceSprite = AddCustomCurrencyType(currencyIconPath, $"{prefix}:{currencyName}", Assembly.GetCallingAssembly());
+                        shopObj.customPriceSprite = AddCustomCurrencyType(currencyIconPath, $"{prefix}:{currencyName}", assembly);
                     }
                     else
                     {
@@ -1177,7 +1177,7 @@ namespace Alexandria.NPCAPI
                 shopObj.isPassable = true;
                 shopObj.baseShopType = BaseShopController.AdditionalShopType.FOYER_META;//shopType;
 
-                shopObj.ExampleBlueprintPrefab = GenerateBluePrint($"{name} Blueprint", prefix, bluePrintSpritePath, Assembly.GetCallingAssembly());
+                shopObj.ExampleBlueprintPrefab = GenerateBluePrint($"{name} Blueprint", prefix, bluePrintSpritePath, assembly);
                 shopObj.IsBeetleMerchant = false;
                 //shopObj.ExampleBlueprintPrefab = null;
                 shopObj.shopItems = lootTable;
@@ -1225,7 +1225,7 @@ namespace Alexandria.NPCAPI
 
                 if (hasCarpet)
                 {
-                    var carpetObj = SpriteBuilder.SpriteFromResource(carpetSpritePath, new GameObject(prefix + ":" + name + "_Carpet"), Assembly.GetCallingAssembly());
+                    var carpetObj = SpriteBuilder.SpriteFromResource(carpetSpritePath, new GameObject(prefix + ":" + name + "_Carpet"), assembly);
                     carpetObj.GetComponent<tk2dSprite>().SortingOrder = 2;
                     FakePrefab.MarkAsFakePrefab(carpetObj);
                     UnityEngine.Object.DontDestroyOnLoad(carpetObj);
@@ -1279,6 +1279,7 @@ namespace Alexandria.NPCAPI
         /// <param name="stealAnimFPS">Your on stolen from animation FPS.</param> 
         public static void AddAdditionalAnimationsToShop(GameObject self, List<string> purchaseSpritePaths = null, float purchaseAnimFPS = 6, List<string> denyPurchaseSpritePaths = null, float denyPurchaseAnimFPS = 6, List<string> stealSpritePaths = null, float stealAnimFPS = 6)
         {
+            Assembly assembly = Assembly.GetCallingAssembly();
             var collection = self.GetComponentInChildren<tk2dSprite>().Collection;
             tk2dSpriteAnimator spriteAnimator = self.GetComponentInChildren<tk2dSpriteAnimator>();
             AIAnimator aianimator = self.GetComponentInChildren<AIAnimator>();
@@ -1288,7 +1289,7 @@ namespace Alexandria.NPCAPI
                 var danceIdsList = new List<int>();
                 foreach (string sprite in purchaseSpritePaths)
                 {
-                    danceIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection));
+                    danceIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly: assembly));
                 }
                 CreateDirectionalAnimation(spriteAnimator, collection, aianimator, danceIdsList, "purchase", purchaseAnimFPS);
             }
@@ -1297,7 +1298,7 @@ namespace Alexandria.NPCAPI
                 var denyIdsList = new List<int>();
                 foreach (string sprite in denyPurchaseSpritePaths)
                 {
-                    denyIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection));
+                    denyIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly: assembly));
                 }
                 CreateDirectionalAnimation(spriteAnimator, collection, aianimator, denyIdsList, "denied", denyPurchaseAnimFPS);
             }
@@ -1306,7 +1307,7 @@ namespace Alexandria.NPCAPI
                 var stealIdsList = new List<int>();
                 foreach (string sprite in stealSpritePaths)
                 {
-                    stealIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection));
+                    stealIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly: assembly));
                 }
                 CreateDirectionalAnimation(spriteAnimator, collection, aianimator, stealIdsList, "stolen", stealAnimFPS);
             }
@@ -1338,6 +1339,7 @@ namespace Alexandria.NPCAPI
 
         public static void AddParentedAnimationToShop(GameObject self, List<string> yourPaths, float YourAnimFPS, string AnimationName)
         {
+            Assembly assembly = Assembly.GetCallingAssembly();
             var collection = self.GetComponentInChildren<tk2dSprite>().Collection;
             tk2dSpriteAnimator spriteAnimator = self.GetComponentInChildren<tk2dSpriteAnimator>();
             AIAnimator aianimator = self.GetComponentInChildren<AIAnimator>();
@@ -1346,7 +1348,7 @@ namespace Alexandria.NPCAPI
                 var stealIdsList = new List<int>();
                 foreach (string sprite in yourPaths)
                 {
-                    stealIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection));
+                    stealIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly: assembly));
                 }
                 CreateDirectionalAnimation(spriteAnimator, collection, aianimator, stealIdsList, AnimationName, YourAnimFPS);
             }
@@ -1361,6 +1363,7 @@ namespace Alexandria.NPCAPI
         /// <param name="AnimationName">Your NON DIRECTIONAL animations name.</param> 
         public static void AddUnparentedAnimationToShop(GameObject self, List<string> yourPaths, float YourAnimFPS, string AnimationName)
         {
+            Assembly assembly = Assembly.GetCallingAssembly();
             var collection = self.GetComponentInChildren<tk2dSprite>().Collection;
             tk2dSpriteAnimator spriteAnimator = self.GetComponentInChildren<tk2dSpriteAnimator>();
             AIAnimator aianimator = self.GetComponentInChildren<AIAnimator>();
@@ -1369,7 +1372,7 @@ namespace Alexandria.NPCAPI
                 var IdsList = new List<int>();
                 foreach (string sprite in yourPaths)
                 {
-                    IdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection));
+                    IdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly: assembly));
                 }
                 SpriteBuilder.AddAnimation(spriteAnimator, collection, IdsList, AnimationName, tk2dSpriteAnimationClip.WrapMode.Once, YourAnimFPS);
             }
@@ -1536,9 +1539,10 @@ namespace Alexandria.NPCAPI
 
             var idleIdsList = new List<int>();
 
+            Assembly assembly = Assembly.GetCallingAssembly();
             foreach (string sprite in idleSpritePaths)
             {
-                idleIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection));
+                idleIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly: assembly));
             }
 
             tk2dSpriteAnimator spriteAnimator = npcObj.AddComponent<tk2dSpriteAnimator>();
@@ -1678,6 +1682,21 @@ namespace Alexandria.NPCAPI
             DungeonHandler.Register(roomData);
         }
 
+        public static void AddRoomToSubshopPool(PrototypeDungeonRoom room, string annotation)
+        {
+            GameManager.Instance.GlobalInjectionData.entries[2].injectionData.InjectionData.Add(new ProceduralFlowModifierData()
+            {
+                annotation = annotation,
+                placementRules = new List<ProceduralFlowModifierData.FlowModifierPlacementType>()
+                {
+                    ProceduralFlowModifierData.FlowModifierPlacementType.END_OF_CHAIN
+                },
+                exactRoom = room,
+                selectionWeight = 1f,
+                prerequisites = new DungeonPrerequisite[0],
+                CanBeForcedSecret = false,
+            });
+        }
 
         public static AIAnimator GenerateBlankAIAnimator(GameObject targetObject)
         {

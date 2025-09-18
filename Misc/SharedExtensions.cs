@@ -7,6 +7,8 @@ using UnityEngine;
 using Alexandria.ItemAPI; // SpriteBuilder
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
+using HarmonyLib;
+using System.Text.RegularExpressions;
 
 namespace Alexandria.Misc
 {
@@ -28,6 +30,22 @@ namespace Alexandria.Misc
             VariableDefinition v = new VariableDefinition(il.Import(typeof(T)));
             il.Body.Variables.Add(v);
             return v;
+        }
+
+        /// <summary>Retrieves a field from within an enumerator</summary>
+        private static Regex rx_enum_field = new Regex(@"^<?([^>]+)(>__[0-9]+)?$", RegexOptions.Compiled);
+        public static FieldInfo GetEnumeratorField(this Type t, string s)
+        {
+            return AccessTools.GetDeclaredFields(t).Find(f => {
+                // ETGModConsole.Log($"{f.Name}");
+                foreach (Match match in rx_enum_field.Matches(f.Name))
+                {
+                  // ETGModConsole.Log($"  {match.Groups[1].Value}");
+                  if (match.Groups[1].Value == s)
+                    return true;
+                }
+                return false;
+            });
         }
 
         internal static void MakeOffset(this tk2dSpriteDefinition def, Vector3 offset, bool changesCollider = false)

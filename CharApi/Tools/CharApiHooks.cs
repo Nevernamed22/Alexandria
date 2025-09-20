@@ -98,12 +98,6 @@ namespace Alexandria.CharacterAPI
                     typeof(AmmonomiconDeathPageController).GetMethod("GetDeathPortraitName", BindingFlags.Instance | BindingFlags.NonPublic),
                     typeof(Hooks).GetMethod("GetDeathPortraitNameHook", BindingFlags.Static | BindingFlags.NonPublic)
                 );
-
-                Hook InitHook = new Hook(
-                    typeof(PunchoutController).GetMethod("Init", BindingFlags.Instance | BindingFlags.Public),
-                    typeof(Hooks).GetMethod("InitHook", BindingFlags.Static | BindingFlags.Public)
-                );
-                //======
             }
             catch (Exception e)
             {
@@ -302,81 +296,55 @@ namespace Alexandria.CharacterAPI
         public static string[] backUp = PunchoutPlayerController.PlayerNames;
         public static string[] backUpUI = PunchoutPlayerController.PlayerUiNames;
 
-        //one hook in and im already at the point of wanting to punch my screen thats gotta be a new record!! Update its like 3? (i think, ive lost track couldve been a week) days later and i can say it got worse 
-        public static void InitHook(Action<PunchoutController> orig, PunchoutController self)
+        [HarmonyPatch(typeof(PunchoutController), nameof(PunchoutController.Init))]
+        [HarmonyPrefix]
+        private static bool PunchoutControllerInitPatch(PunchoutController __instance)
         {
-            //ETGModConsole.Log("InitHook 0");
-            FieldInfo _isInitialized = typeof(PunchoutController).GetField("m_isInitialized", BindingFlags.NonPublic | BindingFlags.Instance);
-            FieldInfo _PlayerNames = typeof(PunchoutPlayerController).GetField("PlayerNames", BindingFlags.NonPublic | BindingFlags.Static);
-            FieldInfo _PlayerUiNames = typeof(PunchoutPlayerController).GetField("PlayerUiNames", BindingFlags.NonPublic | BindingFlags.Static);
-            //ETGModConsole.Log("InitHook 1");
-            var CCC = GameManager.Instance.PrimaryPlayer.gameObject.GetComponent<CustomCharacter>();
-            if ((int)GameManager.Instance.PrimaryPlayer.characterIdentity > 10 && CCC != null)
+            PlayerController player = GameManager.Instance.PrimaryPlayer;
+            if (!player.IsCustomCharacter() || player.gameObject.GetComponent<CustomCharacter>() is not CustomCharacter cc)
+                return true;
+
+            var name = cc.data.nameShort.ToLower();
+            if (!backUp.Contains("eevee"))
             {
-                var name = CCC.data.nameShort.ToLower();
+                Array.Resize(ref PunchoutPlayerController.PlayerNames, PunchoutPlayerController.PlayerNames.Length + 1);
+                PunchoutPlayerController.PlayerNames[PunchoutPlayerController.PlayerNames.Length - 1] = "eevee";
+                Array.Resize(ref PunchoutPlayerController.PlayerUiNames, PunchoutPlayerController.PlayerUiNames.Length + 1);
+                PunchoutPlayerController.PlayerUiNames[PunchoutPlayerController.PlayerUiNames.Length - 1] = "punch_player_health_eevee_00";
+            }
 
-                if (!backUp.Contains("eevee"))
-                {
-                    var fuckFuckFuck = (_PlayerNames.GetValue(null) as string[]).ToList();
-                    fuckFuckFuck.Add("eevee");
-                    _PlayerNames.SetValue(null, fuckFuckFuck.ToArray());
+            if (!backUp.Contains(name))
+            {
+                Array.Resize(ref PunchoutPlayerController.PlayerNames, PunchoutPlayerController.PlayerNames.Length + 1);
+                PunchoutPlayerController.PlayerNames[PunchoutPlayerController.PlayerNames.Length - 1] = name;
+                Array.Resize(ref PunchoutPlayerController.PlayerUiNames, PunchoutPlayerController.PlayerUiNames.Length + 1);
+                PunchoutPlayerController.PlayerUiNames[PunchoutPlayerController.PlayerUiNames.Length - 1] = $"punch_player_health_{name}_00";
 
-                    var fuckFuckFuckShit = (_PlayerUiNames.GetValue(null) as string[]).ToList();
-                    fuckFuckFuckShit.Add($"punch_player_health_eevee_00");
-                    _PlayerUiNames.SetValue(null, fuckFuckFuckShit.ToArray());
-                }
+                CustomCharacter.punchoutBullShit.Add(name, PunchoutPlayerController.PlayerUiNames.Length - 1);
+                backUp = PunchoutPlayerController.PlayerNames;
+                backUpUI = PunchoutPlayerController.PlayerUiNames;
+            }
 
-                if (!backUp.Contains(name)) //.Contains(name)))
-                {
-                    var fuckFuckFuck = (_PlayerNames.GetValue(null) as string[]).ToList();
-                    fuckFuckFuck.Add(name);
-                    _PlayerNames.SetValue(null, fuckFuckFuck.ToArray());
+            __instance.Player.CustomSwapPlayer(CustomCharacter.punchoutBullShit[name], false);
+            __instance.CoopCultist.gameObject.SetActive(GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER);
+            __instance.StartCoroutine(__instance.UiFadeInCR());
+            __instance.m_isInitialized = true;
+            __instance.Player.sprite.usesOverrideMaterial = true;
 
-                    var fuckFuckFuckShit = (_PlayerUiNames.GetValue(null) as string[]).ToList();
-                    fuckFuckFuckShit.Add($"punch_player_health_{name}_00");
-                    _PlayerUiNames.SetValue(null, fuckFuckFuckShit.ToArray());
-
-
-                    CustomCharacter.punchoutBullShit.Add(name, (_PlayerUiNames.GetValue(null) as string[]).Length - 1);
-                    backUp = _PlayerNames.GetValue(null) as string[];
-                    backUpUI = _PlayerUiNames.GetValue(null) as string[];
-                }
-
-                self.Player.CustomSwapPlayer(new int?(CustomCharacter.punchoutBullShit[name]), false);
-                self.CoopCultist.gameObject.SetActive(GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER);
-                self.StartCoroutine(self.GetType().GetMethod("UiFadeInCR", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, null) as IEnumerator);
-                _isInitialized.SetValue(self, true);
-                self.Player.sprite.usesOverrideMaterial = true;
-
-                bool hasMat = false;
-                if ((int)GameManager.Instance.PrimaryPlayer?.characterIdentity > 10 && CCC != null)
-                {
-
-                    if (CCC.data.useGlow)
-                    {
-                        if (CCC.data.glowMaterial != null)
-                        {
-                            if (CCC.data.glowMaterial.GetTexture("_MainTex") != self.Player.sprite.renderer.material.GetTexture("_MainTex"))
-                            {
-                                CCC.data.glowMaterial.SetTexture("_MainTexture", self.Player.sprite.renderer.material.GetTexture("_MainTex"));
-                            }
-                            if (hasMat == false) { hasMat = !hasMat; }
-                            self.Player.sprite.renderer.material = CCC.data.glowMaterial;
-                        }
-                    }
-                }
-                if (hasMat == false) 
-                {
-                    Material mat = new Material(SpriteHandler.Default_Punchout_Material);
-                    mat.mainTexture = self.Player.sprite.renderer.material.mainTexture;
-                    mat.SetTexture("_MainTexture", self.Player.sprite.renderer.material.GetTexture("_MainTex"));
-                    self.Player.sprite.renderer.material = mat;
-                }
+            if (cc.data.useGlow && cc.data.glowMaterial != null)
+            {
+                if (cc.data.glowMaterial.GetTexture("_MainTex") != __instance.Player.sprite.renderer.material.GetTexture("_MainTex"))
+                    cc.data.glowMaterial.SetTexture("_MainTexture", __instance.Player.sprite.renderer.material.GetTexture("_MainTex"));
+                __instance.Player.sprite.renderer.material = cc.data.glowMaterial;
             }
             else
             {
-                orig(self);
+                Material mat = new Material(SpriteHandler.Default_Punchout_Material);
+                mat.mainTexture = __instance.Player.sprite.renderer.material.mainTexture;
+                mat.SetTexture("_MainTexture", __instance.Player.sprite.renderer.material.GetTexture("_MainTex"));
+                __instance.Player.sprite.renderer.material = mat;
             }
+            return false;
         }
 
         private static void CustomSwapPlayer(this PunchoutPlayerController self, int? newPlayerIndex = null, bool keepEevee = false)

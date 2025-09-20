@@ -64,11 +64,6 @@ namespace Alexandria.CharacterAPI
                     typeof(Hooks).GetMethod("OnP2Cleared")
                 );
 
-                Hook setWinPicHook = new Hook(
-                    typeof(AmmonomiconDeathPageController).GetMethod("SetWinPic", BindingFlags.Instance | BindingFlags.NonPublic),
-                    typeof(Hooks).GetMethod("SetWinPicHook", BindingFlags.Static | BindingFlags.NonPublic)
-                );
-
                 Hook updateHook = new Hook(
                     typeof(CharacterSelectIdleDoer).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic),
                     typeof(Hooks).GetMethod("UpdateHook", BindingFlags.Static | BindingFlags.NonPublic)
@@ -789,29 +784,24 @@ namespace Alexandria.CharacterAPI
         public static Hook getOrLoadByName_Hook;
         public static Hook setWinPicHook;
 
-        private static void SetWinPicHook(Action<AmmonomiconDeathPageController> orig, AmmonomiconDeathPageController self)
+        [HarmonyPatch(typeof(AmmonomiconDeathPageController), nameof(AmmonomiconDeathPageController.SetWinPic))]
+        [HarmonyPostfix]
+        private static void AmmonomiconDeathPageControllerSetWinPicPatch(AmmonomiconDeathPageController __instance)
         {
-            orig(self);
             GlobalDungeonData.ValidTilesets tilesetId = GameManager.Instance.Dungeon.tileIndices.tilesetId;
-            if (GameManager.Instance.CurrentGameMode != GameManager.GameMode.BOSSRUSH && GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>() && GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data != null)
+            PlayerController player = GameManager.Instance.PrimaryPlayer;
+            if (GameManager.Instance.CurrentGameMode == GameManager.GameMode.BOSSRUSH || player.GetComponent<CustomCharacter>() is not CustomCharacter cc || cc.data == null)
+                return;
+            if (tilesetId != GlobalDungeonData.ValidTilesets.FINALGEON && __instance.ShouldUseJunkPic())
             {
-                if (GameManager.Instance.Dungeon.tileIndices.tilesetId != GlobalDungeonData.ValidTilesets.FINALGEON && (bool)typeof(AmmonomiconDeathPageController).GetMethod("ShouldUseJunkPic", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, null))
-                {
-                    if (GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data.junkanWinPic == null)
-                    {
-                        self.photoSprite.Texture = (BraveResources.Load("Win_Pic_Gun_Get_001", ".png") as Texture);
-                    }
-                    else
-                    {
-                        self.photoSprite.Texture = GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data.junkanWinPic;
-                    }
+                if (cc.data.junkanWinPic == null)
+                    __instance.photoSprite.Texture = (BraveResources.Load("Win_Pic_Gun_Get_001", ".png") as Texture);
+                else
+                    __instance.photoSprite.Texture = cc.data.junkanWinPic;
 
-                }
-                else if (tilesetId == GlobalDungeonData.ValidTilesets.FINALGEON && GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data.pastWinPic)
-                {
-                    self.photoSprite.Texture = GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data.pastWinPic;
-                }
             }
+            else if (tilesetId == GlobalDungeonData.ValidTilesets.FINALGEON && cc.data.pastWinPic)
+                __instance.photoSprite.Texture = cc.data.pastWinPic;
         }
 
         public static List<string> characterDeathNames = new List<string>

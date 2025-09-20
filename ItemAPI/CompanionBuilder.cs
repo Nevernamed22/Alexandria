@@ -6,13 +6,13 @@ using Gungeon;
 using MonoMod.RuntimeDetour;
 using UnityEngine;
 using Alexandria.Misc;
+using HarmonyLib;
 
 namespace Alexandria.ItemAPI
 {
-    // Token: 0x02000016 RID: 22
+    [HarmonyPatch]
     public static class CompanionBuilder
     {
-        // Token: 0x060000BB RID: 187 RVA: 0x00007FC8 File Offset: 0x000061C8
         public static void Init()
         {
             string companionGuid = Game.Items["dog"].GetComponent<CompanionItem>().CompanionGuid;
@@ -34,14 +34,14 @@ namespace Alexandria.ItemAPI
                 }
             }
             CompanionBuilder.behaviorSpeculatorPrefab.MakeFakePrefab();
-            Hook hook = new Hook(typeof(EnemyDatabase).GetMethod("GetOrLoadByGuid", BindingFlags.Static | BindingFlags.Public), typeof(CompanionBuilder).GetMethod("GetOrLoadByGuid"));
         }
 
-        public static AIActor GetOrLoadByGuid(Func<string, AIActor> orig, string guid)
+        [HarmonyPatch(typeof(EnemyDatabase), nameof(EnemyDatabase.GetOrLoadByGuid))]
+        [HarmonyPostfix]
+        private static void EnemyDatabaseGetOrLoadByGuidPatch(EnemyDatabase __instance, string guid, ref AIActor __result)
         {
-            if (CompanionBuilder.companionDictionary.TryGetValue(guid, out GameObject companion))
-                return companion.GetComponent<AIActor>();
-            return orig(guid);
+            if (companionDictionary.TryGetValue(guid, out GameObject companion))
+                __result = companion.GetComponent<AIActor>();
         }
 
         public static GameObject BuildPrefab(string name, string guid, string defaultSpritePath, IntVector2 hitboxOffset, IntVector2 hitBoxSize)
@@ -85,7 +85,6 @@ namespace Alexandria.ItemAPI
             return gameObject;
         }
 
-        // Token: 0x060000BE RID: 190 RVA: 0x000082FC File Offset: 0x000064FC
         public static tk2dSpriteAnimationClip AddAnimation(this GameObject obj, string name, string spriteDirectory, int fps, CompanionBuilder.AnimationType type, DirectionalAnimation.DirectionType directionType = DirectionalAnimation.DirectionType.None, DirectionalAnimation.FlipType flipType = DirectionalAnimation.FlipType.None)
         {
             AIAnimator orAddComponent = obj.GetOrAddComponent<AIAnimator>();
@@ -97,7 +96,6 @@ namespace Alexandria.ItemAPI
             return CompanionBuilder.BuildAnimation(orAddComponent, name, spriteDirectory, fps, Assembly.GetCallingAssembly());
         }
 
-        // Token: 0x060000BF RID: 191 RVA: 0x000083B8 File Offset: 0x000065B8
         public static tk2dSpriteAnimationClip BuildAnimation(AIAnimator aiAnimator, string name, string spriteDirectory, int fps, Assembly assembly = null)
         {
             tk2dSpriteCollectionData tk2dSpriteCollectionData = aiAnimator.GetComponent<tk2dSpriteCollectionData>();
@@ -119,7 +117,6 @@ namespace Alexandria.ItemAPI
             return tk2dSpriteAnimationClip;
         }
 
-        // Token: 0x060000C0 RID: 192 RVA: 0x0000846C File Offset: 0x0000666C
         public static DirectionalAnimation GetDirectionalAnimation(this AIAnimator aiAnimator, string name, DirectionalAnimation.DirectionType directionType, CompanionBuilder.AnimationType type)
         {
             return type switch
@@ -133,7 +130,6 @@ namespace Alexandria.ItemAPI
             };
         }
 
-        // Token: 0x060000C1 RID: 193 RVA: 0x000084E4 File Offset: 0x000066E4
         public static void AssignDirectionalAnimation(this AIAnimator aiAnimator, string name, DirectionalAnimation animation, CompanionBuilder.AnimationType type)
         {
             switch (type)
@@ -167,13 +163,10 @@ namespace Alexandria.ItemAPI
             }
         }
 
-        // Token: 0x04000054 RID: 84
         private static GameObject behaviorSpeculatorPrefab;
 
-        // Token: 0x04000055 RID: 85
         public static Dictionary<string, GameObject> companionDictionary = new Dictionary<string, GameObject>();
 
-        // Token: 0x02000063 RID: 99
         public enum AnimationType
         {
             // Token: 0x0400012F RID: 303

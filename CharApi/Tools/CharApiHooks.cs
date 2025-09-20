@@ -88,11 +88,6 @@ namespace Alexandria.CharacterAPI
                     typeof(PlayerController).GetMethod("DoGhostBlank", BindingFlags.Instance | BindingFlags.NonPublic),
                     typeof(Hooks).GetMethod("DoGhostBlankHook", BindingFlags.Static | BindingFlags.Public)
                 );
-
-                Hook GetBaseAnimationNameHook = new Hook(
-                    typeof(PlayerController).GetMethod("GetBaseAnimationName", BindingFlags.Instance | BindingFlags.NonPublic),
-                    typeof(Hooks).GetMethod("GetBaseAnimationNameHook", BindingFlags.Static | BindingFlags.Public)
-                );
             }
             catch (Exception e)
             {
@@ -110,7 +105,6 @@ namespace Alexandria.CharacterAPI
               instr => instr.MatchLdarg(0),
               instr => instr.MatchLdfld<PlayerController>("characterIdentity")))
             {
-                System.Console.WriteLine($"patching in {il.Method.Name}");
                 cursor.Emit(OpCodes.Ldarg_0);
                 cursor.CallPrivate(typeof(Hooks), nameof(TreatZeroHealthCharacterAsRobot));
             }
@@ -128,7 +122,6 @@ namespace Alexandria.CharacterAPI
               instr => instr.MatchLdfld(original.DeclaringType.FullName, thisField.Name),
               instr => instr.MatchLdfld<PlayerController>("characterIdentity")))
             {
-                System.Console.WriteLine($"patching in {il.Method.Name}");
                 cursor.Emit(OpCodes.Ldarg_0);
                 cursor.Emit(OpCodes.Ldfld, thisField);
                 cursor.CallPrivate(typeof(Hooks), nameof(TreatZeroHealthCharacterAsRobot));
@@ -456,14 +449,12 @@ namespace Alexandria.CharacterAPI
             }
         }
 
-        public delegate TResult Func<T1, T2, T3, T4, T5, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
-        public static string GetBaseAnimationNameHook(Func<PlayerController, Vector2, float, bool, bool, string> orig, PlayerController self, Vector2 v, float gunAngle, bool invertThresholds = false, bool forceTwoHands = false)
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.GetBaseAnimationName))]
+        [HarmonyPostfix]
+        private static void PlayerControllerGetBaseAnimationNamePatch(PlayerController __instance, ref string __result)
         {
-            string s = self.gameObject?.GetComponent<CustomCharacter>()?.overrideAnimation;
-            if (!string.IsNullOrEmpty(s))
-                return s;
-            return orig(self, v, gunAngle, invertThresholds, forceTwoHands);
-
+            if (__instance.gameObject.GetComponent<CustomCharacter>() is CustomCharacter cc && !string.IsNullOrEmpty(cc.overrideAnimation))
+                __result = cc.overrideAnimation;
         }
 
         public static void DoGhostBlankHook(Action<PlayerController> orig, PlayerController self)

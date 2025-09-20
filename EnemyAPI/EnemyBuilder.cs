@@ -6,7 +6,6 @@ using System.Text;
 using Alexandria.ItemAPI;
 using Alexandria.Misc;
 using UnityEngine;
-using MonoMod.RuntimeDetour;
 using Brave.BulletScript;
 using DirectionType = DirectionalAnimation.DirectionType;
 using FlipType = DirectionalAnimation.FlipType;

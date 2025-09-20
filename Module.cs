@@ -57,7 +57,6 @@ namespace Alexandria
                 //Low Priority
                 ChamberGunAPI.Init();
                 AlexandriaTags.InitGenericTagsInternal();
-                ChestSpawnHelper.Init();
                 Commands.Init();
                 BreachShopTools.Init();
 

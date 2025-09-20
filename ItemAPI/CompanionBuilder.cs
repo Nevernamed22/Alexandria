@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Gungeon;
-using MonoMod.RuntimeDetour;
 using UnityEngine;
 using Alexandria.Misc;
 using HarmonyLib;

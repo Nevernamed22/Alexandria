@@ -1,5 +1,4 @@
 ﻿using Dungeonator;
-using MonoMod.RuntimeDetour;
 using System;
 using System.Collections.Generic;
 using System.Linq;

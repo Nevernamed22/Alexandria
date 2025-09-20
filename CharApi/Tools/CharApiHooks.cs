@@ -5,7 +5,6 @@ using System.Text;
 using System.Reflection;
 
 using UnityEngine;
-using MonoMod.RuntimeDetour;
 using Object = UnityEngine.Object;
 using IEnumerator = System.Collections.IEnumerator;
 

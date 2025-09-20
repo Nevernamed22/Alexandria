@@ -1,5 +1,4 @@
 ﻿using Alexandria.ItemAPI;
-using MonoMod.RuntimeDetour;
 using System;
 using System.Collections;
 using System.Collections.Generic;

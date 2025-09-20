@@ -1,6 +1,5 @@
 ﻿using Alexandria.Misc;
 using Dungeonator;
-using MonoMod.RuntimeDetour;
 using System;
 using System.Collections;
 using System.Collections.Generic;

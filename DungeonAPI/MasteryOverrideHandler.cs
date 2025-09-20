@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Text;
 using Alexandria.Misc;
 using Dungeonator;
-using MonoMod.RuntimeDetour;
 using UnityEngine;
 
 using HarmonyLib;

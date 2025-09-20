@@ -1,5 +1,4 @@
 ﻿using Dungeonator;
-using MonoMod.RuntimeDetour;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,17 +9,11 @@ namespace Alexandria.ChestAPI
 {
 	public static class ChestSpawnHelper
 	{
-		public static void Init()
-		{
-			//var ConfigureOnPlacementHook = new Hook(
-			//		typeof(FloorChestPlacer).GetMethod("ConfigureOnPlacement", BindingFlags.Instance | BindingFlags.Public),
-			//		typeof(ChestSpawnHelper).GetMethod("ConfigureOnPlacementHook", BindingFlags.Static | BindingFlags.Public));
-		}
+		[Obsolete("This method does nothing and exists for backwards compatibility only.", false)]
+		public static void Init() { }
 
-		public static void RegisterCustomChest(Chest chest, float weight = 1)
-		{
-
-		}
+		[Obsolete("This method does nothing and exists for backwards compatibility only.", false)]
+		public static void RegisterCustomChest(Chest chest, float weight = 1) { }
 
 		//d 0.25
 		//c 0.32
@@ -28,11 +21,8 @@ namespace Alexandria.ChestAPI
 		//a 0.09
 		//s 0.04
 
-
 		public static void ConfigureOnPlacementHook(Action<FloorChestPlacer, RoomHandler> orig, FloorChestPlacer self, RoomHandler room)
 		{
-
-
 			FloorRewardData rewardDataForFloor = GameManager.Instance.RewardManager.GetRewardDataForFloor2(GameManager.Instance.BestGenerationDungeonPrefab.tileIndices.tilesetId);
 			bool forceDChanceZero = StaticReferenceManager.DChestsSpawnedInTotal >= 2;
 

@@ -6,7 +6,6 @@ using System.Text;
 using System.Reflection;
 
 using UnityEngine;
-using MonoMod.RuntimeDetour;
 using ChangeCoopMode = HutongGames.PlayMaker.Actions.ChangeCoopMode;
 using InputDevice = InControl.InputDevice;
 

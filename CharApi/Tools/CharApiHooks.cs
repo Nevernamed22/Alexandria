@@ -99,11 +99,6 @@ namespace Alexandria.CharacterAPI
                     typeof(Hooks).GetMethod("GetBaseAnimationNameHook", BindingFlags.Static | BindingFlags.Public)
                 );
 
-                Hook ChangeSpecialShaderFlagHook = new Hook(
-                    typeof(PlayerController).GetMethod("ChangeSpecialShaderFlag", BindingFlags.Instance | BindingFlags.Public),
-                    typeof(Hooks).GetMethod("ChangeSpecialShaderFlagHook", BindingFlags.Static | BindingFlags.Public)
-                );
-
                 Hook GetDeathPortraitNameHook = new Hook(
                     typeof(AmmonomiconDeathPageController).GetMethod("GetDeathPortraitName", BindingFlags.Instance | BindingFlags.NonPublic),
                     typeof(Hooks).GetMethod("GetDeathPortraitNameHook", BindingFlags.Static | BindingFlags.NonPublic)
@@ -555,47 +550,47 @@ namespace Alexandria.CharacterAPI
 
         }
 
-        //stupid janky hooks that only exist so we can have things glow >:|
-        public static void ChangeSpecialShaderFlagHook(Action<PlayerController, int, float> orig, PlayerController self, int flagIndex, float val)
+        private static bool IsCustomCharacter(this PlayerController player)
         {
-            if ((int)self.characterIdentity > 10 && self.gameObject.GetComponent<CustomCharacter>())
+            return player.characterIdentity > PlayableCharacters.Gunslinger;
+        }
+
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.ChangeSpecialShaderFlag))]
+        [HarmonyPrefix]
+        private static void PlayerControllerChangeSpecialShaderFlagPatch(PlayerController __instance, int flagIndex, float val)
+        {
+            if (!__instance.IsCustomCharacter())
+                return;
+            if (__instance.gameObject.GetComponent<CustomCharacter>() is not CustomCharacter cc)
+                return;
+
+            Texture spriteTexture = __instance.sprite.renderer.material.GetTexture("_MainTex");
+            if (val == 0)
             {
-                if (val == 0)
+                if (cc.data.useGlow)
                 {
-                    if (self.gameObject.GetComponent<CustomCharacter>().data.useGlow)
+                    if (__instance.IsUsingAlternateCostume && cc.data.altGlowMaterial is Material altGlowMaterial)
                     {
-                        if (self.IsUsingAlternateCostume && self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial != null)
-                        {
-                            if (self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial.GetTexture("_MainTex") != self.sprite.renderer.material.GetTexture("_MainTex"))
-                            {
-                                self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial.SetTexture("_MainTexture", self.sprite.renderer.material.GetTexture("_MainTex"));
-                            }
-                            self.sprite.renderer.material = self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial;
-                        }
-                        else if (self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial != null)
-                        {
-                            if (self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial.GetTexture("_MainTex") != self.sprite.renderer.material.GetTexture("_MainTex"))
-                            {
-                                self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial.SetTexture("_MainTexture", self.sprite.renderer.material.GetTexture("_MainTex"));
-                            }
-                            self.sprite.renderer.material = self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial;
-                        }
-                        else
-                        {
-                            ETGModConsole.Log($"[Charapi]: glow material NULLED");
-                        }
+                        if (altGlowMaterial.GetTexture("_MainTex") != spriteTexture)
+                            altGlowMaterial.SetTexture("_MainTexture", spriteTexture);
+                        __instance.sprite.renderer.material = altGlowMaterial;
                     }
-                }
-                else
-                {
-                    if (self.gameObject.GetComponent<CustomCharacter>().data.normalMaterial.GetTexture("_MainTex") != self.sprite.renderer.material.GetTexture("_MainTex"))
+                    else if (cc.data.glowMaterial is Material glowMaterial)
                     {
-                        self.gameObject.GetComponent<CustomCharacter>().data.normalMaterial.SetTexture("_MainTexture", self.sprite.renderer.material.GetTexture("_MainTex"));
+                        if (glowMaterial.GetTexture("_MainTex") != spriteTexture)
+                            glowMaterial.SetTexture("_MainTexture", spriteTexture);
+                        __instance.sprite.renderer.material = glowMaterial;
                     }
-                    self.sprite.renderer.material = self.gameObject.GetComponent<CustomCharacter>().data.normalMaterial;
+                    else
+                        ETGModConsole.Log($"[Charapi]: glow material NULLED");
                 }
             }
-            orig(self, flagIndex, val);
+            else
+            {
+                if (cc.data.normalMaterial.GetTexture("_MainTex") != spriteTexture)
+                    cc.data.normalMaterial.SetTexture("_MainTexture", spriteTexture);
+                __instance.sprite.renderer.material = cc.data.normalMaterial;
+            }
         }
 
         public static void RegisterOverrideColorHook(Action<GameActor, Color, string> orig, GameActor self, Color overrideColor, string source)

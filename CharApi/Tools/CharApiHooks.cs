@@ -27,11 +27,6 @@ namespace Alexandria.CharacterAPI
         {
             try
             {
-                Hook getValueHook = new Hook(
-                    typeof(dfLanguageManager).GetMethod("GetValue", BindingFlags.Public | BindingFlags.Instance),
-                    typeof(Hooks).GetMethod("GetValueHook")
-                );
-
                 Hook foyerCallbacksHook = new Hook(
                    typeof(Foyer).GetMethod("SetUpCharacterCallbacks", BindingFlags.NonPublic | BindingFlags.Instance),
                    typeof(Hooks).GetMethod("FoyerCallbacks2")
@@ -491,62 +486,19 @@ namespace Alexandria.CharacterAPI
             return false;
         }
 
-        #region Dumb Bad Hooks
-
-        public static void InteractHook(Action<ArkController, PlayerController> orig, ArkController self, PlayerController interactor)
+        [HarmonyPatch(typeof(dfLanguageManager), nameof(dfLanguageManager.GetValue))]
+        [HarmonyPrefix]
+        private static bool dfLanguageManagerGetValuePatch(dfLanguageManager __instance, string key, ref string __result)
         {
-
-            if ((int)interactor.characterIdentity > 10 && ETGModMainBehaviour.Instance.gameObject.GetComponent("CharApiHiveMind") != null)
+            if (!characterDeathNames.Contains(key))
+                return true;
+            PlayerController player = GameManager.Instance.PrimaryPlayer;
+            if (player && player.GetComponent<CustomCharacter>() is CustomCharacter cc && cc.data != null)
             {
-                FieldInfo _hasBeenInteracted = typeof(ArkController).GetField("m_hasBeenInteracted", BindingFlags.NonPublic | BindingFlags.Instance);
-
-                SpriteOutlineManager.RemoveOutlineFromSprite(self.sprite, false);
-                SpriteOutlineManager.RemoveOutlineFromSprite(self.LidAnimator.sprite, false);
-                if (!(bool)_hasBeenInteracted.GetValue(self))
-                {
-                    _hasBeenInteracted.SetValue(self, true);
-                }
-                for (int i = 0; i < GameManager.Instance.AllPlayers.Length; i++)
-                {
-                    GameManager.Instance.AllPlayers[i].RemoveBrokenInteractable(self);
-                }
-                BraveInput.DoVibrationForAllPlayers(Vibration.Time.Normal, Vibration.Strength.Medium);
-                if (GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER)
-                {
-                    PlayerController otherPlayer = GameManager.Instance.GetOtherPlayer(interactor);
-                    float num = Vector2.Distance(otherPlayer.CenterPosition, interactor.CenterPosition);
-                    if (num > 8f || num < 0.75f)
-                    {
-                        Vector2 a = Vector2.right;
-                        if (interactor.CenterPosition.x < self.ChestAnimator.sprite.WorldCenter.x)
-                        {
-                            a = Vector2.left;
-                        }
-                        otherPlayer.WarpToPoint(otherPlayer.transform.position.XY() + a * 2f, true, false);
-                    }
-                }
-                var comp = ETGModMainBehaviour.Instance.gameObject.GetComponent("CharApiHiveMind");
-
-                self.StartCoroutine(comp.GetType().GetMethod("Open", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { self, interactor }) as IEnumerator);
+                __result = cc.name;
+                return false;
             }
-            else
-            {
-                orig(self, interactor);
-            }
-        }
-        #endregion
-        //Hook for Punchout UI being updated (called when UI updates)
-
-        public static string GetValueHook(Func<dfLanguageManager, string, string> orig, dfLanguageManager self, string key)
-        {
-            if (characterDeathNames.Contains(key))
-            {
-                if (GameManager.Instance.PrimaryPlayer != null && GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>() != null && GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data != null)
-                {
-                    return GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data.name;
-                }
-            }
-            return orig(self, key);
+            return true;
         }
 
         //Triggers FoyerCharacterHandler (called from Foyer.SetUpCharacterCallbacks)

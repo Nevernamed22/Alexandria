@@ -137,11 +137,6 @@ namespace Alexandria.CharacterAPI
                     typeof(Hooks).GetMethod("HandleCloneEffectHook", BindingFlags.Static | BindingFlags.Public)
                 );
 
-                Hook DarkSoulsResetHook = new Hook(
-                    typeof(PlayerController).GetMethod("TriggerDarkSoulsReset", BindingFlags.Instance | BindingFlags.Public),
-                    typeof(Hooks).GetMethod("TriggerDarkSoulsResetHook", BindingFlags.Static | BindingFlags.Public)
-                );
-
                 Hook CoopResurrectInternalHook = new Hook(
                     typeof(PlayerController).GetMethod("CoopResurrectInternal", BindingFlags.Instance | BindingFlags.NonPublic),
                     typeof(Hooks).GetMethod("CoopResurrectInternalHook", BindingFlags.Static | BindingFlags.Public)
@@ -236,8 +231,9 @@ namespace Alexandria.CharacterAPI
         }
 
         [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.ResetToFactorySettings))]
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.TriggerDarkSoulsReset))]
         [HarmonyILManipulator]
-        private static void PlayerControllerResetToFactorySettingsPatchIL(ILContext il)
+        private static void EnsureZeroHealthCharactersAreTreatedLikeRobotIL(ILContext il)
         {
             ILCursor cursor = new ILCursor(il);
             if (!cursor.TryGotoNext(MoveType.After,
@@ -256,38 +252,6 @@ namespace Alexandria.CharacterAPI
             return actualId;
         }
 
-        public static void TriggerDarkSoulsResetHook(Action<PlayerController, bool, int> orig, PlayerController self, bool dropItems = true, int cursedHealthMaximum = 1)
-        {
-            self.IsOnFire = false;
-            self.CurrentFireMeterValue = 0f;
-            self.CurrentPoisonMeterValue = 0f;
-            self.CurrentCurseMeterValue = 0f;
-            self.CurrentDrainMeterValue = 0f;
-            AkSoundEngine.PostEvent("Stop_OBJ_paydaydrill_loop_01", GameManager.Instance.gameObject);
-            if (GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER && !GameManager.Instance.GetOtherPlayer(self).IsGhost)
-            {
-                self.DropPileOfSouls();
-                self.HandleDarkSoulsHollowTransition(true);
-                self.StartCoroutine(self.HandleCoopDeath(self.m_isFalling));
-            }
-            else
-            {
-                self.m_interruptingPitRespawn = true;
-                self.healthHaver.FullHeal();
-                if (self.ForceZeroHealthState == true)
-                {
-                    self.healthHaver.Armor = 2f;
-                }
-                self.specRigidbody.Velocity = Vector2.zero;
-                self.knockbackDoer.TriggerTemporaryKnockbackInvulnerability(1f);
-                if (self.m_returnTeleporter != null)
-                {
-                    self.m_returnTeleporter.ClearReturnActive();
-                    self.m_returnTeleporter = null;
-                }
-                GameManager.Instance.Dungeon.DarkSoulsReset(self, dropItems, cursedHealthMaximum);
-            }
-        }
         public static IEnumerator HandleCloneEffectHook(Func<PlayerController, IEnumerator> orig, PlayerController self)
         {
             Pixelator.Instance.FadeToBlack(0.5f, false, 0f);

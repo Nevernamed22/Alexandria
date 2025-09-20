@@ -26,27 +26,10 @@ namespace Alexandria.CharacterAPI
         {
             try
             {
-
-                /*Hook getNicknamehook = new Hook(
-				    typeof(StringTableManager).GetMethod("GetTalkingPlayerNick", BindingFlags.NonPublic | BindingFlags.Static),
-				    typeof(Hooks).GetMethod("GetTalkingPlayerNickHook")
-				);
-
-				Hook getNamehook = new Hook(
-				    typeof(StringTableManager).GetMethod("GetTalkingPlayerName", BindingFlags.NonPublic | BindingFlags.Static),
-				   typeof(Hooks).GetMethod("GetTalkingPlayerNameHook")
-				);*/
-
                 Hook getValueHook = new Hook(
                     typeof(dfLanguageManager).GetMethod("GetValue", BindingFlags.Public | BindingFlags.Instance),
                     typeof(Hooks).GetMethod("GetValueHook")
                 );
-
-
-                /*Hook punchoutUIHook = new Hook(
-					typeof(PunchoutPlayerController).GetMethod("UpdateUI", BindingFlags.Public | BindingFlags.Instance),
-					typeof(Hooks).GetMethod("PunchoutUpdateUI")
-				); */
 
                 Hook foyerCallbacksHook = new Hook(
                    typeof(Foyer).GetMethod("SetUpCharacterCallbacks", BindingFlags.NonPublic | BindingFlags.Instance),
@@ -74,10 +57,6 @@ namespace Alexandria.CharacterAPI
                     typeof(Hooks).GetMethod("OnPlayerChanged")
                 );
                 Debug.Log("charapi hooks: 2");
-                //Hook clearP1Hook = new Hook(
-                //	typeof(ETGModConsole).GetMethod("SwitchCharacter", BindingFlags.NonPublic | BindingFlags.Instance),
-                //	typeof(Hooks).GetMethod("PrimaryPlayerSwitched")
-                //);
 
                 Hook clearP2Hook = new Hook(
                     typeof(GameManager).GetMethod("ClearSecondaryPlayer", BindingFlags.Public | BindingFlags.Instance),
@@ -88,16 +67,6 @@ namespace Alexandria.CharacterAPI
                     typeof(AmmonomiconDeathPageController).GetMethod("SetWinPic", BindingFlags.Instance | BindingFlags.NonPublic),
                     typeof(Hooks).GetMethod("SetWinPicHook", BindingFlags.Static | BindingFlags.NonPublic)
                 );
-
-                //Hook interactHook = new Hook(
-                //	typeof(ArkController).GetMethod("Interact", BindingFlags.Instance | BindingFlags.Public),
-                //	typeof(Hooks).GetMethod("InteractHook", BindingFlags.Static | BindingFlags.Public)
-                //);
-
-                //Hook getNumMetasToQuickRestartHook = new Hook(
-                //	typeof(AmmonomiconDeathPageController).GetMethod("GetNumMetasToQuickRestart", BindingFlags.Static | BindingFlags.Public),
-                //	typeof(Hooks).GetMethod("GetNumMetasToQuickRestartHook", BindingFlags.Static | BindingFlags.Public)
-                //);
 
                 Hook updateHook = new Hook(
                     typeof(CharacterSelectIdleDoer).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic),
@@ -129,43 +98,6 @@ namespace Alexandria.CharacterAPI
                     typeof(Hooks).GetMethod("GetBaseAnimationNameHook", BindingFlags.Static | BindingFlags.Public)
                 );
 
-                /*Hook GetPlayerStatValueHook = new Hook(
-					typeof(GameStatsManager).GetMethod("GetPlayerStatValue", BindingFlags.Instance | BindingFlags.Public),
-					typeof(Hooks).GetMethod("GetPlayerStatValueHook", BindingFlags.Static | BindingFlags.Public)
-				);
-
-				Hook ClearStatValueGlobalHook = new Hook(
-					typeof(GameStatsManager).GetMethod("ClearStatValueGlobal", BindingFlags.Instance | BindingFlags.Public),
-					typeof(Hooks).GetMethod("ClearStatValueGlobalHook", BindingFlags.Static | BindingFlags.Public)
-				);
-
-
-				Hook LoadOptionHook = new Hook(
-					typeof(GameOptions).GetMethod("Load", BindingFlags.Static | BindingFlags.Public),
-					typeof(Hooks).GetMethod("LoadOptionHook", BindingFlags.Static | BindingFlags.Public)
-				);
-
-				Hook SaveOptionsHook = new Hook(
-					typeof(GameOptions).GetMethod("Save", BindingFlags.Static | BindingFlags.Public),
-					typeof(Hooks).GetMethod("SaveOptionsHook", BindingFlags.Static | BindingFlags.Public)
-				);
-
-				Hook ClearOverheadElementHook = new Hook(
-					typeof(FoyerCharacterSelectFlag).GetMethod("ClearOverheadElement", BindingFlags.Instance | BindingFlags.Public),
-					typeof(Hooks).GetMethod("ClearOverheadElementHook", BindingFlags.Static | BindingFlags.Public)
-				);
-
-				
-
-				Hook RegisterOverrideColorHook = new Hook(
-					typeof(GameActor).GetMethod("RegisterOverrideColor", BindingFlags.Instance | BindingFlags.Public),
-					typeof(Hooks).GetMethod("RegisterOverrideColorHook", BindingFlags.Static | BindingFlags.Public)
-				);
-				Hook DeregisterOverrideColorHook = new Hook(
-					typeof(GameActor).GetMethod("DeregisterOverrideColorHook", BindingFlags.Instance | BindingFlags.Public),
-					typeof(Hooks).GetMethod("DeregisterOverrideColor", BindingFlags.Static | BindingFlags.Public)
-				);*/
-
                 Hook ChangeSpecialShaderFlagHook = new Hook(
                     typeof(PlayerController).GetMethod("ChangeSpecialShaderFlag", BindingFlags.Instance | BindingFlags.Public),
                     typeof(Hooks).GetMethod("ChangeSpecialShaderFlagHook", BindingFlags.Static | BindingFlags.Public)
@@ -192,7 +124,6 @@ namespace Alexandria.CharacterAPI
                 );
 
                 Hook hook3 = new Hook(typeof(PlayerController).GetProperty("LocalShaderName", BindingFlags.Instance | BindingFlags.Public).GetGetMethod(), typeof(Hooks).GetMethod("LocalShaderNameGetHook"));
-                //BotsModule.Log("hooks done");
 
                 Hook punchoutUIHook = new Hook(
                     typeof(PunchoutPlayerController).GetMethod("UpdateUI", BindingFlags.Public | BindingFlags.Instance),
@@ -554,107 +485,6 @@ namespace Alexandria.CharacterAPI
             yield break;
         }
 
-
-        /*[HarmonyPatch(typeof(GameStatsManager), "Save")]
-		public class SaveHook
-		{
-
-			static Dictionary<PlayableCharacters, GameStats> thingsToRemove = new Dictionary<PlayableCharacters, GameStats>();
-
-			[HarmonyPrefix]
-			public static void Prefix()
-			{
-				if (!SaveFileBullShit.HasInstance)
-				{
-					SaveFileBullShit.Load();
-				}
-				thingsToRemove.Clear();
-				foreach (var characterStats in GameStatsManager.Instance.m_characterStats)
-				{
-
-					var character = characterStats.Key;
-					var stats = characterStats.Value;
-					if ((int)character > 10)
-					{
-						//ETGModConsole.Log($"Found character \"{character}\" moving them to the custom save file");
-						if (!SaveFileBullShit.Instance.m_customCharacterStats.ContainsKey((CustomPlayableCharacters)character))
-						{
-							SaveFileBullShit.Instance.m_customCharacterStats.Add((CustomPlayableCharacters)character, new GameStats());
-						}
-						else if (SaveFileBullShit.Instance.m_customCharacterStats.ContainsKey((CustomPlayableCharacters)character) && stats != null)
-						{
-							SaveFileBullShit.Instance.m_customCharacterStats[(CustomPlayableCharacters)character] = stats;
-						}
-						else if (SaveFileBullShit.Instance.m_customCharacterStats.ContainsKey((CustomPlayableCharacters)character) && stats == null)
-						{
-							SaveFileBullShit.Instance.m_customCharacterStats[(CustomPlayableCharacters)character] = new GameStats();
-						}
-						thingsToRemove.Add(character, SaveFileBullShit.Instance.m_customCharacterStats[(CustomPlayableCharacters)character]);
-					}
-
-				}
-				SaveFileBullShit.Save();
-				foreach (var character in thingsToRemove)
-				{
-					if (GameStatsManager.Instance.m_characterStats.ContainsKey(character.Key))
-					{
-						GameStatsManager.Instance.m_characterStats.Remove(character.Key);
-					}
-
-				}
-			}
-
-			public static void PostFix()
-			{
-				foreach (var character in thingsToRemove)
-				{
-					if (!GameStatsManager.Instance.m_characterStats.ContainsKey(character.Key))
-					{
-						GameStatsManager.Instance.m_characterStats.Add(character.Key, character.Value);
-					}
-
-				}
-			}
-		}
-
-		[HarmonyPatch(typeof(GameStatsManager), "Save")]
-		public class LoadHook
-		{
-			[HarmonyPrefix]
-			public static void Prefix()
-			{
-				if (!SaveFileBullShit.HasInstance)
-				{
-					SaveFileBullShit.Load();
-				}
-				//ETGModConsole.Log($"{SaveFileBullShit.Instance.m_customCharacterStats.Count} - {GameStatsManager.Instance.m_characterStats.Count}");
-				foreach (var characterStats in SaveFileBullShit.Instance.m_customCharacterStats)
-				{
-					var character = characterStats.Key;
-					var stats = characterStats.Value;
-					//ETGModConsole.Log($"Found custom character \"{character}\" adding them to m_characterStats");
-					if (!GameStatsManager.Instance.m_characterStats.ContainsKey((PlayableCharacters)character) && stats != null)
-					{
-						GameStatsManager.Instance.m_characterStats.Add((PlayableCharacters)character, stats);
-					}
-					else if (!GameStatsManager.Instance.m_characterStats.ContainsKey((PlayableCharacters)character) && stats == null)
-					{
-						GameStatsManager.Instance.m_characterStats.Add((PlayableCharacters)character, new GameStats());
-					}
-					else if (GameStatsManager.Instance.m_characterStats.ContainsKey((PlayableCharacters)character) && stats != null)
-					{
-						GameStatsManager.Instance.m_characterStats[(PlayableCharacters)character] = stats;
-					}
-					else if (GameStatsManager.Instance.m_characterStats.ContainsKey((PlayableCharacters)character) && stats == null)
-					{
-						GameStatsManager.Instance.m_characterStats[(PlayableCharacters)character] = new GameStats();
-					}
-
-				}
-			}
-		}*/
-
-
         public static void SwapToAlternateCostumeHook(Action<PlayerController, tk2dSpriteAnimation> orig, PlayerController self, tk2dSpriteAnimation overrideTargetLibrary = null)
         {
 
@@ -684,7 +514,6 @@ namespace Alexandria.CharacterAPI
 
             orig(self, overrideTargetLibrary);
         }
-
 
         public static void ProcessPlayerEnteredFoyerHook(Action<Foyer, PlayerController> orig, Foyer self, PlayerController p)
         {
@@ -830,13 +659,10 @@ namespace Alexandria.CharacterAPI
 
         public static void PunchoutUpdateUI(Action<PunchoutPlayerController> orig, PunchoutPlayerController self)
         {
-            //FieldInfo _PlayerUiNames = typeof(PunchoutPlayerController).GetField("PlayerUiNames", BindingFlags.NonPublic | BindingFlags.Static);
-
             if ((int)self.m_playerId > 7)
             {
                 string str = backUpUI[self.m_playerId];
 
-                //string str = (_PlayerUiNames.GetValue(null) as string[])[(int)self.m_playerId];
                 self.HealthBarUI.SpriteName = "punch_health_bar_001";
                 if (self.Health > 66f)
                 {
@@ -901,11 +727,6 @@ namespace Alexandria.CharacterAPI
                     _PlayerUiNames.SetValue(null, fuckFuckFuckShit.ToArray());
                 }
 
-                //ETGModConsole.Log(name);
-
-  
-
-
                 if (!backUp.Contains(name)) //.Contains(name)))
                 {
                     var fuckFuckFuck = (_PlayerNames.GetValue(null) as string[]).ToList();
@@ -922,22 +743,11 @@ namespace Alexandria.CharacterAPI
                     backUpUI = _PlayerUiNames.GetValue(null) as string[];
                 }
 
-
-                //Debug.Log("ID to change to: "+ ((_PlayerUiNames.GetValue(null) as string[]).Length - 1));
-
-                //ETGModConsole.Log("InitHook 1.5");
-                //ETGModConsole.Log(PunchoutPlayerController.PlayerNames.Length.ToString());
-                //ETGModConsole.Log($"[{(_PlayerUiNames.GetValue(null) as string[])[CustomCharacter.punchoutBullShit[name]]}]: {(_PlayerUiNames.GetValue(null) as string[]).Length} -=- {CustomCharacter.punchoutBullShit[name]}");
                 self.Player.CustomSwapPlayer(new int?(CustomCharacter.punchoutBullShit[name]), false);
-                //ETGModConsole.Log("InitHook 2");
-
                 self.CoopCultist.gameObject.SetActive(GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER);
-                //ETGModConsole.Log("InitHook 3");
                 self.StartCoroutine(self.GetType().GetMethod("UiFadeInCR", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(self, null) as IEnumerator);
                 _isInitialized.SetValue(self, true);
                 self.Player.sprite.usesOverrideMaterial = true;
-
-
 
                 bool hasMat = false;
                 if ((int)GameManager.Instance.PrimaryPlayer?.characterIdentity > 10 && CCC != null)
@@ -972,8 +782,6 @@ namespace Alexandria.CharacterAPI
 
         private static void CustomSwapPlayer(this PunchoutPlayerController self, int? newPlayerIndex = null, bool keepEevee = false)
         {
-
-
             if (newPlayerIndex == null)
             {
                 if (self.IsEevee && !keepEevee)
@@ -1033,31 +841,6 @@ namespace Alexandria.CharacterAPI
             otherAnimations[0].anim.Type = DirectionalAnimation.DirectionType.None;
             otherAnimations[1].anim.Type = DirectionalAnimation.DirectionType.None;
             otherAnimations[2].anim.Type = DirectionalAnimation.DirectionType.None;
-            /*
-            if (self.m_playerId == 4)
-            {
-                otherAnimations[0].anim.Type = DirectionalAnimation.DirectionType.Single;
-                otherAnimations[0].anim.Prefix = "bullet_super_vfx";
-                otherAnimations[1].anim.Type = DirectionalAnimation.DirectionType.Single;
-                otherAnimations[1].anim.Prefix = "bullet_super_final_vfx";
-            }
-            else if (self.m_playerId == 5)
-            {
-                otherAnimations[0].anim.Type = DirectionalAnimation.DirectionType.Single;
-                otherAnimations[0].anim.Prefix = "robot_super_vfx";
-                otherAnimations[1].anim.Type = DirectionalAnimation.DirectionType.Single;
-                otherAnimations[1].anim.Prefix = "robot_super_final_vfx";
-                otherAnimations[2].anim.Type = DirectionalAnimation.DirectionType.Single;
-                otherAnimations[2].anim.Prefix = "robot_knockout_vfx";
-            }
-            else if (self.m_playerId == 6)
-            {
-                otherAnimations[0].anim.Type = DirectionalAnimation.DirectionType.Single;
-                otherAnimations[0].anim.Prefix = "slinger_super_vfx";
-                otherAnimations[1].anim.Type = DirectionalAnimation.DirectionType.Single;
-                otherAnimations[1].anim.Prefix = "slinger_super_final_vfx";
-            }
-            */
         }
 
 
@@ -1067,7 +850,6 @@ namespace Alexandria.CharacterAPI
         {
             if ((int)GameManager.Instance.PrimaryPlayer.characterIdentity > 10 && GameManager.Instance.PrimaryPlayer.gameObject.GetComponent<CustomCharacter>() != null)
             {
-                //ETGModConsole.Log($"coop_page_death_{GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>().data.nameShort.ToLower()}_001");
                 return $"coop_page_death_{GameManager.Instance.PrimaryPlayer.gameObject.GetComponent<CustomCharacter>().data.nameShort.ToLower()}_001";
 
             }
@@ -1077,51 +859,6 @@ namespace Alexandria.CharacterAPI
             }
 
         }
-
-
-
-
-
-        /*public static bool SaveOptionsHook(Func<GameOptions, bool> orig)
-		{
-			ETGModConsole.Log($"Quick start character set to: \"{GameManager.Options.LastPlayedCharacter}\"");
-
-			if (!SaveFileBullShit.HasInstance)
-			{
-				SaveFileBullShit.Load();
-			}
-
-			if ((int)SaveFileBullShit.Instance.customLastPlayedCharacter > 10)
-			{
-				GameManager.Options.LastPlayedCharacter = (PlayableCharacters)SaveFileBullShit.Instance.customLastPlayedCharacter;
-			} 
-			
-
-			SaveFileBullShit.Save();
-
-			return orig(GameManager.Options);
-		}
-
-		public static void LoadOptionHook(Action<GameOptions> orig)
-		{
-			orig(GameManager.Options);
-
-			if (!SaveFileBullShit.HasInstance)
-			{
-				SaveFileBullShit.Load();
-			}
-
-			if ((int)SaveFileBullShit.Instance.customLastPlayedCharacter > 10)
-			{
-				GameManager.Options.LastPlayedCharacter = (PlayableCharacters)SaveFileBullShit.Instance.customLastPlayedCharacter;
-			}
-
-			//if ((int)SaveFileBullShit.Instance.customLastPlayedCharacter > 10)
-            //{
-				GameManager.Options.LastPlayedCharacter = (PlayableCharacters)SaveFileBullShit.Instance.customLastPlayedCharacter;
-			//}
-			
-		}*/
 
         //stupid janky hooks that only exist so we can have things glow >:|
         public static void ChangeSpecialShaderFlagHook(Action<PlayerController, int, float> orig, PlayerController self, int flagIndex, float val)
@@ -1168,21 +905,15 @@ namespace Alexandria.CharacterAPI
 
         public static void RegisterOverrideColorHook(Action<GameActor, Color, string> orig, GameActor self, Color overrideColor, string source)
         {
-            //
             if (self is PlayerController && (int)(self as PlayerController).characterIdentity > 10 && self.gameObject.GetComponent<CustomCharacter>() != null)
             {
-                //ETGModConsole.Log($"[Charapi]: (RegisterOverrideColorHook) 1");
-                //self.gameObject.GetComponent<CustomCharacter>().data.normalMaterial.SetTexture("_MainTexture", self.sprite.renderer.material.GetTexture("_MainTex"));
                 if (self.gameObject.GetComponent<CustomCharacter>().data == null)
                 {
-                    //ETGModConsole.Log($"[Charapi]: custom character data nulled... thats really bad");
                     if (!self.gameObject.GetComponent<CustomCharacter>().GetData())
                     {
                         ETGModConsole.Log($"[Charapi]: custom character data nulled... seems it dosent exists... fuck!");
                     }
-                    //ETGModConsole.Log($"[Charapi]: (RegisterOverrideColorHook) 2");
                 }
-                //ETGModConsole.Log($"[Charapi]: (RegisterOverrideColorHook) 3");
 
                 for (int i = 0; i < self.healthHaver.bodySprites.Count; i++)
                 {
@@ -1191,19 +922,7 @@ namespace Alexandria.CharacterAPI
                         self.healthHaver.bodySprites[i].usesOverrideMaterial = true;
                         self.healthHaver.bodySprites[i].renderer.material = self.gameObject.GetComponent<CustomCharacter>().data.normalMaterial;
                     }
-                    else
-                    {
-                        //ETGModConsole.Log($"[Charapi]: i hate you");
-                    }
                 }
-
-                if (self.renderer == null)
-                {
-                    //ETGModConsole.Log($"[Charapi]: i hate you");
-                }
-
-                //self.renderer.material = self.gameObject.GetComponent<CustomCharacter>().data.normalMaterial;
-                //ETGModConsole.Log($"[Charapi]: (RegisterOverrideColorHook) 4");
             }
             orig(self, overrideColor, source);
         }
@@ -1233,8 +952,6 @@ namespace Alexandria.CharacterAPI
             }
         }
 
-
-
         public static float GetPlayerStatValueHook(Func<GameStatsManager, TrackedStats, float> orig, GameStatsManager self, TrackedStats stat)
         {
             float statValue = orig(self, stat);
@@ -1247,19 +964,8 @@ namespace Alexandria.CharacterAPI
                     {
                         statValue += whydodgerollmustyouhurtmelikethis.Value.GetStatValue(stat);
                     }
-
-                    // statValue += whydodgerollmustyouhurtmelikethis.Value.GetStatValue(stat);					
                 }
             }
-            /*
-			foreach (var character in Loader.myPlayableCharacters)
-			{
-				GameStats gameStats;
-				if (self.m_characterStats.TryGetValue(character, out gameStats))
-				{
-					statValue += gameStats.GetStatValue(stat);
-				}
-			}*/
             return statValue;
         }
 
@@ -1327,61 +1033,6 @@ namespace Alexandria.CharacterAPI
             {
                 orig(self);
             }
-
-            //if (action != null)
-            //{
-            //
-            //}
-            // else 
-            //{
-            //	call orig
-            /*}
-
-			if (ghostProj == null)
-            {
-				ghostProj = UnityEngine.Object.Instantiate<Projectile>((PickupObjectDatabase.GetById(15) as Gun).DefaultModule.projectiles[0]);
-				ghostProj.gameObject.SetActive(false);
-
-				ghostProj.baseData.speed = 50;
-				ghostProj.baseData.UsesCustomAccelerationCurve = true;
-				ghostProj.baseData.AccelerationCurve = new AnimationCurve
-				{
-					postWrapMode = WrapMode.Clamp,
-					preWrapMode = WrapMode.Clamp,
-					keys = new Keyframe[]
-					{
-					new Keyframe
-					{
-						time = 0f,
-						value = 0f,
-						inTangent = 0f,
-						outTangent = 0f
-					},
-					new Keyframe
-					{
-						time = 1f,
-						value = 1f,
-						inTangent = 2f,
-						outTangent = 2f
-					},
-					}
-				};
-				ghostProj.baseData.CustomAccelerationCurveDuration = 0.3f;
-				ghostProj.baseData.IgnoreAccelCurveTime = 0f;
-				ghostProj.shouldRotate = true;
-				ghostProj.SetProjectileSpriteRight("lost_ghost_blank_proj", 9, 7, true, tk2dBaseSprite.Anchor.LowerLeft);
-			}
-			self.QueueSpecificAnimation("ghost_sneeze_right");		
-			for (int i = 0; i < 8; i++)
-			{
-				//BotsModule.Log(i + ": proj hopefully spawned");
-				GameObject gameObject = SpawnManager.SpawnProjectile(ghostProj.gameObject, self.specRigidbody.UnitCenter, Quaternion.Euler(0f, 0f, i * 45), true);
-				gameObject.SetActive(true);
-				Projectile component = gameObject.GetComponent<Projectile>();
-				component.Owner = self;
-				component.Shooter = self.specRigidbody;
-			}
-			self.m_blankCooldownTimer = 5f;*/
         }
         private static void UpdateHook(Action<CharacterSelectIdleDoer> orig, CharacterSelectIdleDoer self)
         {
@@ -1438,9 +1089,6 @@ namespace Alexandria.CharacterAPI
 
         public static QuickRestartOptions GetNumMetasToQuickRestartHook(Func<QuickRestartOptions> orig)
         {
-
-
-
             QuickRestartOptions result = orig();
 
             for (int i = 0; i < GameManager.Instance.AllPlayers.Length; i++)
@@ -1504,30 +1152,6 @@ namespace Alexandria.CharacterAPI
 
         #endregion
         //Hook for Punchout UI being updated (called when UI updates)
-
-
-        /*public static void PunchoutUpdateUI(Action<PunchoutPlayerController> orig, PunchoutPlayerController self)
-        {
-            orig(self);
-
-			if (!ab)
-            {
-				CollectionDumper.DumpAnimation(self.spriteAnimator.Library);
-				ab = true;
-			}
-
-            var customChar = GameManager.Instance.PrimaryPlayer.GetComponent<CustomCharacter>();
-            if (customChar != null)
-            {
-                char index = self.PlayerUiSprite.SpriteName.Last();
-                SpriteHandler.HandlePunchoutSprites(self, customChar.data);
-                if (customChar.data.punchoutFaceCards != null)
-                {
-                    self.PlayerUiSprite.SpriteName = customChar.data.nameInternal + "_punchout_facecard" + index;
-                    ToolsCharApi.Print(self.PlayerUiSprite.SpriteName);
-                }
-            }
-        }*/
 
         public static string GetTalkingPlayerNickHook(Func<string> orig)
         {

@@ -83,11 +83,6 @@ namespace Alexandria.CharacterAPI
                     typeof(FoyerCharacterSelectFlag).GetMethod("OnSelectedCharacterCallback", BindingFlags.Instance | BindingFlags.Public),
                     typeof(Hooks).GetMethod("OnSelectedCharacterCallbackHook", BindingFlags.Static | BindingFlags.Public)
                 );
-
-                Hook DoGhostBlankHook = new Hook(
-                    typeof(PlayerController).GetMethod("DoGhostBlank", BindingFlags.Instance | BindingFlags.NonPublic),
-                    typeof(Hooks).GetMethod("DoGhostBlankHook", BindingFlags.Static | BindingFlags.Public)
-                );
             }
             catch (Exception e)
             {
@@ -457,27 +452,21 @@ namespace Alexandria.CharacterAPI
                 __result = cc.overrideAnimation;
         }
 
-        public static void DoGhostBlankHook(Action<PlayerController> orig, PlayerController self)
+        //NOTE: i suspect this code doesn't work quite correctly, but i've ported it to harmony as-is
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.DoGhostBlank))]
+        [HarmonyPrefix]
+        private static bool PlayerControllerDoGhostBlankPatch(PlayerController __instance)
         {
             if (CharacterBuilder.storedCharacters.Count() > 0)
-            {
-                orig(self);
-                return;
-            }
-            var component = self.gameObject.GetComponent<CustomCharacter>();
-            if (component != null)
-            {
-                if (CharacterBuilder.storedCharacters[component.data.nameInternal.ToLower()].First.coopBlankReplacement != null)
-                {
-                    self.m_blankCooldownTimer = CharacterBuilder.storedCharacters[self.gameObject.GetComponent<CustomCharacter>()?.data.nameInternal.ToLower()].First.coopBlankReplacement(self);
-
-                }
-            }
-            else
-            {
-                orig(self);
-            }
+                return true;
+            if (__instance.gameObject.GetComponent<CustomCharacter>() is not CustomCharacter cc)
+                return true;
+            var coopBlankReplacement = CharacterBuilder.storedCharacters[cc.data.nameInternal.ToLower()].First.coopBlankReplacement;
+            if (coopBlankReplacement != null)
+                __instance.m_blankCooldownTimer = coopBlankReplacement(__instance);
+            return false;
         }
+
         private static void UpdateHook(Action<CharacterSelectIdleDoer> orig, CharacterSelectIdleDoer self)
         {
             if (self.GetComponent<CustomCharacterFoyerController>() != null && self.GetComponent<CustomCharacterFoyerController>().useGlow && self.sprite.renderer.material != self.GetComponent<CustomCharacterFoyerController>().data.glowMaterial)

@@ -73,7 +73,6 @@ namespace Alexandria
                 MasteryOverrideHandler.InitInternal();
 
                 //Character API
-                CharacterAPI.Hooks.Init();
                 ToolsCharApi.Init();
 
                 //cAPI

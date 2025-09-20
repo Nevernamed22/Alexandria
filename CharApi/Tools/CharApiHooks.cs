@@ -23,28 +23,8 @@ namespace Alexandria.CharacterAPI
     [HarmonyPatch]
     public static class Hooks
     {
-        public static void Init()
-        {
-            try
-            {
-                Debug.Log("charapi hooks: 1");
-
-                Hook playerSwitchHook = new Hook(
-                    typeof(Foyer).GetMethod("PlayerCharacterChanged", BindingFlags.Public | BindingFlags.Instance),
-                    typeof(Hooks).GetMethod("OnPlayerChanged")
-                );
-                Debug.Log("charapi hooks: 2");
-
-                Hook clearP2Hook = new Hook(
-                    typeof(GameManager).GetMethod("ClearSecondaryPlayer", BindingFlags.Public | BindingFlags.Instance),
-                    typeof(Hooks).GetMethod("OnP2Cleared")
-                );
-            }
-            catch (Exception e)
-            {
-                ToolsCharApi.PrintException(e);
-            }
-        }
+        [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
+        public static void Init() { }
 
         [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.ResetToFactorySettings))]
         [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.TriggerDarkSoulsReset))]
@@ -513,15 +493,17 @@ namespace Alexandria.CharacterAPI
                 __result = result.Second;
         }
 
-        public static void OnPlayerChanged(Action<Foyer, PlayerController> orig, Foyer self, PlayerController player)
+        [HarmonyPatch(typeof(Foyer), nameof(Foyer.PlayerCharacterChanged))]
+        [HarmonyPrefix]
+        private static void FoyerPlayerCharacterChangedPatch(Foyer __instance)
         {
             ResetInfiniteGuns();
-            orig(self, player);
         }
 
-        public static void OnP2Cleared(Action<GameManager> orig, GameManager self)
+        [HarmonyPatch(typeof(GameManager), nameof(GameManager.ClearSecondaryPlayer))]
+        [HarmonyPostfix]
+        private static void GameManagerClearSecondaryPlayerPatch(GameManager __instance)
         {
-            orig(self);
             ResetInfiniteGuns();
         }
 
@@ -547,8 +529,6 @@ namespace Alexandria.CharacterAPI
                 gunBackups.Remove(id);
 
         }
-        public static Hook getOrLoadByName_Hook;
-        public static Hook setWinPicHook;
 
         [HarmonyPatch(typeof(AmmonomiconDeathPageController), nameof(AmmonomiconDeathPageController.SetWinPic))]
         [HarmonyPostfix]
@@ -570,6 +550,25 @@ namespace Alexandria.CharacterAPI
                 __instance.photoSprite.Texture = cc.data.pastWinPic;
         }
 
+        /// <summary>Allows CharAPI characters to be saved / loaded properly by the elevator button.</summary>
+        [HarmonyPatch(typeof(MidGameSaveData), nameof(MidGameSaveData.GetPlayerOnePrefab))]
+        [HarmonyPrefix]
+        private static bool MidGameSaveDataGetPlayerOnePrefabPatch(MidGameSaveData __instance, ref GameObject __result)
+        {
+            PlayableCharacters id = __instance.playerOneData.CharacterIdentity;
+            if (id <= PlayableCharacters.Gunslinger)
+                return true;
+            foreach (var tup in CharacterBuilder.storedCharacters.Values)
+            {
+                if (tup.Second.GetComponent<PlayerController>().characterIdentity == id)
+                {
+                    __result = tup.Second;
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public static List<string> characterDeathNames = new List<string>
         {
             "#CHAR_ROGUE_SHORT",
@@ -582,7 +581,7 @@ namespace Alexandria.CharacterAPI
             "#CHAR_PARADOX_SHORT",
             "#CHAR_GUNSLINGER_SHORT"
         };
-        //static bool ab = false;
+
         public struct GunBackupData
         {
             public bool InfiniteAmmo,
@@ -591,27 +590,4 @@ namespace Alexandria.CharacterAPI
                 PreventStartingOwnerFromDropping;
         }
     }
-}
-
-/// <summary>Allows CharAPI characters to be saved / loaded properly by the elevator button.</summary>
-[HarmonyPatch]
-internal static class MidGameSaveDataGetPlayerOnePrefabPatcher
-{
-  [HarmonyPatch(typeof(MidGameSaveData), nameof(MidGameSaveData.GetPlayerOnePrefab))]
-  [HarmonyPrefix]
-  private static bool MidGameSaveDataGetPlayerOnePrefabPatch(MidGameSaveData __instance, ref GameObject __result)
-  {
-    PlayableCharacters id = __instance.playerOneData.CharacterIdentity;
-    if (id <= PlayableCharacters.Gunslinger)
-      return true;
-    foreach (var tup in Alexandria.CharacterAPI.CharacterBuilder.storedCharacters.Values)
-    {
-      if (tup.Second.GetComponent<PlayerController>().characterIdentity == id)
-      {
-        __result = tup.Second;
-        return false;
-      }
-    }
-    return true;
-  }
 }

@@ -104,11 +104,6 @@ namespace Alexandria.CharacterAPI
                     typeof(Hooks).GetMethod("InitHook", BindingFlags.Static | BindingFlags.Public)
                 );
 
-                Hook ProcessPlayerEnteredFoyerHook = new Hook(
-                    typeof(Foyer).GetMethod("ProcessPlayerEnteredFoyer", BindingFlags.Instance | BindingFlags.Public),
-                    typeof(Hooks).GetMethod("ProcessPlayerEnteredFoyerHook", BindingFlags.Static | BindingFlags.Public)
-                );
-
                 Hook punchoutUIHook = new Hook(
                     typeof(PunchoutPlayerController).GetMethod("UpdateUI", BindingFlags.Public | BindingFlags.Instance),
                     typeof(Hooks).GetMethod("PunchoutUpdateUI")
@@ -186,51 +181,31 @@ namespace Alexandria.CharacterAPI
             }
         }
 
-        public static void ProcessPlayerEnteredFoyerHook(Action<Foyer, PlayerController> orig, Foyer self, PlayerController p)
+        [HarmonyPatch(typeof(Foyer), nameof(Foyer.ProcessPlayerEnteredFoyer))]
+        [HarmonyPostfix]
+        private static void FoyerProcessPlayerEnteredFoyerPatch(Foyer __instance, PlayerController p)
         {
-            orig(self, p);
             if (Dungeon.ShouldAttemptToLoadFromMidgameSave && GameManager.Instance.IsLoadingLevel)
+                return;
+            if (!p || p.gameObject.GetComponent<CustomCharacter>() is not CustomCharacter cc)
+                return;
+            if (cc.data == null && !cc.GetData())
             {
+                ETGModConsole.Log($"[Charapi]: custom character data NULLED as it DOES NOT EXIST");
                 return;
             }
-            var CCC = p.gameObject.GetComponent<CustomCharacter>();
-
-            if (p && CCC != null)
+            p.ForceStaticFaceDirection(Vector2.up);
+            if (p.IsUsingAlternateCostume && cc.data.altGlowMaterial is Material altGlowMaterial)
             {
-                if (CCC.data == null)
-                {
-                    //ETGModConsole.Log($"[Charapi]: custom character data nulled... thats really bad");
-                    if (!p.gameObject.GetComponent<CustomCharacter>().GetData())
-                    {
-                        ETGModConsole.Log($"[Charapi]: custom character data NULLED as it DOES NOT EXIST");
-                    }
-                }
-
-                p.ForceStaticFaceDirection(Vector2.up);
-                if (p.IsUsingAlternateCostume && CCC.data.altGlowMaterial != null)
-                {
-
-                    if (CCC.data.altGlowMaterial.GetTexture("_MainTex") != p.sprite.renderer.material.GetTexture("_MainTex"))
-                    {
-                        CCC.data.altGlowMaterial.SetTexture("_MainTex", p.sprite.renderer.material.GetTexture("_MainTex"));
-                    }
-                    p.SetOverrideMaterial(CCC.data.altGlowMaterial);
-
-                    //ETGModConsole.Log($"[Charapi]: set shader for alt skin");
-
-                }
-                else if (CCC.data.glowMaterial != null)
-                {
-
-                    if (CCC.data.glowMaterial.GetTexture("_MainTex") != p.sprite.renderer.material.GetTexture("_MainTex"))
-                    {
-                        //_MainTexture
-                        CCC.data.glowMaterial.SetTexture("_MainTex", p.sprite.renderer.material.GetTexture("_MainTex"));
-                    }
-                    p.SetOverrideMaterial(CCC.data.glowMaterial);
-
-                    //ETGModConsole.Log($"[Charapi]: set shader for main skin");
-                }
+                if (altGlowMaterial.GetTexture("_MainTex") != p.sprite.renderer.material.GetTexture("_MainTex"))
+                    altGlowMaterial.SetTexture("_MainTex", p.sprite.renderer.material.GetTexture("_MainTex"));
+                p.SetOverrideMaterial(altGlowMaterial);
+            }
+            else if (cc.data.glowMaterial is Material glowMaterial)
+            {
+                if (glowMaterial.GetTexture("_MainTex") != p.sprite.renderer.material.GetTexture("_MainTex"))
+                    glowMaterial.SetTexture("_MainTex", p.sprite.renderer.material.GetTexture("_MainTex"));
+                p.SetOverrideMaterial(glowMaterial);
             }
         }
 

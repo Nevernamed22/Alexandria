@@ -1,9 +1,7 @@
-﻿using MonoMod.RuntimeDetour;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Text;
+using HarmonyLib;
 
 namespace Alexandria.ItemAPI
 {
@@ -11,41 +9,28 @@ namespace Alexandria.ItemAPI
     {
         string GetLabel();
     }
+
+    [HarmonyPatch]
     class LabelablePlayerItemSetup
     {
-        /// <summary>
-        /// Initialises the hooks necessary to make labelable player items functional.
-        /// </summary>
-        internal static void InitLabelHookInternal()
+        [HarmonyPatch(typeof(GameUIItemController), nameof(GameUIItemController.UpdateItem))]
+        [HarmonyPostfix]
+        private static void GameUIItemControllerUpdateItemPatch(GameUIItemController __instance, PlayerItem current, List<PlayerItem> items)
         {
-            new Hook(
-                typeof(GameUIItemController).GetMethod("UpdateItem", BindingFlags.Instance | BindingFlags.Public),
-                typeof(LabelablePlayerItemSetup).GetMethod("UpdateCustomLabelHookInternal", BindingFlags.Static | BindingFlags.NonPublic)
-            );
-        }
+            if (!current || current is not ILabelItem labelitem)
+                return;
 
-        /// <summary>
-        /// A hook method involved in making labelable player items functional.
-        /// </summary>
-        internal static void UpdateCustomLabelHookInternal(Action<GameUIItemController, PlayerItem, List<PlayerItem>> orig, GameUIItemController self, PlayerItem current, List<PlayerItem> items)
-        {
-            orig(self, current, items);
-            if (current && current is ILabelItem)
+            string label = labelitem.GetLabel();
+            if (string.IsNullOrEmpty(label))
             {
-                var labelitem = (ILabelItem)current;
-                var label = labelitem.GetLabel();
-                if (!string.IsNullOrEmpty(label))
-                {
-                    self.ItemCountLabel.AutoHeight = true; // enable multiline text
-                    self.ItemCountLabel.ProcessMarkup = true; // enable multicolor text
-                    self.ItemCountLabel.IsVisible = true;
-                    self.ItemCountLabel.Text = label;
-                }
-                else
-                {
-                    self.ItemCountLabel.IsVisible = false;
-                }
-            }            
+                __instance.ItemCountLabel.IsVisible = false;
+                return;
+            }
+
+            __instance.ItemCountLabel.AutoHeight = true; // enable multiline text
+            __instance.ItemCountLabel.ProcessMarkup = true; // enable multicolor text
+            __instance.ItemCountLabel.IsVisible = true;
+            __instance.ItemCountLabel.Text = label;
         }
 
         [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]

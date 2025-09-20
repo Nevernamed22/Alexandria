@@ -93,11 +93,6 @@ namespace Alexandria.CharacterAPI
                     typeof(PlayerController).GetMethod("GetBaseAnimationName", BindingFlags.Instance | BindingFlags.NonPublic),
                     typeof(Hooks).GetMethod("GetBaseAnimationNameHook", BindingFlags.Static | BindingFlags.Public)
                 );
-
-                Hook GetDeathPortraitNameHook = new Hook(
-                    typeof(AmmonomiconDeathPageController).GetMethod("GetDeathPortraitName", BindingFlags.Instance | BindingFlags.NonPublic),
-                    typeof(Hooks).GetMethod("GetDeathPortraitNameHook", BindingFlags.Static | BindingFlags.NonPublic)
-                );
             }
             catch (Exception e)
             {
@@ -410,21 +405,12 @@ namespace Alexandria.CharacterAPI
             otherAnimations[2].anim.Type = DirectionalAnimation.DirectionType.None;
         }
 
-
-
-
-        private static string GetDeathPortraitNameHook(Func<AmmonomiconDeathPageController, string> orig, AmmonomiconDeathPageController self)
+        [HarmonyPatch(typeof(AmmonomiconDeathPageController), nameof(AmmonomiconDeathPageController.GetDeathPortraitName))]
+        [HarmonyPostfix]
+        private static void AmmonomiconDeathPageControllerGetDeathPortraitNamePatch(AmmonomiconDeathPageController __instance, ref string __result)
         {
-            if ((int)GameManager.Instance.PrimaryPlayer.characterIdentity > 10 && GameManager.Instance.PrimaryPlayer.gameObject.GetComponent<CustomCharacter>() != null)
-            {
-                return $"coop_page_death_{GameManager.Instance.PrimaryPlayer.gameObject.GetComponent<CustomCharacter>().data.nameShort.ToLower()}_001";
-
-            }
-            else
-            {
-                return orig(self);
-            }
-
+            if (GameManager.Instance.PrimaryPlayer.IsCustomCharacter() && GameManager.Instance.PrimaryPlayer.gameObject.GetComponent<CustomCharacter>() is CustomCharacter cc)
+                __result = $"coop_page_death_{cc.data.nameShort.ToLower()}_001";
         }
 
         private static bool IsCustomCharacter(this PlayerController player)

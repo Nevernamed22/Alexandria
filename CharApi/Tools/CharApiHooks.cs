@@ -20,6 +20,7 @@ using FullInspector;
 
 namespace Alexandria.CharacterAPI
 {
+    [HarmonyPatch]
     public static class Hooks
     {
         public static void Init()
@@ -141,10 +142,6 @@ namespace Alexandria.CharacterAPI
                     typeof(Hooks).GetMethod("TriggerDarkSoulsResetHook", BindingFlags.Static | BindingFlags.Public)
                 );
 
-                Hook ResetFactorySettingsHook = new Hook(
-                    typeof(PlayerController).GetMethod("ResetToFactorySettings", BindingFlags.Instance | BindingFlags.Public),
-                    typeof(Hooks).GetMethod("ResetToFactorySettingsHook", BindingFlags.Static | BindingFlags.Public)
-                );
                 Hook CoopResurrectInternalHook = new Hook(
                     typeof(PlayerController).GetMethod("CoopResurrectInternal", BindingFlags.Instance | BindingFlags.NonPublic),
                     typeof(Hooks).GetMethod("CoopResurrectInternalHook", BindingFlags.Static | BindingFlags.Public)
@@ -237,126 +234,28 @@ namespace Alexandria.CharacterAPI
             self.healthHaver.IsVulnerable = true;
             yield break;
         }
-        public static void ResetToFactorySettingsHook(Action<PlayerController, bool, bool, bool> orig, PlayerController self, bool includeFullHeal = false, bool useFinalFightGuns = false, bool forceAllItems = false)
+
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.ResetToFactorySettings))]
+        [HarmonyILManipulator]
+        private static void PlayerControllerResetToFactorySettingsPatchIL(ILContext il)
         {
-            if (!self.IsDarkSoulsHollow || useFinalFightGuns)
-            {
-                self.inventory.DestroyAllGuns();
-            }
-            if (useFinalFightGuns && self.finalFightGunIds != null && self.finalFightGunIds.Count > 0)
-            {
-                for (int i = 0; i < self.finalFightGunIds.Count; i++)
-                {
-                    if (self.finalFightGunIds[i] >= 0)
-                    {
-                        self.inventory.AddGunToInventory(PickupObjectDatabase.GetById(self.finalFightGunIds[i]) as Gun, true);
-                    }
-                }
-            }
-            else if (self.UsingAlternateStartingGuns)
-            {
-                for (int j = 0; j < self.startingAlternateGunIds.Count; j++)
-                {
-                    Gun gun = PickupObjectDatabase.GetById(self.startingAlternateGunIds[j]) as Gun;
-                    if (forceAllItems || includeFullHeal || useFinalFightGuns || gun.PreventStartingOwnerFromDropping)
-                    {
-                        Gun gun2 = self.inventory.AddGunToInventory(gun, true);
-                    }
-                }
-            }
-            else
-            {
-                for (int k = 0; k < self.startingGunIds.Count; k++)
-                {
-                    Gun gun3 = PickupObjectDatabase.GetById(self.startingGunIds[k]) as Gun;
-                    if (forceAllItems || includeFullHeal || useFinalFightGuns || gun3.PreventStartingOwnerFromDropping)
-                    {
-                        Gun gun4 = self.inventory.AddGunToInventory(gun3, true);
-                    }
-                }
-            }
-            for (int l = 0; l < self.passiveItems.Count; l++)
-            {
-                if (!self.passiveItems[l].PersistsOnDeath)
-                {
-                    DebrisObject debrisObject = self.DropPassiveItem(self.passiveItems[l]);
-                    if (debrisObject != null)
-                    {
-                        UnityEngine.Object.Destroy(debrisObject.gameObject);
-                        l--;
-                    }
-                }
-            }
-            for (int m = 0; m < self.activeItems.Count; m++)
-            {
-                if (!self.activeItems[m].PersistsOnDeath)
-                {
-                    DebrisObject debrisObject2 = self.DropActiveItem(self.activeItems[m], 4f, true);
-                    if (debrisObject2 != null)
-                    {
-                        UnityEngine.Object.Destroy(debrisObject2.gameObject);
-                        m--;
-                    }
-                }
-            }
-            for (int n = 0; n < self.startingActiveItemIds.Count; n++)
-            {
-                PlayerItem playerItem = PickupObjectDatabase.GetById(self.startingActiveItemIds[n]) as PlayerItem;
-                if (forceAllItems || !playerItem.consumable)
-                {
-                    if (!self.HasActiveItem(playerItem.PickupObjectId))
-                    {
-                        if (forceAllItems || includeFullHeal || useFinalFightGuns || playerItem.PreventStartingOwnerFromDropping)
-                        {
-                            EncounterTrackable.SuppressNextNotification = true;
-                            playerItem.Pickup(self);
-                            EncounterTrackable.SuppressNextNotification = false;
-                        }
-                    }
-                }
-            }
-            for (int num = 0; num < self.startingPassiveItemIds.Count; num++)
-            {
-                PassiveItem passiveItem = PickupObjectDatabase.GetById(self.startingPassiveItemIds[num]) as PassiveItem;
-                if (!self.HasPassiveItem(passiveItem.PickupObjectId))
-                {
-                    EncounterTrackable.SuppressNextNotification = true;
-                    LootEngine.GivePrefabToPlayer(passiveItem.gameObject, self);
-                    EncounterTrackable.SuppressNextNotification = false;
-                }
-            }
-            if (self.ownerlessStatModifiers != null)
-            {
-                if (useFinalFightGuns || includeFullHeal)
-                {
-                    self.ownerlessStatModifiers.Clear();
-                }
-                else
-                {
-                    for (int num2 = 0; num2 < self.ownerlessStatModifiers.Count; num2++)
-                    {
-                        if (!self.ownerlessStatModifiers[num2].PersistsOnCoopDeath)
-                        {
-                            self.ownerlessStatModifiers.RemoveAt(num2);
-                            num2--;
-                        }
-                    }
-                }
-            }
-            self.stats.RecalculateStats(self, false, false);
-            if (GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER)
-            {
-                GameManager.Instance.GetOtherPlayer(self).stats.RecalculateStats(GameManager.Instance.GetOtherPlayer(self), false, false);
-            }
-            if (useFinalFightGuns && self.ForceZeroHealthState == true)
-            {
-                self.healthHaver.Armor = 6f;
-            }
-            if (includeFullHeal)
-            {
-                self.healthHaver.FullHeal();
-            }
+            ILCursor cursor = new ILCursor(il);
+            if (!cursor.TryGotoNext(MoveType.After,
+              instr => instr.MatchLdarg(0),
+              instr => instr.MatchLdfld<PlayerController>("characterIdentity")))
+                return;
+
+            cursor.Emit(OpCodes.Ldarg_0);
+            cursor.CallPrivate(typeof(Hooks), nameof(TreatZeroHealthCharacterAsRobot));
         }
+
+        private static int TreatZeroHealthCharacterAsRobot(int actualId, PlayerController player)
+        {
+            if (player.ForceZeroHealthState)
+                return (int)PlayableCharacters.Robot; // matching against a BNE opcode expecting Robot
+            return actualId;
+        }
+
         public static void TriggerDarkSoulsResetHook(Action<PlayerController, bool, int> orig, PlayerController self, bool dropItems = true, int cursedHealthMaximum = 1)
         {
             self.IsOnFire = false;
@@ -1144,12 +1043,6 @@ namespace Alexandria.CharacterAPI
                 orig(self, interactor);
             }
         }
-
-
-
-
-
-
         #endregion
         //Hook for Punchout UI being updated (called when UI updates)
 
@@ -1236,7 +1129,6 @@ namespace Alexandria.CharacterAPI
 
 
         //Triggers FoyerCharacterHandler (called from Foyer.SetUpCharacterCallbacks)
-
         public static List<FoyerCharacterSelectFlag> FoyerCallbacks2(Func<Foyer, List<FoyerCharacterSelectFlag>> orig, Foyer self)
         {
             var sortedByX = orig(self);
@@ -1246,9 +1138,6 @@ namespace Alexandria.CharacterAPI
             foreach (var character in sortedByXCustom)
             {
                 sortedByX.Add(character);
-                //self.OnPlayerCharacterChanged = character.OnSelectedCharacterCallback;
-
-
             }
 
             return sortedByX;
@@ -1325,7 +1214,6 @@ namespace Alexandria.CharacterAPI
         public static Hook getOrLoadByName_Hook;
         public static Hook setWinPicHook;
 
-
         private static void SetWinPicHook(Action<AmmonomiconDeathPageController> orig, AmmonomiconDeathPageController self)
         {
             orig(self);
@@ -1350,8 +1238,6 @@ namespace Alexandria.CharacterAPI
                 }
             }
         }
-
-
 
         public static List<string> characterDeathNames = new List<string>
         {

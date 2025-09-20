@@ -103,11 +103,6 @@ namespace Alexandria.CharacterAPI
                     typeof(PunchoutController).GetMethod("Init", BindingFlags.Instance | BindingFlags.Public),
                     typeof(Hooks).GetMethod("InitHook", BindingFlags.Static | BindingFlags.Public)
                 );
-
-                Hook punchoutUIHook = new Hook(
-                    typeof(PunchoutPlayerController).GetMethod("UpdateUI", BindingFlags.Public | BindingFlags.Instance),
-                    typeof(Hooks).GetMethod("PunchoutUpdateUI")
-                );
                 //======
             }
             catch (Exception e)
@@ -273,51 +268,39 @@ namespace Alexandria.CharacterAPI
             }
         }
 
-        public static void PunchoutUpdateUI(Action<PunchoutPlayerController> orig, PunchoutPlayerController self)
+        [HarmonyPatch(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.UpdateUI))]
+        [HarmonyPrefix]
+        private static bool PunchoutPlayerControllerUpdateUIPatch(PunchoutPlayerController __instance)
         {
-            if ((int)self.m_playerId > 7)
-            {
-                string str = backUpUI[self.m_playerId];
+            if (__instance.m_playerId <= 7)
+                return true;
 
-                self.HealthBarUI.SpriteName = "punch_health_bar_001";
-                if (self.Health > 66f)
-                {
-                    self.PlayerUiSprite.SpriteName = str + "1";
-                }
-                else if (self.Health > 33f)
-                {
-                    self.PlayerUiSprite.SpriteName = str + "2";
-                }
-                else
-                {
-                    self.PlayerUiSprite.SpriteName = str + "3";
-                }
-                if (self.IsEevee && self.PlayerUiSprite.OverrideMaterial == null)
-                {
-                    Material material = UnityEngine.Object.Instantiate<Material>(self.PlayerUiSprite.Atlas.Material);
-                    material.shader = Shader.Find("Brave/Internal/GlitchEevee");
-                    material.SetTexture("_EeveeTex", self.CosmicTex);
-                    material.SetFloat("_WaveIntensity", 0.1f);
-                    material.SetFloat("_ColorIntensity", 0.015f);
-                    self.PlayerUiSprite.OverrideMaterial = material;
-                    return;
-                }
-                if (!self.IsEevee && self.PlayerUiSprite.OverrideMaterial != null)
-                {
-                    self.PlayerUiSprite.OverrideMaterial = null;
-                }
-            }
+            string str = backUpUI[__instance.m_playerId];
+            __instance.HealthBarUI.SpriteName = "punch_health_bar_001";
+            if (__instance.Health > 66f)
+                __instance.PlayerUiSprite.SpriteName = str + "1";
+            else if (__instance.Health > 33f)
+                __instance.PlayerUiSprite.SpriteName = str + "2";
             else
+                __instance.PlayerUiSprite.SpriteName = str + "3";
+
+            if (__instance.IsEevee && __instance.PlayerUiSprite.OverrideMaterial == null)
             {
-                orig(self);
+                Material material = UnityEngine.Object.Instantiate<Material>(__instance.PlayerUiSprite.Atlas.Material);
+                material.shader = Shader.Find("Brave/Internal/GlitchEevee");
+                material.SetTexture("_EeveeTex", __instance.CosmicTex);
+                material.SetFloat("_WaveIntensity", 0.1f);
+                material.SetFloat("_ColorIntensity", 0.015f);
+                __instance.PlayerUiSprite.OverrideMaterial = material;
             }
+            else if (!__instance.IsEevee && __instance.PlayerUiSprite.OverrideMaterial != null)
+                __instance.PlayerUiSprite.OverrideMaterial = null;
 
-
+            return false;
         }
 
         public static string[] backUp = PunchoutPlayerController.PlayerNames;
         public static string[] backUpUI = PunchoutPlayerController.PlayerUiNames;
-
 
         //one hook in and im already at the point of wanting to punch my screen thats gotta be a new record!! Update its like 3? (i think, ive lost track couldve been a week) days later and i can say it got worse 
         public static void InitHook(Action<PunchoutController> orig, PunchoutController self)

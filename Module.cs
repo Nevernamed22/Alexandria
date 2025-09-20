@@ -46,9 +46,7 @@ namespace Alexandria
                 //The Most important classes, which must be initialised first
                 StaticReferences.Init();
                 DungeonHandler.Init();
-                FakePrefabHooks.Init();
                 ItemBuilder.Init();
-
 
                 //Medium Priority
                 CustomActions.InitHooks();

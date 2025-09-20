@@ -90,7 +90,6 @@
     <Compile Include="ItemAPI\BasicProjectileComponents\AdditionalProjectileTypes\ImprovedHelixProjectile.cs" />
     <Compile Include="ItemAPI\BasicProjectileComponents\AdvancedTransmogrifyBehaviour.cs" />
     <Compile Include="ItemAPI\BasicProjectileComponents\AutoDoShadowChainOnSpawn.cs" />
-    <Compile Include="ItemAPI\BasicProjectileComponents\PreventGunjurerGrabBehaviour.cs" />
     <Compile Include="ItemAPI\BasicProjectileComponents\ProjectileSlashingBehaviour.cs" />
     <Compile Include="ItemAPI\GenericItemAPIHooks.cs" />
     <Compile Include="ItemAPI\ItemInterfaces\LabelablePlayerItem.cs" />

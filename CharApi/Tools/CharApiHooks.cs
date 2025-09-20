@@ -27,11 +27,6 @@ namespace Alexandria.CharacterAPI
         {
             try
             {
-                Hook foyerCallbacksHook = new Hook(
-                   typeof(Foyer).GetMethod("SetUpCharacterCallbacks", BindingFlags.NonPublic | BindingFlags.Instance),
-                   typeof(Hooks).GetMethod("FoyerCallbacks2")
-
-               );
                 Debug.Log("charapi hooks: 1");
                 Hook languageManagerHook = new Hook(
                     typeof(dfControl).GetMethod("getLocalizedValue", BindingFlags.NonPublic | BindingFlags.Instance),
@@ -502,18 +497,13 @@ namespace Alexandria.CharacterAPI
         }
 
         //Triggers FoyerCharacterHandler (called from Foyer.SetUpCharacterCallbacks)
-        public static List<FoyerCharacterSelectFlag> FoyerCallbacks2(Func<Foyer, List<FoyerCharacterSelectFlag>> orig, Foyer self)
+        [HarmonyPatch(typeof(Foyer), nameof(Foyer.SetUpCharacterCallbacks))]
+        [HarmonyPostfix]
+        private static void FoyerSetupCharacterCallbacksPatch(Foyer __instance, ref List<FoyerCharacterSelectFlag> __result)
         {
-            var sortedByX = orig(self);
-
-            var sortedByXCustom = FoyerCharacterHandler.AddCustomCharactersToFoyer(sortedByX);
-
+            var sortedByXCustom = FoyerCharacterHandler.AddCustomCharactersToFoyer(__result);
             foreach (var character in sortedByXCustom)
-            {
-                sortedByX.Add(character);
-            }
-
-            return sortedByX;
+                __result.Add(character);
         }
 
         //Used to add in strings 

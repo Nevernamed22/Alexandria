@@ -28,10 +28,6 @@ namespace Alexandria.CharacterAPI
             try
             {
                 Debug.Log("charapi hooks: 1");
-                Hook languageManagerHook = new Hook(
-                    typeof(dfControl).GetMethod("getLocalizedValue", BindingFlags.NonPublic | BindingFlags.Instance),
-                    typeof(Hooks).GetMethod("DFGetLocalizedValue")
-                );
 
                 var braveSETypes = new Type[]
                 {
@@ -506,12 +502,16 @@ namespace Alexandria.CharacterAPI
                 __result.Add(character);
         }
 
-        //Used to add in strings 
-        public static string DFGetLocalizedValue(Func<dfControl, string, string> orig, dfControl self, string key)
+        [HarmonyPatch(typeof(dfControl), nameof(dfControl.getLocalizedValue))]
+        [HarmonyPrefix]
+        private static bool dfControlgetLocalizedValuePatch(dfControl __instance, string key, ref string __result)
         {
             if (StringHandler.customStringDictionary.TryGetValue(key, out string val))
-                return val;
-            return orig(self, key);
+            {
+                __result = val;
+                return false;
+            }
+            return true;
         }
 
         //Used to set fake player prefabs to active on instantiation (hook doesn't work on this call)

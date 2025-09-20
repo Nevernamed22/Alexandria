@@ -75,7 +75,6 @@
     <Compile Include="CustomDodgeRollAPI\CustomDodgeRollPatches.cs" />
     <Compile Include="CustomDodgeRollAPI\CustomDodgeRollPrivate.cs" />
     <Compile Include="CustomDodgeRollAPI\ExtraDodgeRollItem.cs" />
-    <Compile Include="DungeonAPI\BreachExtensions.cs" />
     <Compile Include="DungeonAPI\DungeonPatches.cs" />
     <Compile Include="DungeonAPI\MasteryOverrideHandler.cs" />
     <Compile Include="DungeonAPI\RoomIcons.cs" />

@@ -130,99 +130,12 @@ namespace Alexandria.CharacterAPI
                     typeof(PunchoutPlayerController).GetMethod("UpdateUI", BindingFlags.Public | BindingFlags.Instance),
                     typeof(Hooks).GetMethod("PunchoutUpdateUI")
                 );
-
-                //Resurrection Based Hooks
-                Hook CoopResurrectInternalHook = new Hook(
-                    typeof(PlayerController).GetMethod("CoopResurrectInternal", BindingFlags.Instance | BindingFlags.NonPublic),
-                    typeof(Hooks).GetMethod("CoopResurrectInternalHook", BindingFlags.Static | BindingFlags.Public)
-                );
                 //======
             }
             catch (Exception e)
             {
                 ToolsCharApi.PrintException(e);
             }
-        }
-
-        public static IEnumerator CoopResurrectInternalHook(Func<PlayerController, Vector3, tk2dSpriteAnimationClip, bool, IEnumerator> orig, PlayerController self, Vector3 targetPosition, tk2dSpriteAnimationClip clipToWaitFor, bool isChest = false)
-        {
-            GameManager.Instance.MainCameraController.IsLerping = true;
-            self.m_cloneWaitingForCoopDeath = false;
-            self.ForceBlank(5f, 0.5f, true, false, new Vector2?(targetPosition.XY()), false, -1f);
-            if (!isChest)
-            {
-                self.IsCurrentlyCoopReviving = true;
-                self.SetInputOverride("revivepause");
-                self.PlayEffectOnActor((GameObject)ResourceCache.Acquire("Global VFX/VFX_GhostRevive"), Vector3.zero, true, true, false);
-                float elapsed = 0f;
-                while (elapsed < 0.75f)
-                {
-                    elapsed += BraveTime.DeltaTime;
-                    yield return null;
-                }
-                self.ClearInputOverride("revivepause");
-                self.IsCurrentlyCoopReviving = false;
-                GameManager.Instance.MainCameraController.OverrideRecoverySpeed = 7.5f;
-                GameManager.Instance.MainCameraController.IsLerping = true;
-            }
-            self.ChangeSpecialShaderFlag(0, 0f);
-            self.IsGhost = false;
-            self.specRigidbody.RemoveCollisionLayerIgnoreOverride(CollisionMask.LayerToMask(CollisionLayer.EnemyHitBox, CollisionLayer.EnemyCollider));
-            self.m_blankCooldownTimer = 0f;
-            GameUIRoot.Instance.TransitionToGhostUI(self);
-            self.CurrentInputState = PlayerInputState.NoInput;
-            self.m_cachedAimDirection = -Vector2.up;
-            GameUIRoot.Instance.ReenableCoopPlayerUI(self);
-            self.stats.RecalculateStats(self, false, false);
-            self.transform.position = targetPosition;
-            self.specRigidbody.CollideWithTileMap = true;
-            self.specRigidbody.CollideWithOthers = true;
-            self.specRigidbody.Reinitialize();
-            self.healthHaver.FullHeal();
-            if (self.ForceZeroHealthState == true)
-            {
-                self.healthHaver.Armor = 6f;
-            }
-            self.DoVibration(Vibration.Time.Normal, Vibration.Strength.Medium);
-            self.m_handlingQueuedAnimation = true;
-            if (clipToWaitFor != null)
-            {
-                self.spriteAnimator.Play(clipToWaitFor);
-                while (self.spriteAnimator.IsPlaying(clipToWaitFor))
-                {
-                    yield return null;
-                }
-            }
-            self.m_handlingQueuedAnimation = false;
-            self.IsVisible = true;
-            if (!SpriteOutlineManager.HasOutline(self.sprite))
-            {
-                SpriteOutlineManager.AddOutlineToSprite(self.sprite, self.outlineColor, 0.1f, 0f, (self.characterIdentity != PlayableCharacters.Eevee) ? SpriteOutlineManager.OutlineType.NORMAL : SpriteOutlineManager.OutlineType.EEVEE);
-            }
-            self.m_hideRenderers.ClearOverrides();
-            self.m_hideGunRenderers.ClearOverrides();
-            self.m_hideHandRenderers.ClearOverrides();
-            self.ToggleShadowVisiblity(true);
-            self.ToggleRenderer(true, string.Empty);
-            self.ToggleRenderer(true, "isVisible");
-            self.ToggleGunRenderers(true, string.Empty);
-            self.ToggleGunRenderers(true, "isVisible");
-            self.ToggleHandRenderers(true, string.Empty);
-            self.ToggleHandRenderers(true, "isVisible");
-            List<SpeculativeRigidbody> overlappingRigidbodies = PhysicsEngine.Instance.GetOverlappingRigidbodies(self.specRigidbody, null, false);
-            for (int i = 0; i < overlappingRigidbodies.Count; i++)
-            {
-                self.specRigidbody.RegisterGhostCollisionException(overlappingRigidbodies[i]);
-                overlappingRigidbodies[i].RegisterGhostCollisionException(self.specRigidbody);
-            }
-            self.m_isFalling = false;
-            self.ClearDodgeRollState();
-            self.previousMineCart = null;
-            self.m_interruptingPitRespawn = false;
-            GameManager.Instance.GetOtherPlayer(self).stats.RecalculateStats(GameManager.Instance.GetOtherPlayer(self), false, false);
-            self.CurrentInputState = PlayerInputState.AllInput;
-            self.healthHaver.IsVulnerable = true;
-            yield break;
         }
 
         [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.ResetToFactorySettings))]
@@ -242,6 +155,7 @@ namespace Alexandria.CharacterAPI
         }
 
         [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.HandleCloneEffect), MethodType.Enumerator)]
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.CoopResurrectInternal), MethodType.Enumerator)]
         [HarmonyILManipulator]
         private static void EnsureZeroHealthCharactersAreTreatedLikeRobotEnumeratorIL(ILContext il, MethodBase original)
         {

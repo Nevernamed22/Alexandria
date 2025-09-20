@@ -593,106 +593,6 @@ namespace Alexandria.CharacterAPI
             }
         }
 
-        public static void RegisterOverrideColorHook(Action<GameActor, Color, string> orig, GameActor self, Color overrideColor, string source)
-        {
-            if (self is PlayerController && (int)(self as PlayerController).characterIdentity > 10 && self.gameObject.GetComponent<CustomCharacter>() != null)
-            {
-                if (self.gameObject.GetComponent<CustomCharacter>().data == null)
-                {
-                    if (!self.gameObject.GetComponent<CustomCharacter>().GetData())
-                    {
-                        ETGModConsole.Log($"[Charapi]: custom character data nulled... seems it dosent exists... fuck!");
-                    }
-                }
-
-                for (int i = 0; i < self.healthHaver.bodySprites.Count; i++)
-                {
-                    if (self.healthHaver.bodySprites[i])
-                    {
-                        self.healthHaver.bodySprites[i].usesOverrideMaterial = true;
-                        self.healthHaver.bodySprites[i].renderer.material = self.gameObject.GetComponent<CustomCharacter>().data.normalMaterial;
-                    }
-                }
-            }
-            orig(self, overrideColor, source);
-        }
-
-        public static void DeregisterOverrideColorHook(Action<GameActor, string> orig, GameActor self, string source)
-        {
-            orig(self, source);
-            if (self is PlayerController && (int)(self as PlayerController).characterIdentity > 10 && self.gameObject.GetComponent<CustomCharacter>())
-            {
-                if (self.gameObject.GetComponent<CustomCharacter>().data.useGlow)
-                {
-                    if ((self as PlayerController).IsUsingAlternateCostume && self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial != null)
-                    {
-                        self.gameObject.GetComponent<CustomCharacter>().data.normalMaterial.SetTexture("_MainTexture", self.sprite.renderer.material.GetTexture("_MainTex"));
-                        self.sprite.renderer.material = self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial;
-                    }
-                    else if (self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial != null)
-                    {
-                        self.gameObject.GetComponent<CustomCharacter>().data.normalMaterial.SetTexture("_MainTexture", self.sprite.renderer.material.GetTexture("_MainTex"));
-                        self.sprite.renderer.material = self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial;
-                    }
-                    else
-                    {
-                        ETGModConsole.Log($"[Charapi]: glow material NULLED");
-                    }
-                }
-            }
-        }
-
-        public static float GetPlayerStatValueHook(Func<GameStatsManager, TrackedStats, float> orig, GameStatsManager self, TrackedStats stat)
-        {
-            float statValue = orig(self, stat);
-            foreach (var whydodgerollmustyouhurtmelikethis in self.m_characterStats)
-            {
-                if (Loader.myPlayableCharacters.Contains(whydodgerollmustyouhurtmelikethis.Key))
-                {
-
-                    if (whydodgerollmustyouhurtmelikethis.Value != null)
-                    {
-                        statValue += whydodgerollmustyouhurtmelikethis.Value.GetStatValue(stat);
-                    }
-                }
-            }
-            return statValue;
-        }
-
-
-        public static void ClearStatValueGlobalHook(Action<GameStatsManager, TrackedStats> orig, GameStatsManager self, TrackedStats stat)
-        {
-            orig(self, stat);
-            foreach (var whydodgerollmustyouhurtmelikethis in self.m_characterStats)
-            {
-                if (Loader.myPlayableCharacters.Contains(whydodgerollmustyouhurtmelikethis.Key))
-                {
-
-                    if (whydodgerollmustyouhurtmelikethis.Value != null)
-                    {
-                        whydodgerollmustyouhurtmelikethis.Value.SetStat(stat, 0);
-                    }
-
-                }
-            }
-        }
-
-        public static void ClearOverheadElementHook(Action<FoyerCharacterSelectFlag> orig, FoyerCharacterSelectFlag self)
-        {
-            FieldInfo _extantOverheadUIElement = typeof(FoyerCharacterSelectFlag).GetField("m_extantOverheadUIElement", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if ((_extantOverheadUIElement.GetValue(self) as dfControl) != null && FakePrefab.IsFakePrefab((_extantOverheadUIElement.GetValue(self) as dfControl).gameObject))
-            {
-                (_extantOverheadUIElement.GetValue(self) as dfControl).gameObject.SetActive(false);
-                //UnityEngine.Object.Destroy((_extantOverheadUIElement.GetValue(self) as dfControl).gameObject);
-                _extantOverheadUIElement.SetValue(self, null);
-            }
-            else
-            {
-                orig(self);
-            }
-        }
-
         public delegate TResult Func<T1, T2, T3, T4, T5, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
         public static string GetBaseAnimationNameHook(Func<PlayerController, Vector2, float, bool, bool, string> orig, PlayerController self, Vector2 v, float gunAngle, bool invertThresholds = false, bool forceTwoHands = false)
         {
@@ -777,21 +677,7 @@ namespace Alexandria.CharacterAPI
 
         }
 
-        public static QuickRestartOptions GetNumMetasToQuickRestartHook(Func<QuickRestartOptions> orig)
-        {
-            QuickRestartOptions result = orig();
-
-            for (int i = 0; i < GameManager.Instance.AllPlayers.Length; i++)
-            {
-                if (GameManager.Instance.AllPlayers[i].characterIdentity > (PlayableCharacters)10 && GameManager.Instance.AllPlayers[i].gameObject.GetComponent<CustomCharacter>() != null)
-                {
-                    result.NumMetas += GameManager.Instance.AllPlayers[i].GetComponent<CustomCharacter>().data.metaCost;
-                }
-            }
-            return result;
-        }
         #region Dumb Bad Hooks
-
 
         public static void InteractHook(Action<ArkController, PlayerController> orig, ArkController self, PlayerController interactor)
         {
@@ -837,31 +723,6 @@ namespace Alexandria.CharacterAPI
         #endregion
         //Hook for Punchout UI being updated (called when UI updates)
 
-        public static string GetTalkingPlayerNickHook(Func<string> orig)
-        {
-            PlayerController talkingPlayer = Hooks.GetTalkingPlayer();
-            if (talkingPlayer.IsThief)
-            {
-                return "#THIEF_NAME";
-            }
-            if (talkingPlayer.GetComponent<CustomCharacter>() != null)
-            {
-                if (talkingPlayer.GetComponent<CustomCharacter>().data != null)
-                {
-                    return "#PLAYER_NICK_" + talkingPlayer.GetComponent<CustomCharacter>().data.nickname.ToUpper();
-                }
-            }
-            if (talkingPlayer.characterIdentity == PlayableCharacters.Eevee)
-            {
-                return "#PLAYER_NICK_RANDOM";
-            }
-            if (talkingPlayer.characterIdentity == PlayableCharacters.Gunslinger)
-            {
-                return "#PLAYER_NICK_GUNSLINGER";
-            }
-            return "#PLAYER_NICK_" + talkingPlayer.characterIdentity.ToString().ToUpperInvariant();
-        }
-
         public static string GetValueHook(Func<dfLanguageManager, string, string> orig, dfLanguageManager self, string key)
         {
             if (characterDeathNames.Contains(key))
@@ -873,51 +734,6 @@ namespace Alexandria.CharacterAPI
             }
             return orig(self, key);
         }
-
-        public static string GetTalkingPlayerNameHook(Func<string> orig)
-        {
-            PlayerController talkingPlayer = Hooks.GetTalkingPlayer();
-            if (talkingPlayer.IsThief)
-            {
-                return "#THIEF_NAME";
-            }
-            if (talkingPlayer.GetComponent<CustomCharacter>() != null)
-            {
-                if (talkingPlayer.GetComponent<CustomCharacter>().data != null)
-                {
-                    return "#PLAYER_NAME_" + talkingPlayer.GetComponent<CustomCharacter>().data.nameShort.ToUpper();
-                }
-            }
-            if (talkingPlayer.characterIdentity == PlayableCharacters.Eevee)
-            {
-                return "#PLAYER_NAME_RANDOM";
-            }
-            if (talkingPlayer.characterIdentity == PlayableCharacters.Gunslinger)
-            {
-                return "#PLAYER_NAME_GUNSLINGER";
-            }
-            return "#PLAYER_NAME_" + talkingPlayer.characterIdentity.ToString().ToUpperInvariant();
-        }
-
-        private static PlayerController GetTalkingPlayer()
-        {
-            List<TalkDoerLite> allNpcs = StaticReferenceManager.AllNpcs;
-            for (int i = 0; i < allNpcs.Count; i++)
-            {
-                if (allNpcs[i])
-                {
-                    if (!allNpcs[i].IsTalking || !allNpcs[i].TalkingPlayer || GameManager.Instance.HasPlayer(allNpcs[i].TalkingPlayer))
-                    {
-                        if (allNpcs[i].IsTalking && allNpcs[i].TalkingPlayer)
-                        {
-                            return allNpcs[i].TalkingPlayer;
-                        }
-                    }
-                }
-            }
-            return GameManager.Instance.PrimaryPlayer;
-        }
-
 
         //Triggers FoyerCharacterHandler (called from Foyer.SetUpCharacterCallbacks)
         public static List<FoyerCharacterSelectFlag> FoyerCallbacks2(Func<Foyer, List<FoyerCharacterSelectFlag>> orig, Foyer self)

@@ -132,11 +132,6 @@ namespace Alexandria.CharacterAPI
                 );
 
                 //Resurrection Based Hooks
-                Hook CloneHook = new Hook(
-                    typeof(PlayerController).GetMethod("HandleCloneEffect", BindingFlags.Instance | BindingFlags.NonPublic),
-                    typeof(Hooks).GetMethod("HandleCloneEffectHook", BindingFlags.Static | BindingFlags.Public)
-                );
-
                 Hook CoopResurrectInternalHook = new Hook(
                     typeof(PlayerController).GetMethod("CoopResurrectInternal", BindingFlags.Instance | BindingFlags.NonPublic),
                     typeof(Hooks).GetMethod("CoopResurrectInternalHook", BindingFlags.Static | BindingFlags.Public)
@@ -236,13 +231,32 @@ namespace Alexandria.CharacterAPI
         private static void EnsureZeroHealthCharactersAreTreatedLikeRobotIL(ILContext il)
         {
             ILCursor cursor = new ILCursor(il);
-            if (!cursor.TryGotoNext(MoveType.After,
+            while (cursor.TryGotoNext(MoveType.After,
               instr => instr.MatchLdarg(0),
               instr => instr.MatchLdfld<PlayerController>("characterIdentity")))
-                return;
+            {
+                System.Console.WriteLine($"patching in {il.Method.Name}");
+                cursor.Emit(OpCodes.Ldarg_0);
+                cursor.CallPrivate(typeof(Hooks), nameof(TreatZeroHealthCharacterAsRobot));
+            }
+        }
 
-            cursor.Emit(OpCodes.Ldarg_0);
-            cursor.CallPrivate(typeof(Hooks), nameof(TreatZeroHealthCharacterAsRobot));
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.HandleCloneEffect), MethodType.Enumerator)]
+        [HarmonyILManipulator]
+        private static void EnsureZeroHealthCharactersAreTreatedLikeRobotEnumeratorIL(ILContext il, MethodBase original)
+        {
+            FieldInfo thisField = original.DeclaringType.GetEnumeratorField("$this");
+            ILCursor cursor = new ILCursor(il);
+            while (cursor.TryGotoNext(MoveType.After,
+              instr => instr.MatchLdarg(0),
+              instr => instr.MatchLdfld(original.DeclaringType.FullName, thisField.Name),
+              instr => instr.MatchLdfld<PlayerController>("characterIdentity")))
+            {
+                System.Console.WriteLine($"patching in {il.Method.Name}");
+                cursor.Emit(OpCodes.Ldarg_0);
+                cursor.Emit(OpCodes.Ldfld, thisField);
+                cursor.CallPrivate(typeof(Hooks), nameof(TreatZeroHealthCharacterAsRobot));
+            }
         }
 
         private static int TreatZeroHealthCharacterAsRobot(int actualId, PlayerController player)
@@ -250,102 +264,6 @@ namespace Alexandria.CharacterAPI
             if (player.ForceZeroHealthState)
                 return (int)PlayableCharacters.Robot; // matching against a BNE opcode expecting Robot
             return actualId;
-        }
-
-        public static IEnumerator HandleCloneEffectHook(Func<PlayerController, IEnumerator> orig, PlayerController self)
-        {
-            Pixelator.Instance.FadeToBlack(0.5f, false, 0f);
-            GameUIRoot.Instance.ToggleUICamera(false);
-            self.healthHaver.FullHeal();
-            self.IsOnFire = false;
-            self.CurrentFireMeterValue = 0f;
-            self.CurrentPoisonMeterValue = 0f;
-            self.CurrentCurseMeterValue = 0f;
-            self.CurrentDrainMeterValue = 0f;
-            if (self.ForceZeroHealthState == true)
-            {
-                self.healthHaver.Armor = 6f;
-            }
-            float ela = 0f;
-            while (ela < 0.5f)
-            {
-                ela += GameManager.INVARIANT_DELTA_TIME;
-                yield return null;
-            }
-            int targetLevelIndex = 1;
-            if (GameManager.Instance.CurrentGameMode == GameManager.GameMode.SHORTCUT)
-            {
-                targetLevelIndex += GameManager.Instance.LastShortcutFloorLoaded;
-            }
-            GameManager.Instance.SetNextLevelIndex(targetLevelIndex);
-            if (GameManager.Instance.CurrentGameMode == GameManager.GameMode.BOSSRUSH)
-            {
-                GameManager.Instance.DelayedLoadBossrushFloor(0.5f);
-            }
-            else
-            {
-                GameManager.Instance.DelayedLoadNextLevel(0.5f);
-            }
-            self.m_cloneWaitingForCoopDeath = false;
-            ExtraLifeItem cloneItem = null;
-            for (int i = 0; i < self.passiveItems.Count; i++)
-            {
-                if (self.passiveItems[i] is ExtraLifeItem)
-                {
-                    ExtraLifeItem extraLifeItem = self.passiveItems[i] as ExtraLifeItem;
-                    if (extraLifeItem.extraLifeMode == ExtraLifeItem.ExtraLifeMode.CLONE)
-                    {
-                        cloneItem = extraLifeItem;
-                    }
-                }
-            }
-            if (cloneItem != null)
-            {
-                self.RemovePassiveItem(cloneItem.PickupObjectId);
-            }
-            if (GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER)
-            {
-                for (int j = 0; j < GameManager.Instance.AllPlayers.Length; j++)
-                {
-                    PlayerController playerController = GameManager.Instance.AllPlayers[j];
-                    if (playerController.IsGhost)
-                    {
-                        playerController.StartCoroutine(playerController.CoopResurrectInternal(playerController.transform.position, null, true));
-                    }
-                    playerController.healthHaver.FullHeal();
-                    playerController.specRigidbody.Velocity = Vector2.zero;
-                    playerController.knockbackDoer.TriggerTemporaryKnockbackInvulnerability(1f);
-                    if (playerController.m_returnTeleporter != null)
-                    {
-                        playerController.m_returnTeleporter.ClearReturnActive();
-                        playerController.m_returnTeleporter = null;
-                    }
-                }
-                Chest.ToggleCoopChests(false);
-            }
-            else
-            {
-                self.healthHaver.FullHeal();
-                self.specRigidbody.Velocity = Vector2.zero;
-                self.knockbackDoer.TriggerTemporaryKnockbackInvulnerability(1f);
-                if (self.m_returnTeleporter != null)
-                {
-                    self.m_returnTeleporter.ClearReturnActive();
-                    self.m_returnTeleporter = null;
-                }
-            }
-            yield return new WaitForSeconds(1f);
-            self.IsOnFire = false;
-            self.CurrentFireMeterValue = 0f;
-            self.CurrentPoisonMeterValue = 0f;
-            self.CurrentCurseMeterValue = 0f;
-            self.CurrentDrainMeterValue = 0f;
-            self.healthHaver.FullHeal();
-            if (self.ForceZeroHealthState == true)
-            {
-                self.healthHaver.Armor = 6f;
-            }
-            yield break;
         }
 
         public static void SwapToAlternateCostumeHook(Action<PlayerController, tk2dSpriteAnimation> orig, PlayerController self, tk2dSpriteAnimation overrideTargetLibrary = null)

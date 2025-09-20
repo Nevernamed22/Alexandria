@@ -119,8 +119,6 @@ namespace Alexandria.CharacterAPI
                     typeof(Hooks).GetMethod("SwapToAlternateCostumeHook", BindingFlags.Static | BindingFlags.Public)
                 );
 
-                Hook hook3 = new Hook(typeof(PlayerController).GetProperty("LocalShaderName", BindingFlags.Instance | BindingFlags.Public).GetGetMethod(), typeof(Hooks).GetMethod("LocalShaderNameGetHook"));
-
                 Hook punchoutUIHook = new Hook(
                     typeof(PunchoutPlayerController).GetMethod("UpdateUI", BindingFlags.Public | BindingFlags.Instance),
                     typeof(Hooks).GetMethod("PunchoutUpdateUI")
@@ -253,66 +251,36 @@ namespace Alexandria.CharacterAPI
             }
         }
 
-        public static string LocalShaderNameGetHook(Func<PlayerController, string> orig, PlayerController self)
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.LocalShaderName), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool PlayerControllerLocalShaderNamePatch(PlayerController __instance, ref string __result)
         {
-
-            bool flag = !GameOptions.SupportsStencil;
-            string result;
-            if (flag)
+            if (!GameOptions.SupportsStencil)
+                return true;
+            if (!__instance.IsCustomCharacter() || __instance.gameObject.GetComponent<CustomCharacter>() is not CustomCharacter cc)
+                return true;
+            if (cc.data == null && !cc.GetData())
             {
-                result = "Brave/PlayerShaderNoStencil";
+                ETGModConsole.Log($"[Charapi]: custom character data NULLED as it DOES NOT EXIST");
+                return true;
             }
-            else
+            if (__instance.IsUsingAlternateCostume && cc.data.altGlowMaterial is Material altGlowMaterial)
             {
-                if (self.characterIdentity > (PlayableCharacters)10 && self.gameObject.GetComponent<CustomCharacter>() != null)
-                {
-                    if (self.gameObject.GetComponent<CustomCharacter>().data == null)
-                    {
-                        //ETGModConsole.Log($"[Charapi]: custom character data nulled... thats really bad");
-                        if (!self.gameObject.GetComponent<CustomCharacter>().GetData())
-                        {
-                            ETGModConsole.Log($"[Charapi]: custom character data NULLED as it DOES NOT EXIST");
-                        }
-                    }
-
-                    var CCC = self.gameObject.GetComponent<CustomCharacter>();
-                    if (CCC != null)
-                    {
-                        if (self.IsUsingAlternateCostume && CCC.data.altGlowMaterial != null)
-                        {
-                            if (CCC.data.altGlowMaterial.GetTexture("_MainTex") != self.sprite.renderer.material.GetTexture("_MainTex"))
-                            {
-                                //_MainTexture
-                                CCC.data.altGlowMaterial.SetTexture("_MainTex", self.sprite.renderer.material.GetTexture("_MainTex"));
-                            }
-                            self.sprite.renderer.material = CCC.data.altGlowMaterial;
-                            result = CCC.data.altGlowMaterial.shader.name;
-                        }
-                        else if (CCC.data.glowMaterial != null)
-                        {
-                            if (CCC.data.glowMaterial.GetTexture("_MainTex") != self.sprite.renderer.material.GetTexture("_MainTex"))
-                            {
-                                CCC.data.glowMaterial.SetTexture("_MainTex", self.sprite.renderer.material.GetTexture("_MainTex"));
-                            }
-                            self.sprite.renderer.material = CCC.data.glowMaterial;
-                            result = CCC.data.glowMaterial.shader.name;
-                        }
-                        else
-                        {
-                            result = orig(self);
-                        }
-                    }
-                    else
-                    {
-                        result = orig(self);
-                    }
-                }
-                else
-                {
-                    result = orig(self);
-                }
+                if (altGlowMaterial.GetTexture("_MainTex") != __instance.sprite.renderer.material.GetTexture("_MainTex"))
+                    altGlowMaterial.SetTexture("_MainTex", __instance.sprite.renderer.material.GetTexture("_MainTex")); //_MainTexture
+                __instance.sprite.renderer.material = altGlowMaterial;
+                __result = altGlowMaterial.shader.name;
+                return false;
             }
-            return result;
+            if (cc.data.glowMaterial is Material glowMaterial)
+            {
+                if (glowMaterial.GetTexture("_MainTex") != __instance.sprite.renderer.material.GetTexture("_MainTex"))
+                    glowMaterial.SetTexture("_MainTex", __instance.sprite.renderer.material.GetTexture("_MainTex"));
+                __instance.sprite.renderer.material = glowMaterial;
+                __result = glowMaterial.shader.name;
+                return false;
+            }
+            return true;
         }
 
         [HarmonyPatch]

@@ -64,11 +64,6 @@ namespace Alexandria.CharacterAPI
                     typeof(Hooks).GetMethod("OnP2Cleared")
                 );
 
-                Hook updateHook = new Hook(
-                    typeof(CharacterSelectIdleDoer).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic),
-                    typeof(Hooks).GetMethod("UpdateHook", BindingFlags.Static | BindingFlags.NonPublic)
-                );
-
                 Hook onEnableHook = new Hook(
                     typeof(CharacterSelectIdleDoer).GetMethod("OnEnable", BindingFlags.Instance | BindingFlags.NonPublic),
                     typeof(Hooks).GetMethod("OnEnableHook", BindingFlags.Static | BindingFlags.NonPublic)
@@ -467,16 +462,15 @@ namespace Alexandria.CharacterAPI
             return false;
         }
 
-        private static void UpdateHook(Action<CharacterSelectIdleDoer> orig, CharacterSelectIdleDoer self)
+        [HarmonyPatch(typeof(CharacterSelectIdleDoer), nameof(CharacterSelectIdleDoer.Update))]
+        [HarmonyPrefix]
+        private static void CharacterSelectIdleDoerUpdatePatch(CharacterSelectIdleDoer __instance)
         {
-            if (self.GetComponent<CustomCharacterFoyerController>() != null && self.GetComponent<CustomCharacterFoyerController>().useGlow && self.sprite.renderer.material != self.GetComponent<CustomCharacterFoyerController>().data.glowMaterial)
+            if (__instance.GetComponent<CustomCharacterFoyerController>() is CustomCharacterFoyerController ccfc && ccfc.useGlow && __instance.sprite.renderer.material != ccfc.data.glowMaterial)
             {
-                var character = self.GetComponent<CustomCharacterFoyerController>();
-                self.sprite.usesOverrideMaterial = true;
-                self.sprite.renderer.material = character.data.glowMaterial;
-
+                __instance.sprite.usesOverrideMaterial = true;
+                __instance.sprite.renderer.material = ccfc.data.glowMaterial;
             }
-            orig(self);
         }
 
         public static void OnSelectedCharacterCallbackHook(Action<FoyerCharacterSelectFlag, PlayerController> orig, FoyerCharacterSelectFlag self, PlayerController newCharacter)

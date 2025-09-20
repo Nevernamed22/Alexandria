@@ -9,9 +9,11 @@ using Alexandria.ItemAPI;
 using UnityEngine;
 using System.Collections;
 using Alexandria.NPCAPI;
+using HarmonyLib;
 
 namespace Alexandria.Misc
 {
+    [HarmonyPatch]
     public class CustomActions
     {
         //General dungeon based actions
@@ -96,6 +98,7 @@ namespace Alexandria.Misc
         /// <summary>
         /// (DOES NOT WORK) Runs whenever any player collects any kind of Pickup Object. Runs AFTER pickup, so be aware of that.
         /// </summary>
+        [Obsolete("This action does not work and should never be used; it is public for backwards compatability only.", false)]
         public static Action<PickupObject, PlayerController> OnAnyPlayerCollectedPickup;
         /// <summary>
         /// Runs whenever any player drops a passive item.
@@ -120,281 +123,277 @@ namespace Alexandria.Misc
         /// </summary>
         public static Action<DebrisObject> OnPostProcessItemSpawn;
 
-        public static void InitHooks()
-        {
-            //General dungeon based actions
-            new Hook(typeof(Dungeon).GetMethod("FloorReached", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("FloorReachedHook"));
-            new Hook(typeof(Dungeon).GetMethod("Start", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("StartHook", BindingFlags.Static | BindingFlags.Public));
-            new Hook(typeof(RewardPedestal).GetMethod("MaybeBecomeMimic", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("PostProcessPedestal", BindingFlags.Static | BindingFlags.Public));
-            new Hook(typeof(AdvancedShrineController).GetMethod("DoShrineEffect", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("ShrineUsed", BindingFlags.Static | BindingFlags.NonPublic));
-
-            new Hook(typeof(ShopItemController).GetMethods().Single(a => a.Name == "Initialize" && a.GetParameters().Length == 2 && a.GetParameters()[1].ParameterType == typeof(BaseShopController)), typeof(CustomActions).GetMethod("InitializeViaBaseShopController", BindingFlags.Static | BindingFlags.Public));
-            new Hook(typeof(ShopItemController).GetMethods().Single(a => a.Name == "Initialize" && a.GetParameters().Length == 2 && a.GetParameters()[1].ParameterType == typeof(ShopController)), typeof(CustomActions).GetMethod("InitializeViaShopController", BindingFlags.Static | BindingFlags.Public));
-            //new Hook(typeof(ShopItemController).GetMethod("InitializeInternal", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("InitializeInternalHook", BindingFlags.Static | BindingFlags.Public));
-
-            new Hook(typeof(ResourcefulRatMazeSystemController).GetMethod("HandleFailure", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("OnFailedRatMaze", BindingFlags.Static | BindingFlags.Public));
-            new Hook(typeof(MinorBreakable).GetMethod("FinishBreak", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("MinorBreakableBreak", BindingFlags.Static | BindingFlags.Public));
-            new Hook(typeof(RewardPedestal).GetMethod("DetermineContents", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("RewardPedestalDetermineContents", BindingFlags.Static | BindingFlags.Public));
-
-            //Chest-based actions
-            new Hook(typeof(Chest).GetMethod("PossiblyCreateBowler", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("PostProcessChest", BindingFlags.Static | BindingFlags.NonPublic));
-            new Hook(typeof(Chest).GetMethod("Open", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("ChestPreOpen", BindingFlags.Static | BindingFlags.NonPublic));
-            new Hook(typeof(Chest).GetMethod("OnBroken", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("OnBroken", BindingFlags.Static | BindingFlags.NonPublic));
-
-            //'Global' versions of actions which exist locally on the instance already
-            new Hook(typeof(HealthHaver).GetMethod("Die", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("OnHealthHaverDie", BindingFlags.Static | BindingFlags.NonPublic));
-            new Hook(typeof(AmmoPickup).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("ammoPickupHookMethod"));
-            new Hook(typeof(HealthPickup).GetMethod("PrePickupLogic", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("healthPrePickupHook"));
-            new Hook(typeof(KeyBulletPickup).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("keyPickupHookMethod"));
-            new Hook(typeof(SilencerItem).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("blankPickupHookMethod"));
-            new Hook(typeof(HealthPickup).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("heartPickupHookMethod"));
-            new Hook(typeof(CompanionController).GetMethod("HandleCompanionPostProcessProjectile", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("companionSpawnedbullet", BindingFlags.Static | BindingFlags.Public));
-            new Hook(typeof(PlayerController).GetMethod("DropActiveItem", BindingFlags.Public | BindingFlags.Instance), typeof(CustomActions).GetMethod("DropActiveHook", BindingFlags.Public | BindingFlags.Static));
-            new Hook(typeof(SilencerInstance).GetMethod("ProcessBlankModificationItemAdditionalEffects", BindingFlags.Instance | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("BlankModHook", BindingFlags.Static | BindingFlags.Public));
-
-            new Hook(typeof(PassiveItem).GetMethod("Drop", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("DropPassiveItemHook", BindingFlags.Static | BindingFlags.Public));
-
-
-            //============= WARNING, VOLATILE HOOK, DO NOT ENABLE UNLESS YOU KNOW HOW TO FIX IT
-            //
-            //
-            //new Hook(typeof(PickupObject).GetMethod("Pickup", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("AcquirePickupObjectHook", BindingFlags.Static | BindingFlags.Public));
-            //
-            //
-            //============= WARNING, VOLATILE HOOK, DO NOT ENABLE UNLESS YOU KNOW HOW TO FIX IT
-
-
-            //Misc
-            new Hook(typeof(Exploder).GetMethod("Explode", BindingFlags.Static | BindingFlags.Public), typeof(CustomActions).GetMethod("ExplosionHook", BindingFlags.Static | BindingFlags.NonPublic));
-            new Hook(typeof(PlayerController).GetMethod("ChangeToRandomGun", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("ChangeToRandomGunHook", BindingFlags.Static | BindingFlags.Public));
-            new Hook(typeof(SuperReaperController).GetMethod("Start", BindingFlags.NonPublic | BindingFlags.Instance), typeof(CustomActions).GetMethod("LOTJSpawnHook"));
-            new Hook(typeof(LootEngine).GetMethod("PostprocessItemSpawn", BindingFlags.Static | BindingFlags.NonPublic), typeof(CustomActions).GetMethod("PostProcessItemHook", BindingFlags.Static | BindingFlags.Public));
-            new Hook(typeof(PlayerOrbital).GetMethod("Initialize", BindingFlags.Instance | BindingFlags.Public), typeof(CustomActions).GetMethod("OrbitalInitialiseHook", BindingFlags.Static | BindingFlags.Public));
-
-        }
+        [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
+        public static void InitHooks() { }
 
         //General dungeon based actions
-        public static void FloorReachedHook(Action<Dungeon> orig, Dungeon self)
+        [HarmonyPatch(typeof(Dungeon), nameof(Dungeon.FloorReached))]
+        [HarmonyPostfix]
+        private static void DungeonFloorReachedPatch(Dungeon __instance)
         {
-            orig(self);
             var gameManager = GameManager.Instance;
             var gameStatsManager = GameStatsManager.Instance;
-            if (gameManager != null && gameStatsManager != null && gameStatsManager.IsInSession == true)
-            {
-                if (gameStatsManager.GetSessionStatValue(TrackedStats.TIME_PLAYED) < 0.1f)
-                {
-                    if (gameManager.PrimaryPlayer != null && gameManager.PrimaryPlayer.GetExtComp() != null && !gameManager.PrimaryPlayer.GetExtComp().playerHasExperiencedRunStartHook)
-                    {
-                        gameManager.PrimaryPlayer.GetExtComp().playerHasExperiencedRunStartHook = true;
-                        if (OnRunStart != null)
-                        {
-                            OnRunStart(gameManager.PrimaryPlayer, gameManager.SecondaryPlayer, gameManager.CurrentGameMode);
-                        }
-                    }
-                }
-            }
+            if (gameManager == null || gameStatsManager == null || gameStatsManager.IsInSession != true)
+                return;
+            if (gameStatsManager.GetSessionStatValue(TrackedStats.TIME_PLAYED) >= 0.1f)
+                return;
+            if (gameManager.PrimaryPlayer == null || gameManager.PrimaryPlayer.GetExtComp() == null || gameManager.PrimaryPlayer.GetExtComp().playerHasExperiencedRunStartHook)
+                return;
+            gameManager.PrimaryPlayer.GetExtComp().playerHasExperiencedRunStartHook = true;
+            if (OnRunStart != null)
+                OnRunStart(gameManager.PrimaryPlayer, gameManager.SecondaryPlayer, gameManager.CurrentGameMode);
         }
-        public static void PostProcessPedestal(Action<RewardPedestal> orig, RewardPedestal self) { orig(self); if (OnRewardPedestalSpawned != null) { OnRewardPedestalSpawned(self); } }
-        public static IEnumerator StartHook(Func<Dungeon, IEnumerator> orig, Dungeon self)
-        {
-            IEnumerator origEnum = orig(self);
-            while (origEnum.MoveNext())
-            {
-                object obj = origEnum.Current;
-                yield return obj;
-            }
 
+        [HarmonyPatch(typeof(RewardPedestal), nameof(RewardPedestal.MaybeBecomeMimic))]
+        [HarmonyPostfix]
+        private static void RewardPedestalMaybeBecomeMimicPatch(RewardPedestal __instance)
+        {
+            if (OnRewardPedestalSpawned != null)
+                OnRewardPedestalSpawned(__instance);
+        }
+
+        [HarmonyPatch(typeof(Dungeon), nameof(Dungeon.Start))]
+        [HarmonyPostfix]
+        private static IEnumerator DungeonStartPatch(IEnumerator orig, Dungeon __instance)
+        {
+            while (orig.MoveNext())
+                yield return orig.Current;
             if (PostDungeonTrueStart != null)
-            {
-                PostDungeonTrueStart(self);
-            }
+                PostDungeonTrueStart(__instance);
             yield break;
         }
-        private static void ShrineUsed(Action<AdvancedShrineController, PlayerController> orig, AdvancedShrineController self, PlayerController playa)
+
+        [HarmonyPatch(typeof(AdvancedShrineController), nameof(AdvancedShrineController.DoShrineEffect))]
+        [HarmonyPrefix]
+        private static void AdvancedShrineControllerDoShrineEffectPatch(AdvancedShrineController __instance, PlayerController player)
         {
-            if (OnShrineUsed != null) OnShrineUsed(self, playa);
-            orig(self, playa);
+            if (OnShrineUsed != null)
+                OnShrineUsed(__instance, player);
         }
-        public static void InitializeViaBaseShopController(Action<ShopItemController, PickupObject, BaseShopController> orig, ShopItemController self, PickupObject i, BaseShopController parent)
+
+        [HarmonyPatch(typeof(ShopItemController), nameof(ShopItemController.Initialize), typeof(PickupObject), typeof(BaseShopController))]
+        [HarmonyPatch(typeof(ShopItemController), nameof(ShopItemController.Initialize), typeof(PickupObject), typeof(ShopController))]
+        [HarmonyPostfix]
+        private static void ShopItemControllerInitializeFromBaseShopControllerPatch(ShopItemController __instance)
         {
-            orig(self, i, parent);
             if (CustomActions.OnShopItemStarted != null)
-            {
-                CustomActions.OnShopItemStarted(self);
-            }
+                CustomActions.OnShopItemStarted(__instance);
         }
-        public static void InitializeViaShopController(Action<ShopItemController, PickupObject, ShopController> orig, ShopItemController self, PickupObject i, ShopController parent)
+
+        [HarmonyPatch(typeof(ResourcefulRatMazeSystemController), nameof(ResourcefulRatMazeSystemController.HandleFailure))]
+        [HarmonyPostfix]
+        private static void ResourcefulRatMazeSystemControllerHandleFailurePatch(ResourcefulRatMazeSystemController __instance, PlayerController cp)
         {
-            orig(self, i, parent);
-            if (CustomActions.OnShopItemStarted != null)
-            {
-                CustomActions.OnShopItemStarted(self);
-            }
+            if (OnRatMazeFailed != null)
+                OnRatMazeFailed(__instance, cp);
         }
-        public static void OnFailedRatMaze(Action<ResourcefulRatMazeSystemController, PlayerController> orig, ResourcefulRatMazeSystemController self, PlayerController playa)
-        {
-            orig(self, playa);
-            if (OnRatMazeFailed != null) OnRatMazeFailed(self, playa);
-        }
-        public static void RewardPedestalDetermineContents(Action<RewardPedestal, PlayerController> orig, RewardPedestal self, PlayerController compareAgainst)
+
+        [HarmonyPatch(typeof(RewardPedestal), nameof(RewardPedestal.DetermineContents))]
+        [HarmonyPrefix]
+        private static void RewardPedestalDetermineContentsPatch(RewardPedestal __instance, PlayerController player)
         {
             ValidPedestalContents contentsSet = new ValidPedestalContents();
             contentsSet.overrideItemPool = new List<Tuple<int, float>>();
-            if (OnRewardPedestalDetermineContents != null) OnRewardPedestalDetermineContents(self, compareAgainst, contentsSet);
+            if (OnRewardPedestalDetermineContents != null)
+                OnRewardPedestalDetermineContents(__instance, player, contentsSet);
             if (contentsSet.overrideItemPool.Count > 0)
             {
                 GenericLootTable onTheFlyLootTable = LootUtility.CreateLootTable();
                 foreach (Tuple<int, float> entry in contentsSet.overrideItemPool) { onTheFlyLootTable.AddItemToPool(entry.First, entry.Second); }
-                self.contents = onTheFlyLootTable.SelectByWeightNoExclusions().GetComponent<PickupObject>();
+                __instance.contents = onTheFlyLootTable.SelectByWeightNoExclusions().GetComponent<PickupObject>();
             }
-            orig(self, compareAgainst);
         }
-        public static void MinorBreakableBreak(Action<MinorBreakable> orig, MinorBreakable self)
+
+        [HarmonyPatch(typeof(MinorBreakable), nameof(MinorBreakable.FinishBreak))]
+        [HarmonyPrefix]
+        private static void MinorBreakableFinishBreakPatch(MinorBreakable __instance)
         {
-            if (OnMinorBreakableShattered != null) OnMinorBreakableShattered(self);
-            orig(self);
+            if (OnMinorBreakableShattered != null)
+                OnMinorBreakableShattered(__instance);
         }
 
         //Chest-based actions
-        private static void PostProcessChest(Action<Chest, bool> orig, Chest self, bool uselssVar) { self.m_cachedSpriteForCoop = self.sprite.spriteId; if (OnChestPostSpawn != null) { OnChestPostSpawn(self); } orig(self, uselssVar); }
-        private static void ChestPreOpen(Action<Chest, PlayerController> orig, Chest self, PlayerController opener) { if (OnChestPreOpen != null) { OnChestPreOpen(self, opener); } orig(self, opener); }
-        private static void OnBroken(Action<Chest> orig, Chest self) { if (OnChestBroken != null) { OnChestBroken(self); } orig(self); }
+        [HarmonyPatch(typeof(Chest), nameof(Chest.PossiblyCreateBowler))]
+        [HarmonyPrefix]
+        private static void PossiblyCreateBowlerPatch(Chest __instance, bool mightBeActive)
+        {
+            __instance.m_cachedSpriteForCoop = __instance.sprite.spriteId;
+            if (OnChestPostSpawn != null)
+                OnChestPostSpawn(__instance);
+        }
+
+        [HarmonyPatch(typeof(Chest), nameof(Chest.Open))]
+        [HarmonyPrefix]
+        private static void ChestOpenPatch(Chest __instance, PlayerController player)
+        {
+            if (OnChestPreOpen != null)
+                OnChestPreOpen(__instance, player);
+        }
+
+        [HarmonyPatch(typeof(Chest), nameof(Chest.OnBroken))]
+        [HarmonyPrefix]
+        private static void ChestOnBrokenPatch(Chest __instance)
+        {
+            if (OnChestBroken != null)
+                OnChestBroken(__instance);
+        }
 
         //'Global' versions of actions which exist locally on the instance already
-        private static void OnHealthHaverDie(Action<HealthHaver, Vector2> orig, HealthHaver self, Vector2 finalDamageDir)
+        [HarmonyPatch(typeof(HealthHaver), nameof(HealthHaver.Die))]
+        [HarmonyPrefix]
+        private static void HealthHaverDiePatch(HealthHaver __instance, Vector2 finalDamageDirection)
         {
             if (OnAnyHealthHaverDie != null)
-            {
-                OnAnyHealthHaverDie(self);
-            }
-            if (self && self.IsBoss && !GameManager.Instance.InTutorial)
-            {
-                if (OnBossKilled != null) OnBossKilled(self, self.IsSubboss);
-            }
-            orig(self, finalDamageDir);
-
+                OnAnyHealthHaverDie(__instance);
+            if (__instance && __instance.IsBoss && !GameManager.Instance.InTutorial && OnBossKilled != null)
+                OnBossKilled(__instance, __instance.IsSubboss);
         }
-        public static void ammoPickupHookMethod(Action<AmmoPickup, PlayerController> orig, AmmoPickup self, PlayerController player)
+
+        [HarmonyPatch(typeof(AmmoPickup), nameof(AmmoPickup.Pickup))]
+        [HarmonyPrefix]
+        private static bool AmmoPickupPickupPrefixPatch(AmmoPickup __instance, PlayerController player)
         {
             bool runOrig = true;
-            if (player.CurrentGun && player.CurrentGun.GetComponent<AdvancedGunBehavior>())
+            if (player.CurrentGun && player.CurrentGun.GetComponent<AdvancedGunBehavior>() is AdvancedGunBehavior agb)
+                runOrig = agb.CollectedAmmoPickup(player, player.CurrentGun, __instance);
+            return runOrig;
+        }
+
+        [HarmonyPatch(typeof(AmmoPickup), nameof(AmmoPickup.Pickup))]
+        [HarmonyPostfix]
+        private static void AmmoPickupPickupPostfixPatch(AmmoPickup __instance, PlayerController player)
+        {
+            if (OnAnyPlayerCollectedAmmo != null)
+                OnAnyPlayerCollectedAmmo(__instance, player);
+            if (player.GetExtComp() is ExtendedPlayerComponent ext && ext.OnPickedUpAmmo != null)
+                ext.OnPickedUpAmmo(player, __instance);
+        }
+
+        [HarmonyPatch(typeof(HealthPickup), nameof(HealthPickup.PrePickupLogic))]
+        [HarmonyPrefix]
+        private static bool PrePickupLogicPatch(HealthPickup __instance, SpeculativeRigidbody otherRigidbody, SpeculativeRigidbody selfRigidbody)
+        {
+            if (__instance && otherRigidbody.gameActor && otherRigidbody.gameActor is PlayerController playerCont)
             {
-                runOrig = player.CurrentGun.GetComponent<AdvancedGunBehavior>().CollectedAmmoPickup(player, player.CurrentGun, self);
+                if (OnAnyPlayerNudgedHealth != null)
+                    OnAnyPlayerNudgedHealth(__instance, playerCont);
+                if (playerCont.GetExtComp() is ExtendedPlayerComponent ext && ext.OnNudgedHP != null)
+                    ext.OnNudgedHP(playerCont, __instance);
+                if (__instance && otherRigidbody && !__instance.m_pickedUp)
+                    return true;
             }
-            if (self)
-            {
-                if (runOrig) orig(self, player);
-                if (OnAnyPlayerCollectedAmmo != null) OnAnyPlayerCollectedAmmo(self, player);
-                if (player.GetExtComp() && player.GetExtComp().OnPickedUpAmmo != null) player.GetExtComp().OnPickedUpAmmo(player, self);
-            }
+            return false;
         }
-        public static void healthPrePickupHook(Action<HealthPickup, SpeculativeRigidbody, SpeculativeRigidbody> orig, HealthPickup self, SpeculativeRigidbody player, SpeculativeRigidbody selfBody)
+
+        [HarmonyPatch(typeof(KeyBulletPickup), nameof(KeyBulletPickup.Pickup))]
+        [HarmonyPostfix]
+        private static void KeyBulletPickupPickupPatch(KeyBulletPickup __instance, PlayerController player)
         {
-            if (self && player.gameActor && player.gameActor is PlayerController)
-            {
-                PlayerController playerCont = player.gameActor as PlayerController;
-                if (OnAnyPlayerNudgedHealth != null) OnAnyPlayerNudgedHealth(self, playerCont);
-                if (playerCont.GetExtComp() && playerCont.GetExtComp().OnNudgedHP != null) playerCont.GetExtComp().OnNudgedHP(playerCont, self);
-                if (self && player && !self.m_pickedUp) orig(self, player, selfBody);
-            }
+            if (OnAnyPlayerCollectedKey != null)
+                OnAnyPlayerCollectedKey(__instance, player);
+            if (player.GetExtComp() is ExtendedPlayerComponent ext && ext.OnPickedUpKey != null)
+                ext.OnPickedUpKey(player, __instance);
         }
-        public static void keyPickupHookMethod(Action<KeyBulletPickup, PlayerController> orig, KeyBulletPickup self, PlayerController player)
+
+        [HarmonyPatch(typeof(SilencerItem), nameof(SilencerItem.Pickup))]
+        [HarmonyPostfix]
+        private static void SilencerItemPickupPatch(SilencerItem __instance, PlayerController player)
         {
-            orig(self, player);
-            if (OnAnyPlayerCollectedKey != null) OnAnyPlayerCollectedKey(self, player);
-            if (player.GetExtComp() && player.GetExtComp().OnPickedUpKey != null) player.GetExtComp().OnPickedUpKey(player, self);
+            if (OnAnyPlayerCollectedBlank != null)
+                OnAnyPlayerCollectedBlank(__instance, player);
+            if (player.GetExtComp() is ExtendedPlayerComponent ext && ext.OnPickedUpBlank != null)
+                ext.OnPickedUpBlank(__instance, player);
         }
-        public static void blankPickupHookMethod(Action<SilencerItem, PlayerController> orig, SilencerItem self, PlayerController player)
+
+        [HarmonyPatch(typeof(HealthPickup), nameof(HealthPickup.Pickup))]
+        [HarmonyPostfix]
+        private static void HealthPickupPickupPatch(HealthPickup __instance, PlayerController player)
         {
-            orig(self, player);
-            if (OnAnyPlayerCollectedBlank != null) OnAnyPlayerCollectedBlank(self, player);
-            if (player.GetExtComp() && player.GetExtComp().OnPickedUpBlank != null) player.GetExtComp().OnPickedUpBlank(self, player);
+            if (OnAnyPlayerCollectedHealth != null)
+                OnAnyPlayerCollectedHealth(__instance, player);
+            if (player.GetExtComp() is ExtendedPlayerComponent ext && ext.OnPickedUpHP != null)
+                ext.OnPickedUpHP(player, __instance);
         }
-        public static void heartPickupHookMethod(Action<HealthPickup, PlayerController> orig, HealthPickup self, PlayerController player)
+
+        [HarmonyPatch(typeof(CompanionController), nameof(CompanionController.HandleCompanionPostProcessProjectile))]
+        [HarmonyPostfix]
+        private static void CompanionControllerHandleCompanionPostProcessProjectilePatch(CompanionController __instance, Projectile obj)
         {
-            orig(self, player);
-            if (OnAnyPlayerCollectedHealth != null) OnAnyPlayerCollectedHealth(self, player);
-            if (player.GetExtComp() && player.GetExtComp().OnPickedUpHP != null) player.GetExtComp().OnPickedUpHP(player, self);
+            if (__instance && __instance.m_owner && __instance.m_owner.GetExtComp() is ExtendedPlayerComponent ext && ext.OnCompanionSpawnedBullet != null)
+                ext.OnCompanionSpawnedBullet(__instance, obj);
         }
-        public static void companionSpawnedbullet(Action<CompanionController, Projectile> orig, CompanionController self, Projectile spawnedProjectile)
+
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.DropActiveItem))]
+        [HarmonyPrefix]
+        private static void PlayerControllerDropActiveItemPatch(PlayerController __instance, PlayerItem item, float overrideForce, bool isDeathDrop)
         {
-            orig(self, spawnedProjectile);
-            if (self && self.m_owner && self.m_owner.GetExtComp() && self.m_owner.GetExtComp().OnCompanionSpawnedBullet != null) self.m_owner.GetExtComp().OnCompanionSpawnedBullet(self, spawnedProjectile);
+            if (__instance && __instance.GetExtComp() is ExtendedPlayerComponent ext && ext.OnActiveItemPreDrop != null)
+                ext.OnActiveItemPreDrop(__instance, item, isDeathDrop);
         }
-        public static DebrisObject DropActiveHook(Func<PlayerController, PlayerItem, float, bool, DebrisObject> orig, PlayerController self, PlayerItem item, float force = 4f, bool deathdrop = false)
+
+        [HarmonyPatch(typeof(SilencerInstance), nameof(SilencerInstance.ProcessBlankModificationItemAdditionalEffects))]
+        [HarmonyPostfix]
+        private static void SilencerInstanceProcessBlankModificationItemAdditionalEffectsPatch(SilencerInstance __instance, BlankModificationItem bmi, Vector2 centerPoint, PlayerController user)
         {
-            if (self && self.GetExtComp().OnActiveItemPreDrop != null) self.GetExtComp().OnActiveItemPreDrop(self, item, deathdrop);
-            return orig(self, item, force, deathdrop);
+            if (user && user.GetExtComp() is ExtendedPlayerComponent ext && ext.OnBlankModificationItemProcessed != null)
+                ext.OnBlankModificationItemProcessed(user, __instance, centerPoint, bmi);
         }
-        public static void BlankModHook(Action<SilencerInstance, BlankModificationItem, Vector2, PlayerController> orig, SilencerInstance silencer, BlankModificationItem bmi, Vector2 centerPoint, PlayerController user)
+
+        [HarmonyPatch(typeof(PassiveItem), nameof(PassiveItem.Drop))]
+        [HarmonyPostfix]
+        private static void PassiveItemDropPatch(PassiveItem __instance, PlayerController player, DebrisObject __result)
         {
-            orig(silencer, bmi, centerPoint, user);
-            if (user && user.GetExtComp() && user.GetExtComp().OnBlankModificationItemProcessed != null) user.GetExtComp().OnBlankModificationItemProcessed(user, silencer, centerPoint, bmi);
-        }
-        /*public static void AcquirePickupObjectHook(Action<PickupObject, PlayerController> orig, PickupObject self, PlayerController player)
-        {
-            //orig(self, player);
-            if (OnAnyPlayerCollectedPickup != null) { OnAnyPlayerCollectedPickup(self, player); }
-            if (player && player.GetExtComp() && player.GetExtComp().OnCollectedPickup != null) { player.GetExtComp().OnCollectedPickup(self, player); }
-        }*/
-        public static DebrisObject DropPassiveItemHook(Func<PassiveItem, PlayerController, DebrisObject> orig, PassiveItem self, PlayerController player)
-        {
-            DebrisObject dropped = orig(self, player);
-            if (OnAnyPlayerDroppedPassiveItem != null) { OnAnyPlayerDroppedPassiveItem(self, player, dropped); }
-            if (player && player.GetExtComp() && player.GetExtComp().OnDroppedPassiveItem != null) { player.GetExtComp().OnDroppedPassiveItem(self, player, dropped); }
-            return dropped;
+            if (OnAnyPlayerDroppedPassiveItem != null)
+                OnAnyPlayerDroppedPassiveItem(__instance, player, __result);
+            if (player && player.GetExtComp() is ExtendedPlayerComponent ext && ext.OnDroppedPassiveItem != null)
+                ext.OnDroppedPassiveItem(__instance, player, __result);
         }
 
         //Misc
-        private static void ExplosionHook(Action<Vector3, ExplosionData, Vector2, Action, bool, CoreDamageTypes, bool> orig, Vector3 position, ExplosionData data, Vector2 sourceNormal, Action onExplosionBegin = null, bool ignoreQueues = false, CoreDamageTypes damageTypes = CoreDamageTypes.None, bool ignoreDamageCaps = false)
+        [HarmonyPatch(typeof(Exploder), nameof(Exploder.Explode))]
+        [HarmonyPostfix]
+        private static void ExploderExplodePatch(Exploder __instance, Vector3 position, ExplosionData data, Vector2 sourceNormal, Action onExplosionBegin, bool ignoreQueues, CoreDamageTypes damageTypes, bool ignoreDamageCaps)
         {
-            orig(position, data, sourceNormal, onExplosionBegin, ignoreQueues, damageTypes, ignoreDamageCaps);
-            if (OnExplosionComplex != null) OnExplosionComplex(position, data, sourceNormal, onExplosionBegin, ignoreQueues, damageTypes, ignoreDamageCaps);
+            if (OnExplosionComplex != null)
+                OnExplosionComplex(position, data, sourceNormal, onExplosionBegin, ignoreQueues, damageTypes, ignoreDamageCaps);
         }
-        public static void ChangeToRandomGunHook(Action<PlayerController> orig, PlayerController self)
-        {
-            orig(self);
 
-            if (GameManager.Instance.CurrentLevelOverrideState == GameManager.LevelOverrideState.END_TIMES || GameManager.Instance.CurrentLevelOverrideState == GameManager.LevelOverrideState.CHARACTER_PAST || GameManager.Instance.CurrentLevelOverrideState == GameManager.LevelOverrideState.TUTORIAL)
-            {
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.ChangeToRandomGun))]
+        [HarmonyPostfix]
+        private static void PlayerControllerChangeToRandomGunPatch(PlayerController __instance)
+        {
+            if (!__instance || GameManager.Instance.CurrentLevelOverrideState == GameManager.LevelOverrideState.END_TIMES || GameManager.Instance.CurrentLevelOverrideState == GameManager.LevelOverrideState.CHARACTER_PAST || GameManager.Instance.CurrentLevelOverrideState == GameManager.LevelOverrideState.TUTORIAL)
                 return;
-            }
 
-            if (self)
-            {
-                var currentGun = self.CurrentGun;
+            var currentGun = __instance.CurrentGun;
+            if (currentGun && currentGun.HasTag("exclude_blessed"))
+                __instance.ChangeToRandomGun();
+            else if (__instance && __instance.GetExtComp() is ExtendedPlayerComponent ext && ext.OnBlessedGunChanged != null)
+                ext.OnBlessedGunChanged(__instance);
+        }
 
-                if (currentGun && currentGun.HasTag("exclude_blessed"))
-                {
-                    self.ChangeToRandomGun();
-                }
-                else { if (self && self.GetExtComp() != null && self.GetExtComp().OnBlessedGunChanged != null) self.GetExtComp().OnBlessedGunChanged(self); }
-            }
-            else
-            {
-                if (self && self.GetExtComp() != null) 
-                {
-                    if (self.GetExtComp().OnBlessedGunChanged != null)
-                    {
-                        self.GetExtComp().OnBlessedGunChanged(self);
-                    }
-                }
-            }
-        }
-        public static void LOTJSpawnHook(Action<SuperReaperController> orig, SuperReaperController self)
+        [HarmonyPatch(typeof(SuperReaperController), nameof(SuperReaperController.Start))]
+        [HarmonyPostfix]
+        private static void SuperReaperControllerStartPatch(SuperReaperController __instance)
         {
-            orig(self);
-            if (OnLOTJSpawned != null) OnLOTJSpawned(self);
+            if (OnLOTJSpawned != null)
+                OnLOTJSpawned(__instance);
         }
-        public static void PostProcessItemHook(Action<DebrisObject> orig, DebrisObject spawnedItem)
+
+        [HarmonyPatch(typeof(LootEngine), nameof(LootEngine.PostprocessItemSpawn))]
+        [HarmonyPostfix]
+        private static void LootEnginePostprocessItemSpawnPatch(DebrisObject item)
         {
-            orig(spawnedItem);
-            if (OnPostProcessItemSpawn != null && spawnedItem != null) OnPostProcessItemSpawn(spawnedItem);
+            if (OnPostProcessItemSpawn != null && item != null)
+                OnPostProcessItemSpawn(item);
         }
-        public static void OrbitalInitialiseHook(Action<PlayerOrbital, PlayerController> orig, PlayerOrbital self, PlayerController owner)
+
+        [HarmonyPatch(typeof(PlayerOrbital), nameof(PlayerOrbital.Initialize))]
+        [HarmonyPostfix]
+        private static void PlayerOrbitalInitializePatch(PlayerOrbital __instance, PlayerController owner)
         {
-            orig(self, owner);
-            if (owner && owner.GetExtComp() && owner.GetExtComp().OnNewOrbitalInitialised != null) owner.GetExtComp().OnNewOrbitalInitialised(owner, self);
+            if (owner && owner.GetExtComp() is ExtendedPlayerComponent ext && ext.OnNewOrbitalInitialised != null)
+                ext.OnNewOrbitalInitialised(owner, __instance);
         }
 
         //Stat Queries

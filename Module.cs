@@ -49,7 +49,6 @@ namespace Alexandria
                 ItemBuilder.Init();
 
                 //Medium Priority
-                CustomActions.InitHooks();
                 EnemyTools.Init();
                 EnemyBuilder.Init();
                 BossBuilder.Init();

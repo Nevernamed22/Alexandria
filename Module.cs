@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-//using Alexandria.SaveAPI;
 using Alexandria.NPCAPI;
 using Alexandria.EnemyAPI;
 using Alexandria.DungeonAPI;
@@ -46,31 +45,20 @@ namespace Alexandria
                 //The Most important classes, which must be initialised first
                 StaticReferences.Init();
                 DungeonHandler.Init();
-                FakePrefabHooks.Init();
                 ItemBuilder.Init();
 
-
                 //Medium Priority
-                CustomActions.InitHooks();
-                ExtendedPlayerComponent.Init();
                 EnemyTools.Init();
                 EnemyBuilder.Init();
                 BossBuilder.Init();
-                NPCAPI.NPCHooks.Init();
-                EnemyAPI.Hooks.Init();
                 CustomDiscountManager.Init();
                 GoopUtility.Init();
 
                 //Low Priority
                 ChamberGunAPI.Init();
-                GenericItemAPIHooks.InitHooks();
                 AlexandriaTags.InitGenericTagsInternal();
-                ChestSpawnHelper.Init();
                 Commands.Init();
                 BreachShopTools.Init();
-                AmmoPickupFixer.Init();
-                LabelablePlayerItemSetup.InitLabelHookInternal();
-                MasteryOverrideHandler.InitInternal();
 
                 //Character API
                 ToolsCharApi.Init();

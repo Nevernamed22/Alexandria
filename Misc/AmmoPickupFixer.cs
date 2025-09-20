@@ -1,24 +1,39 @@
-﻿using MonoMod.RuntimeDetour;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Text;
 using Alexandria.ItemAPI;
 using Dungeonator;
 using UnityEngine;
+using HarmonyLib;
 
 namespace Alexandria.Misc
 {
+   [HarmonyPatch]
    public static class AmmoPickupFixer
     {
-        public static void Init()
+        [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
+        public static void Init() { }
+
+        [HarmonyPatch(typeof(AmmoPickup), nameof(AmmoPickup.Interact))]
+        [HarmonyPrefix]
+        private static bool AmmoPickupInteractPatch(AmmoPickup __instance, PlayerController interactor)
         {
-            new Hook(
-                typeof(AmmoPickup).GetMethod("Interact", BindingFlags.Instance | BindingFlags.Public),
-                typeof(AmmoPickupFixer).GetMethod("ammoInteractHookMethod")
-            );
+            if (interactor.CurrentGun is Gun gun && gun.GetComponent<AdvancedGunBehavior>() is AdvancedGunBehavior agb && agb.canCollectAmmoAtMaxAmmo)
+            {
+                if (RoomHandler.unassignedInteractableObjects.Contains(__instance))
+                    RoomHandler.unassignedInteractableObjects.Remove(__instance);
+                SpriteOutlineManager.RemoveOutlineFromSprite(__instance.sprite, true);
+                __instance.Pickup(interactor);
+                return false;
+            }
+            if (interactor.CurrentGun && !interactor.CurrentGun.CanGainAmmo)
+            {
+                GameUIRoot.Instance.InformNeedsReload(interactor, new Vector3(interactor.specRigidbody.UnitCenter.x - interactor.transform.position.x, 1.25f, 0f), 1f, "#RELOAD_FULL");
+                return false;
+            }
+            return true;
         }
+
         public static void ForcePickupWithoutGainingAmmo(this AmmoPickup self, PlayerController collectingPlayer, bool neglectSpreadToOtherGuns = false)
         {
             if (self.mode == AmmoPickup.AmmoPickupMode.FULL_AMMO)
@@ -73,23 +88,5 @@ namespace Alexandria.Misc
             UnityEngine.Object.Destroy(self.gameObject);
             AkSoundEngine.PostEvent("Play_OBJ_ammo_pickup_01", self.gameObject);
         }      
-        public static void ammoInteractHookMethod(Action<AmmoPickup, PlayerController> orig, AmmoPickup self, PlayerController player)
-        {
-            if (player.CurrentGun && player.CurrentGun.GetComponent<AdvancedGunBehavior>() && player.CurrentGun.GetComponent<AdvancedGunBehavior>().canCollectAmmoAtMaxAmmo)
-            {
-                if (RoomHandler.unassignedInteractableObjects.Contains(self)) RoomHandler.unassignedInteractableObjects.Remove(self);
-                SpriteOutlineManager.RemoveOutlineFromSprite(self.sprite, true);
-                self.Pickup(player);
-            }
-            else if (player.CurrentGun && !player.CurrentGun.CanGainAmmo)
-            {
-                GameUIRoot.Instance.InformNeedsReload(player, new Vector3(player.specRigidbody.UnitCenter.x - player.transform.position.x, 1.25f, 0f), 1f, "#RELOAD_FULL");
-                return;
-            }
-            else
-            {
-                orig(self, player);
-            }
-        }
     }
 }

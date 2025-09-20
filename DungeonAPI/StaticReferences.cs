@@ -7,7 +7,6 @@ using Dungeonator;
 using Alexandria.ItemAPI;
 using Planetside;
 using System.Reflection;
-using MonoMod.RuntimeDetour;
 using System.Collections;
 using HarmonyLib;
 using Alexandria.Misc;

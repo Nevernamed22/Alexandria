@@ -1,5 +1,4 @@
 ﻿using Alexandria.ItemAPI;
-using MonoMod.RuntimeDetour;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,9 +6,11 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using HarmonyLib;
 
 namespace Alexandria.Misc
 {
+    [HarmonyPatch]
     public class ExtendedPlayerComponent : MonoBehaviour
     {
         #region InitAndHooks
@@ -17,20 +18,19 @@ namespace Alexandria.Misc
         {
             playerHasExperiencedRunStartHook = false;
         }
-        public static void Init()
+
+        [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
+        public static void Init() { }
+
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.Start))]
+        [HarmonyPostfix]
+        private static void PlayerControllerStartPatch(PlayerController __instance)
         {
-            new Hook(
-                typeof(PlayerController).GetMethod("Start", BindingFlags.Public | BindingFlags.Instance),
-                typeof(ExtendedPlayerComponent).GetMethod("DoSetup"));
-        }
-        public static void DoSetup(Action<PlayerController> action, PlayerController player)
-        {
-            action(player);
-            if (player != null)
-            {
-                if (CustomActions.OnNewPlayercontrollerSpawned != null) CustomActions.OnNewPlayercontrollerSpawned(player);
-                if (player.GetComponent<ExtendedPlayerComponent>() == null) player.gameObject.AddComponent<ExtendedPlayerComponent>();
-            }
+            if (!__instance)
+                return;
+            if (CustomActions.OnNewPlayercontrollerSpawned != null)
+                CustomActions.OnNewPlayercontrollerSpawned(__instance);
+            __instance.gameObject.GetOrAddComponent<ExtendedPlayerComponent>();
         }
 
         #endregion

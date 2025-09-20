@@ -1,165 +1,94 @@
-﻿using MonoMod.RuntimeDetour;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Text;
-using HutongGames.PlayMaker.Actions;
+using HarmonyLib;
 
 namespace Alexandria.NPCAPI
 {
-    //im so fucking sorry to anyone looking at this code
+    [HarmonyPatch]
     class NPCHooks
     {
-        public static void Init()
+        [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
+        public static void Init() { }
+
+        [HarmonyPatch(typeof(BaseShopController), nameof(BaseShopController.LockItems))]
+        [HarmonyPrefix]
+        private static bool BaseShopControllerLockItemsPatch(BaseShopController __instance)
         {
-            var ModifiedPriceHook = new Hook(
-                   typeof(ShopItemController).GetProperty("ModifiedPrice", BindingFlags.Public | BindingFlags.Instance).GetGetMethod(),
-                   typeof(NPCHooks).GetMethod("ModifiedPriceHook"));
-            var LockedHook = new Hook(
-                   typeof(ShopItemController).GetProperty("Locked", BindingFlags.Public | BindingFlags.Instance).GetGetMethod(),
-                   typeof(NPCHooks).GetMethod("LockedHook"));
-
-            var interactHook = new Hook(
-                    typeof(ShopItemController).GetMethod("Interact", BindingFlags.Instance | BindingFlags.Public),
-                    typeof(NPCHooks).GetMethod("InteractHook", BindingFlags.Static | BindingFlags.Public));
-
-            var OnEnteredRangeHook = new Hook(
-                typeof(ShopItemController).GetMethod("OnEnteredRange", BindingFlags.Instance | BindingFlags.Public),
-                typeof(NPCHooks).GetMethod("OnEnteredRangeHook", BindingFlags.Static | BindingFlags.Public));
-
-            var InitializeInternalHook = new Hook(
-                    typeof(ShopItemController).GetMethod("InitializeInternal", BindingFlags.Instance | BindingFlags.NonPublic),
-                    typeof(NPCHooks).GetMethod("InitializeInternalHook", BindingFlags.Static | BindingFlags.NonPublic));
-
-            var ForceStealHook = new Hook(
-                    typeof(ShopItemController).GetMethod("ForceSteal", BindingFlags.Instance | BindingFlags.Public),
-                    typeof(NPCHooks).GetMethod("ForceStealHook", BindingFlags.Static | BindingFlags.Public));
-
-            var OnExitRangeHook = new Hook(
-                    typeof(ShopItemController).GetMethod("OnExitRange", BindingFlags.Instance | BindingFlags.Public),
-                    typeof(NPCHooks).GetMethod("OnExitRangeHook", BindingFlags.Static | BindingFlags.Public));
-
-            var LockItemsHook = new Hook(
-                    typeof(BaseShopController).GetMethod("LockItems", BindingFlags.Instance | BindingFlags.NonPublic),
-                    typeof(NPCHooks).GetMethod("LockItemsHook", BindingFlags.Static | BindingFlags.NonPublic));
-
-
-            /*var LockItemsHook = new Hook(
-                typeof(BaseShopController).GetMethod("LockItems", BindingFlags.Instance | BindingFlags.NonPublic),
-                typeof(Hooks).GetMethod("LockItemsHook", BindingFlags.Static | BindingFlags.NonPublic));*/
+            if (__instance is not CustomShopController csc)
+                return true;
+            csc.LockItems();
+            return false;
         }
 
-
-        private static void LockItemsHook(Action<BaseShopController> orig, BaseShopController self)
+        [HarmonyPatch(typeof(ShopItemController), nameof(ShopItemController.Locked), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool ShopItemControllerLockedPatch(ShopItemController __instance, ref bool __result)
         {
-            if (self is CustomShopController)
-            {
-                (self as CustomShopController).LockItems();
-            }
-            else
-            {
-                orig(self);
-            }
+            if (__instance is not CustomShopItemController csic)
+                return true;
+            __result = csic.Locked;
+            return false;
         }
 
-        public static bool LockedHook(Func<ShopItemController, bool> orig, ShopItemController self)
+        [HarmonyPatch(typeof(ShopItemController), nameof(ShopItemController.ModifiedPrice), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool ShopItemControllerModifiedPricePatch(ShopItemController __instance, ref int __result)
         {
-            if (self is CustomShopItemController)
-            {
-                return (self as CustomShopItemController).Locked;
-            }
-            else
-            {
-                return orig(self);
-            }
+            if (__instance is not CustomShopItemController csic)
+                return true;
+            __result = csic.ModifiedPrice;
+            return false;
         }
 
-        public static int ModifiedPriceHook(Func<ShopItemController, int> orig, ShopItemController self)
+        [HarmonyPatch(typeof(ShopItemController), nameof(ShopItemController.OnEnteredRange))]
+        [HarmonyPrefix]
+        private static bool ShopItemControllerOnEnteredRangePatch(ShopItemController __instance, PlayerController interactor)
         {
-            if (self is CustomShopItemController)
-            {
-                return (self as CustomShopItemController).ModifiedPrice;
-            }
-            else
-            {
-                return orig(self);
-            }
+            if (!__instance || __instance is not CustomShopItemController csic)
+                return true;
+            csic.OnEnteredRange(interactor);
+            return false;
         }
 
-        public static void OnEnteredRangeHook(Action<ShopItemController, PlayerController> orig, ShopItemController self, PlayerController interactor)
+        [HarmonyPatch(typeof(ShopItemController), nameof(ShopItemController.Interact))]
+        [HarmonyPrefix]
+        private static bool ShopItemControllerInteractPatch(ShopItemController __instance, PlayerController player)
         {
-            if (!self)
-            {
-                return;
-            }
-
-            if (self is CustomShopItemController)
-            {
-                (self as CustomShopItemController).OnEnteredRange(interactor);
-            }
-            else
-            {
-                orig(self, interactor);
-            }
-
+            if (__instance is not CustomShopItemController csic)
+                return true;
+            csic.Interact(player);
+            return false;
         }
 
-        public static void InteractHook(Action<ShopItemController, PlayerController> orig, ShopItemController self, PlayerController player)
+        [HarmonyPatch(typeof(ShopItemController), nameof(ShopItemController.ForceSteal))]
+        [HarmonyPrefix]
+        private static bool ShopItemControllerForceStealPatch(ShopItemController __instance, PlayerController player)
         {
-            if (self is CustomShopItemController)
-            {
-                (self as CustomShopItemController).Interact(player);
-            }
-            else
-            {
-                orig(self, player);
-            }
-
+            if (__instance is not CustomShopItemController csic)
+                return true;
+            csic.ForceSteal(player);
+            return false;
         }
 
-        public static void ForceStealHook(Action<ShopItemController, PlayerController> orig, ShopItemController self, PlayerController player)
+        [HarmonyPatch(typeof(ShopItemController), nameof(ShopItemController.OnExitRange))]
+        [HarmonyPrefix]
+        private static bool ShopItemControllerOnExitRangePatch(ShopItemController __instance, PlayerController interactor)
         {
-            if (self is CustomShopItemController)
-            {
-                (self as CustomShopItemController).ForceSteal(player);
-            }
-            else
-            {
-                orig(self, player);
-            }
+            if (__instance is not CustomShopItemController csic)
+                return true;
+            csic.OnExitRange(interactor);
+            return false;
         }
 
-        public static void OnExitRangeHook(Action<ShopItemController, PlayerController> orig, ShopItemController self, PlayerController player)
+        [HarmonyPatch(typeof(ShopItemController), nameof(ShopItemController.InitializeInternal))]
+        [HarmonyPrefix]
+        private static bool ShopItemControllerInitializeInternalPatch(ShopItemController __instance, PickupObject i)
         {
-            if (self is CustomShopItemController)
-            {
-                (self as CustomShopItemController).ForceSteal(player);
-            }
-            else
-            {
-                orig(self, player);
-            }
+            if (!__instance || __instance is not CustomShopItemController csic)
+                return true;
+            csic.InitializeInternal(i);
+            return false;
         }
-
-        private static void InitializeInternalHook(Action<ShopItemController, PickupObject> orig, ShopItemController self, PickupObject i)
-        {
-            if (!self)
-            {
-                return;
-            }
-
-            if (self is CustomShopItemController)
-            {
-                (self as CustomShopItemController).InitializeInternal(i);
-            }
-            else
-            {
-                orig(self, i);
-            }
-
-        }
-
-
     }
 }

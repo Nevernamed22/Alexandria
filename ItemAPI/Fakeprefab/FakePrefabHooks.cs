@@ -1,124 +1,58 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-
 using UnityEngine;
-using MonoMod.RuntimeDetour;
-using Object = UnityEngine.Object;
+using HarmonyLib;
 
 namespace Alexandria.ItemAPI
 {
+    [HarmonyPatch]
     public static class FakePrefabHooks
     {
-        public static void Init()
+        [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
+        public static void Init() { }
+
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.AcquirePassiveItemPrefabDirectly))]
+        [HarmonyPrefix]
+        private static void PlayerControllerAcquirePassiveItemPrefabDirectlyPrefixPatch(PlayerController __instance, PassiveItem item, ref bool __state)
         {
-            //Since for some reason generic method hooks don't want to work. Hopefully this is the only other way to get items!
-            Hook silentItemAcquireHook = new Hook(
-                typeof(PlayerController).GetMethod("AcquirePassiveItemPrefabDirectly"),
-                typeof(FakePrefabHooks).GetMethod("AcquirePassiveItemPrefabDirectly")
-            );
-
-            //Same deal but for passives
-            Hook activePickupHook = new Hook(
-                typeof(PlayerItem).GetMethod("Pickup"),
-                typeof(FakePrefabHooks).GetMethod("ActivePickup")
-            );
-
-            Hook instantiateOPI = new Hook(
-                typeof(Object).GetMethod("Instantiate", new Type[]{
-                    typeof(Object),
-                    typeof(Transform),
-                    typeof(bool),
-                }),
-                typeof(FakePrefabHooks).GetMethod("InstantiateOPI")
-            );
-
-            Hook instantiateOP = new Hook(
-                typeof(Object).GetMethod("Instantiate", new Type[]{
-                    typeof(Object),
-                    typeof(Transform),
-                }),
-                typeof(FakePrefabHooks).GetMethod("InstantiateOP")
-            );
-
-            Hook instantiateO = new Hook(
-                typeof(Object).GetMethod("Instantiate", new Type[]{
-                    typeof(Object),
-                 }),
-                typeof(FakePrefabHooks).GetMethod("InstantiateO")
-            );
-
-            Hook instantiateOPR = new Hook(
-                typeof(Object).GetMethod("Instantiate", new Type[]{
-                    typeof(Object),
-                    typeof(Vector3),
-                    typeof(Quaternion),
-                }),
-                typeof(FakePrefabHooks).GetMethod("InstantiateOPR")
-            );
-
-            Hook instantiateOPRP = new Hook(
-                typeof(Object).GetMethod("Instantiate", new Type[]{
-                    typeof(Object),
-                    typeof(Vector3),
-                    typeof(Quaternion),
-                    typeof(Transform),
-                }),
-                typeof(FakePrefabHooks).GetMethod("InstantiateOPRP")
-            );
+            __state = FakePrefab.IsFakePrefab(item.gameObject);
+            if (__state)
+                item.gameObject.SetActive(true);
         }
 
-        public static void AcquirePassiveItemPrefabDirectly(Action<PlayerController, PassiveItem> orig, PlayerController self, PassiveItem item)
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.AcquirePassiveItemPrefabDirectly))]
+        [HarmonyPostfix]
+        private static void PlayerControllerAcquirePassiveItemPrefabDirectlyPostfixPatch(PlayerController __instance, PassiveItem item, bool __state)
         {
-            bool isFake = FakePrefab.IsFakePrefab(item.gameObject);
-            if (isFake)
-                item.gameObject.SetActive(true);
-
-            orig(self, item);
-
-            if (isFake)
+            if (__state)
                 item.gameObject.SetActive(false);
         }
 
-        public static void ActivePickup(Action<PlayerItem, PlayerController> orig, PlayerItem self, PlayerController player)
+        [HarmonyPatch(typeof(PlayerItem), nameof(PlayerItem.Pickup))]
+        [HarmonyPrefix]
+        private static void PlayerItemPickupPrefixPatch(PlayerItem __instance, PlayerController player, ref bool __state)
         {
-            bool isFake = FakePrefab.IsFakePrefab(self.gameObject);
-            if (isFake)
-                self.gameObject.SetActive(true);
-
-            orig(self, player);
-
-            if (isFake)
-                self.gameObject.SetActive(false);
+            __state = FakePrefab.IsFakePrefab(__instance.gameObject);
+            if (__state)
+                __instance.gameObject.SetActive(true);
         }
 
-        public static Object InstantiateOPI(Func<Object, Transform, bool, Object> orig, Object original, Transform parent, bool instantiateInWorldSpace)
+        [HarmonyPatch(typeof(PlayerItem), nameof(PlayerItem.Pickup))]
+        [HarmonyPostfix]
+        private static void PlayerItemPickupPostfixPatch(PlayerItem __instance, PlayerController player, bool __state)
         {
-            return FakePrefab.Instantiate(original, orig(original, parent, instantiateInWorldSpace));
+            if (__state)
+                __instance.gameObject.SetActive(false);
         }
 
-        public static Object InstantiateOP(Func<Object, Transform, Object> orig, Object original, Transform parent)
+        [HarmonyPatch(typeof(UnityEngine.Object), nameof(UnityEngine.Object.Instantiate), typeof(UnityEngine.Object))]
+        [HarmonyPatch(typeof(UnityEngine.Object), nameof(UnityEngine.Object.Instantiate), typeof(UnityEngine.Object), typeof(Transform))]
+        [HarmonyPatch(typeof(UnityEngine.Object), nameof(UnityEngine.Object.Instantiate), typeof(UnityEngine.Object), typeof(Transform), typeof(bool))]
+        [HarmonyPatch(typeof(UnityEngine.Object), nameof(UnityEngine.Object.Instantiate), typeof(UnityEngine.Object), typeof(Vector3), typeof(Quaternion))]
+        [HarmonyPatch(typeof(UnityEngine.Object), nameof(UnityEngine.Object.Instantiate), typeof(UnityEngine.Object), typeof(Vector3), typeof(Quaternion), typeof(Transform))]
+        [HarmonyPostfix]
+        private static void UnityEngineObjectInstantiatePatch(UnityEngine.Object original, ref UnityEngine.Object __result)
         {
-            return FakePrefab.Instantiate(original, orig(original, parent));
+            __result = FakePrefab.Instantiate(original, __result);
         }
-
-        public static Object InstantiateO(Func<Object, Object> orig, Object original)
-        {
-            return FakePrefab.Instantiate(original, orig(original));
-        }
-
-        public static Object InstantiateOPR(Func<Object, Vector3, Quaternion, Object> orig, Object original, Vector3 position, Quaternion rotation)
-        {
-            return FakePrefab.Instantiate(original, orig(original, position, rotation));
-        }
-
-        public delegate TResult Func<T1, T2, T3, T4, T5, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
-        public static Object InstantiateOPRP(Func<Object, Vector3, Quaternion, Transform, Object> orig, Object original, Vector3 position, Quaternion rotation, Transform parent)
-        {
-            return FakePrefab.Instantiate(original, orig(original, position, rotation, parent));
-        }
-
     }
 }

@@ -1,13 +1,14 @@
-﻿using MonoMod.RuntimeDetour;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using HarmonyLib;
 
 namespace Alexandria.Misc
 {
+    [HarmonyPatch]
     public static class GoopUtility
     {
         private static GoopDefinition LoadIndividualGoop(string text)
@@ -22,6 +23,7 @@ namespace Alexandria.Misc
             goopDefinition.name = text.Replace("assets/data/goops/", "").Replace(".asset", "");
             return goopDefinition;
         }
+
         public static void Init()
         {
             FireDef = LoadIndividualGoop("assets/data/goops/napalmgoopthatworks.asset");
@@ -33,14 +35,8 @@ namespace Alexandria.Misc
             EternalFireDef = LoadIndividualGoop("assets/data/goops/eternal fire.asset");
             NapalmDef = LoadIndividualGoop("assets/data/goops/napalm goop.asset");
             QuickIgniteNapalmDef = LoadIndividualGoop("assets/data/goops/napalmgoopquickignite.asset");
-
-            new Hook(typeof(DeadlyDeadlyGoopManager).GetMethod("DoGoopEffect", BindingFlags.Instance | BindingFlags.Public), typeof(GoopUtility).GetMethod("DoGoopEffectUpdateHook", BindingFlags.Static | BindingFlags.NonPublic));
-            new Hook(typeof(DeadlyDeadlyGoopManager).GetMethod("InitialGoopEffect", BindingFlags.Instance | BindingFlags.Public), typeof(GoopUtility).GetMethod("ActorEnteredGoopHook", BindingFlags.Static | BindingFlags.NonPublic));
-            new Hook(typeof(DeadlyDeadlyGoopManager).GetMethod("EndGoopEffect", BindingFlags.Instance | BindingFlags.Public), typeof(GoopUtility).GetMethod("ActorLeftGoopHook", BindingFlags.Static | BindingFlags.NonPublic));
-            new Hook(typeof(DeadlyDeadlyGoopManager).GetMethod("GetGoopManagerForGoopType", BindingFlags.Static | BindingFlags.Public), typeof(GoopUtility).GetMethod("GoopManagerForTypeHook", BindingFlags.Static | BindingFlags.NonPublic));
-
-            specialGoopComps = new Dictionary<string, Type>();
         }
+
         public static GoopDefinition Clone(this GoopDefinition toClone)
         {
             GoopDefinition newGoo = ScriptableObject.CreateInstance<GoopDefinition>();
@@ -123,36 +119,42 @@ namespace Alexandria.Misc
 
             return newGoo;
         }
+
         public static void RegisterComponentToGoopDefinition(GoopDefinition def, Type comp)
         {
-            if (specialGoopComps == null) specialGoopComps = new Dictionary<string, Type>();
             specialGoopComps.Add(def.name, comp);
         }
-        private static DeadlyDeadlyGoopManager GoopManagerForTypeHook(Func<GoopDefinition, DeadlyDeadlyGoopManager> orig, GoopDefinition goop)
+
+        [HarmonyPatch(typeof(DeadlyDeadlyGoopManager), nameof(DeadlyDeadlyGoopManager.GetGoopManagerForGoopType))]
+        [HarmonyPostfix]
+        private static void DeadlyDeadlyGoopManagerGetGoopManagerForGoopTypePatch(GoopDefinition goopDef, ref DeadlyDeadlyGoopManager __result)
         {
-            DeadlyDeadlyGoopManager newThing = orig( goop);
-            string repairedGoopName = goop.name.Replace("(clone)", "");
-            if (specialGoopComps.ContainsKey(repairedGoopName))
-            {
-                Type comp = specialGoopComps[repairedGoopName];            
-                newThing.gameObject.AddComponent(comp);
-            }
-            return newThing;
+            if (specialGoopComps.TryGetValue(__result.name.Replace("(clone)", ""), out Type comp))
+                __result.gameObject.AddComponent(comp);
         }
-        private static void DoGoopEffectUpdateHook(Action<DeadlyDeadlyGoopManager, GameActor, IntVector2> orig, DeadlyDeadlyGoopManager self, GameActor actor, IntVector2 goopPosition)
+
+        [HarmonyPatch(typeof(DeadlyDeadlyGoopManager), nameof(DeadlyDeadlyGoopManager.DoGoopEffect))]
+        [HarmonyPostfix]
+        private static void DeadlyDeadlyGoopManagerDoGoopEffectPatch(DeadlyDeadlyGoopManager __instance, GameActor actor, IntVector2 goopPosition)
         {
-            orig(self, actor, goopPosition);
-            if (self.gameObject.GetComponent<SpecialGoopBehaviourDoer>() != null) self.gameObject.GetComponent<SpecialGoopBehaviourDoer>().DoGoopEffectUpdate(self, actor, goopPosition);
+            if (__instance.gameObject.GetComponent<SpecialGoopBehaviourDoer>() is SpecialGoopBehaviourDoer sgbd)
+                sgbd.DoGoopEffectUpdate(__instance, actor, goopPosition);
         }
-        private static void ActorEnteredGoopHook(Action<DeadlyDeadlyGoopManager, GameActor> orig, DeadlyDeadlyGoopManager self, GameActor actor)
+
+        [HarmonyPatch(typeof(DeadlyDeadlyGoopManager), nameof(DeadlyDeadlyGoopManager.InitialGoopEffect))]
+        [HarmonyPostfix]
+        private static void DeadlyDeadlyGoopManagerInitialGoopEffectPatch(DeadlyDeadlyGoopManager __instance, GameActor actor)
         {
-            orig(self, actor);
-            if (self.gameObject.GetComponent<SpecialGoopBehaviourDoer>() != null) self.gameObject.GetComponent<SpecialGoopBehaviourDoer>().ActorEnteredGoop(self, actor);
+            if (__instance.gameObject.GetComponent<SpecialGoopBehaviourDoer>() is SpecialGoopBehaviourDoer sgbd)
+                sgbd.ActorEnteredGoop(__instance, actor);
         }
-        private static void ActorLeftGoopHook(Action<DeadlyDeadlyGoopManager, GameActor> orig, DeadlyDeadlyGoopManager self, GameActor actor)
+
+        [HarmonyPatch(typeof(DeadlyDeadlyGoopManager), nameof(DeadlyDeadlyGoopManager.EndGoopEffect))]
+        [HarmonyPostfix]
+        private static void DeadlyDeadlyGoopManagerEndGoopEffectPatch(DeadlyDeadlyGoopManager __instance, GameActor actor)
         {
-            orig(self, actor);
-            if (self.gameObject.GetComponent<SpecialGoopBehaviourDoer>() != null) self.gameObject.GetComponent<SpecialGoopBehaviourDoer>().ActorLeftGoop(self, actor);
+            if (__instance.gameObject.GetComponent<SpecialGoopBehaviourDoer>() is SpecialGoopBehaviourDoer sgbd)
+                sgbd.ActorLeftGoop(__instance, actor);
         }
 
         public static GoopDefinition EternalFireDef;
@@ -170,7 +172,7 @@ namespace Alexandria.Misc
         public static GoopDefinition BloodDef = PickupObjectDatabase.GetById(272)?.GetComponent<IronCoinItem>()?.BloodDefinition;
         public static GoopDefinition MimicSpitDef = EnemyDatabase.GetOrLoadByGuid("479556d05c7c44f3b6abb3b2067fc778").GetComponent<GoopDoer>().goopDefinition;
         public static GoopDefinition WineDef = EnemyDatabase.GetOrLoadByGuid("ffca09398635467da3b1f4a54bcfda80").bulletBank.GetBullet("goblet").BulletObject.GetComponent<GoopDoer>().goopDefinition;
-        private static Dictionary<string, Type> specialGoopComps;
+        private static Dictionary<string, Type> specialGoopComps = new Dictionary<string, Type>();
     }
     public class SpecialGoopBehaviourDoer : MonoBehaviour
     {

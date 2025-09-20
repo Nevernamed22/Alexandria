@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.IO;
 using System.Collections;
-using MonoMod.RuntimeDetour;
 using Alexandria.ItemAPI;
 using Alexandria.Misc;
 using Alexandria.VisualAPI;

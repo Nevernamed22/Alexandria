@@ -6,13 +6,14 @@ using System.Text;
 using Alexandria.ItemAPI;
 using Alexandria.Misc;
 using UnityEngine;
-using MonoMod.RuntimeDetour;
 using Brave.BulletScript;
 using DirectionType = DirectionalAnimation.DirectionType;
 using FlipType = DirectionalAnimation.FlipType;
+using HarmonyLib;
 
 namespace Alexandria.EnemyAPI
 {
+    [HarmonyPatch]
     public static class EnemyBuilder
     {
         private static GameObject behaviorSpeculatorPrefab;
@@ -40,18 +41,14 @@ namespace Alexandria.EnemyAPI
             GameObject.DontDestroyOnLoad(behaviorSpeculatorPrefab);
             FakePrefab.MarkAsFakePrefab(behaviorSpeculatorPrefab);
             behaviorSpeculatorPrefab.SetActive(false);
-
-            Hook enemyHook = new Hook(
-                typeof(EnemyDatabase).GetMethod("GetOrLoadByGuid", BindingFlags.Public | BindingFlags.Static),
-                typeof(EnemyBuilder).GetMethod("GetOrLoadByGuid")
-            );
         }
 
-        public static AIActor GetOrLoadByGuid(Func<string, AIActor> orig, string guid)
+        [HarmonyPatch(typeof(EnemyDatabase), nameof(EnemyDatabase.GetOrLoadByGuid))]
+        [HarmonyPostfix]
+        private static void EnemyDatabaseGetOrLoadByGuidPatch(EnemyDatabase __instance, string guid, ref AIActor __result)
         {
             if (Dictionary.TryGetValue(guid, out GameObject companion))
-                return companion.GetComponent<AIActor>();
-            return orig(guid);
+                __result = companion.GetComponent<AIActor>();
         }
 
         public static GameObject BuildPrefab(string name, string guid, string defaultSpritePath, IntVector2 hitboxOffset, IntVector2 hitBoxSize, bool HasAiShooter)

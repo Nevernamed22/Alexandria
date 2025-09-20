@@ -6,7 +6,6 @@ using System.Reflection;
 
 using UnityEngine;
 
-using MonoMod.RuntimeDetour;
 using HutongCharacter = HutongGames.PlayMaker.Actions.ChangeToNewCharacter;
 
 using Alexandria.ItemAPI;

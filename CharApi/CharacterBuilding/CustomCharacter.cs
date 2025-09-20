@@ -193,9 +193,9 @@ namespace Alexandria.CharacterAPI
                 {
                     if (infiniteGunIDs.Contains(gun.PickupObjectId))
                     {
-                        if (!Hooks.gunBackups.ContainsKey(gun.PickupObjectId))
+                        if (!CharacterAPI.Hooks.gunBackups.ContainsKey(gun.PickupObjectId))
                         {
-                            var backup = new Hooks.GunBackupData()
+                            var backup = new CharacterAPI.Hooks.GunBackupData()
                             {
                                 InfiniteAmmo = gun.InfiniteAmmo,
                                 PreventStartingOwnerFromDropping = gun.PreventStartingOwnerFromDropping,

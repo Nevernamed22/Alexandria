@@ -8,7 +8,6 @@ using System.Reflection;
 using UnityEngine;
 
 using Dungeonator;
-using MonoMod.RuntimeDetour;
 
 namespace Alexandria.CharacterAPI
 {

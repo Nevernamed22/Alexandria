@@ -14,15 +14,56 @@ namespace Alexandria.CharacterAPI
     //Utility methods
     public static class ToolsCharApi
     {
+        static ToolsCharApi() // static constructor
+        {
+            defaultLog = Path.Combine(ETGMod.ResourcesDirectory, "customCharacterLog.txt");
+            if (File.Exists(defaultLog))
+                File.Delete(defaultLog);
+        }
+
         internal const float PIXELS_PER_UNIT = 16f;
 
         public static bool verbose = false;
-        private static string defaultLog = Path.Combine(ETGMod.ResourcesDirectory, "customCharacterLog.txt");
+        private static string defaultLog;
         public static string modID = "CharAPI";
         public static bool EnableDebugLogging = false;
 
         private static Dictionary<string, float> timers = new Dictionary<string, float>();
-        private static string[] BundlePrereqs;
+        private static string[] BundlePrereqs = new string[] {
+            "brave_resources_001",
+            "dungeon_scene_001",
+            "encounters_base_001",
+            "enemies_base_001",
+            "flows_base_001",
+            "foyer_001",
+            "foyer_002",
+            "foyer_003",
+            "shared_auto_001",
+            "shared_auto_002",
+            "shared_base_001",
+            "dungeons/base_bullethell",
+            "dungeons/base_castle",
+            "dungeons/base_catacombs",
+            "dungeons/base_cathedral",
+            "dungeons/base_forge",
+            "dungeons/base_foyer",
+            "dungeons/base_gungeon",
+            "dungeons/base_mines",
+            "dungeons/base_nakatomi",
+            "dungeons/base_resourcefulrat",
+            "dungeons/base_sewer",
+            "dungeons/base_tutorial",
+            "dungeons/finalscenario_bullet",
+            "dungeons/finalscenario_convict",
+            "dungeons/finalscenario_coop",
+            "dungeons/finalscenario_guide",
+            "dungeons/finalscenario_pilot",
+            "dungeons/finalscenario_robot",
+            "dungeons/finalscenario_soldier"
+        };
+
+        [Obsolete("This method does nothing and exists for backwards compatability only.", false)]
+        public static void Init() { }
 
         public static Material[] SetOverrideMaterial (this PlayerController player, Material overrideMaterial)
         {
@@ -94,10 +135,6 @@ namespace Alexandria.CharacterAPI
 
         public static T LoadAssetFromAnywhere<T>(string path) where T : UnityEngine.Object
         {
-            if (BundlePrereqs == null)
-            {
-                Init();
-            }
             T obj = null;
             foreach (string name in BundlePrereqs)
             {
@@ -376,48 +413,6 @@ namespace Alexandria.CharacterAPI
 		public static Vector2Int ToVector2Int(this IntVector2 vector)
         {
             return new Vector2Int(vector.x, vector.y);
-        }
-
-        public static void Init()
-        {
-            if (BundlePrereqs == null) 
-            {
-                BundlePrereqs = new string[]
-                {
-                    "brave_resources_001",
-                    "dungeon_scene_001",
-                    "encounters_base_001",
-                    "enemies_base_001",
-                    "flows_base_001",
-                    "foyer_001",
-                    "foyer_002",
-                    "foyer_003",
-                    "shared_auto_001",
-                    "shared_auto_002",
-                    "shared_base_001",
-                    "dungeons/base_bullethell",
-                    "dungeons/base_castle",
-                    "dungeons/base_catacombs",
-                    "dungeons/base_cathedral",
-                    "dungeons/base_forge",
-                    "dungeons/base_foyer",
-                    "dungeons/base_gungeon",
-                    "dungeons/base_mines",
-                    "dungeons/base_nakatomi",
-                    "dungeons/base_resourcefulrat",
-                    "dungeons/base_sewer",
-                    "dungeons/base_tutorial",
-                    "dungeons/finalscenario_bullet",
-                    "dungeons/finalscenario_convict",
-                    "dungeons/finalscenario_coop",
-                    "dungeons/finalscenario_guide",
-                    "dungeons/finalscenario_pilot",
-                    "dungeons/finalscenario_robot",
-                    "dungeons/finalscenario_soldier"
-                };  
-            }
-
-            if (File.Exists(defaultLog)) File.Delete(defaultLog);
         }
 
         public static void Print<T>(T obj, string color = "FFFFFF", bool force = false)

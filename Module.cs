@@ -60,11 +60,7 @@ namespace Alexandria
                 Commands.Init();
                 BreachShopTools.Init();
 
-                //Character API
-                ToolsCharApi.Init();
-
                 //cAPI
-                HatUtility.SetupConsoleCommands();
                 Brimsly.Init();
 
                 this.StartCoroutine(this.delayedstarthandler());
@@ -78,7 +74,6 @@ namespace Alexandria
             }
             
         }
-
 
         public IEnumerator delayedstarthandler()
         {

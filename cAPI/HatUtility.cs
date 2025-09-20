@@ -17,11 +17,16 @@ namespace Alexandria.cAPI
 {
     public static class HatUtility
     {
+        static HatUtility() // static constructor
+        {
+            SetupConsoleCommands();
+        }
+
         private static AutocompletionSettings HatAutoCompletionSettings = new AutocompletionSettings(delegate (string input) {
             return Hatabase.Hats.Keys.Where(key => key.AutocompletionMatch(input.ToLower())).ToArray();
         });
 
-        internal static void SetupConsoleCommands()
+        private static void SetupConsoleCommands()
         {
             ETGModConsole.Commands.AddGroup("capi");
 

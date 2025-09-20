@@ -63,11 +63,6 @@ namespace Alexandria.CharacterAPI
                     typeof(GameManager).GetMethod("ClearSecondaryPlayer", BindingFlags.Public | BindingFlags.Instance),
                     typeof(Hooks).GetMethod("OnP2Cleared")
                 );
-
-                Hook canBeSelectedHook = new Hook(
-                    typeof(FoyerCharacterSelectFlag).GetMethod("CanBeSelected", BindingFlags.Instance | BindingFlags.Public),
-                    typeof(Hooks).GetMethod("CanBeSelectedHook", BindingFlags.Static | BindingFlags.Public)
-                );
             }
             catch (Exception e)
             {
@@ -486,17 +481,14 @@ namespace Alexandria.CharacterAPI
             }
         }
 
-        public static bool CanBeSelectedHook(Func<FoyerCharacterSelectFlag, bool> orig, FoyerCharacterSelectFlag self)
+        [HarmonyPatch(typeof(FoyerCharacterSelectFlag), nameof(FoyerCharacterSelectFlag.CanBeSelected))]
+        [HarmonyPrefix]
+        private static bool FoyerCharacterSelectFlagCanBeSelectedPatch(FoyerCharacterSelectFlag __instance, ref bool __result)
         {
-            if (self.GetComponent<CustomCharacterFoyerController>() != null && self.GetComponent<CustomCharacterFoyerController>().metaCost > 0)
-            {
-                return (GameStatsManager.Instance.GetPlayerStatValue(TrackedStats.META_CURRENCY) >= self.GetComponent<CustomCharacterFoyerController>().metaCost);
-            }
-            else
-            {
-                return orig(self);
-            }
-
+            if (__instance.GetComponent<CustomCharacterFoyerController>() is not CustomCharacterFoyerController ccfc || ccfc.metaCost <= 0)
+                return true;
+            __result = (GameStatsManager.Instance.GetPlayerStatValue(TrackedStats.META_CURRENCY) >= __instance.GetComponent<CustomCharacterFoyerController>().metaCost);
+            return false;
         }
 
         #region Dumb Bad Hooks

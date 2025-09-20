@@ -4,15 +4,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MonoMod.RuntimeDetour;
+using HarmonyLib;
 
 namespace Alexandria.ItemAPI
 {
+    [HarmonyPatch]
     public static class CustomSynergies
     {
-        public static Hook synergyHook = new Hook(
-            typeof(StringTableManager).GetMethod("GetSynergyString", BindingFlags.Static | BindingFlags.Public),
-            typeof(CustomSynergies).GetMethod("SynergyStringHook")
-        );
+        [HarmonyPatch(typeof(StringTableManager), nameof(StringTableManager.GetSynergyString))]
+        [HarmonyPostfix]
+        private static void StringTableManagerGetSynergyStringPatch(string key, int index, ref string __result)
+        {
+            if (string.IsNullOrEmpty(__result))
+                __result = key;
+        }
+
         public static bool PlayerHasActiveSynergy(this PlayerController player, string synergyNameToCheck)
         {
             foreach (int index in player.ActiveExtraSynergies)
@@ -25,6 +31,7 @@ namespace Alexandria.ItemAPI
             }
             return false;
         }
+
         public static AdvancedSynergyEntry Add(string name, List<string> mandatoryConsoleIDs, List<string> optionalConsoleIDs = null, bool affectedByLichesEye = true)
         {
             if (mandatoryConsoleIDs == null || mandatoryConsoleIDs.Count == 0) { ETGModConsole.Log($"Synergy {name} has no mandatory items/guns."); return null; }
@@ -74,14 +81,6 @@ namespace Alexandria.ItemAPI
         {
             AdvancedSynergyEntry[] array = new AdvancedSynergyEntry[] { synergyEntry };
             GameManager.Instance.SynergyManager.synergies = GameManager.Instance.SynergyManager.synergies.Concat(array).ToArray<AdvancedSynergyEntry>();
-        }
-
-        public static string SynergyStringHook(Func<string, int, string> orig, string key, int index = -1)
-        {
-            string text = orig(key, index);
-            bool flag = string.IsNullOrEmpty(text);
-            if (flag) text = key;
-            return text;
         }
 
         public static bool HasMTGConsoleID(this PlayerController player, string consoleID)

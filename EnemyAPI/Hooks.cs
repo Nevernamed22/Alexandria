@@ -4,29 +4,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using HarmonyLib;
 
 namespace Alexandria.EnemyAPI
 {
+    [HarmonyPatch]
     public static class Hooks
     {
-        public static void Init()
-        {
-            Hook customEnemyChangesHook = new Hook(
-                typeof(AIActor).GetMethod("Awake", BindingFlags.Instance | BindingFlags.Public),
-                typeof(Hooks).GetMethod("HandleCustomEnemyChanges")
-            );
-        }
+        [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
+        public static void Init() { }
 
-        public static void HandleCustomEnemyChanges(Action<AIActor> orig, AIActor self)
+        [HarmonyPatch(typeof(AIActor), nameof(AIActor.Awake))]
+        [HarmonyPostfix]
+        private static void AIActorAwakePatch(AIActor __instance)
         {
-            orig(self);
-
             try
             {
-                var obehaviors = EnemyTools.overrideBehaviors.Where(ob => ob.OverrideAIActorGUID == self.EnemyGuid);
+                var obehaviors = EnemyTools.overrideBehaviors.Where(ob => ob.OverrideAIActorGUID == __instance.EnemyGuid);
                 foreach (var obehavior in obehaviors)
                 {
-                    obehavior.SetupOB(self);
+                    obehavior.SetupOB(__instance);
                     if (obehavior.ShouldOverride())
                     {
                         obehavior.DoOverride();

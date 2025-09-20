@@ -57,7 +57,6 @@ namespace Alexandria
                 EnemyBuilder.Init();
                 BossBuilder.Init();
                 NPCAPI.NPCHooks.Init();
-                EnemyAPI.Hooks.Init();
                 CustomDiscountManager.Init();
                 GoopUtility.Init();
 

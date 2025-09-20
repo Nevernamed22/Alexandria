@@ -18,6 +18,8 @@ namespace Alexandria.EnemyAPI
         [HarmonyPostfix]
         private static void AIActorAwakePatch(AIActor __instance)
         {
+            if (EnemyTools.overrideBehaviors == null)
+                return;
             try
             {
                 var obehaviors = EnemyTools.overrideBehaviors.Where(ob => ob.OverrideAIActorGUID == __instance.EnemyGuid);

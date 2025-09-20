@@ -52,7 +52,6 @@ namespace Alexandria
 
                 //Medium Priority
                 CustomActions.InitHooks();
-                ExtendedPlayerComponent.Init();
                 EnemyTools.Init();
                 EnemyBuilder.Init();
                 BossBuilder.Init();

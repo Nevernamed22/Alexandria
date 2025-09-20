@@ -64,11 +64,6 @@ namespace Alexandria.CharacterAPI
                     typeof(Hooks).GetMethod("OnP2Cleared")
                 );
 
-                Hook onEnableHook = new Hook(
-                    typeof(CharacterSelectIdleDoer).GetMethod("OnEnable", BindingFlags.Instance | BindingFlags.NonPublic),
-                    typeof(Hooks).GetMethod("OnEnableHook", BindingFlags.Static | BindingFlags.NonPublic)
-                );
-
                 Hook canBeSelectedHook = new Hook(
                     typeof(FoyerCharacterSelectFlag).GetMethod("CanBeSelected", BindingFlags.Instance | BindingFlags.Public),
                     typeof(Hooks).GetMethod("CanBeSelectedHook", BindingFlags.Static | BindingFlags.Public)
@@ -480,16 +475,15 @@ namespace Alexandria.CharacterAPI
             __instance.GetComponent<SpeculativeRigidbody>().enabled = false;
         }
 
-        private static void OnEnableHook(Action<CharacterSelectIdleDoer> orig, CharacterSelectIdleDoer self)
+        [HarmonyPatch(typeof(CharacterSelectIdleDoer), nameof(CharacterSelectIdleDoer.OnEnable))]
+        [HarmonyPrefix]
+        private static void CharacterSelectIdleDoerOnEnablePatch(CharacterSelectIdleDoer __instance)
         {
-            if (self.GetComponent<CustomCharacterFoyerController>() != null && self.GetComponent<CustomCharacterFoyerController>().useGlow && self.sprite.renderer.material != self.GetComponent<CustomCharacterFoyerController>().data.glowMaterial)
+            if (__instance.GetComponent<CustomCharacterFoyerController>() is CustomCharacterFoyerController ccfc && ccfc.useGlow && __instance.sprite.renderer.material != ccfc.data.glowMaterial)
             {
-                var character = self.GetComponent<CustomCharacterFoyerController>();
-                self.sprite.usesOverrideMaterial = true;
-                self.sprite.renderer.material = character.data.glowMaterial;
+                __instance.sprite.usesOverrideMaterial = true;
+                __instance.sprite.renderer.material = ccfc.data.glowMaterial;
             }
-
-            orig(self);
         }
 
         public static bool CanBeSelectedHook(Func<FoyerCharacterSelectFlag, bool> orig, FoyerCharacterSelectFlag self)

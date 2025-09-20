@@ -109,11 +109,6 @@ namespace Alexandria.CharacterAPI
                     typeof(Hooks).GetMethod("ProcessPlayerEnteredFoyerHook", BindingFlags.Static | BindingFlags.Public)
                 );
 
-                Hook SwapToAlternateCostumeHook = new Hook(
-                    typeof(PlayerController).GetMethod("SwapToAlternateCostume", BindingFlags.Instance | BindingFlags.Public),
-                    typeof(Hooks).GetMethod("SwapToAlternateCostumeHook", BindingFlags.Static | BindingFlags.Public)
-                );
-
                 Hook punchoutUIHook = new Hook(
                     typeof(PunchoutPlayerController).GetMethod("UpdateUI", BindingFlags.Public | BindingFlags.Instance),
                     typeof(Hooks).GetMethod("PunchoutUpdateUI")
@@ -168,34 +163,27 @@ namespace Alexandria.CharacterAPI
             return actualId;
         }
 
-        public static void SwapToAlternateCostumeHook(Action<PlayerController, tk2dSpriteAnimation> orig, PlayerController self, tk2dSpriteAnimation overrideTargetLibrary = null)
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.SwapToAlternateCostume))]
+        [HarmonyPrefix]
+        private static void PlayerControllerSwapToAlternateCostumePatch(PlayerController __instance, tk2dSpriteAnimation overrideTargetLibrary)
         {
-
-            if (self?.characterIdentity > (PlayableCharacters)10 && self.gameObject.GetComponent<CustomCharacter>() != null)
+            if (!__instance.IsCustomCharacter() || __instance.gameObject.GetComponent<CustomCharacter>() is not CustomCharacter cc)
+                return;
+            if (cc.data == null)
+                cc.GetData();
+            if (!__instance.IsUsingAlternateCostume && cc.data.altGlowMaterial is Material altGlowMaterial)
             {
-
-                if (self.gameObject.GetComponent<CustomCharacter>().data == null) self.gameObject.GetComponent<CustomCharacter>().GetData();
-
-                if (!self.IsUsingAlternateCostume && self.gameObject.GetComponent<CustomCharacter>()?.data?.altGlowMaterial != null)
-                {
-                    if (self.gameObject.GetComponent<CustomCharacter>()?.data?.altGlowMaterial?.GetTexture("_MainTex") != self.AlternateCostumeLibrary?.clips[0]?.frames[0]?.spriteCollection?.spriteDefinitions[0]?.material.GetTexture("_MainTex"))
-                    {
-                        self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial.SetTexture("_MainTex", self.AlternateCostumeLibrary.clips[0].frames[0].spriteCollection.spriteDefinitions[0].material.GetTexture("_MainTex"));
-                    }
-                    self.sprite.renderer.material = self.gameObject.GetComponent<CustomCharacter>().data.altGlowMaterial;
-                }
-                else if (self.gameObject.GetComponent<CustomCharacter>()?.data?.glowMaterial != null)
-                {
-                    if (self.gameObject.GetComponent<CustomCharacter>().data?.glowMaterial?.GetTexture("_MainTex") != self.sprite.renderer.material.GetTexture("_MainTex"))
-                    {
-                        //_MainTexture
-                        self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial.SetTexture("_MainTex", self.sprite.renderer.material.GetTexture("_MainTex"));
-                    }
-                    self.sprite.renderer.material = self.gameObject.GetComponent<CustomCharacter>().data.glowMaterial;
-                }
+                Texture mainTex = __instance.AlternateCostumeLibrary?.clips[0]?.frames[0]?.spriteCollection?.spriteDefinitions[0]?.material.GetTexture("_MainTex");
+                if (mainTex != null && altGlowMaterial.GetTexture("_MainTex") != mainTex)
+                    altGlowMaterial.SetTexture("_MainTex", mainTex);
+                __instance.sprite.renderer.material = altGlowMaterial;
             }
-
-            orig(self, overrideTargetLibrary);
+            else if (cc.data.glowMaterial is Material glowMaterial)
+            {
+                if (glowMaterial.GetTexture("_MainTex") != __instance.sprite.renderer.material.GetTexture("_MainTex"))
+                    glowMaterial.SetTexture("_MainTex", __instance.sprite.renderer.material.GetTexture("_MainTex")); //_MainTexture
+                __instance.sprite.renderer.material = glowMaterial;
+            }
         }
 
         public static void ProcessPlayerEnteredFoyerHook(Action<Foyer, PlayerController> orig, Foyer self, PlayerController p)
@@ -746,16 +734,6 @@ namespace Alexandria.CharacterAPI
         public static void OnP2Cleared(Action<GameManager> orig, GameManager self)
         {
             orig(self);
-            ResetInfiniteGuns();
-        }
-
-        public static void PrimaryPlayerSwitched(Action<ETGModConsole, string[]> orig, ETGModConsole self, string[] args)
-        {
-            try
-            {
-                orig(self, args);
-            }
-            catch { }
             ResetInfiniteGuns();
         }
 

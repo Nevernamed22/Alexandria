@@ -73,11 +73,6 @@ namespace Alexandria.CharacterAPI
                     typeof(FoyerCharacterSelectFlag).GetMethod("CanBeSelected", BindingFlags.Instance | BindingFlags.Public),
                     typeof(Hooks).GetMethod("CanBeSelectedHook", BindingFlags.Static | BindingFlags.Public)
                 );
-
-                Hook onSelectedCharacterCallbackHook = new Hook(
-                    typeof(FoyerCharacterSelectFlag).GetMethod("OnSelectedCharacterCallback", BindingFlags.Instance | BindingFlags.Public),
-                    typeof(Hooks).GetMethod("OnSelectedCharacterCallbackHook", BindingFlags.Static | BindingFlags.Public)
-                );
             }
             catch (Exception e)
             {
@@ -473,20 +468,16 @@ namespace Alexandria.CharacterAPI
             }
         }
 
-        public static void OnSelectedCharacterCallbackHook(Action<FoyerCharacterSelectFlag, PlayerController> orig, FoyerCharacterSelectFlag self, PlayerController newCharacter)
+        [HarmonyPatch(typeof(FoyerCharacterSelectFlag), nameof(FoyerCharacterSelectFlag.OnSelectedCharacterCallback))]
+        [HarmonyPostfix]
+        private static void FoyerCharacterSelectFlagOnSelectedCharacterCallbackPatch(FoyerCharacterSelectFlag __instance, PlayerController newCharacter)
         {
-            orig(self, newCharacter);
-            //ETGModConsole.Log($"{newCharacter.gameObject.name} - {self.CharacterPrefabPath}");
-            if (newCharacter.gameObject.name.ToLower().Contains(self.CharacterPrefabPath.ToLower(), false))
-            {
-                if (self.GetComponent<CustomCharacterFoyerController>() != null && self.GetComponent<CustomCharacterFoyerController>().metaCost > 0)
-                {
-
-                    GameStatsManager.Instance.RegisterStatChange(TrackedStats.META_CURRENCY, -(self.GetComponent<CustomCharacterFoyerController>().metaCost));
-                }
-                self.gameObject.SetActive(false);
-                self.GetComponent<SpeculativeRigidbody>().enabled = false;
-            }
+            if (!newCharacter.gameObject.name.ToLower().Contains(__instance.CharacterPrefabPath.ToLower(), false))
+                return;
+            if (__instance.GetComponent<CustomCharacterFoyerController>() is CustomCharacterFoyerController ccfc && ccfc.metaCost > 0)
+                GameStatsManager.Instance.RegisterStatChange(TrackedStats.META_CURRENCY, -ccfc.metaCost);
+            __instance.gameObject.SetActive(false);
+            __instance.GetComponent<SpeculativeRigidbody>().enabled = false;
         }
 
         private static void OnEnableHook(Action<CharacterSelectIdleDoer> orig, CharacterSelectIdleDoer self)

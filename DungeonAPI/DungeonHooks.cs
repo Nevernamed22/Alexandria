@@ -3,12 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using Dungeonator;
-using MonoMod.RuntimeDetour;
-
 using Alexandria.Misc;
 using HarmonyLib;
-using MonoMod.Cil;
-using Mono.Cecil.Cil;
 
 namespace Alexandria.DungeonAPI
 {
@@ -29,7 +25,7 @@ namespace Alexandria.DungeonAPI
 
         [HarmonyPatch(typeof(LoopDungeonGenerator), MethodType.Constructor, new[]{typeof(Dungeon), typeof(int)})]
         [HarmonyPostfix]
-        private static void LoopDungeonGeneratorMethodToPatchPatch(LoopDungeonGenerator __instance, Dungeon dungeon, int dungeonSeed)
+        private static void LoopDungeonGeneratorConstructorPatch(LoopDungeonGenerator __instance, Dungeon d, int dungeonSeed)
         {
             if (GameManager.Instance != null && GameManager.Instance != targetInstance)
             {
@@ -37,8 +33,8 @@ namespace Alexandria.DungeonAPI
                 targetInstance.OnNewLevelFullyLoaded += OnLevelLoadInternal;
             }
 
-            OnPreDungeonGeneration?.Invoke(__instance, dungeon, __instance.m_assignedFlow, dungeonSeed);
-            dungeon = null;
+            OnPreDungeonGeneration?.Invoke(__instance, d, __instance.m_assignedFlow, dungeonSeed);
+            d = null;
         }
 
         [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]

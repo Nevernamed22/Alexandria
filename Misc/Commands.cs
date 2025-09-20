@@ -1,5 +1,4 @@
-﻿//using Alexandria.SaveAPI;
-using Alexandria.DungeonAPI;
+﻿using Alexandria.DungeonAPI;
 using Dungeonator;
 using System;
 using System.Collections.Generic;
@@ -16,22 +15,6 @@ namespace Alexandria.Misc
         public static void Init()
         {
             ETGModConsole.Commands.AddGroup("alexandria");
-
-            //ETGModConsole.Commands.GetGroup("alexandria").AddUnit("logAllFlags", delegate (string[] args)
-            //{
-                /*foreach (var save in SaveAPIManager.AdvancedGameSaves)
-                {
-                    ETGModConsole.Log($"--=== {save.Key.ToUpper()} ===---");
-                    var inst = AdvancedGameStatsManager.GetInstance(save.Key);
-                    foreach (var flag in inst.m_flags)
-                    {
-                        //flag.ToString()
-                        ETGModConsole.Log($"    {flag}");
-                    }
-                }
-                ETGModConsole.Log($"--=== END ===---");*/
-            //});
-
 
             ETGModConsole.Commands.GetGroup("alexandria").AddUnit("checkcustomobjects", delegate (string[] args)
             {

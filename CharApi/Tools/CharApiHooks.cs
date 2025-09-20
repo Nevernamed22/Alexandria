@@ -29,16 +29,6 @@ namespace Alexandria.CharacterAPI
             {
                 Debug.Log("charapi hooks: 1");
 
-                var braveSETypes = new Type[]
-                {
-                    typeof(string),
-                    typeof(string),
-                };
-                Hook braveLoad = new Hook(
-                    typeof(BraveResources).GetMethod("Load", BindingFlags.Public | BindingFlags.Static, null, braveSETypes, null),
-                    typeof(Hooks).GetMethod("BraveLoadObject")
-                );
-
                 Hook playerSwitchHook = new Hook(
                     typeof(Foyer).GetMethod("PlayerCharacterChanged", BindingFlags.Public | BindingFlags.Instance),
                     typeof(Hooks).GetMethod("OnPlayerChanged")
@@ -515,19 +505,12 @@ namespace Alexandria.CharacterAPI
         }
 
         //Used to set fake player prefabs to active on instantiation (hook doesn't work on this call)
-        public static Object BraveLoadObject(Func<string, string, Object> orig, string path, string extension = ".prefab")
+        [HarmonyPatch(typeof(BraveResources), nameof(BraveResources.Load), typeof(string), typeof(string))]
+        [HarmonyPostfix]
+        private static void BraveResourcesLoadPatch(BraveResources __instance, string path, string extension, ref UnityEngine.Object __result)
         {
-            var value = orig(path, extension);
-            if (value == null)
-            {
-                path = path.ToLower();
-                if (CharacterBuilder.storedCharacters.ContainsKey(path))
-                {
-                    var character = CharacterBuilder.storedCharacters[path].Second;
-                    return character;
-                }
-            }
-            return value;
+            if (__result == null && CharacterBuilder.storedCharacters.TryGetValue(path.ToLower(), out var result))
+                __result = result.Second;
         }
 
         public static void OnPlayerChanged(Action<Foyer, PlayerController> orig, Foyer self, PlayerController player)

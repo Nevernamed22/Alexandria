@@ -65,7 +65,6 @@
     <Compile Include="CharApi\CustomCharacterBlackSmithHandler.cs" />
     <Compile Include="CharApi\CollectionDumper.cs" />
     <Compile Include="CharApi\Tools\CharApiHooks.cs" />
-    <Compile Include="CharApi\Tools\HooksToMakeDodgeRollsCodeForRobotGood.cs" />
     <Compile Include="CharApi\Tools\TexturePacker.cs" />
     <Compile Include="CharApi\Tools\TextureStitcher.cs" />
     <Compile Include="CharApi\Tools\Tools.cs" />

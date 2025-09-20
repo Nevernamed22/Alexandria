@@ -66,7 +66,6 @@ namespace Alexandria
                 ChestSpawnHelper.Init();
                 Commands.Init();
                 BreachShopTools.Init();
-                AmmoPickupFixer.Init();
 
                 //Character API
                 ToolsCharApi.Init();

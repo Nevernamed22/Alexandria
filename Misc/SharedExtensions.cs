@@ -25,7 +25,7 @@ namespace Alexandria.Misc
         }
 
         /// <summary>Declare a local variable in an ILManipulator</summary>
-        public static VariableDefinition DeclareLocal<T>(this ILContext il)
+        internal static VariableDefinition DeclareLocal<T>(this ILContext il)
         {
             VariableDefinition v = new VariableDefinition(il.Import(typeof(T)));
             il.Body.Variables.Add(v);
@@ -34,7 +34,7 @@ namespace Alexandria.Misc
 
         /// <summary>Retrieves a field from within an enumerator</summary>
         private static Regex rx_enum_field = new Regex(@"^<?([^>]+)(>__[0-9]+)?$", RegexOptions.Compiled);
-        public static FieldInfo GetEnumeratorField(this Type t, string s)
+        internal static FieldInfo GetEnumeratorField(this Type t, string s)
         {
             return AccessTools.GetDeclaredFields(t).Find(f => {
                 // ETGModConsole.Log($"{f.Name}");
@@ -521,6 +521,15 @@ namespace Alexandria.Misc
             else
                 collection.spriteNameLookupDict[spriteDefinition.name] = nextIndex;
             return nextIndex;
+        }
+
+        /// <summary>Adds 1 or more elements to an array.</summary>
+        internal static void Append<T>(ref T[] array, params T[] elements)
+        {
+            int oldLength = array.Length;
+            Array.Resize(ref array, oldLength + elements.Length);
+            for (int i = 0; i < elements.Length; ++i)
+                array[oldLength + i] = elements[i];
         }
     }
 }

@@ -68,9 +68,9 @@ namespace Alexandria.ItemAPI
         }
         public static void Add<T>(ref T[] array, T toAdd)
         {
-            List<T> list = array.ToList();
-            list.Add(toAdd);
-            array = list.ToArray<T>();
+            int oldLength = array.Length;
+            Array.Resize(ref array, oldLength + 1);
+            array[oldLength] = toAdd;
         }
 
         [Obsolete("This method is obsolete and does nothing; it exists for backwards compatability only.", false)]

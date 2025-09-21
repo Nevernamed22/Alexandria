@@ -17,139 +17,121 @@ namespace Alexandria.NPCAPI
 {
     public static class ShopAPI
     {
-
         public static Dictionary<string, GameObject> builtShops = new Dictionary<string, GameObject>();
-
         public static Vector3[] defaultItemPositions = new Vector3[] { new Vector3(1.125f, 2.125f, 1), new Vector3(2.625f, 1f, 1), new Vector3(4.125f, 2.125f, 1) };
         public static Vector3 defaultTalkPointOffset = new Vector3(0.8125f, 2.1875f, -1.31f);
         public static Vector3 defaultNpcPosition = new Vector3(1.9375f, 3.4375f, 5.9375f);
+        private static GameObject _DreamLuckVFX = null;
 
+        private static void SetUpTalkDoer(GameObject npcObj, VoiceBoxes voiceBox, Vector3 talkPointOffset)
+        {
+            var speechPoint = new GameObject("SpeechPoint");
+            speechPoint.transform.position = talkPointOffset;
+            speechPoint.transform.parent = npcObj.transform;
+            speechPoint.RegisterPrefab(true);
 
+            TalkDoerLite talkDoer = npcObj.AddComponent<TalkDoerLite>();
+            talkDoer.placeableWidth = 4;
+            talkDoer.placeableHeight = 3;
+            talkDoer.difficulty = 0;
+            talkDoer.isPassable = true;
+            talkDoer.usesOverrideInteractionRegion = false;
+            talkDoer.overrideRegionOffset = Vector2.zero;
+            talkDoer.overrideRegionDimensions = Vector2.zero;
+            talkDoer.overrideInteractionRadius = -1;
+            talkDoer.PreventInteraction = false;
+            talkDoer.AllowPlayerToPassEventually = true;
+            talkDoer.speakPoint = speechPoint.transform;
+            talkDoer.SpeaksGleepGlorpenese = false;
+            talkDoer.audioCharacterSpeechTag = ReturnVoiceBox(voiceBox);
+            talkDoer.playerApproachRadius = 5;
+            talkDoer.conversationBreakRadius = 5;
+            talkDoer.echo1 = null;
+            talkDoer.echo2 = null;
+            talkDoer.PreventCoopInteraction = false;
+            talkDoer.IsPaletteSwapped = false;
+            talkDoer.PaletteTexture = null;
+            talkDoer.OutlineDepth = 0.5f;
+            talkDoer.OutlineLuminanceCutoff = 0.05f;
+            talkDoer.MovementSpeed = 3;
+            talkDoer.PathableTiles = CellTypes.FLOOR;
+        }
+
+        private static void SetUpDreamLuck(GameObject npcObj, float fortunesFavorRadius)
+        {
+            UltraFortunesFavor dreamLuck = npcObj.AddComponent<UltraFortunesFavor>();
+            dreamLuck.goopRadius = fortunesFavorRadius;
+            dreamLuck.beamRadius = fortunesFavorRadius;
+            dreamLuck.bulletRadius = fortunesFavorRadius;
+            dreamLuck.bulletSpeedModifier = 0.8f;
+            dreamLuck.vfxOffset = 0.625f;
+            if (_DreamLuckVFX == null)
+                _DreamLuckVFX = ResourceManager.LoadAssetBundle("shared_auto_001").LoadAsset<GameObject>("FortuneFavor_VFX_Spark");
+            dreamLuck.sparkOctantVFX = _DreamLuckVFX;
+        }
+
+        private static DirectionalAnimation BasicDirectionalAnimation(string prefix)
+        {
+            return new DirectionalAnimation {
+                Type = DirectionalAnimation.DirectionType.Single,
+                Prefix = prefix,
+                AnimNames = new string[] { "" },
+                Flipped = new DirectionalAnimation.FlipType[] { DirectionalAnimation.FlipType.None }
+            };
+        }
+
+        private static GameObject RegisterPrefab(this GameObject go, bool? setActive = null)
+        {
+            FakePrefab.MarkAsFakePrefab(go);
+            UnityEngine.Object.DontDestroyOnLoad(go); //NOTE: pretty sure this is redundant with MarkAsFakePrefab(), but not changing it for now
+            if (setActive.HasValue)
+                go.SetActive(setActive.Value);
+            return go;
+        }
+
+        private static void SetUpAIAnimator(GameObject npcObj, tk2dSpriteAnimator spriteAnimator, string idleAnim = null, string talkAnim = null)
+        {
+            AIAnimator aIAnimator = GenerateBlankAIAnimator(npcObj);
+            aIAnimator.spriteAnimator = spriteAnimator;
+            if (!string.IsNullOrEmpty(idleAnim))
+                aIAnimator.IdleAnimation = BasicDirectionalAnimation(idleAnim);
+            if (!string.IsNullOrEmpty(talkAnim))
+                aIAnimator.TalkAnimation = BasicDirectionalAnimation(talkAnim);
+        }
+
+        private static List<int> AddSprites(this tk2dSpriteCollectionData collection, List<string> resourcePaths, Assembly assembly)
+        {
+            assembly ??= Assembly.GetCallingAssembly();
+            List<int> ids = new List<int>(resourcePaths.Count);
+            for (int i = 0; i < resourcePaths.Count; ++i)
+                ids.Add(SpriteBuilder.AddSpriteToCollection(resourcePaths[i], collection, assembly));
+            return ids;
+        }
 
         public static GameObject SetUpNPC(string name, string prefix, List<string> idleSpritePaths, int idleFps, List<string> talkSpritePaths, int talkFps, Vector3 talkPointOffset, Vector3 npcPosition, VoiceBoxes voiceBox = VoiceBoxes.OLD_MAN, float fortunesFavorRadius = 2,
             IntVector2? hitboxSize = null, IntVector2? hitboxOffset = null)
         {
-
             try
             {
-
-                var shared_auto_001 = ResourceManager.LoadAssetBundle("shared_auto_001");
-                var shared_auto_002 = ResourceManager.LoadAssetBundle("shared_auto_002");
-                var SpeechPoint = PrefabAPI.PrefabBuilder.BuildObject("SpeechPoint");
-                SpeechPoint.transform.position = talkPointOffset;
-
                 Assembly assembly = Assembly.GetCallingAssembly();
-                var npcObj = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], PrefabAPI.PrefabBuilder.BuildObject(prefix + ":" + name), assembly);
-
+                var npcObj = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], PrefabAPI.PrefabBuilder.BuildObject(prefix + ":" + name), assembly); //TODO: can we avoid using PrefabBuilder here?
                 npcObj.layer = 22;
+                SetUpTalkDoer(npcObj, voiceBox, talkPointOffset);
+                SetUpDreamLuck(npcObj, fortunesFavorRadius);
 
                 var collection = npcObj.GetComponent<tk2dSprite>().Collection;
-                SpeechPoint.transform.parent = npcObj.transform;
-
-                FakePrefab.MarkAsFakePrefab(SpeechPoint);
-                UnityEngine.Object.DontDestroyOnLoad(SpeechPoint);
-                SpeechPoint.SetActive(true);
-
-
-                var idleIdsList = new List<int>();
-                var talkIdsList = new List<int>();
-
-                foreach (string sprite in idleSpritePaths)
-                {
-                    idleIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly));
-                }
-
-                foreach (string sprite in talkSpritePaths)
-                {
-                    talkIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly));
-                }
-
                 tk2dSpriteAnimator spriteAnimator = npcObj.AddComponent<tk2dSpriteAnimator>();
-
-                SpriteBuilder.AddAnimation(spriteAnimator, collection, idleIdsList, "idle", tk2dSpriteAnimationClip.WrapMode.Loop, idleFps);
-                SpriteBuilder.AddAnimation(spriteAnimator, collection, talkIdsList, "talk", tk2dSpriteAnimationClip.WrapMode.Loop, talkFps);
-
+                SpriteBuilder.AddAnimation(spriteAnimator, collection, collection.AddSprites(idleSpritePaths, assembly), "idle", tk2dSpriteAnimationClip.WrapMode.Loop, idleFps);
+                SpriteBuilder.AddAnimation(spriteAnimator, collection, collection.AddSprites(talkSpritePaths, assembly), "talk", tk2dSpriteAnimationClip.WrapMode.Loop, talkFps);
+                SetUpAIAnimator(npcObj, spriteAnimator, "idle", "talk");
 
                 if (hitboxSize == null) hitboxSize = new IntVector2(20, 18);
-                if (hitboxOffset == null) new IntVector2(5, 0);
+                if (hitboxOffset == null) new IntVector2(5, 0); //NOTE: don't think this works...
 
                 SpeculativeRigidbody rigidbody = GenerateOrAddToRigidBody(npcObj, CollisionLayer.LowObstacle, PixelCollider.PixelColliderGeneration.Manual, true, true, true, false, false, false, false, true, hitboxSize, hitboxOffset);
                 rigidbody.AddCollisionLayerOverride(CollisionMask.LayerToMask(CollisionLayer.BulletBlocker));
 
-                //SpeculativeRigidbody rigidbody = GenerateOrAddToRigidBody(npcObj, CollisionLayer.BulletBlocker, PixelCollider.PixelColliderGeneration.Manual, true, true, true, false, false, false, false, true, new IntVector2(20, 18), new IntVector2(5, 0));
-
-                TalkDoerLite talkDoer = npcObj.AddComponent<TalkDoerLite>();
-
-                talkDoer.placeableWidth = 4;
-                talkDoer.placeableHeight = 3;
-                talkDoer.difficulty = 0;
-                talkDoer.isPassable = true;
-                talkDoer.usesOverrideInteractionRegion = false;
-                talkDoer.overrideRegionOffset = Vector2.zero;
-                talkDoer.overrideRegionDimensions = Vector2.zero;
-                talkDoer.overrideInteractionRadius = -1;
-                talkDoer.PreventInteraction = false;
-                talkDoer.AllowPlayerToPassEventually = true;
-                talkDoer.speakPoint = SpeechPoint.transform;
-                talkDoer.SpeaksGleepGlorpenese = false;
-                talkDoer.audioCharacterSpeechTag = ReturnVoiceBox(voiceBox);
-                talkDoer.playerApproachRadius = 5;
-                talkDoer.conversationBreakRadius = 5;
-                talkDoer.echo1 = null;
-                talkDoer.echo2 = null;
-                talkDoer.PreventCoopInteraction = false;
-                talkDoer.IsPaletteSwapped = false;
-                talkDoer.PaletteTexture = null;
-                talkDoer.OutlineDepth = 0.5f;
-                talkDoer.OutlineLuminanceCutoff = 0.05f;
-                talkDoer.MovementSpeed = 3;
-                talkDoer.PathableTiles = CellTypes.FLOOR;
-
-
-                UltraFortunesFavor dreamLuck = npcObj.AddComponent<UltraFortunesFavor>();
-
-                dreamLuck.goopRadius = fortunesFavorRadius;
-                dreamLuck.beamRadius = fortunesFavorRadius;
-                dreamLuck.bulletRadius = fortunesFavorRadius;
-                dreamLuck.bulletSpeedModifier = 0.8f;
-
-                dreamLuck.vfxOffset = 0.625f;
-                dreamLuck.sparkOctantVFX = shared_auto_001.LoadAsset<GameObject>("FortuneFavor_VFX_Spark");
-
-
-                AIAnimator aIAnimator = GenerateBlankAIAnimator(npcObj);
-                aIAnimator.spriteAnimator = spriteAnimator;
-                aIAnimator.IdleAnimation = new DirectionalAnimation
-                {
-                    Type = DirectionalAnimation.DirectionType.Single,
-                    Prefix = "idle",
-                    AnimNames = new string[]
-                    {
-                        ""
-                    },
-                    Flipped = new DirectionalAnimation.FlipType[]
-                    {
-                        DirectionalAnimation.FlipType.None
-                    }
-
-                };
-
-                aIAnimator.TalkAnimation = new DirectionalAnimation
-                {
-                    Type = DirectionalAnimation.DirectionType.Single,
-                    Prefix = "talk",
-                    AnimNames = new string[]
-                    {
-                        ""
-                    },
-                    Flipped = new DirectionalAnimation.FlipType[]
-                    {
-                        DirectionalAnimation.FlipType.None
-                    }
-                };
-
-                PlayMakerFSM iHaveNoFuckingClueWhatThisIs = npcObj.AddComponent<PlayMakerFSM>();
-
+                npcObj.AddComponent<PlayMakerFSM>();
                 npcObj.name = prefix + ":" + name;
                 return npcObj;
             }
@@ -159,404 +141,6 @@ namespace Alexandria.NPCAPI
                 return null;
             }
         }
-
-        /*
-        /// <summary>
-        /// Creates a shop object along with an npc
-        /// </summary>
-        /// <param name="name">Name of the npc</param> 
-        /// <param name="prefix">Mod prefix (for example Bot)</param> 
-        /// 
-        /// <param name="idleSpritePaths">List of *FULL* sprite paths for the idle animation</param> 
-        /// <param name="idleFps">Fps of the idle animation (base game tends to use around 6)</param> 
-        /// 
-        /// <param name="talkSpritePaths">List of *FULL* sprite paths for the talk animation</param> 
-        /// <param name="talkFps">Fps of the talk animation (base game tends to use around 8)</param> 
-        /// 
-        /// <param name="lootTable">Shop loot table</param> 
-        /// <param name="currency">What is used to buy items at the shop</param> 
-        /// 
-        /// <param name="runBasedMultilineGenericStringKey">String key for normal convos</param> 
-        /// <param name="runBasedMultilineStopperStringKey">String key for if you try talking to an npc to much</param> 
-        /// <param name="purchaseItemStringKey">String key for when the player buys something</param> 
-        /// <param name="purchaseItemFailedStringKey">String key for when the player tries but fails to buy something</param> 
-        /// <param name="introStringKey">String key for when the player enters the room</param> 
-        /// <param name="attackedStringKey">String key for when the player shoots at the npc</param> 
-        /// <param name="costModifier">The multiplier for shop prices</param> 
-        /// <param name="itemPositions">The offset for the item(s) sold by your npc, the amount of items sold is based off how many offsets you add here (if you just want the 3 normally items spots you can use ItsDaFuckinShopApi.defaultItemPositions or just leave it as null)</param> 
-        /// <param name="giveStatsOnPurchase">Whether the shop modifies stats after the player buys an item for example how cursula gives curse</param> 
-        /// <param name="statsToGiveOnPurchase"> The stats given when the player buys an item (will be ingored if statsToGiveOnPurchase is false)</param> 
-        /// 
-        /// <param name="CustomCanBuy">The method that gets called to check if the player can buy an item (useless if currency isnt set to CUSTOM)</param> 
-        /// <param name="CustomRemoveCurrency">The method that gets called remove currency from the player (useless if currency isnt set to CUSTOM)</param> 
-        /// <param name="CustomPrice">The method that gets called to get the price of an item (useless if currency isnt set to CUSTOM)</param> 
-        /// 
-        /// <param name="currencyIconPath">Sprite path for your custom currency sprite</param> 
-        /// <param name="currencyName">The name you want your custom currecy sprite to have (i should probably remove this...)</param> 
-        ///
-        /// <param name="hasCarpet">Whether the shop has a carpet or something else that they sit on</param> 
-        /// <param name="carpetSpritePath">Sprite path for the carpet or whatever</param> 
-        ///         
-        /// <param name="hasMinimapIcon">Whether the shop has a minimap icon to show what room theyre in</param> 
-        /// <param name="minimapIconSpritePath">Sprite path minimap icon leave blank to just use deafult smiley face</param> 
-        /// 
-        /// <param name="addToMainNpcPool">Whether the shop should be added to the pool of npcs that show up in the main shop a long side bello</param> 
-        /// <param name="percentChanceForMainPool">How likely it is for the shop to show up in the main pool base game shops use 0.1</param> 
-        /// 
-        /// <param name="prerequisites">These do unlocks and shit</param> 
-        /// <returns></returns>
-        public static GameObject SetUpShop(string name, string prefix, List<string> idleSpritePaths, int idleFps, List<string> talkSpritePaths, int talkFps, GenericLootTable lootTable, CustomShopItemController.ShopCurrencyType currency, string runBasedMultilineGenericStringKey,
-            string runBasedMultilineStopperStringKey, string purchaseItemStringKey, string purchaseItemFailedStringKey, string introStringKey, string attackedStringKey, Vector3 talkPointOffset, Vector3[] itemPositions = null, float costModifier = 1, bool giveStatsOnPurchase = false,
-            StatModifier[] statsToGiveOnPurchase = null, Func<CustomShopController, PlayerController, int, bool> CustomCanBuy = null, Func<CustomShopController, PlayerController, int, int> CustomRemoveCurrency = null, Func<CustomShopController, CustomShopItemController, PickupObject, int> CustomPrice = null,
-            Func<PlayerController, PickupObject, int, bool> OnPurchase = null, Func<PlayerController, PickupObject, int, bool> OnSteal = null, string currencyIconPath = "", string currencyName = "", bool canBeRobbed = true, bool hasCarpet = false, string carpetSpritePath = "", bool hasMinimapIcon = false,
-            string minimapIconSpritePath = "", bool addToMainNpcPool = false, float percentChanceForMainPool = 0.1f, DungeonPrerequisite[] prerequisites = null, IntVector2? hitboxSize = null, IntVector2? hitboxOffset = null)
-        {
-
-            try
-            {
-
-                if (prerequisites == null)
-                {
-                    prerequisites = new DungeonPrerequisite[0];
-                }
-                //bool isBreachShop = false;
-                Vector3 breachPos = Vector3.zero;
-
-                var shared_auto_001 = ResourceManager.LoadAssetBundle("shared_auto_001");
-                var shared_auto_002 = ResourceManager.LoadAssetBundle("shared_auto_002");
-                var SpeechPoint = new GameObject("SpeechPoint");
-                SpeechPoint.transform.position = talkPointOffset;
-
-
-
-                var npcObj = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], new GameObject(prefix + ":" + name), Assembly.GetCallingAssembly());
-
-                FakePrefab.MarkAsFakePrefab(npcObj);
-                UnityEngine.Object.DontDestroyOnLoad(npcObj);
-                npcObj.SetActive(false);
-
-                npcObj.layer = 22;
-
-                var collection = npcObj.GetComponent<tk2dSprite>().Collection;
-                SpeechPoint.transform.parent = npcObj.transform;
-
-                FakePrefab.MarkAsFakePrefab(SpeechPoint);
-                UnityEngine.Object.DontDestroyOnLoad(SpeechPoint);
-                SpeechPoint.SetActive(true);
-
-
-                var idleIdsList = new List<int>();
-                var talkIdsList = new List<int>();
-
-                foreach (string sprite in idleSpritePaths)
-                {
-                    idleIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, Assembly.GetCallingAssembly()));
-                }
-
-                foreach (string sprite in talkSpritePaths)
-                {
-                    talkIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, Assembly.GetCallingAssembly()));
-                }
-
-                tk2dSpriteAnimator spriteAnimator = npcObj.AddComponent<tk2dSpriteAnimator>();
-
-                SpriteBuilder.AddAnimation(spriteAnimator, collection, idleIdsList, "idle", tk2dSpriteAnimationClip.WrapMode.Loop, idleFps);
-                SpriteBuilder.AddAnimation(spriteAnimator, collection, talkIdsList, "talk", tk2dSpriteAnimationClip.WrapMode.Loop, talkFps);
-
-                if (hitboxSize == null) hitboxSize = new IntVector2(20, 18);
-                if (hitboxOffset == null) new IntVector2(5, 0);
-
-                SpeculativeRigidbody rigidbody = GenerateOrAddToRigidBody(npcObj, CollisionLayer.BulletBlocker, PixelCollider.PixelColliderGeneration.Manual, true, true, true, false, false, false, false, true, hitboxSize, hitboxOffset);
-
-                TalkDoerLite talkDoer = npcObj.AddComponent<TalkDoerLite>();
-
-                talkDoer.placeableWidth = 4;
-                talkDoer.placeableHeight = 3;
-                talkDoer.difficulty = 0;
-                talkDoer.isPassable = true;
-                talkDoer.usesOverrideInteractionRegion = false;
-                talkDoer.overrideRegionOffset = Vector2.zero;
-                talkDoer.overrideRegionDimensions = Vector2.zero;
-                talkDoer.overrideInteractionRadius = -1;
-                talkDoer.PreventInteraction = false;
-                talkDoer.AllowPlayerToPassEventually = true;
-                talkDoer.speakPoint = SpeechPoint.transform;
-                talkDoer.SpeaksGleepGlorpenese = false;
-                talkDoer.audioCharacterSpeechTag = "oldman";
-                talkDoer.playerApproachRadius = 5;
-                talkDoer.conversationBreakRadius = 5;
-                talkDoer.echo1 = null;
-                talkDoer.echo2 = null;
-                talkDoer.PreventCoopInteraction = false;
-                talkDoer.IsPaletteSwapped = false;
-                talkDoer.PaletteTexture = null;
-                talkDoer.OutlineDepth = 0.5f;
-                talkDoer.OutlineLuminanceCutoff = 0.05f;
-                talkDoer.MovementSpeed = 3;
-                talkDoer.PathableTiles = CellTypes.FLOOR;
-
-
-                UltraFortunesFavor dreamLuck = npcObj.AddComponent<UltraFortunesFavor>();
-
-                dreamLuck.goopRadius = 2;
-                dreamLuck.beamRadius = 2;
-                dreamLuck.bulletRadius = 2;
-                dreamLuck.bulletSpeedModifier = 0.8f;
-
-                dreamLuck.vfxOffset = 0.625f;
-                dreamLuck.sparkOctantVFX = shared_auto_001.LoadAsset<GameObject>("FortuneFavor_VFX_Spark");
-
-
-                AIAnimator aIAnimator = GenerateBlankAIAnimator(npcObj);
-                aIAnimator.spriteAnimator = spriteAnimator;
-                aIAnimator.IdleAnimation = new DirectionalAnimation
-                {
-                    Type = DirectionalAnimation.DirectionType.Single,
-                    Prefix = "idle",
-                    AnimNames = new string[]
-                    {
-                        name + "_idle"
-                    },
-                    Flipped = new DirectionalAnimation.FlipType[]
-                    {
-                        DirectionalAnimation.FlipType.None
-                    }
-
-                };
-
-                aIAnimator.TalkAnimation = new DirectionalAnimation
-                {
-                    Type = DirectionalAnimation.DirectionType.Single,
-                    Prefix = "talk",
-                    AnimNames = new string[]
-                    {
-                       name + "_talk"
-                    },
-                    Flipped = new DirectionalAnimation.FlipType[]
-                    {
-                        DirectionalAnimation.FlipType.None
-                    }
-                };
-
-                var basenpc = ResourceManager.LoadAssetBundle("shared_auto_001").LoadAsset<GameObject>("Merchant_Key").transform.Find("NPC_Key").gameObject;
-
-                PlayMakerFSM iHaveNoFuckingClueWhatThisIs = npcObj.AddComponent<PlayMakerFSM>();
-
-                UnityEngine.JsonUtility.FromJsonOverwrite(UnityEngine.JsonUtility.ToJson(basenpc.GetComponent<PlayMakerFSM>()), iHaveNoFuckingClueWhatThisIs);
-
-                FieldInfo fsmStringParams = typeof(ActionData).GetField("fsmStringParams", BindingFlags.NonPublic | BindingFlags.Instance);
-
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[1].ActionData) as List<FsmString>)[0].Value = runBasedMultilineGenericStringKey;
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[1].ActionData) as List<FsmString>)[1].Value = runBasedMultilineStopperStringKey;
-
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[4].ActionData) as List<FsmString>)[0].Value = purchaseItemStringKey;
-
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[5].ActionData) as List<FsmString>)[0].Value = purchaseItemFailedStringKey;
-
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[7].ActionData) as List<FsmString>)[0].Value = introStringKey;
-
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[8].ActionData) as List<FsmString>)[0].Value = attackedStringKey;
-
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[9].ActionData) as List<FsmString>)[0].Value = "#SUBSHOP_GENERIC_CAUGHT_STEALING";
-
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[10].ActionData) as List<FsmString>)[0].Value = "#SHOP_GENERIC_NO_SALE_LABEL";
-
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[12].ActionData) as List<FsmString>)[0].Value = "#COOP_REBUKE";
-
-                foreach (var state in iHaveNoFuckingClueWhatThisIs.Fsm.FsmComponent.FsmStates)
-                {
-                    foreach (var action in state.Actions)
-                    {
-                        if (action is DialogueBox && (action as DialogueBox).dialogue[0].Value == purchaseItemStringKey)
-                        {
-                            //((DialogueBox)action).OverrideTalkAnim = name + "_talk";
-                            //((DialogueBox)action).SuppressDefaultAnims.Value = true;
-                            //((DialogueBox)action).zombieTime = 0.01f;
-                        }
-                    }
-                }
-
-                npcObj.name = prefix + ":" + name;
-
-                var posList = new List<Transform>();
-                if (itemPositions == null)
-                {
-                    itemPositions = defaultItemPositions;
-                }
-
-                for (int i = 0; i < itemPositions.Length; i++)
-                {
-
-                    var ItemPoint = new GameObject("ItemPoint" + i);
-                    ItemPoint.transform.position = itemPositions[i];
-                    FakePrefab.MarkAsFakePrefab(ItemPoint);
-                    UnityEngine.Object.DontDestroyOnLoad(ItemPoint);
-                    ItemPoint.SetActive(true);
-                    posList.Add(ItemPoint.transform);
-                }
-
-                var ItemPoint1 = new GameObject("ItemPoint1");
-                ItemPoint1.transform.position = new Vector3(1.125f, 2.125f, 1);
-                FakePrefab.MarkAsFakePrefab(ItemPoint1);
-                UnityEngine.Object.DontDestroyOnLoad(ItemPoint1);
-                ItemPoint1.SetActive(true);
-                var ItemPoint2 = new GameObject("ItemPoint2");
-                ItemPoint2.transform.position = new Vector3(2.625f, 1f, 1);
-                FakePrefab.MarkAsFakePrefab(ItemPoint2);
-                UnityEngine.Object.DontDestroyOnLoad(ItemPoint2);
-                ItemPoint2.SetActive(true);
-                var ItemPoint3 = new GameObject("ItemPoint3");
-                ItemPoint3.transform.position = new Vector3(4.125f, 2.125f, 1);
-                FakePrefab.MarkAsFakePrefab(ItemPoint3);
-                UnityEngine.Object.DontDestroyOnLoad(ItemPoint3);
-                ItemPoint3.SetActive(true);
-
-
-                var shopObj = new GameObject(prefix + ":" + name + "_Shop").AddComponent<CustomShopController>();
-                FakePrefab.MarkAsFakePrefab(shopObj.gameObject);
-                UnityEngine.Object.DontDestroyOnLoad(shopObj.gameObject);
-
-                shopObj.gameObject.SetActive(false);
-
-                shopObj.currencyType = currency;
-
-                shopObj.ActionAndFuncSetUp(CustomCanBuy, CustomRemoveCurrency, CustomPrice, OnPurchase, OnSteal);
-
-                if (!string.IsNullOrEmpty(currencyIconPath))
-                {
-                    shopObj.customPriceSprite = AddCustomCurrencyType(currencyIconPath, $"{prefix}:{currencyName}", Assembly.GetCallingAssembly());
-                }
-                else
-                {
-                    shopObj.customPriceSprite = currencyName;
-                }
-
-
-                //GungeonAPI.ToolsCharApi.AddNewItemToAtlas()
-
-                shopObj.canBeRobbed = canBeRobbed;
-
-                shopObj.placeableHeight = 5;
-                shopObj.placeableWidth = 5;
-                shopObj.difficulty = 0;
-                shopObj.isPassable = true;
-                shopObj.baseShopType = BaseShopController.AdditionalShopType.TRUCK;//shopType;
-
-                shopObj.FoyerMetaShopForcedTiers = false;
-                shopObj.IsBeetleMerchant = false;
-                shopObj.ExampleBlueprintPrefab = null;
-                shopObj.shopItems = lootTable;
-                shopObj.spawnPositions = posList.ToArray();//{ ItemPoint1.transform, ItemPoint2.transform, ItemPoint3.transform };
-
-                foreach (var pos in shopObj.spawnPositions)
-                {
-                    pos.parent = shopObj.gameObject.transform;
-                }
-
-                shopObj.shopItemsGroup2 = null;
-                shopObj.spawnPositionsGroup2 = null;
-                shopObj.spawnGroupTwoItem1Chance = 0.5f;
-                shopObj.spawnGroupTwoItem2Chance = 0.5f;
-                shopObj.spawnGroupTwoItem3Chance = 0.5f;
-                shopObj.shopkeepFSM = npcObj.GetComponent<PlayMakerFSM>();
-                shopObj.shopItemShadowPrefab = shared_auto_001.LoadAsset<GameObject>("Merchant_Key").GetComponent<BaseShopController>().shopItemShadowPrefab;
-
-                shopObj.prerequisites = prerequisites;
-                //shopObj.shopItemShadowPrefab = 
-
-                shopObj.cat = null;
-
-
-                if (hasMinimapIcon)
-                {
-                    if (!string.IsNullOrEmpty(minimapIconSpritePath))
-                    {
-                        shopObj.OptionalMinimapIcon = SpriteBuilder.SpriteFromResource(minimapIconSpritePath, assembly: Assembly.GetCallingAssembly());
-                        UnityEngine.Object.DontDestroyOnLoad(shopObj.OptionalMinimapIcon);
-                        FakePrefab.MarkAsFakePrefab(shopObj.OptionalMinimapIcon);
-                    }
-                    else
-                    {
-                        shopObj.OptionalMinimapIcon = ResourceCache.Acquire("Global Prefabs/Minimap_NPC_Icon") as GameObject;
-                    }
-                }
-
-                shopObj.ShopCostModifier = costModifier;
-                shopObj.FlagToSetOnEncounter = GungeonFlags.NONE;
-
-                shopObj.giveStatsOnPurchase = giveStatsOnPurchase;
-                shopObj.statsToGive = statsToGiveOnPurchase;
-
-                //shopObj.
-
-                /*if (isBreachShop)
-                {
-                    shopObj.gameObject.AddComponent<BreachShopComp>().offset = breachPos;
-                    BreachShopTools.registeredShops.Add(prefix + ":" + name, shopObj.gameObject);
-
-                    shopObj.FoyerMetaShopForcedTiers = true;
-
-                    var exampleBlueprintObj = SpriteBuilder.SpriteFromResource(carpetSpritePath, new GameObject(prefix + ":" + name + "_ExampleBlueprintPrefab"));
-                    exampleBlueprintObj.GetComponent<tk2dSprite>().SortingOrder = 2;
-                    FakePrefab.MarkAsFakePrefab(exampleBlueprintObj);
-                    UnityEngine.Object.DontDestroyOnLoad(exampleBlueprintObj);
-                    exampleBlueprintObj.SetActive(false);
-
-                    //var item = exampleBlueprintObj.AddComponent<ItemBlueprintItem>();
-                    //item.quality = PickupObject.ItemQuality.SPECIAL;
-                    //item.PickupObjectId = 99999999;
-                    
-
-
-                    shopObj.ExampleBlueprintPrefab = shared_auto_001.LoadAsset<GameObject>("NPC_Beetle_Merchant_Foyer").GetComponent<BaseShopController>().ExampleBlueprintPrefab;
-                }/
-
-                npcObj.transform.parent = shopObj.gameObject.transform;
-                npcObj.transform.position = new Vector3(1.9375f, 3.4375f, 5.9375f);
-
-
-
-
-                if (hasCarpet)
-                {
-                    var carpetObj = SpriteBuilder.SpriteFromResource(carpetSpritePath, new GameObject(prefix + ":" + name + "_Carpet"), Assembly.GetCallingAssembly());
-                    carpetObj.GetComponent<tk2dSprite>().SortingOrder = 2;
-                    FakePrefab.MarkAsFakePrefab(carpetObj);
-                    UnityEngine.Object.DontDestroyOnLoad(carpetObj);
-                    carpetObj.SetActive(true);
-
-                    carpetObj.transform.position = new Vector3(0, 0, 1.7f);
-                    carpetObj.transform.parent = shopObj.gameObject.transform;
-                    carpetObj.layer = 20;
-                }
-                npcObj.SetActive(true);
-
-                if (addToMainNpcPool)
-                {
-                    shared_auto_002.LoadAsset<DungeonPlaceable>("shopannex_contents_01").variantTiers.Add(new DungeonPlaceableVariant
-                    {
-                        percentChance = percentChanceForMainPool,
-                        unitOffset = new Vector2(-0.5f, -1.25f),
-                        nonDatabasePlaceable = shopObj.gameObject,
-                        enemyPlaceableGuid = "",
-                        pickupObjectPlaceableId = -1,
-                        forceBlackPhantom = false,
-                        addDebrisObject = false,
-                        prerequisites = prerequisites, //shit for unlocks gose here sooner or later
-                        materialRequirements = new DungeonPlaceableRoomMaterialRequirement[0],
-
-                    });
-                }
-
-                ShopAPI.builtShops.Add(prefix + ":" + name, shopObj.gameObject);
-                return shopObj.gameObject;
-            }
-            catch (Exception message)
-            {
-                ETGModConsole.Log(message.ToString());
-                return null;
-            }
-        }*/
 
         /// <summary>
         /// Creates a shop object along with an npc
@@ -619,9 +203,6 @@ namespace Alexandria.NPCAPI
         /// <param name="hitboxOffset">The offset of your enemies hitbox. Remember, 1 is equal to 16 pixels, not 1.</param> 
 
         /// <returns></returns>
-        /// 
-
-
         public static GameObject SetUpShop(string name, string prefix, List<string> idleSpritePaths, int idleFps, List<string> talkSpritePaths, int talkFps, GenericLootTable lootTable, CustomShopItemController.ShopCurrencyType currency, string runBasedMultilineGenericStringKey,
             string runBasedMultilineStopperStringKey, string purchaseItemStringKey, string purchaseItemFailedStringKey, string introStringKey, string attackedStringKey, string stolenFromStringKey, Vector3 talkPointOffset, Vector3 npcPosition, VoiceBoxes voiceBox = VoiceBoxes.OLD_MAN, Vector3[] itemPositions = null, float costModifier = 1, bool giveStatsOnPurchase = false,
             StatModifier[] statsToGiveOnPurchase = null, Func<CustomShopController, PlayerController, int, bool> CustomCanBuy = null, Func<CustomShopController, PlayerController, int, int> CustomRemoveCurrency = null, Func<CustomShopController, CustomShopItemController, PickupObject, int> CustomPrice = null,
@@ -629,221 +210,67 @@ namespace Alexandria.NPCAPI
             Vector2? CarpetOffset = null, bool hasMinimapIcon = false, string minimapIconSpritePath = "", bool addToMainNpcPool = false, float percentChanceForMainPool = 0.1f, DungeonPrerequisite[] prerequisites = null, float fortunesFavorRadius = 2,
             ShopItemPoolType poolType = ShopItemPoolType.DEFAULT, bool RainbowModeImmunity = false, IntVector2? hitboxSize = null, IntVector2? hitboxOffset = null)
         {
-
             try
             {
-
-                if (prerequisites == null)
-                {
-                    prerequisites = new DungeonPrerequisite[0];
-                }
-                //bool isBreachShop = false;
-                Vector3 breachPos = Vector3.zero;
-
                 var shared_auto_001 = ResourceManager.LoadAssetBundle("shared_auto_001");
-                var shared_auto_002 = ResourceManager.LoadAssetBundle("shared_auto_002");
-                var SpeechPoint = new GameObject("SpeechPoint");
-                SpeechPoint.transform.position = talkPointOffset;
-
-
-
-                var npcObj = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], new GameObject(prefix + ":" + name), Assembly.GetCallingAssembly());
-
-                FakePrefab.MarkAsFakePrefab(npcObj);
-                UnityEngine.Object.DontDestroyOnLoad(npcObj);
-                npcObj.SetActive(false);
-
-                npcObj.layer = 22;
-
-                var collection = npcObj.GetComponent<tk2dSprite>().Collection;
-                SpeechPoint.transform.parent = npcObj.transform;
-
-                FakePrefab.MarkAsFakePrefab(SpeechPoint);
-                UnityEngine.Object.DontDestroyOnLoad(SpeechPoint);
-                SpeechPoint.SetActive(true);
-
-
-                var idleIdsList = new List<int>();
-                var talkIdsList = new List<int>();
 
                 Assembly assembly = Assembly.GetCallingAssembly();
-                foreach (string sprite in idleSpritePaths)
-                {
-                    idleIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly));
-                }
+                var npcObj = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], new GameObject(prefix + ":" + name), assembly).RegisterPrefab(false);
+                npcObj.layer = 22;
+                SetUpTalkDoer(npcObj, voiceBox, talkPointOffset);
+                SetUpDreamLuck(npcObj, fortunesFavorRadius);
 
-                foreach (string sprite in talkSpritePaths)
-                {
-                    talkIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly));
-                }
-
+                var collection = npcObj.GetComponent<tk2dSprite>().Collection;
                 tk2dSpriteAnimator spriteAnimator = npcObj.AddComponent<tk2dSpriteAnimator>();
-
-                SpriteBuilder.AddAnimation(spriteAnimator, collection, idleIdsList, "idle", tk2dSpriteAnimationClip.WrapMode.Loop, idleFps);
-                SpriteBuilder.AddAnimation(spriteAnimator, collection, talkIdsList, "talk", tk2dSpriteAnimationClip.WrapMode.Loop, talkFps);
-
+                SpriteBuilder.AddAnimation(spriteAnimator, collection, collection.AddSprites(idleSpritePaths, assembly), "idle", tk2dSpriteAnimationClip.WrapMode.Loop, idleFps);
+                SpriteBuilder.AddAnimation(spriteAnimator, collection, collection.AddSprites(talkSpritePaths, assembly), "talk", tk2dSpriteAnimationClip.WrapMode.Loop, talkFps);
+                SetUpAIAnimator(npcObj, spriteAnimator, "idle", "talk");
 
                 if (hitboxSize == null) hitboxSize = new IntVector2(20, 18);
-                if (hitboxOffset == null) new IntVector2(5, 0);
+                if (hitboxOffset == null) new IntVector2(5, 0); //NOTE: don't think this works...
 
                 SpeculativeRigidbody rigidbody = GenerateOrAddToRigidBody(npcObj, CollisionLayer.LowObstacle, PixelCollider.PixelColliderGeneration.Manual, true, true, true, false, false, false, false, true, hitboxSize, hitboxOffset);
                 rigidbody.AddCollisionLayerOverride(CollisionMask.LayerToMask(CollisionLayer.BulletBlocker));
 
-                //SpeculativeRigidbody rigidbody = GenerateOrAddToRigidBody(npcObj, CollisionLayer.BulletBlocker, PixelCollider.PixelColliderGeneration.Manual, true, true, true, false, false, false, false, true, new IntVector2(20, 18), new IntVector2(5, 0));
+                var basenpc = shared_auto_001.LoadAsset<GameObject>("Merchant_Key").transform.Find("NPC_Key").gameObject;
 
-                TalkDoerLite talkDoer = npcObj.AddComponent<TalkDoerLite>();
-
-                talkDoer.placeableWidth = 4;
-                talkDoer.placeableHeight = 3;
-                talkDoer.difficulty = 0;
-                talkDoer.isPassable = true;
-                talkDoer.usesOverrideInteractionRegion = false;
-                talkDoer.overrideRegionOffset = Vector2.zero;
-                talkDoer.overrideRegionDimensions = Vector2.zero;
-                talkDoer.overrideInteractionRadius = -1;
-                talkDoer.PreventInteraction = false;
-                talkDoer.AllowPlayerToPassEventually = true;
-                talkDoer.speakPoint = SpeechPoint.transform;
-                talkDoer.SpeaksGleepGlorpenese = false;
-                talkDoer.audioCharacterSpeechTag = ReturnVoiceBox(voiceBox);
-                talkDoer.playerApproachRadius = 5;
-                talkDoer.conversationBreakRadius = 5;
-                talkDoer.echo1 = null;
-                talkDoer.echo2 = null;
-                talkDoer.PreventCoopInteraction = false;
-                talkDoer.IsPaletteSwapped = false;
-                talkDoer.PaletteTexture = null;
-                talkDoer.OutlineDepth = 0.5f;
-                talkDoer.OutlineLuminanceCutoff = 0.05f;
-                talkDoer.MovementSpeed = 3;
-                talkDoer.PathableTiles = CellTypes.FLOOR;
-
-
-                UltraFortunesFavor dreamLuck = npcObj.AddComponent<UltraFortunesFavor>();
-
-                dreamLuck.goopRadius = fortunesFavorRadius;
-                dreamLuck.beamRadius = fortunesFavorRadius;
-                dreamLuck.bulletRadius = fortunesFavorRadius;
-                dreamLuck.bulletSpeedModifier = 0.8f;
-
-                dreamLuck.vfxOffset = 0.625f;
-                dreamLuck.sparkOctantVFX = shared_auto_001.LoadAsset<GameObject>("FortuneFavor_VFX_Spark");
-
-
-                AIAnimator aIAnimator = GenerateBlankAIAnimator(npcObj);
-                aIAnimator.spriteAnimator = spriteAnimator;
-                aIAnimator.IdleAnimation = new DirectionalAnimation
-                {
-                    Type = DirectionalAnimation.DirectionType.Single,
-                    Prefix = "idle",
-                    AnimNames = new string[]
-                    {
-                        ""
-                    },
-                    Flipped = new DirectionalAnimation.FlipType[]
-                    {
-                        DirectionalAnimation.FlipType.None
-                    }
-
-                };
-
-                aIAnimator.TalkAnimation = new DirectionalAnimation
-                {
-                    Type = DirectionalAnimation.DirectionType.Single,
-                    Prefix = "talk",
-                    AnimNames = new string[]
-                    {
-                        ""
-                    },
-                    Flipped = new DirectionalAnimation.FlipType[]
-                    {
-                        DirectionalAnimation.FlipType.None
-                    }
-                };
-
-
-
-                var basenpc = ResourceManager.LoadAssetBundle("shared_auto_001").LoadAsset<GameObject>("Merchant_Key").transform.Find("NPC_Key").gameObject;
-
-                PlayMakerFSM iHaveNoFuckingClueWhatThisIs = npcObj.AddComponent<PlayMakerFSM>();
-
-                UnityEngine.JsonUtility.FromJsonOverwrite(UnityEngine.JsonUtility.ToJson(basenpc.GetComponent<PlayMakerFSM>()), iHaveNoFuckingClueWhatThisIs);
-
-                iHaveNoFuckingClueWhatThisIs.FsmStates[1].ActionData.fsmStringParams[0].Value = runBasedMultilineGenericStringKey;
-                iHaveNoFuckingClueWhatThisIs.FsmStates[1].ActionData.fsmStringParams[1].Value = runBasedMultilineStopperStringKey;
-
-                iHaveNoFuckingClueWhatThisIs.FsmStates[4].ActionData.fsmStringParams[0].Value = purchaseItemStringKey;
-
-                iHaveNoFuckingClueWhatThisIs.FsmStates[5].ActionData.fsmStringParams[0].Value = purchaseItemFailedStringKey;
-
-                iHaveNoFuckingClueWhatThisIs.FsmStates[7].ActionData.fsmStringParams[0].Value = introStringKey;
-
-                iHaveNoFuckingClueWhatThisIs.FsmStates[8].ActionData.fsmStringParams[0].Value = attackedStringKey;
-
-                iHaveNoFuckingClueWhatThisIs.FsmStates[9].ActionData.fsmStringParams[0].Value = stolenFromStringKey;
-                iHaveNoFuckingClueWhatThisIs.FsmStates[9].ActionData.fsmStringParams[1].Value = stolenFromStringKey;
-
-                iHaveNoFuckingClueWhatThisIs.FsmStates[10].ActionData.fsmStringParams[0].Value = "#SHOP_GENERIC_NO_SALE_LABEL";
-
-                iHaveNoFuckingClueWhatThisIs.FsmStates[12].ActionData.fsmStringParams[0].Value = "#COOP_REBUKE";
+                PlayMakerFSM fsm = npcObj.AddComponent<PlayMakerFSM>();
+                UnityEngine.JsonUtility.FromJsonOverwrite(UnityEngine.JsonUtility.ToJson(basenpc.GetComponent<PlayMakerFSM>()), fsm);
+                fsm.FsmStates[1].ActionData.fsmStringParams[0].Value = runBasedMultilineGenericStringKey;
+                fsm.FsmStates[1].ActionData.fsmStringParams[1].Value = runBasedMultilineStopperStringKey;
+                fsm.FsmStates[4].ActionData.fsmStringParams[0].Value = purchaseItemStringKey;
+                fsm.FsmStates[5].ActionData.fsmStringParams[0].Value = purchaseItemFailedStringKey;
+                fsm.FsmStates[7].ActionData.fsmStringParams[0].Value = introStringKey;
+                fsm.FsmStates[8].ActionData.fsmStringParams[0].Value = attackedStringKey;
+                fsm.FsmStates[9].ActionData.fsmStringParams[0].Value = stolenFromStringKey;
+                fsm.FsmStates[9].ActionData.fsmStringParams[1].Value = stolenFromStringKey;
+                fsm.FsmStates[10].ActionData.fsmStringParams[0].Value = "#SHOP_GENERIC_NO_SALE_LABEL";
+                fsm.FsmStates[12].ActionData.fsmStringParams[0].Value = "#COOP_REBUKE";
 
                 npcObj.name = prefix + ":" + name;
 
                 var posList = new List<Transform>();
                 for (int i = 0; i < itemPositions.Length; i++)
                 {
-
                     var ItemPoint = new GameObject("ItemPoint" + i);
                     ItemPoint.transform.position = itemPositions[i];
-                    FakePrefab.MarkAsFakePrefab(ItemPoint);
-                    UnityEngine.Object.DontDestroyOnLoad(ItemPoint);
-                    ItemPoint.SetActive(true);
+                    ItemPoint.RegisterPrefab(true);
                     posList.Add(ItemPoint.transform);
                 }
 
-                var ItemPoint1 = new GameObject("ItemPoint1");
-                ItemPoint1.transform.position = new Vector3(1.125f, 2.125f, 1);
-                FakePrefab.MarkAsFakePrefab(ItemPoint1);
-                UnityEngine.Object.DontDestroyOnLoad(ItemPoint1);
-                ItemPoint1.SetActive(true);
-                var ItemPoint2 = new GameObject("ItemPoint2");
-                ItemPoint2.transform.position = new Vector3(2.625f, 1f, 1);
-                FakePrefab.MarkAsFakePrefab(ItemPoint2);
-                UnityEngine.Object.DontDestroyOnLoad(ItemPoint2);
-                ItemPoint2.SetActive(true);
-                var ItemPoint3 = new GameObject("ItemPoint3");
-                ItemPoint3.transform.position = new Vector3(4.125f, 2.125f, 1);
-                FakePrefab.MarkAsFakePrefab(ItemPoint3);
-                UnityEngine.Object.DontDestroyOnLoad(ItemPoint3);
-                ItemPoint3.SetActive(true);
-
-
                 var shopObj = new GameObject(prefix + ":" + name + "_Shop").AddComponent<CustomShopController>();
                 shopObj.AllowedToSpawnOnRainbowMode = RainbowModeImmunity;
-                FakePrefab.MarkAsFakePrefab(shopObj.gameObject);
-                UnityEngine.Object.DontDestroyOnLoad(shopObj.gameObject);
-
-                shopObj.gameObject.SetActive(false);
-
+                shopObj.gameObject.RegisterPrefab(false);
                 shopObj.currencyType = currency;
-
                 shopObj.ActionAndFuncSetUp(CustomCanBuy, CustomRemoveCurrency, CustomPrice, OnPurchase, OnSteal);
 
                 if (currency == CustomShopItemController.ShopCurrencyType.CUSTOM)
                 {
                     if (!string.IsNullOrEmpty(currencyIconPath))
-                    {
-                        shopObj.customPriceSprite = AddCustomCurrencyType(currencyIconPath, $"{prefix}:{currencyName}", Assembly.GetCallingAssembly());
-                    }
+                        shopObj.customPriceSprite = AddCustomCurrencyType(currencyIconPath, $"{prefix}:{currencyName}", assembly);
                     else
-                    {
                         shopObj.customPriceSprite = currencyName;
-                    }
                 }
-
-
-
-                //GungeonAPI.ToolsGAPI.AddNewItemToAtlas()
 
                 shopObj.canBeRobbed = canBeRobbed;
 
@@ -858,12 +285,10 @@ namespace Alexandria.NPCAPI
                 shopObj.ExampleBlueprintPrefab = null;
                 shopObj.poolType = poolType;
                 shopObj.shopItems = lootTable;
-                shopObj.spawnPositions = posList.ToArray();//{ ItemPoint1.transform, ItemPoint2.transform, ItemPoint3.transform };
+                shopObj.spawnPositions = posList.ToArray();
 
                 foreach (var pos in shopObj.spawnPositions)
-                {
                     pos.parent = shopObj.gameObject.transform;
-                }
 
                 shopObj.shopItemsGroup2 = null;
                 shopObj.spawnPositionsGroup2 = null;
@@ -873,24 +298,20 @@ namespace Alexandria.NPCAPI
                 shopObj.shopkeepFSM = npcObj.GetComponent<PlayMakerFSM>();
                 shopObj.shopItemShadowPrefab = shared_auto_001.LoadAsset<GameObject>("Merchant_Key").GetComponent<BaseShopController>().shopItemShadowPrefab;
 
-                shopObj.prerequisites = prerequisites;
-                //shopObj.shopItemShadowPrefab = 
+                shopObj.prerequisites = prerequisites ?? new DungeonPrerequisite[0];
 
                 shopObj.cat = null;
-
 
                 if (hasMinimapIcon)
                 {
                     if (!string.IsNullOrEmpty(minimapIconSpritePath))
                     {
-                        shopObj.OptionalMinimapIcon = SpriteBuilder.SpriteFromResource(minimapIconSpritePath, null, Assembly.GetCallingAssembly());
+                        shopObj.OptionalMinimapIcon = SpriteBuilder.SpriteFromResource(minimapIconSpritePath, null, assembly);
                         UnityEngine.Object.DontDestroyOnLoad(shopObj.OptionalMinimapIcon);
                         FakePrefab.MarkAsFakePrefab(shopObj.OptionalMinimapIcon);
                     }
                     else
-                    {
                         shopObj.OptionalMinimapIcon = ResourceCache.Acquire("Global Prefabs/Minimap_NPC_Icon") as GameObject;
-                    }
                 }
 
                 shopObj.ShopCostModifier = costModifier;
@@ -898,47 +319,15 @@ namespace Alexandria.NPCAPI
                 shopObj.giveStatsOnPurchase = giveStatsOnPurchase;
                 shopObj.statsToGive = statsToGiveOnPurchase;
 
-                //shopObj.
-
-                /*if (isBreachShop)
-                {
-                    shopObj.gameObject.AddComponent<BreachShopComp>().offset = breachPos;
-                    BreachShopTools.registeredShops.Add(prefix + ":" + name, shopObj.gameObject);
-
-                    shopObj.FoyerMetaShopForcedTiers = true;
-
-                    var exampleBlueprintObj = SpriteBuilder.SpriteFromResource(carpetSpritePath, new GameObject(prefix + ":" + name + "_ExampleBlueprintPrefab"));
-                    exampleBlueprintObj.GetComponent<tk2dSprite>().SortingOrder = 2;
-                    FakePrefab.MarkAsFakePrefab(exampleBlueprintObj);
-                    UnityEngine.Object.DontDestroyOnLoad(exampleBlueprintObj);
-                    exampleBlueprintObj.SetActive(false);
-
-                    //var item = exampleBlueprintObj.AddComponent<ItemBlueprintItem>();
-                    //item.quality = PickupObject.ItemQuality.SPECIAL;
-                    //item.PickupObjectId = 99999999;
-                    
-
-
-                    shopObj.ExampleBlueprintPrefab = shared_auto_001.LoadAsset<GameObject>("NPC_Beetle_Merchant_Foyer").GetComponent<BaseShopController>().ExampleBlueprintPrefab;
-                }*/
-
                 npcObj.transform.parent = shopObj.gameObject.transform;
                 npcObj.transform.position = npcPosition;//new Vector3(1.9375f, 3.4375f, 5.9375f) + npcPositionOffset;
 
-
-
-
                 if (hasCarpet)
                 {
-                    var carpetObj = SpriteBuilder.SpriteFromResource(carpetSpritePath, new GameObject(prefix + ":" + name + "_Carpet"), Assembly.GetCallingAssembly());
+                    var carpetObj = SpriteBuilder.SpriteFromResource(carpetSpritePath, new GameObject(prefix + ":" + name + "_Carpet"), assembly);
                     carpetObj.GetComponent<tk2dSprite>().SortingOrder = 2;
-                    FakePrefab.MarkAsFakePrefab(carpetObj);
-                    UnityEngine.Object.DontDestroyOnLoad(carpetObj);
-                    carpetObj.SetActive(true);
-
-                    if (CarpetOffset == null) CarpetOffset = Vector2.zero;
-
-                    carpetObj.transform.position = new Vector3(CarpetOffset.Value.x, CarpetOffset.Value.y, 1.7f);
+                    carpetObj.RegisterPrefab(true);
+                    carpetObj.transform.position = (CarpetOffset ?? Vector2.zero).ToVector3ZUp(1.7f);
                     carpetObj.transform.parent = shopObj.gameObject.transform;
                     carpetObj.layer = 20;
                 }
@@ -946,7 +335,7 @@ namespace Alexandria.NPCAPI
 
                 if (addToMainNpcPool)
                 {
-                    shared_auto_002.LoadAsset<DungeonPlaceable>("shopannex_contents_01").variantTiers.Add(new DungeonPlaceableVariant
+                    ResourceManager.LoadAssetBundle("shared_auto_002").LoadAsset<DungeonPlaceable>("shopannex_contents_01").variantTiers.Add(new DungeonPlaceableVariant
                     {
                         percentChance = percentChanceForMainPool,
                         unitOffset = new Vector2(-0.5f, -1.25f),
@@ -955,7 +344,7 @@ namespace Alexandria.NPCAPI
                         pickupObjectPlaceableId = -1,
                         forceBlackPhantom = false,
                         addDebrisObject = false,
-                        prerequisites = prerequisites, //shit for unlocks gose here sooner or later
+                        prerequisites = prerequisites ?? new DungeonPrerequisite[0], //shit for unlocks gose here sooner or later
                         materialRequirements = new DungeonPlaceableRoomMaterialRequirement[0],
 
                     });
@@ -977,188 +366,63 @@ namespace Alexandria.NPCAPI
             PickupObject, int> CustomPrice = null, Func<PlayerController, PickupObject, int, bool> OnPurchase = null, Func<PlayerController, PickupObject, int, bool> OnSteal = null, string currencyIconPath = "", string currencyName = "", bool hasCarpet = false, 
             string carpetSpritePath = "", Vector2? CarpetOffset = null, DungeonPrerequisite[] prerequisites = null, IntVector2? hitboxSize = null, IntVector2? hitboxOffset = null)
         {
-
             try
             {
-
-                //bool isBreachShop = false;
-                Vector3 breachPos = Vector3.zero;
-
-                var shared_auto_001 = ResourceManager.LoadAssetBundle("shared_auto_001");
-                var shared_auto_002 = ResourceManager.LoadAssetBundle("shared_auto_002");
-                var SpeechPoint = new GameObject("SpeechPoint");
-                SpeechPoint.transform.position = talkPointOffset;
-
-
                 Assembly assembly = Assembly.GetCallingAssembly();
-                var npcObj = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], new GameObject(prefix + ":" + name), assembly);
-
-                FakePrefab.MarkAsFakePrefab(npcObj);
-                UnityEngine.Object.DontDestroyOnLoad(npcObj);
-                npcObj.SetActive(false);
-
+                var npcObj = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], new GameObject(prefix + ":" + name), assembly).RegisterPrefab(false);
                 npcObj.layer = 22;
+                SetUpTalkDoer(npcObj, voiceBox, talkPointOffset);
 
                 var collection = npcObj.GetComponent<tk2dSprite>().Collection;
-                SpeechPoint.transform.parent = npcObj.transform;
-
-                FakePrefab.MarkAsFakePrefab(SpeechPoint);
-                UnityEngine.Object.DontDestroyOnLoad(SpeechPoint);
-                SpeechPoint.SetActive(true);
-
-
-                var idleIdsList = new List<int>();
-                var talkIdsList = new List<int>();
-
-                foreach (string sprite in idleSpritePaths)
-                {
-                    idleIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly));
-                }
-
-                foreach (string sprite in talkSpritePaths)
-                {
-                    talkIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly));
-                }
-
                 tk2dSpriteAnimator spriteAnimator = npcObj.AddComponent<tk2dSpriteAnimator>();
-
-                SpriteBuilder.AddAnimation(spriteAnimator, collection, idleIdsList, "idle", tk2dSpriteAnimationClip.WrapMode.Loop, idleFps);
-                SpriteBuilder.AddAnimation(spriteAnimator, collection, talkIdsList, "talk", tk2dSpriteAnimationClip.WrapMode.Loop, talkFps);
-
+                SpriteBuilder.AddAnimation(spriteAnimator, collection, collection.AddSprites(idleSpritePaths, assembly), "idle", tk2dSpriteAnimationClip.WrapMode.Loop, idleFps);
+                SpriteBuilder.AddAnimation(spriteAnimator, collection, collection.AddSprites(talkSpritePaths, assembly), "talk", tk2dSpriteAnimationClip.WrapMode.Loop, talkFps);
+                SetUpAIAnimator(npcObj, spriteAnimator, "idle", "talk");
 
                 if (hitboxSize == null) hitboxSize = new IntVector2(20, 18);
-                if (hitboxOffset == null) new IntVector2(5, 0);
+                if (hitboxOffset == null) new IntVector2(5, 0); //NOTE: don't think this works...
 
                 SpeculativeRigidbody rigidbody = GenerateOrAddToRigidBody(npcObj, CollisionLayer.LowObstacle, PixelCollider.PixelColliderGeneration.Manual, true, true, true, false, false, false, false, true, hitboxSize, hitboxOffset);
                 rigidbody.AddCollisionLayerOverride(CollisionMask.LayerToMask(CollisionLayer.BulletBlocker));
 
-                TalkDoerLite talkDoer = npcObj.AddComponent<TalkDoerLite>();
-
-                talkDoer.placeableWidth = 4;
-                talkDoer.placeableHeight = 3;
-                talkDoer.difficulty = 0;
-                talkDoer.isPassable = true;
-                talkDoer.usesOverrideInteractionRegion = false;
-                talkDoer.overrideRegionOffset = Vector2.zero;
-                talkDoer.overrideRegionDimensions = Vector2.zero;
-                talkDoer.overrideInteractionRadius = -1;
-                talkDoer.PreventInteraction = false;
-                talkDoer.AllowPlayerToPassEventually = true;
-                talkDoer.speakPoint = SpeechPoint.transform;
-                talkDoer.SpeaksGleepGlorpenese = false;
-                talkDoer.audioCharacterSpeechTag = ReturnVoiceBox(voiceBox);
-                talkDoer.playerApproachRadius = 5;
-                talkDoer.conversationBreakRadius = 5;
-                talkDoer.echo1 = null;
-                talkDoer.echo2 = null;
-                talkDoer.PreventCoopInteraction = false;
-                talkDoer.IsPaletteSwapped = false;
-                talkDoer.PaletteTexture = null;
-                talkDoer.OutlineDepth = 0.5f;
-                talkDoer.OutlineLuminanceCutoff = 0.05f;
-                talkDoer.MovementSpeed = 3;
-                talkDoer.PathableTiles = CellTypes.FLOOR;
-
-
-                AIAnimator aIAnimator = GenerateBlankAIAnimator(npcObj);
-                aIAnimator.spriteAnimator = spriteAnimator;
-                aIAnimator.IdleAnimation = new DirectionalAnimation
-                {
-                    Type = DirectionalAnimation.DirectionType.Single,
-                    Prefix = "idle",
-                    AnimNames = new string[]
-                    {
-                        ""
-                    },
-                    Flipped = new DirectionalAnimation.FlipType[]
-                    {
-                        DirectionalAnimation.FlipType.None
-                    }
-
-                };
-
-                aIAnimator.TalkAnimation = new DirectionalAnimation
-                {
-                    Type = DirectionalAnimation.DirectionType.Single,
-                    Prefix = "talk",
-                    AnimNames = new string[]
-                    {
-                        ""
-                    },
-                    Flipped = new DirectionalAnimation.FlipType[]
-                    {
-                        DirectionalAnimation.FlipType.None
-                    }
-                };
-
-                //idle, msb, end convo, purchas (purchaseItemStringKey), failed buy (purchaseItemFailedStringKey), end convon, ouch (attackedStringKey), has talked, drip (runBasedMultilineGenericStringKey, runBasedMultilineStopperStringKey), fist chat (foyerFirstChat), check coop,
-                //tell coop to fuck off (runBasedMultilineStopperStringKey), end state 5
-
                 var basenpc = ResourceManager.LoadAssetBundle("shared_auto_002").LoadAsset<GameObject>("NPC_Truck_Merchant_Foyer").transform.Find("NPC_Trucker_Foyer").gameObject;
 
-                PlayMakerFSM iHaveNoFuckingClueWhatThisIs = npcObj.AddComponent<PlayMakerFSM>();
-
-                UnityEngine.JsonUtility.FromJsonOverwrite(UnityEngine.JsonUtility.ToJson(basenpc.GetComponent<PlayMakerFSM>()), iHaveNoFuckingClueWhatThisIs);
-
-                iHaveNoFuckingClueWhatThisIs.FsmStates[3].ActionData.fsmStringParams[0].Value = purchaseItemStringKey;
-                iHaveNoFuckingClueWhatThisIs.FsmStates[3].ActionData.fsmStringParams[1].Value = "";
-
-                iHaveNoFuckingClueWhatThisIs.FsmStates[4].ActionData.fsmStringParams[0].Value = purchaseItemFailedStringKey;
-                iHaveNoFuckingClueWhatThisIs.FsmStates[4].ActionData.fsmStringParams[1].Value = "";
-
-                iHaveNoFuckingClueWhatThisIs.FsmStates[6].ActionData.fsmStringParams[0].Value = "";
-
-                iHaveNoFuckingClueWhatThisIs.FsmStates[8].ActionData.fsmStringParams[0].Value = runBasedMultilineGenericStringKey;
-                iHaveNoFuckingClueWhatThisIs.FsmStates[8].ActionData.fsmStringParams[1].Value = runBasedMultilineStopperStringKey;
-
-                iHaveNoFuckingClueWhatThisIs.FsmStates[9].ActionData.fsmStringParams[0].Value = introStringKey;
-
-                iHaveNoFuckingClueWhatThisIs.FsmStates[11].ActionData.fsmStringParams[0].Value = runBasedMultilineStopperStringKey;
-
-
-                
-                //foreach (FsmString fuck in fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[9].ActionData) as List<FsmString>)
-                //{
-                //    ETGModConsole.Log(fuck.Value);
-                //}
-                
+                PlayMakerFSM fsm = npcObj.AddComponent<PlayMakerFSM>();
+                UnityEngine.JsonUtility.FromJsonOverwrite(UnityEngine.JsonUtility.ToJson(basenpc.GetComponent<PlayMakerFSM>()), fsm);
+                fsm.FsmStates[3].ActionData.fsmStringParams[0].Value = purchaseItemStringKey;
+                fsm.FsmStates[3].ActionData.fsmStringParams[1].Value = "";
+                fsm.FsmStates[4].ActionData.fsmStringParams[0].Value = purchaseItemFailedStringKey;
+                fsm.FsmStates[4].ActionData.fsmStringParams[1].Value = "";
+                fsm.FsmStates[6].ActionData.fsmStringParams[0].Value = "";
+                fsm.FsmStates[8].ActionData.fsmStringParams[0].Value = runBasedMultilineGenericStringKey;
+                fsm.FsmStates[8].ActionData.fsmStringParams[1].Value = runBasedMultilineStopperStringKey;
+                fsm.FsmStates[9].ActionData.fsmStringParams[0].Value = introStringKey;
+                fsm.FsmStates[11].ActionData.fsmStringParams[0].Value = runBasedMultilineStopperStringKey;
 
                 npcObj.name = prefix + ":" + name;
 
                 var posList = new List<Transform>();
                 for (int i = 0; i < itemPositions.Length; i++)
                 {
-
                     var ItemPoint = new GameObject("ItemPoint" + i);
                     ItemPoint.transform.position = itemPositions[i];
-                    FakePrefab.MarkAsFakePrefab(ItemPoint);
-                    UnityEngine.Object.DontDestroyOnLoad(ItemPoint);
-                    ItemPoint.SetActive(true);
+                    ItemPoint.RegisterPrefab(true);
                     posList.Add(ItemPoint.transform);
                 }
 
                 var shopObj = new GameObject(prefix + ":" + name + "_Shop").AddComponent<CustomShopController>();
-                FakePrefab.MarkAsFakePrefab(shopObj.gameObject);
-                UnityEngine.Object.DontDestroyOnLoad(shopObj.gameObject);
-
-                shopObj.gameObject.SetActive(false);
+                shopObj.gameObject.RegisterPrefab(false);
 
                 shopObj.currencyType = currency;
-
                 shopObj.ActionAndFuncSetUp(CustomCanBuy, CustomRemoveCurrency, CustomPrice, OnPurchase, OnSteal);
 
                 if (currency == CustomShopItemController.ShopCurrencyType.CUSTOM)
                 {
                     if (!string.IsNullOrEmpty(currencyIconPath))
-                    {
                         shopObj.customPriceSprite = AddCustomCurrencyType(currencyIconPath, $"{prefix}:{currencyName}", assembly);
-                    }
                     else
-                    {
                         shopObj.customPriceSprite = currencyName;
-                    }
                 }
-
 
                 shopObj.placeableHeight = 5;
                 shopObj.placeableWidth = 5;
@@ -1168,14 +432,11 @@ namespace Alexandria.NPCAPI
 
                 shopObj.ExampleBlueprintPrefab = GenerateBluePrint($"{name} Blueprint", prefix, bluePrintSpritePath, assembly);
                 shopObj.IsBeetleMerchant = false;
-                //shopObj.ExampleBlueprintPrefab = null;
                 shopObj.shopItems = lootTable;
-                shopObj.spawnPositions = posList.ToArray();//{ ItemPoint1.transform, ItemPoint2.transform, ItemPoint3.transform };
+                shopObj.spawnPositions = posList.ToArray();
 
                 foreach (var pos in shopObj.spawnPositions)
-                {
                     pos.parent = shopObj.gameObject.transform;
-                }
 
                 shopObj.shopItemsGroup2 = null;
                 shopObj.spawnPositionsGroup2 = null;
@@ -1183,25 +444,13 @@ namespace Alexandria.NPCAPI
                 shopObj.spawnGroupTwoItem2Chance = 0.5f;
                 shopObj.spawnGroupTwoItem3Chance = 0.5f;
                 shopObj.shopkeepFSM = npcObj.GetComponent<PlayMakerFSM>();
-                shopObj.shopItemShadowPrefab = shared_auto_001.LoadAsset<GameObject>("Merchant_Key").GetComponent<BaseShopController>().shopItemShadowPrefab;
+                shopObj.shopItemShadowPrefab = ResourceManager.LoadAssetBundle("shared_auto_001").LoadAsset<GameObject>("Merchant_Key").GetComponent<BaseShopController>().shopItemShadowPrefab;
 
                 shopObj.prerequisites = prerequisites ?? new DungeonPrerequisite[0];
-                //shopObj.shopItemShadowPrefab = 
 
                 shopObj.cat = null;
                 shopObj.ShopCostModifier = costModifier;
                 shopObj.FlagToSetOnEncounter = GungeonFlags.NONE;
-
-
-                //var exampleBlueprintObj = SpriteBuilder.SpriteFromResource(carpetSpritePath, new GameObject(prefix + ":" + name + "_ExampleBlueprintPrefab"), Assembly.GetCallingAssembly());
-                //exampleBlueprintObj.GetComponent<tk2dSprite>().SortingOrder = 2;
-                //FakePrefab.MarkAsFakePrefab(exampleBlueprintObj);
-                //UnityEngine.Object.DontDestroyOnLoad(exampleBlueprintObj);
-                //exampleBlueprintObj.SetActive(false);
-
-                //var item = exampleBlueprintObj.AddComponent<ItemBlueprintItem>();
-                //item.quality = PickupObject.ItemQuality.SPECIAL;
-                //item.PickupObjectId = 99999999;
 
                 shopObj.gameObject.AddComponent<BreachShopComp>().offset = position;
                 BreachShopTools.registeredShops.Add(prefix + ":" + name + "_Shop", shopObj.gameObject);
@@ -1209,20 +458,12 @@ namespace Alexandria.NPCAPI
                 npcObj.transform.parent = shopObj.gameObject.transform;
                 npcObj.transform.position = npcPosition;//new Vector3(1.9375f, 3.4375f, 5.9375f) + npcPositionOffset;
 
-
-
-
                 if (hasCarpet)
                 {
                     var carpetObj = SpriteBuilder.SpriteFromResource(carpetSpritePath, new GameObject(prefix + ":" + name + "_Carpet"), assembly);
                     carpetObj.GetComponent<tk2dSprite>().SortingOrder = 2;
-                    FakePrefab.MarkAsFakePrefab(carpetObj);
-                    UnityEngine.Object.DontDestroyOnLoad(carpetObj);
-                    carpetObj.SetActive(true);
-
-                    if (CarpetOffset == null) CarpetOffset = Vector2.zero;
-
-                    carpetObj.transform.position = new Vector3(CarpetOffset.Value.x, CarpetOffset.Value.y, 1.7f);
+                    carpetObj.RegisterPrefab(true);
+                    carpetObj.transform.position = (CarpetOffset ?? Vector2.zero).ToVector3ZUp(1.7f);
                     carpetObj.transform.parent = shopObj.gameObject.transform;
                     carpetObj.layer = 20;
                 }
@@ -1238,6 +479,42 @@ namespace Alexandria.NPCAPI
             }
         }
 
+        public static GameObject SetUpJailedNpc(string name, string prefix, List<string> idleSpritePaths, int idleFps, Vector3 talkPointOffset, GungeonFlags flag)
+        {
+            var npcObj = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], new GameObject(prefix + ":" + name)).RegisterPrefab(false);
+            npcObj.layer = 22;
+            SetUpTalkDoer(npcObj, VoiceBoxes.OLD_MAN, talkPointOffset);
+            SetUpDreamLuck(npcObj, 2f);
+
+            var collection = npcObj.GetComponent<tk2dSprite>().Collection;
+            tk2dSpriteAnimator spriteAnimator = npcObj.AddComponent<tk2dSpriteAnimator>();
+            SpriteBuilder.AddAnimation(spriteAnimator, collection, collection.AddSprites(idleSpritePaths, Assembly.GetCallingAssembly()), name + "_idle", tk2dSpriteAnimationClip.WrapMode.Loop, idleFps);
+            SetUpAIAnimator(npcObj, spriteAnimator, name + "_idle");
+
+            var shared_auto_002 = ResourceManager.LoadAssetBundle("shared_auto_002");
+            var basenpc = shared_auto_002.LoadAsset<GameObject>("NPC_Key_Jailed");
+            PlayMakerFSM fsm = npcObj.AddComponent<PlayMakerFSM>();
+            UnityEngine.JsonUtility.FromJsonOverwrite(UnityEngine.JsonUtility.ToJson(basenpc.GetComponent<PlayMakerFSM>()), fsm);
+            foreach (var state in fsm.Fsm.FsmComponent.FsmStates)
+                foreach (var action in state.Actions)
+                    if (action is SetSaveFlag ssf)
+                        ssf.targetFlag = flag;
+
+            shared_auto_002.LoadAsset<DungeonPlaceable>("Generic Jailed NPC").variantTiers.Insert(1, new DungeonPlaceableVariant
+            {
+                percentChance = 0.1f,
+                unitOffset = new Vector2(0f, 0f),
+                nonDatabasePlaceable = npcObj.gameObject,
+                enemyPlaceableGuid = "",
+                pickupObjectPlaceableId = -1,
+                forceBlackPhantom = false,
+                addDebrisObject = false,
+                prerequisites = new DungeonPrerequisite[0], //shit for unlocks gose here sooner or later
+                materialRequirements = new DungeonPlaceableRoomMaterialRequirement[0],
+            });
+
+            return npcObj;
+        }
 
         public static GameObject GenerateBluePrint(string name, string prefix, string spritePath, Assembly assembly = null)
         {
@@ -1245,10 +522,8 @@ namespace Alexandria.NPCAPI
             bluePrint.UsesCustomCost = true;
             bluePrint.CustomCost = 10;
             bluePrint.PersistsOnPurchase = false;
-
             return bluePrint.gameObject;
         }
-
 
         /// <summary>
         /// Adds additional animations to certain events to your NPC. To Note, the aanimation names that are used here for certain animations (If the NPC will have one) are called: 
@@ -1277,27 +552,21 @@ namespace Alexandria.NPCAPI
             {
                 var danceIdsList = new List<int>();
                 foreach (string sprite in purchaseSpritePaths)
-                {
                     danceIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly: assembly));
-                }
                 CreateDirectionalAnimation(spriteAnimator, collection, aianimator, danceIdsList, "purchase", purchaseAnimFPS);
             }
             if (denyPurchaseSpritePaths != null)
             {
                 var denyIdsList = new List<int>();
                 foreach (string sprite in denyPurchaseSpritePaths)
-                {
                     denyIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly: assembly));
-                }
                 CreateDirectionalAnimation(spriteAnimator, collection, aianimator, denyIdsList, "denied", denyPurchaseAnimFPS);
             }
             if (stealSpritePaths != null)
             {
                 var stealIdsList = new List<int>();
                 foreach (string sprite in stealSpritePaths)
-                {
                     stealIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly: assembly));
-                }
                 CreateDirectionalAnimation(spriteAnimator, collection, aianimator, stealIdsList, "stolen", stealAnimFPS);
             }
         }
@@ -1309,13 +578,10 @@ namespace Alexandria.NPCAPI
         /// <param name="voicebox">The given VoiceBox to change to.</param> 
         public static void ChangeVoiceBox(GameObject self, VoiceBoxes voicebox)
         {
-            TalkDoerLite talker = self.GetComponentInChildren<TalkDoerLite>();
-            if (self == null || talker == null)
-            {
+            if (self == null || self.GetComponentInChildren<TalkDoerLite>() is not TalkDoerLite talker)
                 ETGModConsole.Log("NPCAPI: Unable to detect TalkDoerLite/GameObject in given object!");
-                return;
-            }
-            talker.audioCharacterSpeechTag = ReturnVoiceBox(voicebox);
+            else
+                talker.audioCharacterSpeechTag = ReturnVoiceBox(voicebox);
         }
 
         /// <summary>
@@ -1325,22 +591,19 @@ namespace Alexandria.NPCAPI
         /// <param name="yourPaths">The sprite paths for your animation.</param> 
         /// <param name="YourAnimFPS">Your animations FPS.</param> 
         /// <param name="AnimationName">Your DIRECTIONAL animations name, along with the animations name.</param> 
-
         public static void AddParentedAnimationToShop(GameObject self, List<string> yourPaths, float YourAnimFPS, string AnimationName)
         {
+            if (yourPaths == null)
+                return;
+
             Assembly assembly = Assembly.GetCallingAssembly();
             var collection = self.GetComponentInChildren<tk2dSprite>().Collection;
             tk2dSpriteAnimator spriteAnimator = self.GetComponentInChildren<tk2dSpriteAnimator>();
             AIAnimator aianimator = self.GetComponentInChildren<AIAnimator>();
-            if (yourPaths != null)
-            {
-                var stealIdsList = new List<int>();
-                foreach (string sprite in yourPaths)
-                {
-                    stealIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly: assembly));
-                }
-                CreateDirectionalAnimation(spriteAnimator, collection, aianimator, stealIdsList, AnimationName, YourAnimFPS);
-            }
+            var stealIdsList = new List<int>();
+            foreach (string sprite in yourPaths)
+                stealIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly: assembly));
+            CreateDirectionalAnimation(spriteAnimator, collection, aianimator, stealIdsList, AnimationName, YourAnimFPS);
         }
 
         /// <summary>
@@ -1352,20 +615,19 @@ namespace Alexandria.NPCAPI
         /// <param name="AnimationName">Your NON DIRECTIONAL animations name.</param> 
         public static void AddUnparentedAnimationToShop(GameObject self, List<string> yourPaths, float YourAnimFPS, string AnimationName)
         {
+            if (yourPaths == null)
+                return;
+
             Assembly assembly = Assembly.GetCallingAssembly();
             var collection = self.GetComponentInChildren<tk2dSprite>().Collection;
             tk2dSpriteAnimator spriteAnimator = self.GetComponentInChildren<tk2dSpriteAnimator>();
             AIAnimator aianimator = self.GetComponentInChildren<AIAnimator>();
-            if (yourPaths != null)
-            {
-                var IdsList = new List<int>();
-                foreach (string sprite in yourPaths)
-                {
-                    IdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly: assembly));
-                }
-                SpriteBuilder.AddAnimation(spriteAnimator, collection, IdsList, AnimationName, tk2dSpriteAnimationClip.WrapMode.Once, YourAnimFPS);
-            }
+            var IdsList = new List<int>();
+            foreach (string sprite in yourPaths)
+                IdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly: assembly));
+            SpriteBuilder.AddAnimation(spriteAnimator, collection, IdsList, AnimationName, tk2dSpriteAnimationClip.WrapMode.Once, YourAnimFPS);
         }
+
         /// <summary>
         /// Modifies a pre-existing directional animation in your NPC to use a different NON-Directional animation that it ALSO has.
         /// </summary>
@@ -1384,7 +646,6 @@ namespace Alexandria.NPCAPI
             }
         }
 
-
         private static void CreateDirectionalAnimation(tk2dSpriteAnimator spriteAnimator, tk2dSpriteCollectionData collection, AIAnimator aianimator, List<int> IdsList, string animationName, float FPS)
         {
             SpriteBuilder.AddAnimation(spriteAnimator, collection, IdsList, animationName, tk2dSpriteAnimationClip.WrapMode.Once, FPS);
@@ -1395,28 +656,12 @@ namespace Alexandria.NPCAPI
                 AnimNames = new string[1],
                 Flipped = new DirectionalAnimation.FlipType[1]
             };
-            if (aianimator.OtherAnimations != null)
-            {
-                aianimator.OtherAnimations.Add(
-                new AIAnimator.NamedDirectionalAnimation
-                {
-                    name = animationName,
-                    anim = aa
-                });
-            }
-            else
-            {
-                aianimator.OtherAnimations = new List<AIAnimator.NamedDirectionalAnimation>
-                {
-                    new AIAnimator.NamedDirectionalAnimation
-                    {
-                        name = animationName,
-                        anim = aa
-                    }
-                };
-            }
-
-
+            if (aianimator.OtherAnimations == null)
+                aianimator.OtherAnimations = new List<AIAnimator.NamedDirectionalAnimation>();
+            aianimator.OtherAnimations.Add(new AIAnimator.NamedDirectionalAnimation {
+                name = animationName,
+                anim = aa
+            });
         }
 
         public enum VoiceBoxes
@@ -1456,8 +701,6 @@ namespace Alexandria.NPCAPI
             SPACE_ROGUE,
             COMPUTER
         };
-
-
 
         public static string ReturnVoiceBox(VoiceBoxes voicebox)
         {
@@ -1501,131 +744,6 @@ namespace Alexandria.NPCAPI
             };
         }
 
-        public static GameObject SetUpJailedNpc(string name, string prefix, List<string> idleSpritePaths, int idleFps, Vector3 talkPointOffset, GungeonFlags flag)
-        {
-            var shared_auto_001 = ResourceManager.LoadAssetBundle("shared_auto_001");
-            var shared_auto_002 = ResourceManager.LoadAssetBundle("shared_auto_002");
-            var SpeechPoint = new GameObject("SpeechPoint");
-            SpeechPoint.transform.position = talkPointOffset;
-
-
-
-            var npcObj = SpriteBuilder.SpriteFromResource(idleSpritePaths[0], new GameObject(prefix + ":" + name));
-
-            FakePrefab.MarkAsFakePrefab(npcObj);
-            UnityEngine.Object.DontDestroyOnLoad(npcObj);
-            npcObj.SetActive(false);
-
-            npcObj.layer = 22;
-
-            var collection = npcObj.GetComponent<tk2dSprite>().Collection;
-            SpeechPoint.transform.parent = npcObj.transform;
-
-            FakePrefab.MarkAsFakePrefab(SpeechPoint);
-            UnityEngine.Object.DontDestroyOnLoad(SpeechPoint);
-            SpeechPoint.SetActive(true);
-
-
-            var idleIdsList = new List<int>();
-
-            Assembly assembly = Assembly.GetCallingAssembly();
-            foreach (string sprite in idleSpritePaths)
-            {
-                idleIdsList.Add(SpriteBuilder.AddSpriteToCollection(sprite, collection, assembly: assembly));
-            }
-
-            tk2dSpriteAnimator spriteAnimator = npcObj.AddComponent<tk2dSpriteAnimator>();
-
-            SpriteBuilder.AddAnimation(spriteAnimator, collection, idleIdsList, name + "_idle", tk2dSpriteAnimationClip.WrapMode.Loop, idleFps);
-
-            PlayMakerFSM nightmareNightmareNightmare = npcObj.AddComponent<PlayMakerFSM>();
-
-            var basenpc = shared_auto_002.LoadAsset<GameObject>("NPC_Key_Jailed");
-
-            UnityEngine.JsonUtility.FromJsonOverwrite(UnityEngine.JsonUtility.ToJson(basenpc.GetComponent<PlayMakerFSM>()), nightmareNightmareNightmare);
-
-            foreach (var state in nightmareNightmareNightmare.Fsm.FsmComponent.FsmStates)
-            {
-                foreach (var action in state.Actions)
-                {
-                    if (action is SetSaveFlag)
-                    {
-                        ((SetSaveFlag)action).targetFlag = flag;
-                    }
-                }
-            }
-
-            AIAnimator aIAnimator = GenerateBlankAIAnimator(npcObj);
-            aIAnimator.spriteAnimator = spriteAnimator;
-            aIAnimator.IdleAnimation = new DirectionalAnimation
-            {
-                Type = DirectionalAnimation.DirectionType.Single,
-                Prefix = name + "_idle",
-                AnimNames = new string[]
-                {
-                        ""
-                },
-                Flipped = new DirectionalAnimation.FlipType[]
-                {
-                        DirectionalAnimation.FlipType.None
-                }
-
-            };
-
-            TalkDoerLite talkDoer = npcObj.AddComponent<TalkDoerLite>();
-
-            talkDoer.placeableWidth = 4;
-            talkDoer.placeableHeight = 3;
-            talkDoer.difficulty = 0;
-            talkDoer.isPassable = true;
-            talkDoer.usesOverrideInteractionRegion = false;
-            talkDoer.overrideRegionOffset = Vector2.zero;
-            talkDoer.overrideRegionDimensions = Vector2.zero;
-            talkDoer.overrideInteractionRadius = -1;
-            talkDoer.PreventInteraction = false;
-            talkDoer.AllowPlayerToPassEventually = true;
-            talkDoer.speakPoint = SpeechPoint.transform;
-            talkDoer.SpeaksGleepGlorpenese = false;
-            talkDoer.audioCharacterSpeechTag = "oldman";
-            talkDoer.playerApproachRadius = 5;
-            talkDoer.conversationBreakRadius = 5;
-            talkDoer.echo1 = null;
-            talkDoer.echo2 = null;
-            talkDoer.PreventCoopInteraction = false;
-            talkDoer.IsPaletteSwapped = false;
-            talkDoer.PaletteTexture = null;
-            talkDoer.OutlineDepth = 0.5f;
-            talkDoer.OutlineLuminanceCutoff = 0.05f;
-            talkDoer.MovementSpeed = 3;
-            talkDoer.PathableTiles = CellTypes.FLOOR;
-
-            UltraFortunesFavor dreamLuck = npcObj.AddComponent<UltraFortunesFavor>();
-
-            dreamLuck.goopRadius = 2;
-            dreamLuck.beamRadius = 2;
-            dreamLuck.bulletRadius = 2;
-            dreamLuck.bulletSpeedModifier = 0.8f;
-
-            dreamLuck.vfxOffset = 0.625f;
-            dreamLuck.sparkOctantVFX = shared_auto_001.LoadAsset<GameObject>("FortuneFavor_VFX_Spark");
-
-            shared_auto_002.LoadAsset<DungeonPlaceable>("Generic Jailed NPC").variantTiers.Insert(1, new DungeonPlaceableVariant
-            {
-                percentChance = 0.1f,
-                unitOffset = new Vector2(0f, 0f),
-                nonDatabasePlaceable = npcObj.gameObject,
-                enemyPlaceableGuid = "",
-                pickupObjectPlaceableId = -1,
-                forceBlackPhantom = false,
-                addDebrisObject = false,
-                prerequisites = new DungeonPrerequisite[0], //shit for unlocks gose here sooner or later
-                materialRequirements = new DungeonPlaceableRoomMaterialRequirement[0],
-
-            });
-
-            return npcObj;
-        }
-
         public static string AddCustomCurrencyType(string ammoTypeSpritePath, string name, Assembly assembly = null)
         {
             return ToolsCharApi.AddUISprite(ResourceExtractor.GetTextureFromResource(ammoTypeSpritePath, assembly ?? Assembly.GetCallingAssembly()), name).name;
@@ -1635,7 +753,6 @@ namespace Alexandria.NPCAPI
         {
             protoroom.category = PrototypeDungeonRoom.RoomCategory.NORMAL;
             DungeonPrerequisite[] array = shop.GetComponent<CustomShopController>()?.prerequisites != null ? shop.GetComponent<CustomShopController>().prerequisites : new DungeonPrerequisite[0];
-            //Vector2 vector = new Vector2((float)(protoroom.Width / 2) + offset.x, (float)(protoroom.Height / 2) + offset.y);
             protoroom.placedObjectPositions.Add(vector);
             protoroom.placedObjects.Add(new PrototypePlacedObjectData
             {
@@ -1718,17 +835,13 @@ namespace Alexandria.NPCAPI
             string clipName, tk2dSpriteAnimationClip.WrapMode wrapMode = tk2dSpriteAnimationClip.WrapMode.Loop, float fps = 15)
         {
             var clip = Shared.CreateAnimation(collection, spriteIDs, clipName, wrapMode, fps);
-
             if (animator.Library == null)
             {
                 animator.Library = animator.gameObject.AddComponent<tk2dSpriteAnimation>();
                 animator.Library.clips = new tk2dSpriteAnimationClip[0];
                 animator.Library.enabled = true;
             }
-
-            Array.Resize(ref animator.Library.clips, animator.Library.clips.Length + 1);
-            animator.Library.clips[animator.Library.clips.Length - 1] = clip;
-
+            Shared.Append(ref animator.Library.clips, clip);
             return clip;
         }
 
@@ -1788,6 +901,5 @@ namespace Alexandria.NPCAPI
             }
             return orAddComponent;
         }
-
     }
 }

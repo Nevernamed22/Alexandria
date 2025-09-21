@@ -131,7 +131,7 @@
     <Compile Include="Misc\PickupUtility.cs" />
     <Compile Include="Misc\PlayerUtility.cs" />
     <Compile Include="Misc\RoomRewardAPI.cs" />
-    <Compile Include="Misc\RuntimeRoomhandlerUtility.cs" />
+    <Compile Include="_Deprecated\RuntimeRoomhandlerUtility.cs" />
     <Compile Include="Misc\ShadowBulletDoer.cs" />
     <Compile Include="Misc\SupplyDropDoer.cs" />
     <Compile Include="Misc\TextHelper.cs" />

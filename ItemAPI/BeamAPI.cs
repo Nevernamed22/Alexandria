@@ -154,7 +154,7 @@ namespace Alexandria.ItemAPI
                         frameDef.colliderVertices = def.colliderVertices;
                         clip.frames[i] = new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection };
                     }
-                    animation.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { clip }).ToArray();
+                    Shared.Append(ref animation.clips, clip);
                     beamController.beamAnimation = "beam_idle";
                 }
 

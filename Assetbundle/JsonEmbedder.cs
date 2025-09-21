@@ -17,74 +17,47 @@ namespace Alexandria.Assetbundle
         /// <param name="path">The direct filepath to all of your *embedded gun jsons.*.</param>
         public static void EmbedJsonDataFromAssembly(Assembly asmb, tk2dSpriteCollectionData data, string path)
         {
-            if (asmb != null)
+            if (asmb == null || data == null || data.spriteDefinitions == null || data.Count == 0)
+                return;
+
+            path = path.Replace("/", ".").Replace("\\", ".");
+            if (!path.EndsWith("."))
+                path += ".";
+
+            List<string> list5 = new List<string>();
+            string[] manifestResourceNames = asmb.GetManifestResourceNames();
+
+            foreach (string text in manifestResourceNames)
             {
-                path = path.Replace("/", ".").Replace("\\", ".");
-                if (!path.EndsWith("."))
-                {
-                    path += ".";
-                }
+                if (!text.StartsWith(path) || text.Length <= path.Length)
+                    continue;
 
-                tk2dSpriteCollectionData tk2dSpriteCollectionData = data;
-                List<string> list5 = new List<string>();
-                string[] manifestResourceNames = asmb.GetManifestResourceNames();
+                string[] array2 = text.Substring(path.LastIndexOf(".") + 1).Split(new char[] { '.' });
+                string text2 = array2.Last().ToLowerInvariant();
+                if (text2 != "json" && text2 != "jtk2d")
+                    continue;
 
-                foreach (string text in manifestResourceNames)
+                string collection = array2[array2.Count() - 2];
+                if (collection == null)
+                    continue;
+
+                int spriteIdByName = data.GetSpriteIdByName(collection, -1);
+                if (spriteIdByName <= -1)
+                    continue;
+
+                using (Stream manifestResourceStream2 = asmb.GetManifestResourceStream(text))
                 {
-                    if (text.StartsWith(path) && text.Length > path.Length)
+                    AssetSpriteData assetSpriteData = default(AssetSpriteData);
+                    try
                     {
-
-                        string[] array2 = text.Substring(path.LastIndexOf(".") + 1).Split(new char[]
-                        {
-                            '.'
-                        });
-
-
-                        string text2 = array2.Last();
-                        if (text2.ToLowerInvariant() == "json" || text2.ToLowerInvariant() == "jtk2d")
-                        {
-                            list5.Add(text);
-                        }
+                        assetSpriteData = JSONHelper.ReadJSON<AssetSpriteData>(manifestResourceStream2);
                     }
-                }
-                foreach (string text5 in list5)
-                {
-                    string[] array5 = text5.Substring(path.LastIndexOf(".") + 1).Split(new char[]
+                    catch
                     {
-                        '.'
-                    });
-
-
-                    string collection = array5[array5.Count() - 2];
-
-
-                    if (collection != null)
-                    {
-                        if (((tk2dSpriteCollectionData != null) ? tk2dSpriteCollectionData.spriteDefinitions : null) != null && tk2dSpriteCollectionData.Count > 0)
-                        {
-                            int spriteIdByName = tk2dSpriteCollectionData.GetSpriteIdByName(collection, -1);
-
-                            if (spriteIdByName > -1)
-                            {
-                                using (Stream manifestResourceStream2 = asmb.GetManifestResourceStream(text5))
-                                {
-                                    AssetSpriteData assetSpriteData = default(AssetSpriteData);
-                                    try
-                                    {
-                                        assetSpriteData = JSONHelper.ReadJSON<AssetSpriteData>(manifestResourceStream2);
-                                    }
-                                    catch
-                                    {
-                                        ETGModConsole.Log("Error: invalid json at project path " + text5, false);
-                                        continue;
-                                    }
-                                    tk2dSpriteCollectionData.SetAttachPoints(spriteIdByName, assetSpriteData.attachPoints);
-                                    //tk2dSpriteCollectionData.inst.SetAttachPoints(spriteIdByName, assetSpriteData.attachPoints);
-                                }
-                            }
-                        }
+                        ETGModConsole.Log("Error: invalid json at project path " + text, false);
+                        continue;
                     }
-
+                    data.SetAttachPoints(spriteIdByName, assetSpriteData.attachPoints);
                 }
             }
         }

@@ -89,8 +89,8 @@ namespace Alexandria.ItemAPI
             AIAnimator orAddComponent = obj.GetOrAddComponent<AIAnimator>();
             DirectionalAnimation directionalAnimation = orAddComponent.GetDirectionalAnimation(name, directionType, type);
             directionalAnimation ??= Shared.BlankDirectionalAnimation(prefix: name, direction: directionType);
-            directionalAnimation.AnimNames = directionalAnimation.AnimNames.Concat(new string[] { name }).ToArray<string>();
-            directionalAnimation.Flipped = directionalAnimation.Flipped.Concat(new DirectionalAnimation.FlipType[] { flipType }).ToArray<DirectionalAnimation.FlipType>();
+            Shared.Append(ref directionalAnimation.AnimNames, name);
+            Shared.Append(ref directionalAnimation.Flipped, flipType);
             orAddComponent.AssignDirectionalAnimation(name, directionalAnimation, type);
             return CompanionBuilder.BuildAnimation(orAddComponent, name, spriteDirectory, fps, Assembly.GetCallingAssembly());
         }

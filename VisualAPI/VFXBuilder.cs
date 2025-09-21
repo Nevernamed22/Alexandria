@@ -83,7 +83,7 @@ namespace Alexandria.VisualAPI
             if (emissiveColour != null) sprite.renderer.material.SetColor("_EmissiveColor", (Color)emissiveColour);
             clip.frames = frames.ToArray();
             clip.wrapMode = wrap;
-            animation.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { clip }).ToArray();
+            Misc.Shared.Append(ref animation.clips, clip);
             if (!persist)
             {
                 SpriteAnimatorKiller kill = animator.gameObject.AddComponent<SpriteAnimatorKiller>();

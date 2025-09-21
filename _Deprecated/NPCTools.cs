@@ -2,24 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Alexandria.CharacterAPI;
+using Alexandria.Misc;
 
 namespace Alexandria.NPCAPI
 {
+    [Obsolete("This class has been obsoleted by ToolsCharApi; it exists for backwards compatability only.", false)]
     public static class NpcTools
     {
         [Obsolete("This method has been obsoleted since NPCHooks.Init() is called directly in Module.cs; it exists for backwards compatability only.", false)]
-        public static void Init()
-        {
-            // NPCHooks.Init();
-        }
+        public static void Init() { }
 
+        [Obsolete("This method has been obsoleted by the equivalent in ToolsCharApi; it exists for backwards compatability only.", false)]
         public static void AddComplex(this StringDBTable stringdb, string key, string value)
         {
-            StringTableManager.ComplexStringCollection stringCollection = (!stringdb.ContainsKey(key))
-                ? new StringTableManager.ComplexStringCollection()
-                : stringCollection = (StringTableManager.ComplexStringCollection)stringdb[key];
-            stringCollection.AddString(value, 1f);
-            stringdb[key] = stringCollection;
+            ToolsCharApi.AddComplex(stringdb, key, value);
         }
 
         [Obsolete("This method has been obsoleted by the equivalent in ToolsCharApi; it exists for backwards compatability only.", false)]

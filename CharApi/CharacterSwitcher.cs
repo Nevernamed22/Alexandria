@@ -9,15 +9,12 @@ using UnityEngine;
 using ChangeCoopMode = HutongGames.PlayMaker.Actions.ChangeCoopMode;
 using InputDevice = InControl.InputDevice;
 
-
-
 namespace Alexandria.CharacterAPI
 {
     //Handles character switching just like the character command
 
     class CharacterSwitcher
     {
-        private static FieldInfo m_instances = typeof(BraveInput).GetField("m_instances", BindingFlags.NonPublic | BindingFlags.Static);
         private static string prefabPath;       
 
         public static void SwitchSecondaryCharacter(string[] args)

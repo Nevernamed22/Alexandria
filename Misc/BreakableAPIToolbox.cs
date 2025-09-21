@@ -121,7 +121,7 @@ namespace Alexandria.BreakableAPI
                 tk2dSpriteAnimationClip idleClip = assembly.CreateAnimation(collection, idleSpritePaths.ToList(), "idle",
                     tk2dSpriteAnimationClip.WrapMode.Loop, idleAnimFPS, tk2dBaseSprite.Anchor.LowerLeft);
 
-                animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { idleClip }).ToArray();
+                Shared.Append(ref animator.Library.clips, idleClip);
                 animator.playAutomatically = true;
                 animator.DefaultClipId = animator.GetClipIdByName("idle");
                 clips.Add(idleClip);
@@ -133,7 +133,7 @@ namespace Alexandria.BreakableAPI
                 tk2dSpriteAnimationClip unsealClip = assembly.CreateAnimation(collection, unsealPaths, "teleport_pad_activate",
                     tk2dSpriteAnimationClip.WrapMode.LoopSection, activateAnimFPS, tk2dBaseSprite.Anchor.LowerLeft);
                 unsealClip.loopStart = activationSpritePaths.Length;
-                animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { unsealClip }).ToArray();
+                Shared.Append(ref animator.Library.clips, unsealClip);
                 clips.Add(unsealClip);
             }
 
@@ -214,7 +214,7 @@ namespace Alexandria.BreakableAPI
                 tk2dSpriteAnimationClip idleClip = assembly.CreateAnimation(collection, idleSpritePaths.ToList(), "idle",
                     tk2dSpriteAnimationClip.WrapMode.Loop, idleAnimFPS, tk2dBaseSprite.Anchor.LowerLeft);
 
-                animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { idleClip }).ToArray();
+                Shared.Append(ref animator.Library.clips, idleClip);
                 animator.playAutomatically = true;
                 animator.DefaultClipId = animator.GetClipIdByName("idle");
             }
@@ -224,7 +224,7 @@ namespace Alexandria.BreakableAPI
                 tk2dSpriteAnimationClip sealClip = assembly.CreateAnimation(collection, sealSpritePaths.ToList(), "seal",
                     tk2dSpriteAnimationClip.WrapMode.Once, sealAnimFPS, tk2dBaseSprite.Anchor.LowerLeft);
 
-                animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { sealClip }).ToArray();
+                Shared.Append(ref animator.Library.clips, sealClip);
                 dungeonDoorSubsidiaryBlocker.sealAnimationName = "seal";
             }
 
@@ -233,7 +233,7 @@ namespace Alexandria.BreakableAPI
                 tk2dSpriteAnimationClip unsealClip = assembly.CreateAnimation(collection, unsealSpritePaths.ToList(), "unseal",
                     tk2dSpriteAnimationClip.WrapMode.Once, unsealAnimFPS, tk2dBaseSprite.Anchor.LowerLeft);
 
-                animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { unsealClip }).ToArray();
+                Shared.Append(ref animator.Library.clips, unsealClip);
                 dungeonDoorSubsidiaryBlocker.unsealAnimationName = "unseal";
             }
 
@@ -242,7 +242,7 @@ namespace Alexandria.BreakableAPI
                 tk2dSpriteAnimationClip playernearblockerClip = assembly.CreateAnimation(collection, playerNearSealedDoorAnimPaths.ToList(), "playernearblocker",
                     tk2dSpriteAnimationClip.WrapMode.Loop, playerNearSealedDoorAnimFPS, tk2dBaseSprite.Anchor.LowerLeft);
 
-                animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { playernearblockerClip }).ToArray();
+                Shared.Append(ref animator.Library.clips, playernearblockerClip);
                 dungeonDoorSubsidiaryBlocker.playerNearSealedAnimationName = "playernearblocker";
             }
             dungeonDoorSubsidiaryBlocker.northSouth = isNorthSouthDoor;
@@ -282,7 +282,7 @@ namespace Alexandria.BreakableAPI
                 tk2dSpriteAnimationClip idleClip = assembly.CreateAnimation(collection, idleSpritePaths.ToList(), "idle",
                     tk2dSpriteAnimationClip.WrapMode.Loop, idleAnimFPS, tk2dBaseSprite.Anchor.LowerLeft);
 
-                animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { idleClip }).ToArray();
+                Shared.Append(ref animator.Library.clips, idleClip);
                 animator.playAutomatically = true;
                 animator.DefaultClipId = animator.GetClipIdByName("idle");
             }
@@ -292,7 +292,7 @@ namespace Alexandria.BreakableAPI
                 tk2dSpriteAnimationClip sealClip = assembly.CreateAnimation(collection, sealSpritePaths.ToList(), "chainseal",
                     tk2dSpriteAnimationClip.WrapMode.Once, sealAnimFPS, tk2dBaseSprite.Anchor.LowerLeft);
 
-                animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { sealClip }).ToArray();
+                Shared.Append(ref animator.Library.clips, sealClip);
                 dungeonDoorSubsidiaryBlocker.sealChainAnimationName = "chainseal";
             }
 
@@ -301,7 +301,7 @@ namespace Alexandria.BreakableAPI
                 tk2dSpriteAnimationClip unsealClip = assembly.CreateAnimation(collection, unsealSpritePaths.ToList(), "chainunseal",
                     tk2dSpriteAnimationClip.WrapMode.Once, unsealAnimFPS, tk2dBaseSprite.Anchor.LowerLeft);
 
-                animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { unsealClip }).ToArray();
+                Shared.Append(ref animator.Library.clips, unsealClip);
                 dungeonDoorSubsidiaryBlocker.unsealChainAnimationName = "chainunseal";
             }
 
@@ -310,7 +310,7 @@ namespace Alexandria.BreakableAPI
                 tk2dSpriteAnimationClip playernearblockerClip = assembly.CreateAnimation(collection, playerNearSealedDoorAnimPaths.ToList(), "chainplayernearblocker",
                     tk2dSpriteAnimationClip.WrapMode.Loop, playerNearSealedDoorAnimFPS, tk2dBaseSprite.Anchor.LowerLeft);
 
-                animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { playernearblockerClip }).ToArray();
+                Shared.Append(ref animator.Library.clips, playernearblockerClip);
                 dungeonDoorSubsidiaryBlocker.playerNearChainAnimationName = "chainplayernearblocker";
             }
             gameObject.transform.parent = parent.transform;
@@ -375,7 +375,7 @@ namespace Alexandria.BreakableAPI
                 tk2dSpriteAnimationClip idleClip = assembly.CreateAnimation(collection, idleSpritePaths.ToList(), "idle",
                     tk2dSpriteAnimationClip.WrapMode.Loop, AnimFPS, tk2dBaseSprite.Anchor.LowerLeft);
 
-                animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { idleClip }).ToArray();
+                Shared.Append(ref animator.Library.clips, idleClip);
                 animator.playAutomatically = true;
                 animator.DefaultClipId = animator.GetClipIdByName("idle");
                 clips.Add(idleClip);
@@ -411,7 +411,7 @@ namespace Alexandria.BreakableAPI
         {
             var clip = Shared.CreateAnimation(Assembly.GetCallingAssembly(), SpriteObjectSpriteCollection, new List<string>(SpritePaths),
                 clipName, wrapMode, FPS, offsetAnchor: tk2dBaseSprite.Anchor.LowerLeft);
-            animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { clip }).ToArray();
+            Shared.Append(ref animator.Library.clips, clip);
             return clip;
         }
 
@@ -1056,7 +1056,7 @@ namespace Alexandria.BreakableAPI
                 tk2dSpriteAnimationClip idleClip = assembly.CreateAnimation(MajorBreakableSpriteCollection, idleSpritePaths.ToList(), "idle",
                     tk2dSpriteAnimationClip.WrapMode.Loop, idleAnimFPS, tk2dBaseSprite.Anchor.LowerLeft);
 
-                animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { idleClip }).ToArray();
+                Shared.Append(ref animator.Library.clips, idleClip);
                 animator.playAutomatically = true;
                 animator.DefaultClipId = animator.GetClipIdByName("idle");
                 clips.Add(idleClip);
@@ -1163,7 +1163,7 @@ namespace Alexandria.BreakableAPI
                 tk2dSpriteAnimationClip idleClip = assembly.CreateAnimation(MinorBreakableSpriteCollection, idleSpritePaths.ToList(), "idle",
                     tk2dSpriteAnimationClip.WrapMode.Loop, idleAnimFPS, tk2dBaseSprite.Anchor.LowerLeft);
 
-                animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { idleClip }).ToArray();
+                Shared.Append(ref animator.Library.clips, idleClip);
                 animator.playAutomatically = true;
                 animator.DefaultClipId = animator.GetClipIdByName("idle");
                 clips.Add(idleClip);
@@ -1504,7 +1504,7 @@ namespace Alexandria.BreakableAPI
             animator.Library = animation;
 
             tk2dSpriteAnimationClip idleClip = assembly.CreateAnimation(VFXSpriteCollection, paths.ToList(), "idle", wrapMode, FPS, null);
-            animator.Library.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { idleClip }).ToArray();
+            Shared.Append(ref animator.Library.clips, idleClip);
             animator.playAutomatically = true;
             animator.DefaultClipId = animator.GetClipIdByName("idle");
         }

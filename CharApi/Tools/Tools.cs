@@ -14,39 +14,70 @@ namespace Alexandria.CharacterAPI
     //Utility methods
     public static class ToolsCharApi
     {
+        static ToolsCharApi() // static constructor
+        {
+            defaultLog = Path.Combine(ETGMod.ResourcesDirectory, "customCharacterLog.txt");
+            if (File.Exists(defaultLog))
+                File.Delete(defaultLog);
+        }
+
         internal const float PIXELS_PER_UNIT = 16f;
 
         public static bool verbose = false;
-        private static string defaultLog = Path.Combine(ETGMod.ResourcesDirectory, "customCharacterLog.txt");
+        private static string defaultLog;
         public static string modID = "CharAPI";
         public static bool EnableDebugLogging = false;
 
         private static Dictionary<string, float> timers = new Dictionary<string, float>();
-        private static string[] BundlePrereqs;
+        private static string[] BundlePrereqs = new string[] {
+            "brave_resources_001",
+            "dungeon_scene_001",
+            "encounters_base_001",
+            "enemies_base_001",
+            "flows_base_001",
+            "foyer_001",
+            "foyer_002",
+            "foyer_003",
+            "shared_auto_001",
+            "shared_auto_002",
+            "shared_base_001",
+            "dungeons/base_bullethell",
+            "dungeons/base_castle",
+            "dungeons/base_catacombs",
+            "dungeons/base_cathedral",
+            "dungeons/base_forge",
+            "dungeons/base_foyer",
+            "dungeons/base_gungeon",
+            "dungeons/base_mines",
+            "dungeons/base_nakatomi",
+            "dungeons/base_resourcefulrat",
+            "dungeons/base_sewer",
+            "dungeons/base_tutorial",
+            "dungeons/finalscenario_bullet",
+            "dungeons/finalscenario_convict",
+            "dungeons/finalscenario_coop",
+            "dungeons/finalscenario_guide",
+            "dungeons/finalscenario_pilot",
+            "dungeons/finalscenario_robot",
+            "dungeons/finalscenario_soldier"
+        };
+
+        [Obsolete("This method does nothing and exists for backwards compatability only.", false)]
+        public static void Init() { }
 
         public static Material[] SetOverrideMaterial (this PlayerController player, Material overrideMaterial)
         {
-            FieldInfo _cachedOverrideMaterials = typeof(PlayerController).GetField("m_cachedOverrideMaterials", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if ((_cachedOverrideMaterials.GetValue(player) as Material[]) == null)
-            {
-                _cachedOverrideMaterials.SetValue(player, new Material[3]);
-            }
-            for (int i = 0; i < (_cachedOverrideMaterials.GetValue(player) as Material[]).Length; i++)
-            {
-                (_cachedOverrideMaterials.GetValue(player) as Material[])[i] = null;
-            }
+            if (player.m_cachedOverrideMaterials == null)
+                player.m_cachedOverrideMaterials = new Material[3];
+            for (int i = 0; i < player.m_cachedOverrideMaterials.Length; i++)
+                player.m_cachedOverrideMaterials[i] = null;
             player.sprite.renderer.material = overrideMaterial;
-            (_cachedOverrideMaterials.GetValue(player) as Material[])[0] = player.sprite.renderer.material;
+            player.m_cachedOverrideMaterials[0] = player.sprite.renderer.material;
             if (player.primaryHand && player.primaryHand.sprite)
-            {
-                (_cachedOverrideMaterials.GetValue(player) as Material[])[1] = player.primaryHand.SetOverrideShader(overrideMaterial.shader);
-            }
+                player.m_cachedOverrideMaterials[1] = player.primaryHand.SetOverrideShader(overrideMaterial.shader);
             if (player.secondaryHand && player.secondaryHand.sprite)
-            {
-                (_cachedOverrideMaterials.GetValue(player) as Material[])[2] = player.secondaryHand.SetOverrideShader(overrideMaterial.shader);
-            }
-            return (_cachedOverrideMaterials.GetValue(player) as Material[]);
+                player.m_cachedOverrideMaterials[2] = player.secondaryHand.SetOverrideShader(overrideMaterial.shader);
+            return player.m_cachedOverrideMaterials;
         }
 
         public static Texture2D Rotated(this Texture2D texture, bool clockwise = false)
@@ -94,10 +125,6 @@ namespace Alexandria.CharacterAPI
 
         public static T LoadAssetFromAnywhere<T>(string path) where T : UnityEngine.Object
         {
-            if (BundlePrereqs == null)
-            {
-                Init();
-            }
             T obj = null;
             foreach (string name in BundlePrereqs)
             {
@@ -378,48 +405,6 @@ namespace Alexandria.CharacterAPI
             return new Vector2Int(vector.x, vector.y);
         }
 
-        public static void Init()
-        {
-            if (BundlePrereqs == null) 
-            {
-                BundlePrereqs = new string[]
-                {
-                    "brave_resources_001",
-                    "dungeon_scene_001",
-                    "encounters_base_001",
-                    "enemies_base_001",
-                    "flows_base_001",
-                    "foyer_001",
-                    "foyer_002",
-                    "foyer_003",
-                    "shared_auto_001",
-                    "shared_auto_002",
-                    "shared_base_001",
-                    "dungeons/base_bullethell",
-                    "dungeons/base_castle",
-                    "dungeons/base_catacombs",
-                    "dungeons/base_cathedral",
-                    "dungeons/base_forge",
-                    "dungeons/base_foyer",
-                    "dungeons/base_gungeon",
-                    "dungeons/base_mines",
-                    "dungeons/base_nakatomi",
-                    "dungeons/base_resourcefulrat",
-                    "dungeons/base_sewer",
-                    "dungeons/base_tutorial",
-                    "dungeons/finalscenario_bullet",
-                    "dungeons/finalscenario_convict",
-                    "dungeons/finalscenario_coop",
-                    "dungeons/finalscenario_guide",
-                    "dungeons/finalscenario_pilot",
-                    "dungeons/finalscenario_robot",
-                    "dungeons/finalscenario_soldier"
-                };  
-            }
-
-            if (File.Exists(defaultLog)) File.Delete(defaultLog);
-        }
-
         public static void Print<T>(T obj, string color = "FFFFFF", bool force = false)
         {
             if (verbose || force)
@@ -601,6 +586,16 @@ namespace Alexandria.CharacterAPI
             int elapsed = (int)((Time.realtimeSinceStartup - timerStart) * 1000);
             timers.Remove(key);
             ToolsCharApi.Print($"{name} finished in " + elapsed + "ms");
+        }
+
+        /// <summary>Adds a complex string to a StringDBTable.</summary>
+        public static void AddComplex(this StringDBTable stringdb, string key, string value)
+        {
+            StringTableManager.ComplexStringCollection stringCollection = (!stringdb.ContainsKey(key))
+                ? new StringTableManager.ComplexStringCollection()
+                : stringCollection = (StringTableManager.ComplexStringCollection)stringdb[key];
+            stringCollection.AddString(value, 1f);
+            stringdb[key] = stringCollection;
         }
     }
 }

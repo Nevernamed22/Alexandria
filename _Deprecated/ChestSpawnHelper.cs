@@ -7,6 +7,7 @@ using System.Text;
 
 namespace Alexandria.ChestAPI
 {
+	[Obsolete("This class is deprecated and exists for backwards compatability only.", true)]
 	public static class ChestSpawnHelper
 	{
 		[Obsolete("This method does nothing and exists for backwards compatibility only.", false)]
@@ -21,6 +22,7 @@ namespace Alexandria.ChestAPI
 		//a 0.09
 		//s 0.04
 
+		[Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
 		public static void ConfigureOnPlacementHook(Action<FloorChestPlacer, RoomHandler> orig, FloorChestPlacer self, RoomHandler room)
 		{
 			FloorRewardData rewardDataForFloor = GameManager.Instance.RewardManager.GetRewardDataForFloor2(GameManager.Instance.BestGenerationDungeonPrefab.tileIndices.tilesetId);
@@ -40,6 +42,7 @@ namespace Alexandria.ChestAPI
 			orig(self, room);
 		}
 
+		[Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
 		public static Chest GetTargetCustomChest(float fran)
 		{
 			//float currentMagnificence = GameManager.Instance.RewardManager.CurrentRewardData.DetermineCurrentMagnificence(isGenerationForMagnificence);
@@ -56,6 +59,7 @@ namespace Alexandria.ChestAPI
 			return null;
 		}
 
+		[Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
 		public static FloorRewardData GetRewardDataForFloor2(this RewardManager rewardManager, GlobalDungeonData.ValidTilesets targetTileset)
 		{
 			FloorRewardData floorRewardData = null;
@@ -73,7 +77,7 @@ namespace Alexandria.ChestAPI
 			return floorRewardData;
 		}
 
-
+		[Obsolete("This field should never be used outside Alexandria and is public for backwards compatability only.", true)]
 		public static Dictionary<string, Tuple<Chest, float>> customChests = new Dictionary<string, Tuple<Chest, float>>();
 
 	}

@@ -51,6 +51,30 @@ namespace Alexandria.EnemyAPI
                 __result = companion.GetComponent<AIActor>();
         }
 
+        [HarmonyPatch(typeof(AIActor), nameof(AIActor.Awake))]
+        [HarmonyPostfix]
+        private static void AIActorAwakePatch(AIActor __instance)
+        {
+            if (EnemyTools.overrideBehaviors == null)
+                return;
+            try
+            {
+                var obehaviors = EnemyTools.overrideBehaviors.Where(ob => ob.OverrideAIActorGUID == __instance.EnemyGuid);
+                foreach (var obehavior in obehaviors)
+                {
+                    obehavior.SetupOB(__instance);
+                    if (obehavior.ShouldOverride())
+                    {
+                        obehavior.DoOverride();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                ETGModConsole.Log(e.ToString());
+            }
+        }
+
         public static GameObject BuildPrefab(string name, string guid, string defaultSpritePath, IntVector2 hitboxOffset, IntVector2 hitBoxSize, bool HasAiShooter)
         {
             if (EnemyBuilder.Dictionary.ContainsKey(guid))
@@ -169,10 +193,9 @@ namespace Alexandria.EnemyAPI
                 };
             }
 
-            animation.AnimNames = animation.AnimNames.Concat(new string[] { name }).ToArray();
+            Shared.Append(ref animation.AnimNames, name);
             aiAnimator.AssignDirectionalAnimation(name, animation, type);
             return BuildAnimations(aiAnimator, name, enemyName, directionType, spriteDirectory, fps, wrapMode, Assembly.GetCallingAssembly());
-
         }
 
         public static tk2dSpriteAnimationClip[] BuildAnimations(AIAnimator aiAnimator, string name, string enemyName, DirectionType directionType, string spriteDirectory, int fps, tk2dSpriteAnimationClip.WrapMode wrapMode, Assembly assembly = null)

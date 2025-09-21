@@ -137,7 +137,7 @@ namespace Alexandria.EnemyAPI
 
             foreach (AIActor maybeFlayer in StaticReferenceManager.AllEnemies)
             {
-                if (!maybeFlayer || maybeFlayer.EnemyGuid != "8b0dd96e2fe74ec7bebc1bc689c0008a" || !maybeFlayer.behaviorSpeculator)
+                if (!maybeFlayer || maybeFlayer.EnemyGuid != EnemyGUIDs.Mine_Flayer_GUID || !maybeFlayer.behaviorSpeculator)
                     continue;
                 List<MineFlayerShellGameBehavior> activeShellGames = maybeFlayer.behaviorSpeculator.FindAttackBehaviors<MineFlayerShellGameBehavior>();
                 if (activeShellGames.Count == 0)

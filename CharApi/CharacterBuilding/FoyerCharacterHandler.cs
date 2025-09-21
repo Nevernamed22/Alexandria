@@ -20,17 +20,8 @@ namespace Alexandria.CharacterAPI
     public static class FoyerCharacterHandler
     {
         private static bool hasInitialized = false;
-        private static FieldInfo m_isHighlighted = typeof(TalkDoerLite).GetField("m_isHighlighted", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        public static void Init()
-        {
-            //ETGModConsole.Commands.AddUnit("pos", s =>
-            //{
-            //    //DebugUtility.Print(GameManager.Instance.PrimaryPlayer.transform.position, "55AAFF", true);
-            //});
-
-     
-        }
+        public static void Init() { }
 
         public static List<FoyerCharacterSelectFlag> AddCustomCharactersToFoyer(List<FoyerCharacterSelectFlag> sortedByX)
         {

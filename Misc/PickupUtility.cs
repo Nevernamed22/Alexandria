@@ -63,15 +63,9 @@ namespace Alexandria.Misc
                 }
             }
 
-            FieldInfo field = typeof(AmmoPickup).GetField("m_pickedUp", BindingFlags.Instance | BindingFlags.NonPublic);
-            field.SetValue(pickup, false);
-
-            FieldInfo field2 = typeof(AmmoPickup).GetField("m_isBeingEyedByRat", BindingFlags.Instance | BindingFlags.NonPublic);
-            field2.SetValue(pickup, false);
-
-            var type = typeof(AmmoPickup);
-            var func = type.GetMethod("GetRidOfMinimapIcon", BindingFlags.Instance | BindingFlags.NonPublic);
-            var ret = func.Invoke(pickup.gameObject.GetComponent<AmmoPickup>(), null);
+            pickup.m_pickedUp = false;
+            pickup.m_isBeingEyedByRat = false;
+            pickup.gameObject.GetComponent<AmmoPickup>().GetRidOfMinimapIcon();
 
             if (pickup.pickupVFX != null)
             {

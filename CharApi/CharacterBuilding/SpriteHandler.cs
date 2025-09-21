@@ -721,9 +721,9 @@ namespace Alexandria.CharacterAPI
 
             bool isSlinger = data.baseCharacter == PlayableCharacters.Gunslinger;
             RuntimeAtlasPage page = new RuntimeAtlasPage();
-            for (int i = 0; i < data.altSprites.Count; i++)
+            for (int i = 0; i < sprites.Count; i++)
             {
-                var tex = data.altSprites[i];
+                var tex = sprites[i];
 
                 float nw = (tex.width) / 16f;
                 float nh = (tex.height) / 16f;

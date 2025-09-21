@@ -25,20 +25,20 @@ namespace Alexandria.VisualAPI
         }
         public static VFXPool CreateVFXPool(string name, List<string> spritePaths, int fps, IntVector2 Dimensions, tk2dBaseSprite.Anchor anchor, bool usesZHeight, float zHeightOffset, bool persist = false, VFXAlignment alignment = VFXAlignment.NormalAligned, float emissivePower = -1, Color? emissiveColour = null, Assembly ass = null)
         {
-            VFXObject vfObj = CreateVFXPrivate(name, spritePaths, fps, Dimensions, anchor, usesZHeight, zHeightOffset, emissivePower, emissiveColour, tk2dSpriteAnimationClip.WrapMode.Once, persist);
+            VFXObject vfObj = CreateVFXPrivate(Assembly.GetCallingAssembly(), name, spritePaths, fps, Dimensions, anchor, usesZHeight, zHeightOffset, emissivePower, emissiveColour, tk2dSpriteAnimationClip.WrapMode.Once, persist);
             return new VFXPool(){ effects = new VFXComplex[]{ new VFXComplex(){effects = new VFXObject[] { vfObj }}}};
         }
         public static VFXComplex CreateVFXComplex(string name, List<string> spritePaths, int fps, IntVector2 Dimensions, tk2dBaseSprite.Anchor anchor, bool usesZHeight, float zHeightOffset, bool persist = false, float emissivePower = -1, Color? emissiveColour = null)
         {
-            VFXObject vfObj = CreateVFXPrivate(name, spritePaths, fps, Dimensions, anchor, usesZHeight, zHeightOffset, emissivePower, emissiveColour, tk2dSpriteAnimationClip.WrapMode.Once, persist);
+            VFXObject vfObj = CreateVFXPrivate(Assembly.GetCallingAssembly(), name, spritePaths, fps, Dimensions, anchor, usesZHeight, zHeightOffset, emissivePower, emissiveColour, tk2dSpriteAnimationClip.WrapMode.Once, persist);
             return new VFXComplex(){effects = new VFXObject[] { vfObj }};
         }
         public static GameObject CreateVFX(string name, List<string> spritePaths, int fps, IntVector2 Dimensions, tk2dBaseSprite.Anchor anchor, bool usesZHeight, float zHeightOffset, float emissivePower = -1, Color? emissiveColour = null, tk2dSpriteAnimationClip.WrapMode wrap = tk2dSpriteAnimationClip.WrapMode.Once, bool persist = false)
         {
-            return CreateVFXPrivate(name, spritePaths, fps, Dimensions, anchor, usesZHeight, zHeightOffset, emissivePower, emissiveColour, wrap, persist).effect;
+            return CreateVFXPrivate(Assembly.GetCallingAssembly(), name, spritePaths, fps, Dimensions, anchor, usesZHeight, zHeightOffset, emissivePower, emissiveColour, wrap, persist).effect;
         }
 
-        private static VFXObject CreateVFXPrivate(string name, List<string> spritePaths, int fps, IntVector2 Dimensions, tk2dBaseSprite.Anchor anchor, bool usesZHeight, float zHeightOffset, float emissivePower = -1, Color? emissiveColour = null, tk2dSpriteAnimationClip.WrapMode wrap = tk2dSpriteAnimationClip.WrapMode.Once, bool persist = false)
+        private static VFXObject CreateVFXPrivate(Assembly assembly, string name, List<string> spritePaths, int fps, IntVector2 Dimensions, tk2dBaseSprite.Anchor anchor, bool usesZHeight, float zHeightOffset, float emissivePower = -1, Color? emissiveColour = null, tk2dSpriteAnimationClip.WrapMode wrap = tk2dSpriteAnimationClip.WrapMode.Once, bool persist = false)
         {
             GameObject Obj = new GameObject(name);
             VFXObject vfObj = new VFXObject();
@@ -47,7 +47,7 @@ namespace Alexandria.VisualAPI
             UnityEngine.Object.DontDestroyOnLoad(Obj);
 
             tk2dSpriteCollectionData VFXSpriteCollection = SpriteBuilder.ConstructCollection(Obj, (name + "_Collection"));
-            int spriteID = SpriteBuilder.AddSpriteToCollection(spritePaths[0], VFXSpriteCollection, Assembly.GetCallingAssembly());
+            int spriteID = SpriteBuilder.AddSpriteToCollection(spritePaths[0], VFXSpriteCollection, assembly);
 
             tk2dSprite sprite = Obj.GetOrAddComponent<tk2dSprite>();
             sprite.SetSprite(VFXSpriteCollection, spriteID);
@@ -66,7 +66,7 @@ namespace Alexandria.VisualAPI
             for (int i = 0; i < spritePaths.Count; i++)
             {
                 tk2dSpriteCollectionData collection = VFXSpriteCollection;
-                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(spritePaths[i], collection, Assembly.GetCallingAssembly());
+                int frameSpriteId = SpriteBuilder.AddSpriteToCollection(spritePaths[i], collection, assembly);
                 tk2dSpriteDefinition frameDef = collection.spriteDefinitions[frameSpriteId];
                 frameDef.ConstructOffsetsFromAnchor(anchor);
                 frameDef.colliderVertices = defaultDef.colliderVertices;

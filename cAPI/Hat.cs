@@ -408,6 +408,8 @@ namespace Alexandria.cAPI
         {
             const float FRONT_DEPTH = 0.01f;
             const float BACK_DEPTH = -0.6f;
+            if (!hatSprite)
+                return;
             if (hatDepthType == HatDepthType.ALWAYS_IN_FRONT)
                 hatSprite.HeightOffGround = FRONT_DEPTH;
             else if (hatDepthType == HatDepthType.ALWAYS_BEHIND)

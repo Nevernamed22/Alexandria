@@ -234,7 +234,6 @@ namespace Alexandria.CharacterAPI
                 return identity.ToString().ToLower();
         }
 
-
         public static void SetupLitterallyEverythingForPunchOut(PlayerController player, CustomCharacterData data)
         {
             Dictionary<string, int> spriteIds = new Dictionary<string, int>();
@@ -245,13 +244,12 @@ namespace Alexandria.CharacterAPI
             foreach (var sprite in data.punchoutSprites)
             {
                 var id = AddSpriteToCollection(sprite.Value, collection);
-
                 var hunterDef = collection.spriteDefinitions[collection.GetSpriteIdByName(sprite.Key.Replace(data.nameShort.ToLower(), "hunter"))];
-
-                collection.spriteDefinitions[id].position0 = hunterDef.position0;
-                collection.spriteDefinitions[id].position1 = hunterDef.position1;
-                collection.spriteDefinitions[id].position2 = hunterDef.position2; 
-                collection.spriteDefinitions[id].position3 = hunterDef.position3;
+                var currentDef = collection.spriteDefinitions[id];
+                currentDef.position0 = hunterDef.position0;
+                currentDef.position1 = hunterDef.position1;
+                currentDef.position2 = hunterDef.position2;
+                currentDef.position3 = hunterDef.position3;
 
                 spriteIds.Add(sprite.Key, id);
             }
@@ -263,22 +261,19 @@ namespace Alexandria.CharacterAPI
                 List<int> ids = new List<int>();
 
                 if (info.Key != "_win")
-                {
                     foreach (var num in info.Value.Item4)
                         ids.Add(spriteIds[$"{data.nameShort.ToLower()}_punch_{info.Value.Item3}_00{num}"]);
-                }
                 else
-                {
                     foreach (var key in matches)
                         ids.Add(spriteIds[key]);
-                }
 
                 var anim = SpriteBuilder.AddAnimation(libary, collection, ids, $"{data.nameShort.ToLower()}{info.Key}", info.Value.Item1, info.Value.Item2);
                 if (info.Key == "_knockout")
                     anim.loopStart = 6;
             }
         }
-        public static void HandleSpritesBundle(PlayerController player, tk2dSpriteAnimation d1, tk2dSpriteCollectionData spr1, tk2dSpriteAnimation d2, tk2dSpriteCollectionData spr2, CustomCharacterData data, Assembly assembly = null)
+
+        private static void HandleSpritesCommon(PlayerController player, tk2dSpriteAnimation d1, tk2dSpriteCollectionData spr1, tk2dSpriteAnimation d2, tk2dSpriteCollectionData spr2, CustomCharacterData data, Assembly assembly, bool forBundle)
         {
             if (data.minimapIcon != null)
                 HandleMinimapIcons(player, data);
@@ -292,26 +287,35 @@ namespace Alexandria.CharacterAPI
             if ((data.sprites != null || data.playerSheet != null) && string.IsNullOrEmpty(data.pathForSprites))
                 HandleAnimations(player, data);
 
-            if ((spr1 ?? data.collection) is tk2dSpriteCollectionData handCollection)
+            if (forBundle)
             {
-                player.primaryHand.sprite.Collection = handCollection;
-                player.secondaryHand.sprite.Collection = handCollection;
-                int handId = handCollection.GetSpriteIdByName("hand_001", -1);
-                if (handId >= 0)
+                if ((spr1 ?? data.collection) is tk2dSpriteCollectionData handCollection)
                 {
-                    player.primaryHand.sprite.SetSprite(handId);
-                    player.secondaryHand.sprite.SetSprite(handId);
+                    player.primaryHand.sprite.Collection = handCollection;
+                    player.secondaryHand.sprite.Collection = handCollection;
+                    int handId = handCollection.GetSpriteIdByName("hand_001", -1);
+                    if (handId >= 0)
+                    {
+                        player.primaryHand.sprite.SetSprite(handId);
+                        player.secondaryHand.sprite.SetSprite(handId);
+                    }
                 }
+                if (data.altHandName != null)
+                    player.altHandName  = data.altHandName;
+                if (d2 != null && spr2 != null)
+                    SetupLitterallyEverythingPremade(player, spr2, d2, data, data.pathForAltSprites, true, assembly);
+                if (d1 != null && spr1 != null)
+                    SetupLitterallyEverythingPremade(player, spr1, d1, data, data.pathForSprites, false, assembly);
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(data.pathForAltSprites))
+                    SetupLitterallyEverything(player, data, data.pathForAltSprites, true, assembly);
+
+                if (!string.IsNullOrEmpty(data.pathForSprites))
+                    SetupLitterallyEverything(player, data, data.pathForSprites, false, assembly);
             }
 
-            if (data.altHandName != null)
-                player.altHandName  = data.altHandName;
-
-            if (d2 != null && spr2 != null)
-                SetupLitterallyEverythingPremade(player, spr2, d2, data, data.pathForAltSprites, true, assembly ?? Assembly.GetCallingAssembly());
-            if (d1 != null && spr1 != null)
-                SetupLitterallyEverythingPremade(player, spr1, d1, data, data.pathForSprites, false, assembly ?? Assembly.GetCallingAssembly());
-            
             //face card stuff
             uiAtlas = GameUIRoot.Instance.ConversationBar.portraitSprite.Atlas;
             if (data.faceCard != null)
@@ -335,46 +339,16 @@ namespace Alexandria.CharacterAPI
             }
         }
 
+        public static void HandleSpritesBundle(PlayerController player, tk2dSpriteAnimation d1, tk2dSpriteCollectionData spr1, tk2dSpriteAnimation d2, tk2dSpriteCollectionData spr2, CustomCharacterData data, Assembly assembly = null)
+        {
+            HandleSpritesCommon(player, d1, spr1, d2, spr2, data, assembly ?? Assembly.GetCallingAssembly(), forBundle: true);
+        }
 
         public static void HandleSprites(PlayerController player, CustomCharacterData data, Assembly assembly = null)
         {
-            if (data.minimapIcon != null)
-                HandleMinimapIcons(player, data);
-
-            if (data.bossCard != null)
-                HandleBossCards(player, data);
-
-            if ((data.altSprites != null || data.altPlayerSheet != null) && string.IsNullOrEmpty(data.pathForAltSprites))
-                HandleAltAnimations(player, data);
-
-            if ((data.sprites != null || data.playerSheet != null) && string.IsNullOrEmpty(data.pathForSprites))
-                HandleAnimations(player, data);
-
-            if (!string.IsNullOrEmpty(data.pathForAltSprites))
-                SetupLitterallyEverything(player, data, data.pathForAltSprites, true, assembly ?? Assembly.GetCallingAssembly());
-
-            if (!string.IsNullOrEmpty(data.pathForSprites))
-                SetupLitterallyEverything(player, data, data.pathForSprites, false, assembly ?? Assembly.GetCallingAssembly());
-
-            //face card stuff
-            uiAtlas = GameUIRoot.Instance.ConversationBar.portraitSprite.Atlas;
-            if (data.faceCard != null)
-                HandleFacecards(player, data);
-
-            if (data.punchoutSprites != null && data.punchoutSprites.Count > 0)
-                SetupLitterallyEverythingForPunchOut2(data);
-
-            if (data.loadoutSprites != null)
-                HandleLoudoutSprites(player, data);
-
-            if (data.coopDeathScreenIcon != null)
-                uiAtlas.AddNewItemToAtlas(data.coopDeathScreenIcon, $"coop_page_death_{data.nameShort.ToLower()}_001");
-
-            Default_Punchout_Material = new Material(EnemyDatabase.GetOrLoadByName("GunNut").sprite.renderer.material);
-            Default_Punchout_Material.SetColor("_EmissiveColor", new Color32(0, 0, 0, 0));
-            Default_Punchout_Material.SetFloat("_EmissiveColorPower", 0f);
-            Default_Punchout_Material.SetFloat("_EmissivePower", 0);
+            HandleSpritesCommon(player, null, null, null, null, data, assembly ?? Assembly.GetCallingAssembly(), forBundle: false);
         }
+
         private static tk2dSpriteCollectionData itemCollection = PickupObjectDatabase.GetById(155).sprite.Collection;
         /// <summary>
         /// Returns an object with a tk2dSprite component with the texture provided
@@ -431,20 +405,13 @@ namespace Alexandria.CharacterAPI
                     y++;
                 }
                 var pixel = sprite.GetPixel(x, y);
-                if (pixel.a > 0 && pixel != Color.white)
-                {
-                    for (int i = 0; i < 4; i++)
-                    {
-                        var pixel1 = sprite.GetPixel(x + posList[i].x, y + posList[i].y);
-                        if (pixel1.a == 0)
-                        {
-                            sprite.SetPixel(x + posList[i].x, y + posList[i].y, color);
-                            sprite.Apply();
-                        }
-                    }
-                }
+                if (pixel.a <= 0 || pixel == Color.white)
+                    continue;
+                for (int i = 0; i < 4; i++)
+                    if (sprite.GetPixel(x + posList[i].x, y + posList[i].y).a == 0)
+                        sprite.SetPixel(x + posList[i].x, y + posList[i].y, color);
             }
-
+            sprite.Apply();
             return sprite;
         }
 
@@ -500,11 +467,47 @@ namespace Alexandria.CharacterAPI
             return tex.Resize(width, height);
         }
 
+        private static void ProcessAnimationAudioEvents(tk2dSpriteAnimationClip anim)
+        {
+            for (int i = 0; i <= anim.frames.Length; i++)
+            {
+                if ((i == 2 || i == 5) && anim.name.Contains("run_"))
+                {
+                    anim.frames[i].eventAudio = "Play_FS";
+                    anim.frames[i].triggerEvent = true;
+                }
+                if (i == 0 && (anim.name == "pitfall" || anim.name == "pitfall_down"))
+                {
+                    anim.frames[i].eventAudio = "Play_Fall";
+                    anim.frames[i].triggerEvent = true;
+                }
+                if (i == 0 && anim.name == "pitfall_return")
+                {
+                    anim.frames[i].eventAudio = "Play_Respawn";
+                    anim.frames[i].triggerEvent = true;
+                }
+                if ((i == 0 || i == 5) && anim.name.Contains("dodge"))
+                {
+                    anim.frames[i].eventAudio = (i == 0) ? "Play_Leap" : "Play_Roll";;
+                    anim.frames[i].triggerEvent = true;
+                }
+                if (i == 0 && anim.name == "doorway")
+                {
+                    anim.frames[i].eventAudio = "Play_CHR_boot_stairs_01";
+                    anim.frames[i].triggerEvent = true;
+                }
+                if (i == 0 && anim.name == "pet")
+                {
+                    anim.frames[i].eventAudio = "Play_CHR_fool_voice_01";
+                    anim.frames[i].triggerEvent = true;
+                }
+            }
+        }
+
         public static void SetupLitterallyEverythingPremade(PlayerController player, tk2dSpriteCollectionData SpriteData, tk2dSpriteAnimation d1, CustomCharacterData data, string path, bool alt, Assembly assembly = null)
         {
             GameObject libaryObject = new GameObject((data.nameShort + "Animator").Replace(" ", "_") + (alt ? "_alt" : ""));
             FakePrefab.MarkAsFakePrefab(libaryObject);
-            var collection = d1;
 
             if (alt)
                 data.altCollection = SpriteData;
@@ -516,65 +519,7 @@ namespace Alexandria.CharacterAPI
 
             foreach (var anim in data.animator.Library.clips)
             {
-                for (int i = 0; i <= anim.frames.Length; i++)
-                {
-                    if (anim.name.Contains("run_"))
-                    {
-                        if (i == 2 || i == 5)
-                        {
-                            anim.frames[i].eventAudio = "Play_FS";
-                            anim.frames[i].triggerEvent = true;
-                        }
-                    }
-                    if (anim.name == "pitfall" || anim.name == "pitfall_down")
-                    {
-                        if (i == 0)
-                        {
-                            anim.frames[i].eventAudio = "Play_Fall";
-                            anim.frames[i].triggerEvent = true;
-                        }
-                    }
-                    if (anim.name == "pitfall_return")
-                    {
-                        if (i == 0)
-                        {
-                            anim.frames[i].eventAudio = "Play_Respawn";
-                            anim.frames[i].triggerEvent = true;
-                        }
-                    }
-
-                    if (anim.name.Contains("dodge"))
-                    {
-                        if (i == 0)
-                        {
-                            anim.frames[i].eventAudio = "Play_Leap";
-                            anim.frames[i].triggerEvent = true;
-                        }
-                        if (i == 5)
-                        {
-                            anim.frames[i].eventAudio = "Play_Roll";
-                            anim.frames[i].triggerEvent = true;
-                        }
-                    }
-
-                    if (anim.name == "doorway")
-                    {
-                        if (i == 0)
-                        {
-                            anim.frames[i].eventAudio = "Play_CHR_boot_stairs_01";
-                            anim.frames[i].triggerEvent = true;
-                        }
-                    }
-
-                    if (anim.name == "pet")
-                    {
-                        if (i == 0)
-                        {
-                            anim.frames[i].eventAudio = "Play_CHR_fool_voice_01";
-                            anim.frames[i].triggerEvent = true;
-                        }
-                    }
-                }
+                ProcessAnimationAudioEvents(anim);
 
                 if (anim.name.Contains("dodge"))
                 {
@@ -604,9 +549,9 @@ namespace Alexandria.CharacterAPI
             }
         }
 
-
         public static void SetupLitterallyEverything(PlayerController player, CustomCharacterData data, string path, bool alt, Assembly assembly = null)
         {
+            assembly ??= Assembly.GetCallingAssembly();
             List<string> anims = new List<string>();
             GameObject libaryObject = new GameObject((data.nameShort + "Animator").Replace(" ", "_") + (alt ? "_alt" : ""));
             FakePrefab.MarkAsFakePrefab(libaryObject);
@@ -622,11 +567,10 @@ namespace Alexandria.CharacterAPI
             data.animator.Library.clips = new tk2dSpriteAnimationClip[0];
             data.animator.Library.enabled = true;
 
-            foreach (var file in ResourceExtractor.GetResourceNames(assembly ?? Assembly.GetCallingAssembly()))
+            foreach (var file in ResourceExtractor.GetResourceNames(assembly))
             {
                 var splitPath = file.Split('.');
-
-                if (file.Contains(path) && file.Contains(".png") && splitPath[splitPath.Count() - 2] != (alt ? "hand_alt_001" : "hand_001") && !anims.Contains(splitPath[splitPath.Count() - 3]))// && splitPath[splitPath.Count() - 4] != "custom")
+                if (file.Contains(path) && file.Contains(".png") && splitPath[splitPath.Count() - 2] != (alt ? "hand_alt_001" : "hand_001") && !anims.Contains(splitPath[splitPath.Count() - 3]))
                 {
                     anims.Add(splitPath[splitPath.Count() - 3]);
 
@@ -644,157 +588,80 @@ namespace Alexandria.CharacterAPI
                     List<int> spriteIds = new List<int>();
 
                     if (!file.Contains("cc_sprite_placeholder"))
-                        textures = ResourceExtractor.GetTexturesFromResource($"{path}.{dirName}", assembly ?? Assembly.GetCallingAssembly());
+                        textures = ResourceExtractor.GetTexturesFromResource($"{path}.{dirName}", assembly);
 
-                    if (dirName.Contains("custom"))
+                    if (dirName.Contains("custom") || dirName.Contains("breach_idles"))
                     {
                         var customDirName = splitPath[splitPath.Count() - 3];
                         animName = data.nameShort + "_" + customDirName;
-                        textures = ResourceExtractor.GetTexturesFromResource($"{path}.{dirName}.{customDirName}", assembly ?? Assembly.GetCallingAssembly());
+                        textures = ResourceExtractor.GetTexturesFromResource($"{path}.{dirName}.{customDirName}", assembly);
 
                         for (int i = 0; i < textures.Count; i++)
                             spriteIds.Add(AddSpriteToCollection(textures[i], collection, animName + i.ToString()));
                         if (textures.Count > 0)
                             SpriteBuilder.AddAnimation(data.animator, collection, spriteIds, customDirName, tk2dSpriteAnimationClip.WrapMode.Loop, 8);
+                        continue;
                     }
-                    else if (dirName.Contains("breach_idles"))
-                    {
-                        var customDirName = splitPath[splitPath.Count() - 3];
-                        animName = data.nameShort + "_" + customDirName;
-                        textures = ResourceExtractor.GetTexturesFromResource($"{path}.{dirName}.{customDirName}", assembly ?? Assembly.GetCallingAssembly());
+                    if (((dirName.EndsWith("_hand") || dirName.EndsWith("_twohands"))) && file.Contains("cc_sprite_placeholder"))//textures.Count <= 0)
+                        textures = ResourceExtractor.GetTexturesFromResource((path + "." + dirName).Replace("_twohands", "").Replace("_hand", ""), assembly);
+                    if (dirName.EndsWith("death_coop") && file.Contains("cc_sprite_placeholder"))//textures.Count <= 0)
+                        textures = ResourceExtractor.GetTexturesFromResource((path + "." + dirName).Replace("_coop", ""), assembly);
 
-                        for (int i = 0; i < textures.Count; i++)
-                            spriteIds.Add(AddSpriteToCollection(textures[i], collection, animName + i.ToString()));
-                        if (textures.Count > 0)
-                            SpriteBuilder.AddAnimation(data.animator, collection, spriteIds, customDirName, tk2dSpriteAnimationClip.WrapMode.Loop, 8);
+                    if (textures.Count == 0)
+                    {
+                        Debug.LogWarning($"No sprites found in {dirName}, MAKE SURE youve actually put sprites in that folder!");
+                        if (ToolsCharApi.EnableDebugLogging == true)
+                            ETGModConsole.Log($"No sprites found in {dirName}, MAKE SURE youve actually put sprites in that folder!");
+                        continue;
                     }
-                    else
+
+                    for (int i = 0; i < textures.Count; i++)
+                        spriteIds.Add(AddSpriteToCollection(textures[i], collection, animName + i.ToString()));
+
+                    if (!playerAnimInfo.ContainsKey(dirName.Replace("_armorless", "")))
                     {
-                        if (((dirName.EndsWith("_hand") || dirName.EndsWith("_twohands"))) && file.Contains("cc_sprite_placeholder"))//textures.Count <= 0)
-                            textures = ResourceExtractor.GetTexturesFromResource((path + "." + dirName).Replace("_twohands", "").Replace("_hand", ""), assembly ?? Assembly.GetCallingAssembly());
-                        if (dirName.EndsWith("death_coop") && file.Contains("cc_sprite_placeholder"))//textures.Count <= 0)
-                            textures = ResourceExtractor.GetTexturesFromResource((path + "." + dirName).Replace("_coop", ""), assembly ?? Assembly.GetCallingAssembly());
-                        if (textures.Count > 0)
+                        Debug.LogWarning($"No Anim data found for \"{dirName}\"! DOUBLE-CHECK animation folder names!");
+                        if (ToolsCharApi.EnableDebugLogging == true)
+                            ETGModConsole.Log($"No Anim data found for \"{dirName}\"! DOUBLE-CHECK animation folder names!");
+                        continue;
+                    }
+
+                    var anim = SpriteBuilder.AddAnimation(data.animator, collection, spriteIds, dirName, playerAnimInfo[dirName.Replace("_armorless", "")].First, playerAnimInfo[dirName.Replace("_armorless", "")].Second);
+                    ProcessAnimationAudioEvents(anim);
+                    if (dirName.Contains("dodge"))
+                    {
+                        for (int i = 0; i <= (anim.frames.Length / 2); i++)
                         {
-                            for (int i = 0; i < textures.Count; i++)
-                                spriteIds.Add(AddSpriteToCollection(textures[i], collection, animName + i.ToString()));
-
-                            if (playerAnimInfo.ContainsKey(dirName.Replace("_armorless", "")))
-                            {
-                                var anim = SpriteBuilder.AddAnimation(data.animator, collection, spriteIds, dirName, playerAnimInfo[dirName.Replace("_armorless", "")].First, playerAnimInfo[dirName.Replace("_armorless", "")].Second);
-
-                                for (int i = 0; i <= anim.frames.Length; i++)
-                                {
-                                    if (anim.name.Contains("run_"))
-                                    {
-                                        if (i == 2 || i == 5)
-                                        {
-                                            anim.frames[i].eventAudio = "Play_FS";
-                                            anim.frames[i].triggerEvent = true;
-                                        }
-                                    }
-                                    if (anim.name == "pitfall" || anim.name == "pitfall_down")
-                                    {
-                                        if (i == 0)
-                                        {
-                                            anim.frames[i].eventAudio = "Play_Fall";
-                                            anim.frames[i].triggerEvent = true;
-                                        }
-                                    }
-                                    if (anim.name == "pitfall_return")
-                                    {
-                                        if (i == 0)
-                                        {
-                                            anim.frames[i].eventAudio = "Play_Respawn";
-                                            anim.frames[i].triggerEvent = true;
-                                        }
-                                    }
-
-                                    if (anim.name.Contains("dodge"))
-                                    {
-                                        if (i == 0)
-                                        {
-                                            anim.frames[i].eventAudio = "Play_Leap";
-                                            anim.frames[i].triggerEvent = true;
-                                        }
-                                        if (i == 5)
-                                        {
-                                            anim.frames[i].eventAudio = "Play_Roll";
-                                            anim.frames[i].triggerEvent = true;
-                                        }
-                                    }
-
-                                    if (anim.name == "doorway")
-                                    {
-                                        if (i == 0)
-                                        {
-                                            anim.frames[i].eventAudio = "Play_CHR_boot_stairs_01";
-                                            anim.frames[i].triggerEvent = true;
-                                        }
-                                    }
-
-                                    if (anim.name == "pet")
-                                    {
-                                        if (i == 0)
-                                        {
-                                            anim.frames[i].eventAudio = "Play_CHR_fool_voice_01";
-                                            anim.frames[i].triggerEvent = true;
-                                        }
-                                    }
-                                }
-
-                                if (dirName.Contains("dodge"))
-                                {
-                                    for (int i = 0; i <= (anim.frames.Length / 2); i++)
-                                    {
-                                        anim.frames[i].invulnerableFrame = true;
-                                        anim.frames[i].groundedFrame = false;
-                                    }
-                                }
-
-                                if (dirName.Contains("tablekick"))
-                                    for (int i = 0; i < (anim.frames.Length); i++)
-                                        anim.frames[i].invulnerableFrame = true;
-                                if (dirName.Contains("slide"))
-                                    for (int i = 0; i < (anim.frames.Length); i++)
-                                        anim.frames[i].invulnerableFrame = true;
-                            }
-                            else
-                            {
-                                Debug.LogWarning($"No Anim data found for \"{dirName}\"! DOUBLE-CHECK animation folder names!");
-                                if (ToolsCharApi.EnableDebugLogging == true)
-                                    ETGModConsole.Log($"No Anim data found for \"{dirName}\"! DOUBLE-CHECK animation folder names!");
-                            }
-                        }
-                        else
-                        {
-                            Debug.LogWarning($"No sprites found in {dirName}, MAKE SURE youve actually put sprites in that folder!");
-                            if (ToolsCharApi.EnableDebugLogging == true)
-                                ETGModConsole.Log($"No sprites found in {dirName}, MAKE SURE youve actually put sprites in that folder!");
+                            anim.frames[i].invulnerableFrame = true;
+                            anim.frames[i].groundedFrame = false;
                         }
                     }
+                    if (dirName.Contains("tablekick"))
+                        for (int i = 0; i < (anim.frames.Length); i++)
+                            anim.frames[i].invulnerableFrame = true;
+                    if (dirName.Contains("slide"))
+                        for (int i = 0; i < (anim.frames.Length); i++)
+                            anim.frames[i].invulnerableFrame = true;
                 }
                 else if (splitPath[splitPath.Count() - 2] == (alt ? "hand_alt_001" : "hand_001"))
                 {
-                    var texture = ResourceExtractor.GetTextureFromResource($"{path}.{(alt ? "hand_alt_001" : "hand_001")}.png", assembly ?? Assembly.GetCallingAssembly());
+                    var texture = ResourceExtractor.GetTextureFromResource($"{path}.{(alt ? "hand_alt_001" : "hand_001")}.png", assembly);
                     var id = AddSpriteToCollection(texture, collection, "hand" + (alt ? "_alt" : ""));
-                    collection.spriteDefinitions[id].position0 = new Vector3(-0.125f, -0.125f, 0);
-                    collection.spriteDefinitions[id].position1 = new Vector3(0.125f, -0.125f, 0);
-                    collection.spriteDefinitions[id].position2 = new Vector3(-0.125f, 0.125f, 0);
-                    collection.spriteDefinitions[id].position3 = new Vector3(0.125f, 0.125f, 0);
+                    tk2dSpriteDefinition def = collection.spriteDefinitions[id];
+                    def.position0 = new Vector3(-0.125f, -0.125f, 0);
+                    def.position1 = new Vector3(0.125f, -0.125f, 0);
+                    def.position2 = new Vector3(-0.125f, 0.125f, 0);
+                    def.position3 = new Vector3(0.125f, 0.125f, 0);
                     if (!alt)
                     {
-                        player.primaryHand.sprite.Collection = data.collection;
-                        player.secondaryHand.sprite.Collection = data.collection;
-                        player.primaryHand.sprite.SetSprite(id);
-                        player.secondaryHand.sprite.SetSprite(id);
+                        player.primaryHand.sprite.SetSprite(data.collection, id);
+                        player.secondaryHand.sprite.SetSprite(data.collection, id);
                     }
                 }
             }
+
             if (alt)
-            {
                 player.AlternateCostumeLibrary = data.animator.Library;
-            }
             else
             {
                 player.spriteAnimator.Library = data.animator.Library;
@@ -803,7 +670,6 @@ namespace Alexandria.CharacterAPI
             }
         }
 
-
         /// <summary>
         /// Adds a sprite (from a texture) to a collection
         /// </summary>
@@ -811,15 +677,7 @@ namespace Alexandria.CharacterAPI
         public static int AddSpriteToCollection(Texture2D texture, tk2dSpriteCollectionData collection, string name = "")
         {
             var definition = ConstructDefinition(texture); //Generate definition
-            if (string.IsNullOrEmpty(name))
-            {
-                definition.name = texture.name; //naming the definition is actually extremely important 
-            }
-            else
-            {
-                definition.name = name; //naming the definition is actually extremely important 
-            }
-
+            definition.name = string.IsNullOrEmpty(name) ? texture.name : name;
             return AddSpriteToCollection(definition, collection);
         }
 
@@ -830,16 +688,8 @@ namespace Alexandria.CharacterAPI
         public static int AddSpriteToCollectionWithAnchor(Texture2D texture, tk2dSpriteCollectionData collection, tk2dBaseSprite.Anchor anchor, string name = "")
         {
             var definition = ConstructDefinition(texture); //Generate definition
-            if (string.IsNullOrEmpty(name))
-            {
-                definition.name = texture.name; //naming the definition is actually extremely important 
-            }
-            else
-            {
-                definition.name = name; //naming the definition is actually extremely important 
-            }
+            definition.name = string.IsNullOrEmpty(name) ? texture.name : name;
             Shared.ConstructOffsetsFromAnchor(definition, anchor);
-
             return AddSpriteToCollection(definition, collection);
         }
 
@@ -860,15 +710,79 @@ namespace Alexandria.CharacterAPI
         public static int AddSpriteToCollection(Texture2D texture, tk2dSpriteCollectionData collection, Material overrideMat, string name = "")
         {
             var definition = ConstructDefinition(texture, overrideMat); //Generate definition
-            if (string.IsNullOrEmpty(name))
-            {
-                definition.name = texture.name; //naming the definition is actually extremely important 
-            }
-            else
-            {
-                definition.name = name; //naming the definition is actually extremely important 
-            }
+            definition.name = string.IsNullOrEmpty(name) ? texture.name : name;
             return AddSpriteToCollection(definition, collection);
+        }
+
+        private static RuntimeAtlasPage HandleAnimationSprites(List<Texture2D> sprites, CustomCharacterData data, tk2dSpriteCollectionData copyCollection)
+        {
+            if (ToolsCharApi.EnableDebugLogging)
+                ToolsCharApi.Print("        Using individual sprite replacement.", "FFBB00");
+
+            bool isSlinger = data.baseCharacter == PlayableCharacters.Gunslinger;
+            RuntimeAtlasPage page = new RuntimeAtlasPage();
+            for (int i = 0; i < data.altSprites.Count; i++)
+            {
+                var tex = data.altSprites[i];
+
+                float nw = (tex.width) / 16f;
+                float nh = (tex.height) / 16f;
+
+                if (copyCollection.GetSpriteDefinition(tex.name) is not tk2dSpriteDefinition def)
+                    continue;
+
+                if (isSlinger || def.boundsDataCenter == Vector3.zero)
+                {
+                    def.ReplaceTexture(tex);
+                    continue;
+                }
+
+                var ras = page.Pack(tex);
+                def.materialInst.mainTexture = ras.texture;
+                def.uvs = ras.uvs;
+                def.extractRegion = true;
+                def.position0 = new Vector3(0, 0, 0);
+                def.position1 = new Vector3(nw, 0, 0);
+                def.position2 = new Vector3(0, nh, 0);
+                def.position3 = new Vector3(nw, nh, 0);
+
+                def.boundsDataCenter = new Vector2(nw / 2, nh / 2);
+                def.untrimmedBoundsDataCenter = def.boundsDataCenter;
+
+                def.boundsDataExtents = new Vector2(nw, nh);
+                def.untrimmedBoundsDataExtents = def.boundsDataExtents;
+            }
+            page.Apply();
+            return page;
+        }
+
+        private static void HandleAnimationSheet(Texture2D sheet, tk2dSpriteCollectionData orig, tk2dSpriteCollectionData copyCollection, tk2dSpriteDefinition[] copyDefinitions)
+        {
+            if (ToolsCharApi.EnableDebugLogging)
+                ToolsCharApi.Print("        Using sprite sheet replacement.", "FFBB00");
+            var materialsToCopy = orig.materials;
+            copyCollection.materials = new Material[orig.materials.Length];
+            for (int i = 0; i < copyCollection.materials.Length; i++)
+            {
+                if (materialsToCopy[i] == null) continue;
+                var mat = new Material(materialsToCopy[i]);
+                GameObject.DontDestroyOnLoad(mat);
+                mat.mainTexture = sheet;
+                mat.name = materialsToCopy[i].name;
+                copyCollection.materials[i] = mat;
+            }
+
+            for (int i = 0; i < copyCollection.spriteDefinitions.Length; i++)
+            {
+                foreach (var mat in copyCollection.materials)
+                {
+                    if (mat != null && copyDefinitions[i].material.name.Equals(mat.name))
+                    {
+                        copyDefinitions[i].material = mat;
+                        copyDefinitions[i].materialInst = new Material(mat);
+                    }
+                }
+            }
         }
 
         public static void HandleAnimations(PlayerController player, CustomCharacterData data)
@@ -879,83 +793,14 @@ namespace Alexandria.CharacterAPI
 
             tk2dSpriteDefinition[] copyDefinitions = new tk2dSpriteDefinition[orig.spriteDefinitions.Length];
             for (int i = 0; i < copyCollection.spriteDefinitions.Length; i++)
-            {
                 copyDefinitions[i] = orig.spriteDefinitions[i].Copy();
-            }
             copyCollection.spriteDefinitions = copyDefinitions;
 
             if (data.playerSheet != null)
-            {
-                if (ToolsCharApi.EnableDebugLogging == true)
-                {
-                    ToolsCharApi.Print("        Using sprite sheet replacement.", "FFBB00");
-                }
-                var materialsToCopy = orig.materials;
-                copyCollection.materials = new Material[orig.materials.Length];
-                for (int i = 0; i < copyCollection.materials.Length; i++)
-                {
-                    if (materialsToCopy[i] == null) continue;
-                    var mat = new Material(materialsToCopy[i]);
-                    GameObject.DontDestroyOnLoad(mat);
-                    mat.mainTexture = data.playerSheet;
-                    mat.name = materialsToCopy[i].name;
-                    copyCollection.materials[i] = mat;
-                }
-
-                for (int i = 0; i < copyCollection.spriteDefinitions.Length; i++)
-                {
-                    foreach (var mat in copyCollection.materials)
-                    {
-                        if (mat != null && copyDefinitions[i].material.name.Equals(mat.name))
-                        {
-                            copyDefinitions[i].material = mat;
-                            copyDefinitions[i].materialInst = new Material(mat);
-                        }
-                    }
-                }
-            }
+                HandleAnimationSheet(data.playerSheet, orig, copyCollection, copyDefinitions);
             else if (data.sprites != null)
             {
-                if (ToolsCharApi.EnableDebugLogging == true)
-                    ToolsCharApi.Print("        Using individual sprite replacement.", "FFBB00");
-                bool notSlinger = data.baseCharacter != PlayableCharacters.Gunslinger;
-
-                RuntimeAtlasPage page = new RuntimeAtlasPage();
-                for (int i = 0; i < data.sprites.Count; i++)
-                {
-                    var tex = data.sprites[i];
-                    float nw = (tex.width) / 16f;
-                    float nh = (tex.height) / 16f;
-                    var def = copyCollection.GetSpriteDefinition(tex.name);
-                    if (def != null)
-                    {
-                        if (notSlinger && def.boundsDataCenter != Vector3.zero)
-                        {
-                            var ras = page.Pack(tex);
-
-                            def.materialInst.mainTexture = ras.texture;
-                            def.material.mainTexture = ras.texture;
-
-                            def.uvs = ras.uvs;
-                            def.extractRegion = true;
-                            def.position0 = new Vector3(0, 0, 0);
-                            def.position1 = new Vector3(nw, 0, 0);
-                            def.position2 = new Vector3(0, nh, 0);
-                            def.position3 = new Vector3(nw, nh, 0);
-
-                            def.boundsDataCenter = new Vector2(nw / 2, nh / 2);
-                            def.untrimmedBoundsDataCenter = def.boundsDataCenter;
-
-                            def.boundsDataExtents = new Vector2(nw, nh);
-                            def.untrimmedBoundsDataExtents = def.boundsDataExtents;
-                        }
-                        else
-                            def.ReplaceTexture(tex);
-                    }
-                }
-
-                page.Apply();
-
+                RuntimeAtlasPage page = HandleAnimationSprites(data.sprites, data, copyCollection);
                 var materialsToCopy = orig.materials;
                 copyCollection.materials = new Material[orig.materials.Length];
                 copyCollection.materialInsts = new Material[orig.materials.Length];
@@ -973,9 +818,7 @@ namespace Alexandria.CharacterAPI
                 copyCollection.textureFilterMode = FilterMode.Point;
             }
             else
-            {
                 ToolsCharApi.Print("        Not replacing sprites.", "FFFF00");
-            }
 
             player.spriteAnimator.Library = GameObject.Instantiate(player.spriteAnimator.Library);
             GameObject.DontDestroyOnLoad(player.spriteAnimator.Library);
@@ -995,118 +838,34 @@ namespace Alexandria.CharacterAPI
         public static void HandleAltAnimations(PlayerController player, CustomCharacterData data)
         {
             tk2dSpriteCollectionData orig = null;
-            if (player.AlternateCostumeLibrary?.clips[0]?.frames[0]?.spriteCollection != null)
-            {
-                orig = player.AlternateCostumeLibrary.clips[0].frames[0].spriteCollection;
-            }
+            if (player.AlternateCostumeLibrary?.clips[0]?.frames[0]?.spriteCollection is tk2dSpriteCollectionData collection)
+                orig = collection;
             else
-            {
                 orig = player.sprite.Collection;
-            }
 
             var copyCollection = GameObject.Instantiate(orig);
             GameObject.DontDestroyOnLoad(copyCollection);
 
             tk2dSpriteDefinition[] copyDefinitions = new tk2dSpriteDefinition[orig.spriteDefinitions.Length];
             for (int i = 0; i < copyCollection.spriteDefinitions.Length; i++)
-            {
                 copyDefinitions[i] = orig.spriteDefinitions[i].Copy();
-            }
             copyCollection.spriteDefinitions = copyDefinitions;
 
             if (data.altPlayerSheet != null)
-            {
-                if (ToolsCharApi.EnableDebugLogging == true)
-                {
-                    ToolsCharApi.Print("        Using sprite sheet replacement.", "FFBB00");
-                }
-                var materialsToCopy = orig.materials;
-                copyCollection.materials = new Material[orig.materials.Length];
-                for (int i = 0; i < copyCollection.materials.Length; i++)
-                {
-                    if (materialsToCopy[i] == null) continue;
-                    var mat = new Material(materialsToCopy[i]);
-                    GameObject.DontDestroyOnLoad(mat);
-                    mat.mainTexture = data.altPlayerSheet;
-                    mat.name = materialsToCopy[i].name;
-                    copyCollection.materials[i] = mat;
-                }
-
-                for (int i = 0; i < copyCollection.spriteDefinitions.Length; i++)
-                {
-                    foreach (var mat in copyCollection.materials)
-                    {
-                        if (mat != null && copyDefinitions[i].material.name.Equals(mat.name))
-                        {
-                            copyDefinitions[i].material = mat;
-                            copyDefinitions[i].materialInst = new Material(mat);
-                        }
-                    }
-                }
-            }
-
+                HandleAnimationSheet(data.altPlayerSheet, orig, copyCollection, copyDefinitions);
             else if (data.altSprites != null)
-            {
-                if (ToolsCharApi.EnableDebugLogging == true)
-                {
-                    ToolsCharApi.Print("        Using individual sprite replacement.", "FFBB00");
-                }
-                bool notSlinger = data.baseCharacter != PlayableCharacters.Gunslinger;
-
-                RuntimeAtlasPage page = new RuntimeAtlasPage();
-                for (int i = 0; i < data.altSprites.Count; i++)
-                {
-                    var tex = data.altSprites[i];
-
-                    float nw = (tex.width) / 16f;
-                    float nh = (tex.height) / 16f;
-
-                    var def = copyCollection.GetSpriteDefinition(tex.name);
-                    if (def != null)
-                    {
-                        if (notSlinger && def.boundsDataCenter != Vector3.zero)
-                        {
-                            var ras = page.Pack(tex);
-                            def.materialInst.mainTexture = ras.texture;
-                            def.uvs = ras.uvs;
-                            def.extractRegion = true;
-                            def.position0 = new Vector3(0, 0, 0);
-                            def.position1 = new Vector3(nw, 0, 0);
-                            def.position2 = new Vector3(0, nh, 0);
-                            def.position3 = new Vector3(nw, nh, 0);
-
-                            def.boundsDataCenter = new Vector2(nw / 2, nh / 2);
-                            def.untrimmedBoundsDataCenter = def.boundsDataCenter;
-
-                            def.boundsDataExtents = new Vector2(nw, nh);
-                            def.untrimmedBoundsDataExtents = def.boundsDataExtents;
-                        }
-                        else
-                        {
-                            def.ReplaceTexture(tex);
-                        }
-                    }
-                }
-                page.Apply();
-            }
+                HandleAnimationSprites(data.altSprites, data, copyCollection);
             else
-            {
                 ToolsCharApi.Print("        Not replacing sprites.", "FFFF00");
-            }
+
             player.AlternateCostumeLibrary = GameObject.Instantiate(player.AlternateCostumeLibrary);
             GameObject.DontDestroyOnLoad(player.AlternateCostumeLibrary);
 
             foreach (var clip in player.AlternateCostumeLibrary.clips)
-            {
                 for (int i = 0; i < clip.frames.Length; i++)
-                {
                     clip.frames[i].spriteCollection = copyCollection;
-                }
-            }
-
 
             data.AlternateCostumeLibrary = player.AlternateCostumeLibrary;
-
             copyCollection.name = player.OverrideDisplayName + "_alt";
         }
 
@@ -1134,7 +893,6 @@ namespace Alexandria.CharacterAPI
             new Vector2(1, 1),
         };
 
-
         public static void HandleMinimapIcons(PlayerController player, CustomCharacterData data)
         {
             player.minimapIconPrefab = GameObject.Instantiate(player.minimapIconPrefab);
@@ -1146,16 +904,13 @@ namespace Alexandria.CharacterAPI
 
             if (id < 0)
             {
-                var spriteDef = minimapSprite.GetCurrentSpriteDef();
-                var copy = spriteDef.Copy();
+                var copy = minimapSprite.GetCurrentSpriteDef().Copy();
                 copy.ReplaceTexture(data.minimapIcon);
                 copy.name = iconName;
                 id = AddSpriteToCollection(copy, minimapSprite.Collection);
             }
             else
-            {
                 ToolsCharApi.Print("Minimap icon for " + iconName + " already found, not generating a new one");
-            }
 
             minimapSprite.SetSprite(id);
         }
@@ -1172,29 +927,20 @@ namespace Alexandria.CharacterAPI
 
         public static void HandlePunchoutFaceCards(CustomCharacterData data)
         {
-            var atlas = uiAtlas;
-            var atlasTex = atlas.Texture;
-            if (data.punchoutFaceCards != null)
-            {
-                if (ToolsCharApi.EnableDebugLogging == true)
-                {
-                    ToolsCharApi.Print("Adding punchout facecards");
-                }
-                int count = Mathf.Min(data.punchoutFaceCards.Count, 3);
-                for (int i = 0; i < count; i++)
-                {
-                    var sprite = uiAtlas.AddNewItemToAtlas(data.punchoutFaceCards[i], $"punch_player_health_{data.nameShort.ToLower()}_00{i + 1}");
-                    uiFaceCards.Add(sprite);
-                }
-            }
+            if (data.punchoutFaceCards == null)
+                return;
+
+            if (ToolsCharApi.EnableDebugLogging)
+                ToolsCharApi.Print("Adding punchout facecards");
+            int count = Mathf.Min(data.punchoutFaceCards.Count, 3);
+            for (int i = 0; i < count; i++)
+                uiFaceCards.Add(uiAtlas.AddNewItemToAtlas(data.punchoutFaceCards[i], $"punch_player_health_{data.nameShort.ToLower()}_00{i + 1}"));
         }
 
         public static void HandlePunchoutAnimations(PunchoutPlayerController player, CustomCharacterData data)
         {
-            if (ToolsCharApi.EnableDebugLogging == true)
-            {
+            if (ToolsCharApi.EnableDebugLogging)
                 ToolsCharApi.Print("Replacing punchout sprites...");
-            }
 
             var orig = player.sprite.Collection;
             var copyCollection = GameObject.Instantiate(orig);
@@ -1203,52 +949,35 @@ namespace Alexandria.CharacterAPI
 
             tk2dSpriteDefinition[] copyDefinitions = new tk2dSpriteDefinition[orig.spriteDefinitions.Length];
             for (int i = 0; i < copyCollection.spriteDefinitions.Length; i++)
-            {
                 copyDefinitions[i] = orig.spriteDefinitions[i].Copy();
-            }
             copyCollection.spriteDefinitions = copyDefinitions;
 
             foreach (var tex in data.punchoutSprites)
-            {
-                var def = copyCollection.GetSpriteDefinition(tex.Value.name);
-                if (def != null)
-                {
+                if (copyCollection.GetSpriteDefinition(tex.Value.name) is tk2dSpriteDefinition def)
                     def.ReplaceTexture(tex.Value.CropWhiteSpace());
-                }
-            }
 
             player.spriteAnimator.Library = GameObject.Instantiate(player.spriteAnimator.Library);
             GameObject.DontDestroyOnLoad(player.spriteAnimator.Library);
 
             foreach (var clip in player.spriteAnimator.Library.clips)
-            {
                 for (int i = 0; i < clip.frames.Length; i++)
-                {
                     clip.frames[i].spriteCollection = copyCollection;
-                }
-            }
 
             copyCollection.name = data.nameShort + " Punchout Collection";
             player.sprite.Collection = copyCollection;
-            if (ToolsCharApi.EnableDebugLogging == true)
-            {
+            if (ToolsCharApi.EnableDebugLogging)
                 ToolsCharApi.Print("Punchout sprites successfully replaced");
-            }
         }
 
         public static void SetMinimapIconSpriteID(int key, int value)
         {
-            if (Minimap.HasInstance)
+            if (!Minimap.HasInstance)
+                return;
+            foreach (var marker in Minimap.Instance.m_playerMarkers)
             {
-                var playerMarkers = Minimap.Instance.m_playerMarkers;
-                foreach (var marker in playerMarkers)
-                {
-                    var sprite = marker.First.gameObject.GetComponent<tk2dSprite>();
-                    if (sprite != null && sprite.spriteId == key)
-                    {
-                        sprite.SetSprite(value);
-                    }
-                }
+                var sprite = marker.First.gameObject.GetComponent<tk2dSprite>();
+                if (sprite != null && sprite.spriteId == key)
+                    sprite.SetSprite(value);
             }
         }
 

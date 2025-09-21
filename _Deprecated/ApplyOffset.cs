@@ -10,6 +10,7 @@ namespace Alexandria.ItemAPI
 {
     public static class ApplyOffsetStuff
     {
+        [Obsolete("This method is obsolete and exists for backwards compatibility only. Use SpriteHandler.MakeOffset() instead", false)]
         public static void ApplyOffset(this tk2dSpriteDefinition def, Vector2 offset)
         {
             Shared.MakeOffset(def, offset);

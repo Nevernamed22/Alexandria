@@ -587,5 +587,15 @@ namespace Alexandria.CharacterAPI
             timers.Remove(key);
             ToolsCharApi.Print($"{name} finished in " + elapsed + "ms");
         }
+
+        /// <summary>Adds a complex string to a StringDBTable.</summary>
+        public static void AddComplex(this StringDBTable stringdb, string key, string value)
+        {
+            StringTableManager.ComplexStringCollection stringCollection = (!stringdb.ContainsKey(key))
+                ? new StringTableManager.ComplexStringCollection()
+                : stringCollection = (StringTableManager.ComplexStringCollection)stringdb[key];
+            stringCollection.AddString(value, 1f);
+            stringdb[key] = stringCollection;
+        }
     }
 }

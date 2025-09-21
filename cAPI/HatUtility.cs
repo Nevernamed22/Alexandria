@@ -433,7 +433,7 @@ namespace Alexandria.cAPI
                 Shared.MakeOffset(frameDef, offset);
                 clip.frames[i] = new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = HatSpriteCollection };
             }
-            animation.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { clip }).ToArray();
+            Shared.Append(ref animation.clips, clip);
             return true;
         }
 
@@ -454,7 +454,7 @@ namespace Alexandria.cAPI
                 Shared.MakeOffset(frameDef, offset);
                 clip.frames[i] = new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = HatSpriteCollection };
             }
-            animation.clips = animation.clips.Concat(new tk2dSpriteAnimationClip[] { clip }).ToArray();
+            Shared.Append(ref animation.clips, clip);
             return true;
         }
 

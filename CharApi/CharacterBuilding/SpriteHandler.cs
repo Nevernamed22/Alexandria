@@ -215,7 +215,7 @@ namespace Alexandria.CharacterAPI
                         }
                         frame.spriteId = collection.spriteDefinitions.IndexOf(list[0]);
                     }
-                    libary.clips = libary.clips.Concat(new tk2dSpriteAnimationClip[] { newClip }).ToArray();
+                    Shared.Append(ref libary.clips, newClip);
                 }
             }
         }

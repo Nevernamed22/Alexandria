@@ -8,6 +8,7 @@ using HarmonyLib;
 using UnityEngine;
 using Alexandria.DungeonAPI;
 using FullInspector;
+using Alexandria.Misc;
 
 namespace Alexandria.CharacterAPI
 {
@@ -33,14 +34,8 @@ namespace Alexandria.CharacterAPI
                     var target = state.transitions.First(x => x.EventName == "IsBullet").ToState;
                     state.AddTransition($"Is{name}", target, false);
 
-                    var switchCharacterList = action.compareTo.ToList();
-                    switchCharacterList.Add(characterEnum);
-                    action.compareTo = switchCharacterList.ToArray();
-
-                    var switchEventList = action.sendEvent.ToList();
-                    switchEventList.Add(blacksmithFsm.fsm.Events.First(x => x.name == $"Is{name}"));
-                    action.sendEvent = switchEventList.ToArray();
-
+                    Shared.Append(ref action.compareTo, characterEnum);
+                    Shared.Append(ref action.sendEvent, blacksmithFsm.fsm.Events.First(x => x.name == $"Is{name}"));
                 }
             }
 

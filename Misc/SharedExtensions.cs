@@ -271,7 +271,7 @@ namespace Alexandria.Misc
                 int frameSpriteId = SpriteBuilder.AddSpriteToCollection(animSpritePaths[i], collection, assembly);
                 clip.frames[i] = new tk2dSpriteAnimationFrame { spriteId = frameSpriteId, spriteCollection = collection };
             }
-            beamAnimation.clips = beamAnimation.clips.Concat(new tk2dSpriteAnimationClip[] { clip }).ToArray();
+            Shared.Append(ref beamAnimation.clips, clip);
             SetupBeamPart(beamAnimation, collection, animationName, colliderDimensions, colliderOffsets, overrideVertices,
                 wrapMode: tk2dSpriteAnimationClip.WrapMode.Once, anchor: anchor);
         }

@@ -584,7 +584,7 @@ namespace Alexandria.ItemAPI
             if (item.passiveStatModifiers == null)
                 item.passiveStatModifiers = new StatModifier[] { modifier };
             else
-                item.passiveStatModifiers = item.passiveStatModifiers.Concat(new StatModifier[] { modifier }).ToArray();
+                Shared.Append(ref item.passiveStatModifiers, modifier);
         }
         public static void RemoveStatFromGun(this Gun item, PlayerStats.StatType statType)
         {

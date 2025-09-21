@@ -536,7 +536,7 @@ namespace Alexandria.ItemAPI
                 if (item.passiveStatModifiers == null)
                     item.passiveStatModifiers = new StatModifier[] { modifier };
                 else
-                    item.passiveStatModifiers = item.passiveStatModifiers.Concat(new StatModifier[] { modifier }).ToArray();
+                    Shared.Append(ref item.passiveStatModifiers, modifier);
             }
             else if (po is PassiveItem)
             {
@@ -544,7 +544,7 @@ namespace Alexandria.ItemAPI
                 if (item.passiveStatModifiers == null)
                     item.passiveStatModifiers = new StatModifier[] { modifier };
                 else
-                    item.passiveStatModifiers = item.passiveStatModifiers.Concat(new StatModifier[] { modifier }).ToArray();
+                    Shared.Append(ref item.passiveStatModifiers, modifier);
             }
             else if (po is Gun)
             {
@@ -552,7 +552,7 @@ namespace Alexandria.ItemAPI
                 if (item.passiveStatModifiers == null)
                     item.passiveStatModifiers = new StatModifier[] { modifier };
                 else
-                    item.passiveStatModifiers = item.passiveStatModifiers.Concat(new StatModifier[] { modifier }).ToArray();
+                    Shared.Append(ref item.passiveStatModifiers, modifier);
             }
             else
             {

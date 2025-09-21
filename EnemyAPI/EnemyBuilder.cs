@@ -169,10 +169,9 @@ namespace Alexandria.EnemyAPI
                 };
             }
 
-            animation.AnimNames = animation.AnimNames.Concat(new string[] { name }).ToArray();
+            Shared.Append(ref animation.AnimNames, name);
             aiAnimator.AssignDirectionalAnimation(name, animation, type);
             return BuildAnimations(aiAnimator, name, enemyName, directionType, spriteDirectory, fps, wrapMode, Assembly.GetCallingAssembly());
-
         }
 
         public static tk2dSpriteAnimationClip[] BuildAnimations(AIAnimator aiAnimator, string name, string enemyName, DirectionType directionType, string spriteDirectory, int fps, tk2dSpriteAnimationClip.WrapMode wrapMode, Assembly assembly = null)

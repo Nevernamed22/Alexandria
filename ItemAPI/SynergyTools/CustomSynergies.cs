@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using HarmonyLib;
+using Alexandria.Misc;
 
 namespace Alexandria.ItemAPI
 {
@@ -78,8 +79,7 @@ namespace Alexandria.ItemAPI
 
         public static void Add(AdvancedSynergyEntry synergyEntry)
         {
-            AdvancedSynergyEntry[] array = new AdvancedSynergyEntry[] { synergyEntry };
-            GameManager.Instance.SynergyManager.synergies = GameManager.Instance.SynergyManager.synergies.Concat(array).ToArray<AdvancedSynergyEntry>();
+            Shared.Append(ref GameManager.Instance.SynergyManager.synergies, synergyEntry);
         }
 
         public static bool HasMTGConsoleID(this PlayerController player, string consoleID)

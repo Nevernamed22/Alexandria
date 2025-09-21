@@ -104,7 +104,7 @@
     <Compile Include="EnemyAPI\BossBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyBuilder.cs" />
     <Compile Include="EnemyAPI\EnemyTools.cs" />
-    <Compile Include="EnemyAPI\Hooks.cs" />
+    <Compile Include="_Deprecated\EnemyAPIHooks.cs" />
     <Compile Include="EnemyAPI\OverrideBehavior.cs" />
     <Compile Include="DungeonAPI\DungeonHandler.cs" />
     <Compile Include="DungeonAPI\DungeonHooks.cs" />

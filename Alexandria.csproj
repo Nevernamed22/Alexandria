@@ -82,7 +82,6 @@
     <Compile Include="DungeonAPI\RuntimeDungeonEditing.cs" />
     <Compile Include="DungeonAPI\SetupExoticObjects.cs" />
     <Compile Include="DungeonAPI\SpecialComponents.cs" />
-    <Compile Include="DungeonAPI\StaticInjections.cs" />
     <Compile Include="EnemyAPI\AIActorUtility.cs" />
     <Compile Include="EnemyAPI\AttackBehaviourUtility.cs" />
     <Compile Include="EnemyAPI\EnemyBuildingTools.cs" />

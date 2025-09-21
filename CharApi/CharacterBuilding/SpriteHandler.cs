@@ -22,7 +22,6 @@ namespace Alexandria.CharacterAPI
 
     public static class SpriteHandler
     {
-        private static FieldInfo m_playerMarkers = typeof(Minimap).GetField("m_playerMarkers", BindingFlags.NonPublic | BindingFlags.Instance);
         public static dfAtlas uiAtlas;
         public static List<dfAtlas.ItemInfo> uiFaceCards = new List<dfAtlas.ItemInfo>();
         public static List<dfAtlas.ItemInfo> punchoutFaceCards = new List<dfAtlas.ItemInfo>();
@@ -1630,7 +1629,7 @@ namespace Alexandria.CharacterAPI
         {
             if (Minimap.HasInstance)
             {
-                var playerMarkers = (List<Tuple<Transform, Renderer>>)m_playerMarkers.GetValue(Minimap.Instance);
+                var playerMarkers = Minimap.Instance.m_playerMarkers;
                 foreach (var marker in playerMarkers)
                 {
                     var sprite = marker.First.gameObject.GetComponent<tk2dSprite>();

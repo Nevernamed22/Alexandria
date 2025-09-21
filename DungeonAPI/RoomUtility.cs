@@ -68,8 +68,7 @@ namespace Alexandria.DungeonAPI
         private static IEnumerator DoLateRegeneration(Minimap instance)
         {
             yield return null;
-            FieldInfo field = typeof(Minimap).GetField("m_shouldBuildTilemap", BindingFlags.Instance | BindingFlags.NonPublic);
-            field.SetValue(instance, true);
+            instance.m_shouldBuildTilemap = true;
             yield break;
         }
     }

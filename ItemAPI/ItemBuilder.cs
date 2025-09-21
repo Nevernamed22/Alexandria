@@ -628,40 +628,22 @@ namespace Alexandria.ItemAPI
                 yield break;
             }
 
-            SetPrivateType<PlayerItem>(item, "m_isCurrentlyActive", true);
-            SetPrivateType<PlayerItem>(item, "m_activeElapsed", 0f);
-            SetPrivateType<PlayerItem>(item, "m_activeDuration", duration);
+            item.m_isCurrentlyActive = true;
+            item.m_activeElapsed = 0f;
+            item.m_activeDuration = duration;
             item.OnActivationStatusChanged?.Invoke(item);
 
-            float elapsed = GetPrivateType<PlayerItem, float>(item, "m_activeElapsed");
-            float dur = GetPrivateType<PlayerItem, float>(item, "m_activeDuration");
+            float elapsed = item.m_activeElapsed;
+            float dur = item.m_activeDuration;
 
-            while (GetPrivateType<PlayerItem, float>(item, "m_activeElapsed") < GetPrivateType<PlayerItem, float>(item, "m_activeDuration") && item.IsCurrentlyActive)
+            while (item.m_activeElapsed < item.m_activeDuration && item.IsCurrentlyActive)
             {
                 yield return null;
             }
-            SetPrivateType<PlayerItem>(item, "m_isCurrentlyActive", false);
+            item.m_isCurrentlyActive = false;
             item.OnActivationStatusChanged?.Invoke(item);
             OnFinish?.Invoke(user);
             yield break;
-        }
-
-        private static void SetPrivateType<T>(T obj, string field, bool value)
-        {
-            FieldInfo f = typeof(T).GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);
-            f.SetValue(obj, value);
-        }
-
-        private static void SetPrivateType<T>(T obj, string field, float value)
-        {
-            FieldInfo f = typeof(T).GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);
-            f.SetValue(obj, value);
-        }
-
-        private static T2 GetPrivateType<T, T2>(T obj, string field)
-        {
-            FieldInfo f = typeof(T).GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);
-            return (T2)f.GetValue(obj);
         }
     }
 }

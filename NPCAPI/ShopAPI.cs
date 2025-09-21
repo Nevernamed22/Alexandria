@@ -769,32 +769,23 @@ namespace Alexandria.NPCAPI
 
                 UnityEngine.JsonUtility.FromJsonOverwrite(UnityEngine.JsonUtility.ToJson(basenpc.GetComponent<PlayMakerFSM>()), iHaveNoFuckingClueWhatThisIs);
 
-                FieldInfo fsmStringParams = typeof(ActionData).GetField("fsmStringParams", BindingFlags.NonPublic | BindingFlags.Instance);
+                iHaveNoFuckingClueWhatThisIs.FsmStates[1].ActionData.fsmStringParams[0].Value = runBasedMultilineGenericStringKey;
+                iHaveNoFuckingClueWhatThisIs.FsmStates[1].ActionData.fsmStringParams[1].Value = runBasedMultilineStopperStringKey;
 
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[1].ActionData) as List<FsmString>)[0].Value = runBasedMultilineGenericStringKey;
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[1].ActionData) as List<FsmString>)[1].Value = runBasedMultilineStopperStringKey;
+                iHaveNoFuckingClueWhatThisIs.FsmStates[4].ActionData.fsmStringParams[0].Value = purchaseItemStringKey;
 
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[4].ActionData) as List<FsmString>)[0].Value = purchaseItemStringKey;
+                iHaveNoFuckingClueWhatThisIs.FsmStates[5].ActionData.fsmStringParams[0].Value = purchaseItemFailedStringKey;
 
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[5].ActionData) as List<FsmString>)[0].Value = purchaseItemFailedStringKey;
+                iHaveNoFuckingClueWhatThisIs.FsmStates[7].ActionData.fsmStringParams[0].Value = introStringKey;
 
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[7].ActionData) as List<FsmString>)[0].Value = introStringKey;
+                iHaveNoFuckingClueWhatThisIs.FsmStates[8].ActionData.fsmStringParams[0].Value = attackedStringKey;
 
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[8].ActionData) as List<FsmString>)[0].Value = attackedStringKey;
+                iHaveNoFuckingClueWhatThisIs.FsmStates[9].ActionData.fsmStringParams[0].Value = stolenFromStringKey;
+                iHaveNoFuckingClueWhatThisIs.FsmStates[9].ActionData.fsmStringParams[1].Value = stolenFromStringKey;
 
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[9].ActionData) as List<FsmString>)[0].Value = stolenFromStringKey;
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[9].ActionData) as List<FsmString>)[1].Value = stolenFromStringKey;
+                iHaveNoFuckingClueWhatThisIs.FsmStates[10].ActionData.fsmStringParams[0].Value = "#SHOP_GENERIC_NO_SALE_LABEL";
 
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[10].ActionData) as List<FsmString>)[0].Value = "#SHOP_GENERIC_NO_SALE_LABEL";
-
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[12].ActionData) as List<FsmString>)[0].Value = "#COOP_REBUKE";
-
-                /*
-                foreach (FsmString fuck in fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[9].ActionData) as List<FsmString>)
-                {
-                    ETGModConsole.Log(fuck.Value);
-                }
-                */
+                iHaveNoFuckingClueWhatThisIs.FsmStates[12].ActionData.fsmStringParams[0].Value = "#COOP_REBUKE";
 
                 npcObj.name = prefix + ":" + name;
 
@@ -1109,22 +1100,20 @@ namespace Alexandria.NPCAPI
 
                 UnityEngine.JsonUtility.FromJsonOverwrite(UnityEngine.JsonUtility.ToJson(basenpc.GetComponent<PlayMakerFSM>()), iHaveNoFuckingClueWhatThisIs);
 
-                FieldInfo fsmStringParams = typeof(ActionData).GetField("fsmStringParams", BindingFlags.NonPublic | BindingFlags.Instance);
+                iHaveNoFuckingClueWhatThisIs.FsmStates[3].ActionData.fsmStringParams[0].Value = purchaseItemStringKey;
+                iHaveNoFuckingClueWhatThisIs.FsmStates[3].ActionData.fsmStringParams[1].Value = "";
 
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[3].ActionData) as List<FsmString>)[0].Value = purchaseItemStringKey;
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[3].ActionData) as List<FsmString>)[1].Value = "";
+                iHaveNoFuckingClueWhatThisIs.FsmStates[4].ActionData.fsmStringParams[0].Value = purchaseItemFailedStringKey;
+                iHaveNoFuckingClueWhatThisIs.FsmStates[4].ActionData.fsmStringParams[1].Value = "";
 
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[4].ActionData) as List<FsmString>)[0].Value = purchaseItemFailedStringKey;
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[4].ActionData) as List<FsmString>)[1].Value = "";
+                iHaveNoFuckingClueWhatThisIs.FsmStates[6].ActionData.fsmStringParams[0].Value = "";
 
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[6].ActionData) as List<FsmString>)[0].Value = "";
+                iHaveNoFuckingClueWhatThisIs.FsmStates[8].ActionData.fsmStringParams[0].Value = runBasedMultilineGenericStringKey;
+                iHaveNoFuckingClueWhatThisIs.FsmStates[8].ActionData.fsmStringParams[1].Value = runBasedMultilineStopperStringKey;
 
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[8].ActionData) as List<FsmString>)[0].Value = runBasedMultilineGenericStringKey;
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[8].ActionData) as List<FsmString>)[1].Value = runBasedMultilineStopperStringKey;
+                iHaveNoFuckingClueWhatThisIs.FsmStates[9].ActionData.fsmStringParams[0].Value = introStringKey;
 
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[9].ActionData) as List<FsmString>)[0].Value = introStringKey;
-
-                (fsmStringParams.GetValue(iHaveNoFuckingClueWhatThisIs.FsmStates[11].ActionData) as List<FsmString>)[0].Value = runBasedMultilineStopperStringKey;
+                iHaveNoFuckingClueWhatThisIs.FsmStates[11].ActionData.fsmStringParams[0].Value = runBasedMultilineStopperStringKey;
 
 
                 

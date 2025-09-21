@@ -37,7 +37,6 @@ namespace Alexandria.DungeonAPI
         public static Dictionary<string, RoomData> rooms = new Dictionary<string, RoomData>();
         public static bool FailSafeCheck;
         private static readonly string dataHeader = "***DATA***";
-        private static FieldInfo m_cellData = typeof(PrototypeDungeonRoom).GetField("m_cellData", BindingFlags.Instance | BindingFlags.NonPublic);
         private static RoomEventDefinition sealOnEnterWithEnemies = new RoomEventDefinition(RoomEventTriggerCondition.ON_ENTER_WITH_ENEMIES, RoomEventTriggerAction.SEAL_ROOM);
         private static RoomEventDefinition unsealOnRoomClear = new RoomEventDefinition(RoomEventTriggerCondition.ON_ENEMIES_CLEARED, RoomEventTriggerAction.UNSEAL_ROOM);
         internal static bool _AggregateMissingAssetErrors = false;
@@ -736,7 +735,7 @@ namespace Alexandria.DungeonAPI
                 AddExit(room, new Vector2(width, height / 2), DungeonData.Direction.EAST);
                 AddExit(room, new Vector2(0, height / 2), DungeonData.Direction.WEST);
 
-                PrototypeDungeonRoomCellData[] cellData = m_cellData.GetValue(room) as PrototypeDungeonRoomCellData[];
+                PrototypeDungeonRoomCellData[] cellData = room.m_cellData;
                 cellData = new PrototypeDungeonRoomCellData[width * height];
                 for (int x = 0; x < width; x++)
                 {
@@ -752,7 +751,7 @@ namespace Alexandria.DungeonAPI
                         };
                     }
                 }
-                m_cellData.SetValue(room, cellData);
+                room.m_cellData = cellData;
 
                 room.UpdatePrecalculatedData();
                 return room;

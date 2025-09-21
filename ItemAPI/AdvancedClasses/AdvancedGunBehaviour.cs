@@ -552,7 +552,7 @@ namespace Alexandria.ItemAPI
             {
                 if (this.gun != null)
                 {
-                    return (float)heroSwordCooldown.GetValue(this.gun);
+                    return this.gun.HeroSwordCooldown;
                 }
                 return -1f;
             }
@@ -560,7 +560,7 @@ namespace Alexandria.ItemAPI
             {
                 if (this.gun != null)
                 {
-                    heroSwordCooldown.SetValue(this.gun, value);
+                    this.gun.HeroSwordCooldown = value;
                 }
             }
         }
@@ -621,6 +621,5 @@ namespace Alexandria.ItemAPI
         public bool usesOverrideHeroSwordCooldown;
         public float overrideHeroSwordCooldown;
         public bool canCollectAmmoAtMaxAmmo = false;
-        private static FieldInfo heroSwordCooldown = typeof(Gun).GetField("HeroSwordCooldown", BindingFlags.NonPublic | BindingFlags.Instance);
     }
 }

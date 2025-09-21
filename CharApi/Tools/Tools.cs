@@ -67,27 +67,17 @@ namespace Alexandria.CharacterAPI
 
         public static Material[] SetOverrideMaterial (this PlayerController player, Material overrideMaterial)
         {
-            FieldInfo _cachedOverrideMaterials = typeof(PlayerController).GetField("m_cachedOverrideMaterials", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if ((_cachedOverrideMaterials.GetValue(player) as Material[]) == null)
-            {
-                _cachedOverrideMaterials.SetValue(player, new Material[3]);
-            }
-            for (int i = 0; i < (_cachedOverrideMaterials.GetValue(player) as Material[]).Length; i++)
-            {
-                (_cachedOverrideMaterials.GetValue(player) as Material[])[i] = null;
-            }
+            if (player.m_cachedOverrideMaterials == null)
+                player.m_cachedOverrideMaterials = new Material[3];
+            for (int i = 0; i < player.m_cachedOverrideMaterials.Length; i++)
+                player.m_cachedOverrideMaterials[i] = null;
             player.sprite.renderer.material = overrideMaterial;
-            (_cachedOverrideMaterials.GetValue(player) as Material[])[0] = player.sprite.renderer.material;
+            player.m_cachedOverrideMaterials[0] = player.sprite.renderer.material;
             if (player.primaryHand && player.primaryHand.sprite)
-            {
-                (_cachedOverrideMaterials.GetValue(player) as Material[])[1] = player.primaryHand.SetOverrideShader(overrideMaterial.shader);
-            }
+                player.m_cachedOverrideMaterials[1] = player.primaryHand.SetOverrideShader(overrideMaterial.shader);
             if (player.secondaryHand && player.secondaryHand.sprite)
-            {
-                (_cachedOverrideMaterials.GetValue(player) as Material[])[2] = player.secondaryHand.SetOverrideShader(overrideMaterial.shader);
-            }
-            return (_cachedOverrideMaterials.GetValue(player) as Material[]);
+                player.m_cachedOverrideMaterials[2] = player.secondaryHand.SetOverrideShader(overrideMaterial.shader);
+            return player.m_cachedOverrideMaterials;
         }
 
         public static Texture2D Rotated(this Texture2D texture, bool clockwise = false)

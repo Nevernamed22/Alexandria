@@ -77,27 +77,6 @@ namespace Alexandria.Assetbundle
             return Shared.AddSpriteToCollection(spriteDefinition, collection);
         }
 
-        /*
-        public static void FinalizeSprites()
-        {
-            var collection = ammonomiconCollection;
-
-            var defs = collection.spriteDefinitions;
-
-            foreach (var entry in GunSpriteDefs)
-            {
-                var newDefs = defs.Concat(new tk2dSpriteDefinition[] {entry}).ToArray();
-                collection.spriteDefinitions = newDefs;
-            }
-
-
-            //Reset lookup dictionary
-            FieldInfo f = typeof(tk2dSpriteCollectionData).GetField("spriteNameLookupDict", BindingFlags.Instance | BindingFlags.NonPublic);
-            f.SetValue(collection, null);  //Set dictionary to null
-            collection.InitDictionary(); //InitDictionary only runs if the dictionary is null
-
-        }
-        */
         public static tk2dSpriteCollectionData ammonomiconCollection = AmmonomiconController.ForceInstance.EncounterIconCollection;
     }
 }

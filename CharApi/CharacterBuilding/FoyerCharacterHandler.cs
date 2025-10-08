@@ -310,6 +310,15 @@ namespace Alexandria.CharacterAPI
         {
             try
             {
+                // Custom foyer controller setup
+                var customFoyerController = selectCharacter.gameObject.AddComponent<CustomCharacterFoyerController>();
+                customFoyerController.metaCost = data.metaCost;
+                customFoyerController.useGlow = data.useGlow;
+                customFoyerController.emissiveColor = data.emissiveColor;
+                customFoyerController.emissiveColorPower = data.emissiveColorPower;
+                customFoyerController.emissivePower = data.emissivePower;
+                customFoyerController.data = data;
+
                 if (selectCharacter.OverheadElement == null)
                 {
                     if (ToolsCharApi.EnableDebugLogging == true)
@@ -337,15 +346,6 @@ namespace Alexandria.CharacterAPI
                 newOverheadElement.SetActive(false);
                 newOverheadElement.name = $"CHR_{data.nameShort}Panel";
                 newOverheadElement.GetComponent<FoyerInfoPanelController>().followTransform = selectCharacter.transform; //NOTE: verify this is correct after instantiation
-
-                // Custom foyer controller setup
-                var customFoyerController = selectCharacter.gameObject.AddComponent<CustomCharacterFoyerController>();
-                customFoyerController.metaCost = data.metaCost;
-                customFoyerController.useGlow = data.useGlow;
-                customFoyerController.emissiveColor = data.emissiveColor;
-                customFoyerController.emissiveColorPower = data.emissiveColorPower;
-                customFoyerController.emissivePower = data.emissivePower;
-                customFoyerController.data = data;
 
                 //Change text
                 var infoPanel = newOverheadElement.GetComponent<FoyerInfoPanelController>();

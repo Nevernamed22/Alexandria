@@ -56,7 +56,8 @@ namespace Alexandria.ItemAPI
             tk2dSprite component = SpriteBuilder.SpriteFromResource(defaultSpritePath, gameObject, Assembly.GetCallingAssembly()).GetComponent<tk2dSprite>();
             component.SetUpSpeculativeRigidbody(hitboxOffset, hitBoxSize).CollideWithOthers = false;
             gameObject.AddComponent<tk2dSpriteAnimator>();
-            gameObject.AddComponent<AIAnimator>();
+            AIAnimator aiAnimator = gameObject.AddComponent<AIAnimator>();
+            aiAnimator.OtherVFX = new List<AIAnimator.NamedVFXPool>(0); // fixes a null deref on exit when destroying the fake prefab
             HealthHaver healthHaver = gameObject.AddComponent<HealthHaver>();
             healthHaver.RegisterBodySprite(component, false, 0);
             healthHaver.PreventAllDamage = true;

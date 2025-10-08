@@ -27,7 +27,9 @@ namespace Alexandria.ItemAPI
             UnityEngine.Object.DontDestroyOnLoad(bgSpriteObject);
 
             dfTiledSprite fgSprite = fgSpriteObject.SetupDfSpriteFromTexture<dfTiledSprite>(fgTexture, ShaderCache.Acquire("Daikon Forge/Default UI Shader"));
+            fgSprite.zindex = 7;
             dfTiledSprite bgSprite = bgSpriteObject.SetupDfSpriteFromTexture<dfTiledSprite>(bgTexture, ShaderCache.Acquire("Daikon Forge/Default UI Shader"));
+            bgSprite.zindex = 5;
             GameUIAmmoType uiammotype = new GameUIAmmoType
             {
                 ammoBarBG = bgSprite,

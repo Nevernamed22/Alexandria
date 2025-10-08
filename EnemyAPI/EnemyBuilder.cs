@@ -90,7 +90,8 @@ namespace Alexandria.EnemyAPI
 
             sprite.SetUpSpeculativeRigidbody(hitboxOffset, hitBoxSize).CollideWithOthers = true;
             prefab.AddComponent<tk2dSpriteAnimator>();
-            prefab.AddComponent<AIAnimator>();
+            AIAnimator aiAnimator = prefab.AddComponent<AIAnimator>();
+            aiAnimator.OtherVFX = new List<AIAnimator.NamedVFXPool>(0); // fixes a null deref on exit when destroying the fake prefab
 
             //setup knockback
             var knockback = prefab.AddComponent<KnockbackDoer>();

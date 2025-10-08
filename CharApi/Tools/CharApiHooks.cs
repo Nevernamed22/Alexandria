@@ -455,7 +455,7 @@ namespace Alexandria.CharacterAPI
             PlayerController player = GameManager.Instance.PrimaryPlayer;
             if (player && player.GetComponent<CustomCharacter>() is CustomCharacter cc && cc.data != null)
             {
-                __result = cc.name;
+                __result = cc.data.name;
                 return false;
             }
             return true;

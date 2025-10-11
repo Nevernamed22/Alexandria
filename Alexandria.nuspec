@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>EtG.Alexandria</id>
-    <version>0.4.25</version>
+    <version>0.5.0</version>
     <title>EtG.Alexandria</title>
     <authors>$author$</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>

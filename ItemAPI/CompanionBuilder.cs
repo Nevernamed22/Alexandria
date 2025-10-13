@@ -36,11 +36,13 @@ namespace Alexandria.ItemAPI
         }
 
         [HarmonyPatch(typeof(EnemyDatabase), nameof(EnemyDatabase.GetOrLoadByGuid))]
-        [HarmonyPostfix]
-        private static void EnemyDatabaseGetOrLoadByGuidPatch(EnemyDatabase __instance, string guid, ref AIActor __result)
+        [HarmonyPrefix]
+        private static bool EnemyDatabaseGetOrLoadByGuidPatch(EnemyDatabase __instance, string guid, ref AIActor __result)
         {
-            if (companionDictionary.TryGetValue(guid, out GameObject companion))
-                __result = companion.GetComponent<AIActor>();
+            if (!companionDictionary.TryGetValue(guid, out GameObject companion))
+                return true;
+            __result = companion.GetComponent<AIActor>();
+            return false;
         }
 
         public static GameObject BuildPrefab(string name, string guid, string defaultSpritePath, IntVector2 hitboxOffset, IntVector2 hitBoxSize)

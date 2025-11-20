@@ -184,7 +184,7 @@ namespace Alexandria.CharacterAPI
         [HarmonyPrefix]
         private static bool PunchoutPlayerControllerUpdateUIPatch(PunchoutPlayerController __instance)
         {
-            if (__instance.m_playerId <= 7)
+            if (!_CharApiCharacterIds.Contains(__instance.m_playerId))
                 return true;
 
             string str = backUpUI[__instance.m_playerId];
@@ -213,6 +213,7 @@ namespace Alexandria.CharacterAPI
 
         public static string[] backUp = PunchoutPlayerController.PlayerNames;
         public static string[] backUpUI = PunchoutPlayerController.PlayerUiNames;
+        private static HashSet<int> _CharApiCharacterIds = new();
 
         [HarmonyPatch(typeof(PunchoutController), nameof(PunchoutController.Init))]
         [HarmonyPrefix]
@@ -242,6 +243,8 @@ namespace Alexandria.CharacterAPI
                 backUp = PunchoutPlayerController.PlayerNames;
                 backUpUI = PunchoutPlayerController.PlayerUiNames;
             }
+
+            _CharApiCharacterIds.Add(__instance.Player.m_playerId);
 
             __instance.Player.CustomSwapPlayer(CustomCharacter.punchoutBullShit[name], false);
             __instance.CoopCultist.gameObject.SetActive(GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER);

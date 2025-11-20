@@ -34,7 +34,6 @@ namespace Alexandria.DungeonAPI
             }
 
             OnPreDungeonGeneration?.Invoke(__instance, d, __instance.m_assignedFlow, dungeonSeed);
-            d = null;
         }
 
         [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]

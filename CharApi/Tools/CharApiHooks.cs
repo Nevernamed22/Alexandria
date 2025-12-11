@@ -180,11 +180,39 @@ namespace Alexandria.CharacterAPI
             }
         }
 
+        // WARNING: in the base game, both PlayerNames and PlayerUiNames are readonly. this apparently causes the compiler to do
+        //          some janky optimizations that only make sense if the pointers to those arrays never change. unfortunately,
+        //          this means if two different Harmony patches (e.g., in Alexandria and Cut Characters Reborn) attempt to modify
+        //          either of these arrays, extremely unpredicatable and buggy behavior occur. the patch below might look like it does
+        //          absolutely nothing, but it ensures every mod uses Harmony's cached, updated copy of PlayerNames and PlayerUiNames,
+        //          rather than using the base game's copy of the array and generating IndexOutOfRange exceptions for custom characters
+        [HarmonyPatch(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.UpdateUI))]
+        [HarmonyILManipulator]
+        private static void PunchoutHarmonyVoodoo(ILContext il)
+        {
+            ILCursor cursor = new ILCursor(il);
+            if (!cursor.TryGotoNext(MoveType.Before,
+              instr => instr.MatchLdsfld(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.PlayerUiNames))))
+                return;
+            cursor.Remove(); // do NOT load from the basegame static PlayerUiNames field, it's readonly and causes compiler weirdness
+
+            if (!cursor.TryGotoNext(MoveType.Before,
+              instr => instr.MatchLdelemRef()))
+                return;
+            cursor.Remove(); // again, don't load from the basegame PlayerUiNames
+            cursor.CallPrivate(typeof(Hooks), nameof(LocalNonReadonlyPlayerUiNamesToAppeaseHarmony));
+        }
+
+        private static string LocalNonReadonlyPlayerUiNamesToAppeaseHarmony(int index)
+        {
+            return PunchoutPlayerController.PlayerUiNames[index]; // uses the local, non-readonly copy
+        }
+
         [HarmonyPatch(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.UpdateUI))]
         [HarmonyPrefix]
         private static bool PunchoutPlayerControllerUpdateUIPatch(PunchoutPlayerController __instance)
         {
-            if (__instance.m_playerId <= 7)
+            if (!_CharApiCharacterIds.Contains(__instance.m_playerId))
                 return true;
 
             string str = backUpUI[__instance.m_playerId];
@@ -213,6 +241,7 @@ namespace Alexandria.CharacterAPI
 
         public static string[] backUp = PunchoutPlayerController.PlayerNames;
         public static string[] backUpUI = PunchoutPlayerController.PlayerUiNames;
+        private static HashSet<int> _CharApiCharacterIds = new();
 
         [HarmonyPatch(typeof(PunchoutController), nameof(PunchoutController.Init))]
         [HarmonyPrefix]
@@ -262,6 +291,9 @@ namespace Alexandria.CharacterAPI
                 mat.SetTexture("_MainTexture", __instance.Player.sprite.renderer.material.GetTexture("_MainTex"));
                 __instance.Player.sprite.renderer.material = mat;
             }
+
+            _CharApiCharacterIds.Add(__instance.Player.m_playerId);
+
             return false;
         }
 

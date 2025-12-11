@@ -3,22 +3,51 @@ using HarmonyLib;
 using System.Reflection;
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
+using System.Text;
 
 namespace Alexandria.Misc
 {
     public abstract class CustomAmmoDisplay : MonoBehaviour
     {
+        private static StringBuilder _SB = new StringBuilder("", 1000);
+
         public abstract bool DoCustomAmmoDisplay(GameUIAmmoController uic);  // must return true if doing a custom ammo display, or false to revert to vanilla behavior
 
         private static bool DoAmmoOverride(GameUIAmmoController uic, GunInventory guns)
         {
-            if (guns == null || !guns.CurrentGun || guns.CurrentGun.GetComponent<CustomAmmoDisplay>() is not CustomAmmoDisplay ammoDisplay)
-              return false; // no custom ammo override, so use the vanilla behavior
+            if (guns == null || !guns.CurrentGun)
+              return false; // no gun, so revert to vanilla behavior
+
+            CustomAmmoDisplay ammoDisplay = guns.CurrentGun.gameObject.GetComponent<CustomAmmoDisplay>();
+            IAmmoDisplayAugment[] augments = guns.CurrentGun.gameObject.GetInterfacesInChildren<IAmmoDisplayAugment>();
+            bool haveAugments = augments.Length > 0;
+            if (!ammoDisplay && !haveAugments)
+              return false; // no custom ammo overrides, so use the vanilla behavior
 
             uic.SetAmmoCountLabelColor(Color.white); // reset base color (can be changed in DoCustomAmmoDisplay() with SetAmmoCountLabelColor() or with markup)
+            _SB.Length = 0;
 
-            if (!ammoDisplay.DoCustomAmmoDisplay(uic))
-              return false; // custom ammo override does not want to change vanilla behavior
+            haveAugments = false; // reset to false for a bit while we determine whether we actually need to display augment info
+            foreach (IAmmoDisplayAugment augment in augments)
+            {
+              string augmentString = augment.GetText();
+              if (string.IsNullOrEmpty(augmentString))
+                continue;
+              haveAugments = true;
+              _SB.Append(augmentString);
+              _SB.Append("\n");
+            }
+
+            if (!ammoDisplay || !ammoDisplay.DoCustomAmmoDisplay(uic))
+            {
+              if (!haveAugments)
+                return false; // custom ammo override does not want to change vanilla behavior
+              _SB.Append((guns.Owner as PlayerController).VanillaAmmoDisplay());
+            }
+            else
+              _SB.Append(uic.GunAmmoCountLabel.Text);
+
+            uic.GunAmmoCountLabel.Text = _SB.ToString();
 
             // we're definitely using the custom ammo display, so prepare it
             if (uic.GunAmmoCountLabel.Size.x < 1000)
@@ -81,6 +110,13 @@ namespace Alexandria.Misc
                 cursor.Emit(OpCodes.Ldarg_0); // replace 0th parameter -> GameUIAmmoController
             }
         }
+    }
+
+    /// <summary>Interface that can be implemented by any Component attached to a Gun in order to display extra information above the ammo display.</summary>
+    public interface IAmmoDisplayAugment
+    {
+      /// <summary>Returns a line of formatted text (including colors / sprites) to display above the ammo display.</summary>
+      public string GetText();
     }
 
     public static class CustomAmmoDisplayExtensions

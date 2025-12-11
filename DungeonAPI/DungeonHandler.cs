@@ -247,6 +247,8 @@ namespace Alexandria.DungeonAPI
                         StaticReferences.RoomTables["abbeyextrasecret"].includedRooms.Add(wRoom);
                         break;
                     case "hollow_sell_creep":
+                        room.category = RoomCategory.SPECIAL;
+                        room.subCategorySpecial = RoomSpecialSubCategory.WEIRD_SHOP;
                         StaticReferences.RoomTables["rng_entry"].includedRooms.Add(wRoom);
                         break;
                     case "bullet_hell_secret":

@@ -180,68 +180,68 @@ namespace Alexandria.CharacterAPI
             }
         }
 
+        // NOTE: this code is commented out because it only comes into play when trying to read the cached pointers to PlayerNames and PlayerUiNames,
+        //       which doesn't happen in Alexandria now that RegisterCharacterForPunchout() is called at character creation time. However, if another
+        //       mod ever decides it needs to register a custom punchout player immediately before starting a punchout fight, these transpilers
+        //       are needed to ensure they're only accessing the up-to-date arrays
         // WARNING: in the base game, both PlayerNames and PlayerUiNames are readonly. this apparently causes the compiler to do
         //          some janky optimizations that only make sense if the pointers to those arrays never change. unfortunately,
         //          this means if two different Harmony patches (e.g., in Alexandria and Cut Characters Reborn) attempt to modify
         //          either of these arrays, extremely unpredicatable and buggy behavior occur. the patch below might look like it does
         //          absolutely nothing, but it ensures every mod uses Harmony's cached, updated copy of PlayerNames and PlayerUiNames,
-        //          rather than using the base game's copy of the array and generating IndexOutOfRange exceptions for custom characters
-        [HarmonyPatch(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.UpdateUI))]
-        [HarmonyILManipulator]
-        private static void PunchoutHarmonyVoodoo(ILContext il)
-        {
-            ILCursor cursor = new ILCursor(il);
-            if (!cursor.TryGotoNext(MoveType.Before,
-              instr => instr.MatchLdsfld(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.PlayerUiNames))))
-                return;
-            cursor.Remove(); // do NOT load from the basegame static PlayerUiNames field, it's readonly and causes compiler weirdness
+        //          rather than using the base game's cached copy of the array and generating IndexOutOfRange exceptions for custom characters
+        // [HarmonyPatch(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.UpdateUI))]
+        // [HarmonyPatch(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.HandleAnimationCompletedSwap))]
+        // [HarmonyPatch(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.SwapPlayer))]
+        // [HarmonyILManipulator]
+        // private static void PunchoutHarmonyVoodoo(ILContext il)
+        // {
+        //     ILCursor cursor = new ILCursor(il);
+        //     while (cursor.TryGotoNext(MoveType.After,
+        //       instr => instr.MatchLdsfld(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.PlayerNames))))
+        //         cursor.CallPrivate(typeof(Hooks), nameof(LocalNonReadonlyPlayerNamesToAppeaseHarmony));
 
-            if (!cursor.TryGotoNext(MoveType.Before,
-              instr => instr.MatchLdelemRef()))
-                return;
-            cursor.Remove(); // again, don't load from the basegame PlayerUiNames
-            cursor.CallPrivate(typeof(Hooks), nameof(LocalNonReadonlyPlayerUiNamesToAppeaseHarmony));
+        //     cursor.Index = 0;
+        //     while (cursor.TryGotoNext(MoveType.After,
+        //       instr => instr.MatchLdsfld(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.PlayerUiNames))))
+        //         cursor.CallPrivate(typeof(Hooks), nameof(LocalNonReadonlyPlayerUiNamesToAppeaseHarmony));
+        // }
+
+        private static string[] LocalNonReadonlyPlayerNamesToAppeaseHarmony(string[] dummy) => UncachedPlayerNames();
+        private static string[] LocalNonReadonlyPlayerUiNamesToAppeaseHarmony(string[] dummy) => UncachedPlayerUiNames();
+
+        private static readonly FieldInfo UncachedPlayerNamesField = typeof(PunchoutPlayerController).GetField("PlayerNames", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly FieldInfo UncachedPlayerUiNamesField = typeof(PunchoutPlayerController).GetField("PlayerUiNames", BindingFlags.NonPublic | BindingFlags.Static);
+
+        private static string[] UncachedPlayerNames() => ((string[])UncachedPlayerNamesField.GetValue(null));
+        private static string[] UncachedPlayerUiNames() => ((string[])UncachedPlayerUiNamesField.GetValue(null));
+
+        private static void AddPlayerName(string name) // forcibly reads the uncached value of the non-readonly array
+        {
+            UncachedPlayerNamesField.SetValue(null, UncachedPlayerNames().AddToArray(name));
         }
 
-        private static string LocalNonReadonlyPlayerUiNamesToAppeaseHarmony(int index)
+        private static void AddPlayerUiName(string name) // forcibly reads the uncached value of the non-readonly array
         {
-            return PunchoutPlayerController.PlayerUiNames[index]; // uses the local, non-readonly copy
+            UncachedPlayerUiNamesField.SetValue(null, UncachedPlayerUiNames().AddToArray(name));
         }
 
-        [HarmonyPatch(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.UpdateUI))]
-        [HarmonyPrefix]
-        private static bool PunchoutPlayerControllerUpdateUIPatch(PunchoutPlayerController __instance)
+        internal static void RegisterCharacterForPunchout(CustomCharacter cc)
         {
-            if (!_CharApiCharacterIds.Contains(__instance.m_playerId))
-                return true;
-
-            string str = backUpUI[__instance.m_playerId];
-            __instance.HealthBarUI.SpriteName = "punch_health_bar_001";
-            if (__instance.Health > 66f)
-                __instance.PlayerUiSprite.SpriteName = str + "1";
-            else if (__instance.Health > 33f)
-                __instance.PlayerUiSprite.SpriteName = str + "2";
-            else
-                __instance.PlayerUiSprite.SpriteName = str + "3";
-
-            if (__instance.IsEevee && __instance.PlayerUiSprite.OverrideMaterial == null)
+            var name = cc.data.nameShort.ToLower();
+            if (UncachedPlayerNames().Length == 7) // dummy Paradox / Eevee slot not initialized
             {
-                Material material = UnityEngine.Object.Instantiate<Material>(__instance.PlayerUiSprite.Atlas.Material);
-                material.shader = Shader.Find("Brave/Internal/GlitchEevee");
-                material.SetTexture("_EeveeTex", __instance.CosmicTex);
-                material.SetFloat("_WaveIntensity", 0.1f);
-                material.SetFloat("_ColorIntensity", 0.015f);
-                __instance.PlayerUiSprite.OverrideMaterial = material;
+                AddPlayerName("eevee");
+                AddPlayerUiName($"punch_player_health_eevee_00");
             }
-            else if (!__instance.IsEevee && __instance.PlayerUiSprite.OverrideMaterial != null)
-                __instance.PlayerUiSprite.OverrideMaterial = null;
 
-            return false;
+            if (!UncachedPlayerNames().Contains(name))
+            {
+                AddPlayerName(name);
+                AddPlayerUiName($"punch_player_health_{name}_00");
+                CustomCharacter.punchoutBullShit.Add(name, UncachedPlayerUiNames().Length - 1);
+            }
         }
-
-        public static string[] backUp = PunchoutPlayerController.PlayerNames;
-        public static string[] backUpUI = PunchoutPlayerController.PlayerUiNames;
-        private static HashSet<int> _CharApiCharacterIds = new();
 
         [HarmonyPatch(typeof(PunchoutController), nameof(PunchoutController.Init))]
         [HarmonyPrefix]
@@ -251,28 +251,7 @@ namespace Alexandria.CharacterAPI
             if (!player.IsCustomCharacter() || player.gameObject.GetComponent<CustomCharacter>() is not CustomCharacter cc)
                 return true;
 
-            var name = cc.data.nameShort.ToLower();
-            if (!backUp.Contains("eevee"))
-            {
-                Array.Resize(ref PunchoutPlayerController.PlayerNames, PunchoutPlayerController.PlayerNames.Length + 1);
-                PunchoutPlayerController.PlayerNames[PunchoutPlayerController.PlayerNames.Length - 1] = "eevee";
-                Array.Resize(ref PunchoutPlayerController.PlayerUiNames, PunchoutPlayerController.PlayerUiNames.Length + 1);
-                PunchoutPlayerController.PlayerUiNames[PunchoutPlayerController.PlayerUiNames.Length - 1] = "punch_player_health_eevee_00";
-            }
-
-            if (!backUp.Contains(name))
-            {
-                Array.Resize(ref PunchoutPlayerController.PlayerNames, PunchoutPlayerController.PlayerNames.Length + 1);
-                PunchoutPlayerController.PlayerNames[PunchoutPlayerController.PlayerNames.Length - 1] = name;
-                Array.Resize(ref PunchoutPlayerController.PlayerUiNames, PunchoutPlayerController.PlayerUiNames.Length + 1);
-                PunchoutPlayerController.PlayerUiNames[PunchoutPlayerController.PlayerUiNames.Length - 1] = $"punch_player_health_{name}_00";
-
-                CustomCharacter.punchoutBullShit.Add(name, PunchoutPlayerController.PlayerUiNames.Length - 1);
-                backUp = PunchoutPlayerController.PlayerNames;
-                backUpUI = PunchoutPlayerController.PlayerUiNames;
-            }
-
-            __instance.Player.CustomSwapPlayer(CustomCharacter.punchoutBullShit[name], false);
+            __instance.Player.SwapPlayer(CustomCharacter.punchoutBullShit[cc.data.nameShort.ToLower()], false);
             __instance.CoopCultist.gameObject.SetActive(GameManager.Instance.CurrentGameType == GameManager.GameType.COOP_2_PLAYER);
             __instance.StartCoroutine(__instance.UiFadeInCR());
             __instance.m_isInitialized = true;
@@ -292,72 +271,7 @@ namespace Alexandria.CharacterAPI
                 __instance.Player.sprite.renderer.material = mat;
             }
 
-            _CharApiCharacterIds.Add(__instance.Player.m_playerId);
-
             return false;
-        }
-
-        private static void CustomSwapPlayer(this PunchoutPlayerController self, int? newPlayerIndex = null, bool keepEevee = false)
-        {
-            if (newPlayerIndex == null)
-            {
-                if (self.IsEevee && !keepEevee)
-                {
-                    newPlayerIndex = new int?(0);
-                }
-                else
-                {
-                    newPlayerIndex = new int?((self.m_playerId) % (PunchoutPlayerController.PlayerNames.Length));
-                }
-            }
-
-            if (!keepEevee)
-            {
-                bool flag = newPlayerIndex.Value == 7;
-                if (flag && !self.IsEevee)
-                {
-                    self.IsEevee = true;
-                    self.sprite.usesOverrideMaterial = true;
-                    self.sprite.renderer.material.shader = Shader.Find("Brave/PlayerShaderEevee");
-                    self.sprite.renderer.sharedMaterial.SetTexture("_EeveeTex", self.CosmicTex);
-                    self.sprite.renderer.material.DisableKeyword("BRIGHTNESS_CLAMP_ON");
-                    self.sprite.renderer.material.EnableKeyword("BRIGHTNESS_CLAMP_OFF");
-                }
-                else if (!flag && self.IsEevee)
-                {
-                    self.IsEevee = false;
-                    self.sprite.usesOverrideMaterial = false;
-                }
-            }
-
-            if (self.IsEevee)
-            {
-                newPlayerIndex = new int?(UnityEngine.Random.Range(0, PunchoutPlayerController.PlayerNames.Length));
-            }
-
-
-            string oldName = backUp[self.m_playerId];
-
-            string newName = backUp[newPlayerIndex.Value];
-
-
-            self.m_playerId = newPlayerIndex.Value;
-
-            self.SwapAnim(self.aiAnimator.IdleAnimation, oldName, newName);
-
-            self.SwapAnim(self.aiAnimator.HitAnimation, oldName, newName);
-
-            for (int i = 0; i < self.aiAnimator.OtherAnimations.Count; i++)
-            {
-                self.SwapAnim(self.aiAnimator.OtherAnimations[i].anim, oldName, newName);
-
-            }
-
-            self.UpdateUI();
-            List<AIAnimator.NamedDirectionalAnimation> otherAnimations = self.aiAnimator.ChildAnimator.OtherAnimations;
-            otherAnimations[0].anim.Type = DirectionalAnimation.DirectionType.None;
-            otherAnimations[1].anim.Type = DirectionalAnimation.DirectionType.None;
-            otherAnimations[2].anim.Type = DirectionalAnimation.DirectionType.None;
         }
 
         [HarmonyPatch(typeof(AmmonomiconDeathPageController), nameof(AmmonomiconDeathPageController.GetDeathPortraitName))]

@@ -110,6 +110,10 @@ namespace Alexandria.CharacterAPI
             customCharacter.hasPast = hasCustomPast;
             data.hasPast = hasCustomPast;
 
+            //NOTE: we need to update the punchout arrays here to make sure Harmony's cached values for PlayerNames and PlayerUiNames
+            //      are up to date by the time we actually start a punchout fight
+            CharacterAPI.Hooks.RegisterCharacterForPunchout(customCharacter);
+
             gameObject.SetActive(false);
             FakePrefab.MarkAsFakePrefab(gameObject);
 

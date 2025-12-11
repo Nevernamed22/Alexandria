@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
+using HarmonyLib;
+
 namespace Alexandria.Misc
 {
     public static class PlayerUtility
@@ -254,5 +256,24 @@ namespace Alexandria.Misc
     {
         FULL,
         MINI,
+    }
+
+    //TODO: this should probably be moved to its own file
+    [HarmonyPatch]
+    internal static class PlayerPatches
+    {
+        [HarmonyPatch(typeof(Gun), nameof(Gun.PlayIdleAnimation))]
+        [HarmonyPostfix]
+        public static void GunPlayIdleAnimationPostfix(Gun __instance)
+        {
+            if (__instance.usesContinuousFireAnimation && __instance.usesDirectionalAnimator)
+            {
+                AIAnimator anim = __instance.aiAnimator;
+                if (anim != null && anim.m_currentActionState != null)
+                {
+                    anim.EndAnimation();
+                }
+            }
+        }
     }
 }

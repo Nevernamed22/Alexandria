@@ -180,7 +180,8 @@ namespace Alexandria.CharacterAPI
             }
         }
 
-        // NOTE: this code is commented out because it only comes into play when trying to read the cached pointers to PlayerNames and PlayerUiNames,
+        // 2026-01-03 NOTE: turns out, this code is in fact needed for Paradox, so it is once again uncommented ._.
+        // 2025-12-11 NOTE: this code is commented out because it only comes into play when trying to read the cached pointers to PlayerNames and PlayerUiNames,
         //       which doesn't happen in Alexandria now that RegisterCharacterForPunchout() is called at character creation time. However, if another
         //       mod ever decides it needs to register a custom punchout player immediately before starting a punchout fight, these transpilers
         //       are needed to ensure they're only accessing the up-to-date arrays
@@ -190,22 +191,38 @@ namespace Alexandria.CharacterAPI
         //          either of these arrays, extremely unpredicatable and buggy behavior occur. the patch below might look like it does
         //          absolutely nothing, but it ensures every mod uses Harmony's cached, updated copy of PlayerNames and PlayerUiNames,
         //          rather than using the base game's cached copy of the array and generating IndexOutOfRange exceptions for custom characters
-        // [HarmonyPatch(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.UpdateUI))]
-        // [HarmonyPatch(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.HandleAnimationCompletedSwap))]
-        // [HarmonyPatch(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.SwapPlayer))]
-        // [HarmonyILManipulator]
-        // private static void PunchoutHarmonyVoodoo(ILContext il)
-        // {
-        //     ILCursor cursor = new ILCursor(il);
-        //     while (cursor.TryGotoNext(MoveType.After,
-        //       instr => instr.MatchLdsfld(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.PlayerNames))))
-        //         cursor.CallPrivate(typeof(Hooks), nameof(LocalNonReadonlyPlayerNamesToAppeaseHarmony));
+        [HarmonyPatch(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.UpdateUI))]
+        [HarmonyPatch(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.HandleAnimationCompletedSwap))]
+        [HarmonyPatch(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.SwapPlayer))]
+        [HarmonyILManipulator]
+        private static void PunchoutHarmonyVoodoo(ILContext il)
+        {
+            ILCursor cursor = new ILCursor(il);
+            while (cursor.TryGotoNext(MoveType.After,
+              instr => instr.MatchLdsfld(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.PlayerNames))))
+                cursor.CallPrivate(typeof(Hooks), nameof(LocalNonReadonlyPlayerNamesToAppeaseHarmony));
 
-        //     cursor.Index = 0;
-        //     while (cursor.TryGotoNext(MoveType.After,
-        //       instr => instr.MatchLdsfld(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.PlayerUiNames))))
-        //         cursor.CallPrivate(typeof(Hooks), nameof(LocalNonReadonlyPlayerUiNamesToAppeaseHarmony));
-        // }
+            cursor.Index = 0;
+            while (cursor.TryGotoNext(MoveType.After,
+              instr => instr.MatchLdsfld(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.PlayerUiNames))))
+                cursor.CallPrivate(typeof(Hooks), nameof(LocalNonReadonlyPlayerUiNamesToAppeaseHarmony));
+        }
+
+        [HarmonyPatch(typeof(PunchoutPlayerController), nameof(PunchoutPlayerController.SwapPlayer))]
+        [HarmonyILManipulator]
+        private static void DontAllowSwappingParadoxToParadoxPatch(ILContext il)
+        {
+            ILCursor cursor = new ILCursor(il);
+            if (cursor.TryGotoNext(MoveType.After, instr => instr.MatchCall<UnityEngine.Random>(nameof(UnityEngine.Random.Range))))
+                cursor.CallPrivate(typeof(Hooks), nameof(RerollUntilNotParadox));
+        }
+
+        private static int RerollUntilNotParadox(int orig)
+        {
+            while (orig == 7) // 7 == dummy paradox index
+                orig = UnityEngine.Random.Range(0, UncachedPlayerNames().Length);
+            return orig;
+        }
 
         private static string[] LocalNonReadonlyPlayerNamesToAppeaseHarmony(string[] dummy) => UncachedPlayerNames();
         private static string[] LocalNonReadonlyPlayerUiNamesToAppeaseHarmony(string[] dummy) => UncachedPlayerUiNames();

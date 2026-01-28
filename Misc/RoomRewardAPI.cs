@@ -35,7 +35,7 @@ namespace Alexandria
             if (!cursor.TryGotoNext(MoveType.After, instr => instr.MatchCall("BraveUtility", nameof(BraveUtility.Log))))
                 return;
 
-            VariableDefinition contentsSet = il.DeclareLocal<ValidRoomRewardContents>();
+            VariableDefinition contentsSet = Shared.DeclareLocal<ValidRoomRewardContents>(il);
             ILLabel dontSkipRestOfFunctionLabel = cursor.DefineLabel();
             ILLabel overrideItemPoolLabel = cursor.DefineLabel();
 

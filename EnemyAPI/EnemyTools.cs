@@ -14,6 +14,14 @@ namespace Alexandria.EnemyAPI
         public static ReadOnlyCollection<OverrideBehavior> overrideBehaviors = null;
         //static bool hasInit = false;
 
+        public static HealthHaverExt Ext(this HealthHaver hh)
+        {
+            if (hh == null)
+                return null;
+
+            return hh.gameObject.GetOrAddComponent<HealthHaverExt>();
+        }
+
         public static void Init()
         {
             try

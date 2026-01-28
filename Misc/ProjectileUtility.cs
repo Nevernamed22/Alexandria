@@ -22,6 +22,18 @@ namespace Alexandria.Misc
             else return null;
         }
 
+        /// <summary>
+        /// Returns the ProjectileExt component attached to the given projectile. If one does not exist, adds one and returns it. If the given projectile is null, returns null.
+        /// </summary>
+        /// <param name="proj">The target projectile</param>
+        public static ProjectileExt Ext(this Projectile proj)
+        {
+            if (proj == null)
+                return null;
+
+            return proj.gameObject.GetOrAddComponent<ProjectileExt>();
+        }
+
         //Methods related to spawning and firing Projectiles
 
         /// <summary>

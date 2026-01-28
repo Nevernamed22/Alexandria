@@ -41,6 +41,7 @@ namespace Alexandria.DungeonAPI
         private static RoomEventDefinition unsealOnRoomClear = new RoomEventDefinition(RoomEventTriggerCondition.ON_ENEMIES_CLEARED, RoomEventTriggerAction.UNSEAL_ROOM);
         internal static bool _AggregateMissingAssetErrors = false;
         internal static readonly Dictionary<string, int> _MissingAssetsByGuid = new Dictionary<string, int>();
+        internal static readonly Dictionary<string, List<string>> _MissingAssetsByRoom = new Dictionary<string, List<string>>();
 
         /// <summary>
         /// Loads all rooms in a given folder, similar to how Gun Sprites are setup (Example: LoadRoomsFromRoomDirectory("Alex", this.FolderPath() + "/newRooms");
@@ -96,7 +97,14 @@ namespace Alexandria.DungeonAPI
 
             foreach (KeyValuePair<string, int> kvp in _MissingAssetsByGuid)
                 ShrineTools.PrintError<string>($"Unable to find asset in asset bundles: {kvp.Key} (x{kvp.Value})", "FF0000");
+            foreach (KeyValuePair<string, List<string>> kvp2 in _MissingAssetsByRoom)
+            {
+                string rooms = "; ";
+                foreach(string roomName in kvp2.Value) { rooms = $"{rooms} {roomName},"; }
+                ShrineTools.PrintError<string>($"Asset {kvp2.Key} in rooms{rooms})", "FF0000");
+            }
             _MissingAssetsByGuid.Clear();
+            _MissingAssetsByRoom.Clear();
             _AggregateMissingAssetErrors = false;
             return loadedRooms;
         }
@@ -1724,6 +1732,12 @@ namespace Alexandria.DungeonAPI
                             ++_MissingAssetsByGuid[assetPath];
                         else
                             _MissingAssetsByGuid[assetPath] = 1;
+
+                        if (_MissingAssetsByRoom.ContainsKey(assetPath))
+                        {
+                            if (!_MissingAssetsByRoom[assetPath].Contains(room.name)) { _MissingAssetsByRoom[assetPath].Add(room.name); }
+                        }
+                        else { _MissingAssetsByRoom[assetPath] = new List<string>() { room.name }; }
                     }
                 }
             }

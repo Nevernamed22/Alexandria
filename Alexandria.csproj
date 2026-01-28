@@ -13,7 +13,7 @@
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>13.0</LangVersion>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
@@ -48,6 +48,7 @@
     <Compile Include="Assetbundle\GunInt.cs" />
     <Compile Include="Assetbundle\JsonEmbedder.cs" />
     <Compile Include="Assetbundle\ProjectileBuilders.cs" />
+    <Compile Include="EnemyAPI\HealthHaverExt.cs" />
     <Compile Include="Misc\BreakableAPIToolbox.cs" />
     <Compile Include="cAPI\Brimsly.cs" />
     <Compile Include="cAPI\Hat.cs" />
@@ -68,6 +69,8 @@
     <Compile Include="CharApi\Tools\TexturePacker.cs" />
     <Compile Include="CharApi\Tools\TextureStitcher.cs" />
     <Compile Include="CharApi\Tools\Tools.cs" />
+    <Compile Include="Misc\ILTools.cs" />
+    <Compile Include="Misc\ProjectileExt.cs" />
     <Compile Include="_Deprecated\ChestSpawnHelper.cs" />
     <Compile Include="Misc\ChestUtility.cs" />
     <Compile Include="CustomDodgeRollAPI\CustomDodgeRoll.cs" />
@@ -467,7 +470,6 @@
     <EmbeddedResource Include="cAPI\brimsly_sprites\brimsly_talk_003.png" />
     <EmbeddedResource Include="cAPI\brimsly_sprites\brimsly_talk_004.png" />
     <EmbeddedResource Include="cAPI\brimsly_sprites\brimsly_talk_005.png" />
-
     <EmbeddedResource Include="NativeResources\debugfloor.png" />
     <EmbeddedResource Include="NativeResources\debugnorthwall.png" />
     <EmbeddedResource Include="NativeResources\debugwalls.png" />

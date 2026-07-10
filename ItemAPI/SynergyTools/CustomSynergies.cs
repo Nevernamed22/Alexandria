@@ -34,20 +34,28 @@ namespace Alexandria.ItemAPI
 
         public static AdvancedSynergyEntry Add(string name, List<string> mandatoryConsoleIDs, List<string> optionalConsoleIDs = null, bool affectedByLichesEye = true)
         {
-            if (mandatoryConsoleIDs == null || mandatoryConsoleIDs.Count == 0) { ETGModConsole.Log($"Synergy {name} has no mandatory items/guns."); return null; }
+            int totalIds = (mandatoryConsoleIDs?.Count ?? 0) + (optionalConsoleIDs?.Count ?? 0);
+            if (totalIds < 2)
+            {
+              ETGModConsole.Log($"Synergy {name} must have at least 2 items/guns.");
+              return null;
+            }
             List<int>
                 itemIDs = new List<int>(),
                 gunIDs = new List<int>(),
                 optItemIDs = new List<int>(),
                 optGunIDs = new List<int>();
             PickupObject pickup;
-            foreach (var id in mandatoryConsoleIDs)
+            if (mandatoryConsoleIDs != null)
             {
-                pickup = Gungeon.Game.Items[id];
-                if (pickup && pickup.GetComponent<Gun>())
-                    gunIDs.Add(pickup.PickupObjectId);
-                else if (pickup && (pickup.GetComponent<PlayerItem>() || pickup.GetComponent<PassiveItem>()))
-                    itemIDs.Add(pickup.PickupObjectId);
+                foreach (var id in mandatoryConsoleIDs)
+                {
+                    pickup = Gungeon.Game.Items[id];
+                    if (pickup && pickup.GetComponent<Gun>())
+                        gunIDs.Add(pickup.PickupObjectId);
+                    else if (pickup && (pickup.GetComponent<PlayerItem>() || pickup.GetComponent<PassiveItem>()))
+                        itemIDs.Add(pickup.PickupObjectId);
+                }
             }
 
             if (optionalConsoleIDs != null)

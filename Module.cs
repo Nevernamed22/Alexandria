@@ -27,7 +27,7 @@ namespace Alexandria
     {
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
-        public const string VERSION = "0.5.6";
+        public const string VERSION = "0.5.7";
 
         public void Start()
         {
@@ -72,7 +72,7 @@ namespace Alexandria
             {
                 ETGModConsole.Log(e.ToString());
             }
-            
+
         }
 
         public IEnumerator delayedstarthandler()

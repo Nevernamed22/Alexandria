@@ -51,7 +51,7 @@ namespace Alexandria.EnemyAPI
                 overrideBehaviors = new ReadOnlyCollection<OverrideBehavior>(l);
             }
         }
-    
+
         public static void DebugInformation(BehaviorSpeculator behavior, string path = "")
         {
             List<string> logs = new List<string>();
@@ -138,10 +138,10 @@ namespace Alexandria.EnemyAPI
         public static void DebugInformationNoAIActor(BehaviorSpeculator behavior, string path = "")
         {
             List<string> logs = new List<string>();
-            
+
             logs.Add("Enemy report");
             logs.Add("");
-            
+
             logs.Add("--- Beginning behavior report");
             foreach (var b in behavior.AttackBehaviors)
             {
@@ -184,13 +184,13 @@ namespace Alexandria.EnemyAPI
             }
             logs.Add("--- End of behavior report");
             logs.Add("");
-            
+
             logs.Add("Components attached to the object are listed below.");
             foreach (var c in behavior.gameObject.GetComponents(typeof(object)))
             {
                 logs.Add(c.GetType().Name);
             }
-            
+
             logs.Add("");
             if (behavior.bulletBank)
             {
@@ -206,7 +206,7 @@ namespace Alexandria.EnemyAPI
             {
                 logs.Add("--- Actor does not have a bullet bank.");
             }
-            
+
             var retstr = string.Join("\n", logs.ToArray());
             if (string.IsNullOrEmpty(path))
             {

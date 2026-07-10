@@ -293,5 +293,10 @@ namespace Alexandria.Misc
         public static T EnumeratorGetField<T>(this object obj, string name) => (T)obj.GetType().EnumeratorField(name).GetValue(obj);
         public static FieldInfo EnumeratorField(this MethodBase method, string name) => method.DeclaringType.EnumeratorField(name);
         public static FieldInfo EnumeratorField(this Type tp, string name) => tp.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).First(x => x != null && x.Name != null && (x.Name.Contains($"<{name}>") || x.Name == name));
+
+        // convenience methods for working with boolean values
+
+        internal static bool Or(bool val1, bool val2) => val1 || val2;
+        internal static bool AndNot(bool val1, bool val2) => val1 && !val2;
     }
 }

@@ -132,6 +132,7 @@
     <Compile Include="Misc\MagicCircleDoer.cs" />
     <Compile Include="Misc\MiscUtility.cs" />
     <Compile Include="Misc\PickupUtility.cs" />
+    <Compile Include="Misc\PlayerOverrides.cs" />
     <Compile Include="Misc\PlayerUtility.cs" />
     <Compile Include="Misc\RoomRewardAPI.cs" />
     <Compile Include="_Deprecated\RuntimeRoomhandlerUtility.cs" />

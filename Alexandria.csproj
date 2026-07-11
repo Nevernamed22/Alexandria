@@ -239,6 +239,7 @@
     <Compile Include="VisualAPI\AnimationBuilder.cs" />
     <Compile Include="VisualAPI\ImprovedAfterImageControllers.cs" />
     <Compile Include="VisualAPI\VFXBuilder.cs" />
+    <Compile Include="Integrations\ItemTipsIntegration.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

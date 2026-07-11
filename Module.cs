@@ -22,12 +22,13 @@ using BepInEx.Bootstrap;
 namespace Alexandria
 {
     [BepInDependency("etgmodding.etg.mtgapi")]
+    [BepInDependency("glorfindel.etg.itemtips", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInPlugin(GUID, NAME, VERSION)]
     public class Alexandria : BaseUnityPlugin
     {
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
-        public const string VERSION = "0.5.7";
+        public const string VERSION = "0.5.8";
 
         public void Start()
         {

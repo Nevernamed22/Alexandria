@@ -6,6 +6,7 @@ using MonoMod.Cil;
 using Mono.Cecil.Cil;
 using BepInEx;
 using BepInEx.Bootstrap;
+using HarmonyLib;
 
 namespace Alexandria.Integrations
 {
@@ -27,12 +28,7 @@ namespace Alexandria.Integrations
         return;
       }
 
-      object itemData = Activator.CreateInstance(_ItemDataType);
-      _ItemDataNameField.SetValue(itemData, pickup.itemName);
-      _ItemDataIdField.SetValue(itemData, itemID);
-      _ItemDataNotesField.SetValue(itemData, tip);
-      _ItemDataSourceMetadataField.SetValue(itemData, GenerateSourceMetadata());
-      _AddItemMethod.Invoke(_ItemCachePickups, new object[] { itemID, itemData });
+      pickup.CreateTip(tip);
     }
 
     /// <summary>Add an item tip for a synergy. If no name is provided for the synergy, the synergy's key will be used.</summary>
@@ -43,23 +39,31 @@ namespace Alexandria.Integrations
       if (!_ItemTipsInstalled)
         return;
 
-      string synergyId = synergy.NameKey;
-      object synergyData = Activator.CreateInstance(_SynergyDataType);
-      _SynergyDataType.GetField("Name").SetValue(synergyData, !string.IsNullOrEmpty(name) ? name : synergyId);
-      _SynergyDataType.GetField("Key").SetValue(synergyData, synergyId);
-      _SynergyDataType.GetField("Effect").SetValue(synergyData, tip);
-      _SynergyDataType.GetField("SourceMetadata").SetValue(synergyData, GenerateSourceMetadata());
-      _AddSynergyMethod.Invoke(_ItemCacheSynergies, new object[] { synergyId, synergyData });
+      synergy.CreateTip(tip, name);
     }
   }
 
   // private API
   public static partial class ItemTipsIntegration
   {
+    internal class RuntimItemTipData
+    {
+      public PickupObject pickup = null;
+      public AdvancedSynergyEntry synergy = null;
+      public string tip = null;
+      public string name = null;
+    }
+
+    internal static void CreateTip(this PickupObject pickup, string tip) =>
+      _RuntimeTips.Add(new RuntimItemTipData(){ pickup = pickup, tip = tip });
+    internal static void CreateTip(this AdvancedSynergyEntry synergy, string tip, string name = null) =>
+      _RuntimeTips.Add(new RuntimItemTipData(){ synergy = synergy, tip = tip, name = name });
+
     private const string _LOG_HEADER = "ItemTips integration: ";
 
     private static bool _DidSetup = false;
     private static bool _ItemTipsInstalled = false;
+    private static readonly List<RuntimItemTipData> _RuntimeTips = new();
 
     private static object _ItemCachePickups;
     private static object _ItemCacheSynergies;
@@ -142,16 +146,16 @@ namespace Alexandria.Integrations
           return;
         }
 
-        // get the Add method for the itemCachePickups dictionary
-        _AddItemMethod = _ItemCachePickups.GetType().GetMethod("Add", new Type[] { typeof(int), _ItemDataType });
+        // get the ~~Add~~ set_Item method for the itemCachePickups dictionary // NOTE: use set_Item (e.g., dict[key] = ...) so duplicates are overridden
+        _AddItemMethod = _ItemCachePickups.GetType().GetMethod("set_Item", new Type[] { typeof(int), _ItemDataType });
         if (_AddItemMethod == null)
         {
           ETGModConsole.Log(_LOG_HEADER + "addItemMethod missing");
           return;
         }
 
-        // get the Add method for the itemCacheSynergies dictionary
-        _AddSynergyMethod = _ItemCacheSynergies.GetType().GetMethod("Add", new Type[] { typeof(string), _SynergyDataType });
+        // get the ~~Add~~ set_Item method for the itemCacheSynergies dictionary
+        _AddSynergyMethod = _ItemCacheSynergies.GetType().GetMethod("set_Item", new Type[] { typeof(string), _SynergyDataType });
         if (_AddSynergyMethod == null)
         {
           ETGModConsole.Log(_LOG_HEADER + "addSynergyMethod missing");
@@ -169,6 +173,11 @@ namespace Alexandria.Integrations
         _SynergyDataEffectField         = _SynergyDataType.GetField("Effect");
         _SynergyDataSourceMetadataField = _SynergyDataType.GetField("SourceMetadata");
 
+        // patch ItemTips' ScanExternalData() function to run our own item tips
+        Alexandria._Harmony.Patch(
+          original: itemTipsPluginType.GetMethod("ScanExternalData", bindingAttr: BindingFlags.Instance | BindingFlags.NonPublic),
+          postfix: new HarmonyMethod(typeof(ItemTipsIntegration).GetMethod(nameof(AddAlexandriaTips), bindingAttr: BindingFlags.Static | BindingFlags.NonPublic)));
+
         // we can now register item tips!
         _ItemTipsInstalled = true;
       }
@@ -179,7 +188,35 @@ namespace Alexandria.Integrations
       }
     }
 
-    //NOTE: SourceMetadata seem unused except for debugging, so just make it clear these tips are coming from Alexandria
+    private static void AddAlexandriaTips()
+    {
+      // UnityEngine.Debug.Log($"Registering {_RuntimeTips.Count} runtime tips");
+      foreach (RuntimItemTipData tipData in _RuntimeTips)
+      {
+        if (tipData.pickup != null)
+        {
+          object itemData = Activator.CreateInstance(_ItemDataType);
+          int itemID = tipData.pickup.PickupObjectId;
+          _ItemDataNameField.SetValue(itemData, tipData.pickup.itemName);
+          _ItemDataIdField.SetValue(itemData, itemID);
+          _ItemDataNotesField.SetValue(itemData, tipData.tip);
+          _ItemDataSourceMetadataField.SetValue(itemData, GenerateSourceMetadata());
+          _AddItemMethod.Invoke(_ItemCachePickups, new object[] { itemID, itemData });
+        }
+        else if (tipData.synergy != null)
+        {
+          string synergyId = tipData.synergy.NameKey;
+          object synergyData = Activator.CreateInstance(_SynergyDataType);
+          _SynergyDataType.GetField("Name").SetValue(synergyData, !string.IsNullOrEmpty(tipData.name) ? tipData.name : synergyId);
+          _SynergyDataType.GetField("Key").SetValue(synergyData, synergyId);
+          _SynergyDataType.GetField("Effect").SetValue(synergyData, tipData.tip);
+          _SynergyDataType.GetField("SourceMetadata").SetValue(synergyData, GenerateSourceMetadata());
+          _AddSynergyMethod.Invoke(_ItemCacheSynergies, new object[] { synergyId, synergyData });
+        }
+      }
+    }
+
+    //NOTE: SourceMetadata seems unused except for debugging, so just make it clear these tips are coming from Alexandria
     private static object GenerateSourceMetadata()
     {
       const string META_NAME    = Alexandria.NAME;

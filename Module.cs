@@ -28,12 +28,14 @@ namespace Alexandria
     {
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
-        public const string VERSION = "0.5.8";
+        public const string VERSION = "0.5.9";
+
+        internal static Harmony _Harmony = null;
 
         public void Start()
         {
-            var harmony = new Harmony(GUID);
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
+            _Harmony = new Harmony(GUID);
+            _Harmony.PatchAll(Assembly.GetExecutingAssembly());
             EasyEnumExtender.ExtendEnumsInAssembly(GUID);
 
             ETGModMainBehaviour.WaitForGameManagerStart(GMStart);

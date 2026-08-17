@@ -7,6 +7,7 @@ using Mono.Cecil.Cil;
 using BepInEx;
 using BepInEx.Bootstrap;
 using HarmonyLib;
+using static StringTableManager; // GungeonSupportedLanguages
 
 namespace Alexandria.Integrations
 {
@@ -28,7 +29,7 @@ namespace Alexandria.Integrations
         return;
       }
 
-      pickup.CreateTip(tip);
+      pickup.CreateTip(Assembly.GetCallingAssembly(), tip);
     }
 
     /// <summary>Add an item tip for a synergy. If no name is provided for the synergy, the synergy's key will be used.</summary>
@@ -39,7 +40,19 @@ namespace Alexandria.Integrations
       if (!_ItemTipsInstalled)
         return;
 
-      synergy.CreateTip(tip, name);
+      synergy.CreateTip(Assembly.GetCallingAssembly(), tip, name);
+    }
+
+    /// <summary>Set the language for all future item tips created from the calling assembly.</summary>
+    public static void SetItemTipLanguage(GungeonSupportedLanguages language)
+    {
+      _AssemblyToTipLanguage[Assembly.GetCallingAssembly()] = language;
+    }
+
+    /// <summary>Set the language for all future item tips created from the calling assembly to RUBEL_TEST, making external tips always take priority.</summary>
+    public static void PreferExternalTips(GungeonSupportedLanguages language)
+    {
+      _AssemblyToTipLanguage[Assembly.GetCallingAssembly()] = GungeonSupportedLanguages.RUBEL_TEST;
     }
   }
 
@@ -52,17 +65,25 @@ namespace Alexandria.Integrations
       public AdvancedSynergyEntry synergy = null;
       public string tip = null;
       public string name = null;
+      public GungeonSupportedLanguages language = default;
     }
 
-    internal static void CreateTip(this PickupObject pickup, string tip) =>
-      _RuntimeTips.Add(new RuntimItemTipData(){ pickup = pickup, tip = tip });
-    internal static void CreateTip(this AdvancedSynergyEntry synergy, string tip, string name = null) =>
-      _RuntimeTips.Add(new RuntimItemTipData(){ synergy = synergy, tip = tip, name = name });
+    private static void CreateTip(this PickupObject pickup, Assembly caller, string tip) =>
+      _RuntimeTips.Add(new RuntimItemTipData(){ pickup = pickup, tip = tip, language = caller.TipLanguage() });
+    private static void CreateTip(this AdvancedSynergyEntry synergy, Assembly caller, string tip, string name = null) =>
+      _RuntimeTips.Add(new RuntimItemTipData(){ synergy = synergy, tip = tip, name = name, language = caller.TipLanguage() });
+    private static bool HasItemTip(this PickupObject pickup) =>
+      _ItemTipsInstalled && (bool)_GetItemMethod.Invoke(_ItemCachePickups, new object[] { pickup.PickupObjectId, null });
+    private static bool HasItemTip(this AdvancedSynergyEntry synergy) =>
+      _ItemTipsInstalled && (bool)_GetSynergyMethod.Invoke(_ItemCacheSynergies, new object[] { synergy.NameKey, null });
+    private static GungeonSupportedLanguages TipLanguage(this Assembly caller) =>
+      _AssemblyToTipLanguage.TryGetValue(caller, out var lang) ? lang : GungeonSupportedLanguages.ENGLISH;
 
     private const string _LOG_HEADER = "ItemTips integration: ";
 
     private static bool _DidSetup = false;
     private static bool _ItemTipsInstalled = false;
+    private static Dictionary<Assembly, GungeonSupportedLanguages> _AssemblyToTipLanguage = new();
     private static readonly List<RuntimItemTipData> _RuntimeTips = new();
 
     private static object _ItemCachePickups;
@@ -71,6 +92,8 @@ namespace Alexandria.Integrations
     private static Type _SynergyDataType;
     private static MethodInfo _AddItemMethod;
     private static MethodInfo _AddSynergyMethod;
+    private static MethodInfo _GetItemMethod;
+    private static MethodInfo _GetSynergyMethod;
     private static Type _SourceMetaDataType;
     private static FieldInfo _ItemDataNameField;
     private static FieldInfo _ItemDataIdField;
@@ -162,6 +185,22 @@ namespace Alexandria.Integrations
           return;
         }
 
+        // get the TryGetValue method for the itemCachePickups dictionary // NOTE: use set_Item (e.g., dict[key] = ...) so duplicates are overridden
+        _GetItemMethod = _ItemCachePickups.GetType().GetMethod("TryGetValue", new Type[] { typeof(int), _ItemDataType.MakeByRefType() });
+        if (_GetItemMethod == null)
+        {
+          ETGModConsole.Log(_LOG_HEADER + "getItemMethod missing");
+          return;
+        }
+
+        // get the TryGetValue method for the itemCacheSynergies dictionary
+        _GetSynergyMethod = _ItemCacheSynergies.GetType().GetMethod("TryGetValue", new Type[] { typeof(string), _SynergyDataType.MakeByRefType() });
+        if (_GetSynergyMethod == null)
+        {
+          ETGModConsole.Log(_LOG_HEADER + "getSynergyMethod missing");
+          return;
+        }
+
         // get some miscellaneous metadata
         _SourceMetaDataType             = _ItemDataType.GetField("SourceMetadata").FieldType;
         _ItemDataNameField              = _ItemDataType.GetField("Name");
@@ -190,11 +229,19 @@ namespace Alexandria.Integrations
 
     private static void AddAlexandriaTips()
     {
+      // Get the current game language to make sure we're not overwriting translation files
+      GungeonSupportedLanguages currentLanguage = StringTableManager.CurrentLanguage;
       // UnityEngine.Debug.Log($"Registering {_RuntimeTips.Count} runtime tips");
       foreach (RuntimItemTipData tipData in _RuntimeTips)
       {
+        bool sameLanguage = currentLanguage == tipData.language;
         if (tipData.pickup != null)
         {
+          if (!sameLanguage && tipData.pickup.HasItemTip())
+          {
+            // ETGModConsole.Log($"synergy {tipData.pickup.DisplayName} already has a tip in a different language!");
+            continue; // don't overwrite translations
+          }
           object itemData = Activator.CreateInstance(_ItemDataType);
           int itemID = tipData.pickup.PickupObjectId;
           _ItemDataNameField.SetValue(itemData, tipData.pickup.itemName);
@@ -205,6 +252,11 @@ namespace Alexandria.Integrations
         }
         else if (tipData.synergy != null)
         {
+          if (!sameLanguage && tipData.synergy.HasItemTip())
+          {
+            // ETGModConsole.Log($"synergy {tipData.synergy.NameKey} already has a tip in a different language!");
+            continue; // don't overwrite translations
+          }
           string synergyId = tipData.synergy.NameKey;
           object synergyData = Activator.CreateInstance(_SynergyDataType);
           _SynergyDataType.GetField("Name").SetValue(synergyData, !string.IsNullOrEmpty(tipData.name) ? tipData.name : synergyId);

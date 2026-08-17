@@ -28,7 +28,7 @@ namespace Alexandria
     {
         public const string GUID = "alexandria.etgmod.alexandria";
         public const string NAME = "Alexandria";
-        public const string VERSION = "0.5.9";
+        public const string VERSION = "0.5.10";
 
         internal static Harmony _Harmony = null;
 

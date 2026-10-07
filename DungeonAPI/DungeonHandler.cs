@@ -45,7 +45,7 @@ namespace Alexandria.DungeonAPI
                     flow = SampleFlow.CreateDebugFlow(dungeon);
                     generator.AssignFlow(flow);
                 }
-                
+
                 /*else
                 {
                     flow = DungeonHandler.CreateSpecialFlowFlow(dungeon);
@@ -100,7 +100,7 @@ namespace Alexandria.DungeonAPI
             if (roomData.usesAmbientLight == true)
             {
                 room.usesCustomAmbientLight = true;
-                room.customAmbientLight = new Color(roomData.AmbientLight_R, roomData.AmbientLight_G, roomData.AmbientLight_B);           
+                room.customAmbientLight = new Color(roomData.AmbientLight_R, roomData.AmbientLight_G, roomData.AmbientLight_B);
             }
             if (roomData.specialRoomPool != null && StaticReferences.RoomTables.ContainsKey(roomData.specialRoomPool))
             {
@@ -151,6 +151,8 @@ namespace Alexandria.DungeonAPI
                         break;
                     case "black_market":
                         wRoom.room.name = "Black Market";
+                        wRoom.room.category = RoomCategory.SPECIAL;
+                        wRoom.room.subCategorySpecial = RoomSpecialSubCategory.WEIRD_SHOP;
                         StaticReferences.RoomTables["black_market"].includedRooms.Add(wRoom);
                         break;
                     case "lost_adventurer":
@@ -504,7 +506,7 @@ namespace Alexandria.DungeonAPI
 
             //GameObject iconPrefab = (GameObject)BraveResources.Load("Global Prefabs/Minimap_Shrine_Icon", ".prefab");
             //room.associatedMinimapIcon = iconPrefab;
-            
+
             // bool success = false;
             switch (room.category)
             {
@@ -571,7 +573,7 @@ namespace Alexandria.DungeonAPI
                         chanceToSpawn = 1,
                         prerequisites = new DungeonPrerequisite[] { p }, //doesn't include all the other prereqs, pls fix
                         CanBeForcedSecret = true,
-                        
+
                     });
                 }
             }

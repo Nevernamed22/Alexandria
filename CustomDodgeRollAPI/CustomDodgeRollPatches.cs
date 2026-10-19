@@ -354,7 +354,7 @@ namespace Alexandria.CustomDodgeRollAPI
                     return;
 
             cursor.Emit(OpCodes.Ldarg_0);
-            cursor.CallPrivate(typeof(CustomDodgeRollPatches), nameof(CheckIfCustomDodgeRollDodgesProjectiles));
+            cursor.CallPrivate(typeof(CustomDodgeRollPatches), nameof(CheckIfCustomDodgeRollIsDirectionLocked));
         }
 
         private static bool CheckIfCustomDodgeRollIsDirectionLocked(bool origValue, PlayerController player)

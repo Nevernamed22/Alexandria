@@ -1384,6 +1384,7 @@ namespace Alexandria.BreakableAPI
             DebrisObject DebrisObj = debrisObject.AddComponent<DebrisObject>();
             DebrisObj.SetupInternal(debrisObjectsCanRotate, shadowSprite, Mass, LifeSpanMin, LifeSpanMax, AngularVelocity,
                 AngularVelocityVariance, AudioEventName, BounceVFX, DebrisBounceCount, DoesGoopOnRest, GoopType, GoopRadius);
+            debrisObject.SetActive(false);
             return DebrisObj;
         }
         /// <summary>

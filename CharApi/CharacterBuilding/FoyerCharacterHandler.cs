@@ -361,13 +361,18 @@ namespace Alexandria.CharacterAPI
                 var infoPanel = newOverheadElement.GetComponent<FoyerInfoPanelController>();
                 dfLabel nameLabel = infoPanel.textPanel.transform.Find("NameLabel").GetComponent<dfLabel>();
                 nameLabel.Text = "#CHAR_" + data.nameShort.ToString().ToUpper();
+                dfLabel pastKilledLabel = infoPanel.textPanel.transform.Find("PastKilledLabel").GetComponent<dfLabel>();
+                if (!data.hasPast)
+                  pastKilledLabel.Text = "(No Past)";
                 if (data.metaCost != 0)
                 {
-                    dfLabel pastKilledLabel = infoPanel.textPanel.transform.Find("PastKilledLabel").GetComponent<dfLabel>();
                     pastKilledLabel.ProcessMarkup = true;
                     pastKilledLabel.ColorizeSymbols = true;
                     pastKilledLabel.ModifyLocalizedText(pastKilledLabel.Text + " (" + data.metaCost.ToString() + "[sprite \"hbux_text_icon\"])");
-                    pastKilledLabel.ModifyLocalizedText("(Past Killed)" + " (" + data.metaCost.ToString() + "[sprite \"hbux_text_icon\"])");
+                    if (!data.hasPast)
+                      pastKilledLabel.ModifyLocalizedText("(No Past)" + " (" + data.metaCost.ToString() + "[sprite \"hbux_text_icon\"])");
+                    else
+                      pastKilledLabel.ModifyLocalizedText("(Past Killed)" + " (" + data.metaCost.ToString() + "[sprite \"hbux_text_icon\"])");
                 }
 
                 // Loadout setup

@@ -58,7 +58,7 @@ namespace Alexandria.CharacterAPI
                     ToolsCharApi.PrintException(e);
                 }
             }
-            
+
             foreach(var flag in sortedByX)
             {
                 ResetToIdle(flag);
@@ -141,7 +141,7 @@ namespace Alexandria.CharacterAPI
                 idleDoer.idleMin = customCharacter.First.idleDoer.idleMin;
                 idleDoer.IsEevee = customCharacter.First.idleDoer.IsEevee;
                 idleDoer.phases = customCharacter.First.idleDoer.phases;
-                
+
             }
 
             selectFlag.gameObject.GetComponent<tk2dSpriteAnimator>().DefaultClipId = customCharacter.Second.GetComponent<PlayerController>().spriteAnimator.GetClipIdByName("select_idle");
@@ -207,7 +207,7 @@ namespace Alexandria.CharacterAPI
             return selectFlag;
         }
 
-        
+
         private static void HandleSprites(BraveBehaviour selectCharacter, BraveBehaviour player)
         {
 
@@ -220,7 +220,7 @@ namespace Alexandria.CharacterAPI
 
 
             //BotsMod.BotsModule.Log($"{selectCharacter.spriteAnimator.gameObject}");
-            
+
             selectCharacter.sprite.ForceBuild();
             string coreIdleAnimation = selectCharacter.GetComponent<CharacterSelectIdleDoer>().coreIdleAnimation;
             selectCharacter.spriteAnimator.Play(coreIdleAnimation);
@@ -273,9 +273,9 @@ namespace Alexandria.CharacterAPI
             altSwapper.gameObject.SetActive(true);
 
             baseSwapper.transform.position = data.skinSwapperPos;
-
             altSwapper.transform.position = data.skinSwapperPos;
-            
+            if (!data.hasPast)
+              sprite.gameObject.AddComponent<EnableSwapperForCharacterWithNoPast>();
 
             //BotsMod.BotsModule.Log($"{baseSwapper.name}: {baseSwapper.transform.position}");
 
@@ -290,6 +290,16 @@ namespace Alexandria.CharacterAPI
             }
         }
 
+        private class EnableSwapperForCharacterWithNoPast : MonoBehaviour
+        {
+          private void Start()
+          {
+            base.gameObject.GetComponent<tk2dSprite>().renderer.enabled = true;
+            base.gameObject.GetComponent<CharacterCostumeSwapper>().m_active = true;
+            UnityEngine.Object.Destroy(this);
+          }
+        }
+
         private static void ResetToIdle(BraveBehaviour idler)
         {
             SpriteOutlineManager.RemoveOutlineFromSprite(idler.sprite, true);
@@ -297,7 +307,7 @@ namespace Alexandria.CharacterAPI
 
             //var idle = idler.GetComponent<CharacterSelectIdleDoer>().coreIdleAnimation;
             //idler.sprite.SetSprite(idler.spriteAnimator.GetClipByName(idle).frames[0].spriteId);
-            //idler.talkDoer.OnExitRange(null); 
+            //idler.talkDoer.OnExitRange(null);
         }
 
         private static readonly Dictionary<CustomCharacterData, GameObject> _CachedOverheadPrefabs = new();
@@ -375,7 +385,7 @@ namespace Alexandria.CharacterAPI
                     sprite.transform.localPosition = new Vector3(((i + 0.1f) * 0.1f), 0, 0);
                     infoPanel.itemsPanel.Controls.Add(sprite);
                 }
-                
+
                 // Facecard setup
                 if (data.foyerCardSprites != null)
                 {

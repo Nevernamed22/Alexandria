@@ -4,6 +4,7 @@ using System.Reflection;
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
 using System.Text;
+using System.Collections.Generic;
 
 namespace Alexandria.Misc
 {
@@ -11,16 +12,26 @@ namespace Alexandria.Misc
     {
         private static StringBuilder _SB = new StringBuilder("", 1000);
 
+        private static List<MonoBehaviour> _PlayerControllerComponents = new();
+        private static List<IAmmoDisplayAugment> _CurrentAmmoDisplayAugments = new();
+
         public abstract bool DoCustomAmmoDisplay(GameUIAmmoController uic);  // must return true if doing a custom ammo display, or false to revert to vanilla behavior
 
         private static bool DoAmmoOverride(GameUIAmmoController uic, GunInventory guns)
         {
-            if (guns == null || !guns.CurrentGun)
+            if (guns == null || guns.CurrentGun is not Gun currentGun || currentGun.CurrentOwner is not PlayerController player)
               return false; // no gun, so revert to vanilla behavior
 
-            CustomAmmoDisplay ammoDisplay = guns.CurrentGun.gameObject.GetComponent<CustomAmmoDisplay>();
-            IAmmoDisplayAugment[] augments = guns.CurrentGun.gameObject.GetInterfacesInChildren<IAmmoDisplayAugment>();
-            bool haveAugments = augments.Length > 0;
+            CustomAmmoDisplay ammoDisplay = currentGun.gameObject.GetComponent<CustomAmmoDisplay>();
+            player.gameObject.GetComponents(_PlayerControllerComponents);
+            int numComponents = _PlayerControllerComponents.Count;
+            _CurrentAmmoDisplayAugments.Clear();
+            for (int i = 0; i < numComponents; ++i)
+            {
+              if (_PlayerControllerComponents[i] is IAmmoDisplayAugment iada)
+                _CurrentAmmoDisplayAugments.Add(iada);
+            }
+            bool haveAugments = _CurrentAmmoDisplayAugments.Count > 0;
             if (!ammoDisplay && !haveAugments)
               return false; // no custom ammo overrides, so use the vanilla behavior
 
@@ -28,7 +39,7 @@ namespace Alexandria.Misc
             _SB.Length = 0;
 
             haveAugments = false; // reset to false for a bit while we determine whether we actually need to display augment info
-            foreach (IAmmoDisplayAugment augment in augments)
+            foreach (IAmmoDisplayAugment augment in _CurrentAmmoDisplayAugments)
             {
               string augmentString = augment.GetText();
               if (string.IsNullOrEmpty(augmentString))
@@ -61,7 +72,6 @@ namespace Alexandria.Misc
             //                // NOTE: without this, ammo displays for guns that toggle infinite ammo (e.g., with magazine rack) shift slowly offscreen
 
             // Need to do some vanilla postprocessing to make sure label alignment doesn't get all screwed up
-            Gun currentGun = guns.CurrentGun;
             if (currentGun.IsUndertaleGun)
             {
               if (!uic.IsLeftAligned && uic.m_cachedMaxAmmo == int.MaxValue)
@@ -112,7 +122,7 @@ namespace Alexandria.Misc
         }
     }
 
-    /// <summary>Interface that can be implemented by any Component attached to a Gun in order to display extra information above the ammo display.</summary>
+    /// <summary>Interface that can be implemented by any Component attached to a PlayerController in order to display extra information above the ammo display.</summary>
     public interface IAmmoDisplayAugment
     {
       /// <summary>Returns a line of formatted text (including colors / sprites) to display above the ammo display.</summary>

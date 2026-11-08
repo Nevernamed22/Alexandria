@@ -186,7 +186,7 @@ namespace Alexandria.CharacterAPI
                 ToolsCharApi.PrintError($"No \"{DataFile}\" file found for " + Path.GetFileName(filePath));
                 return null;
             }
-            
+
             var data = ParseCharacterData(lines);
 
             string spritesDir = Path.Combine(filePath, "sprites").Replace("/", ".").Replace("\\", ".");
@@ -200,7 +200,7 @@ namespace Alexandria.CharacterAPI
 
 
             string[] resources = ResourceExtractor.GetResourceNames(assembly);
-            
+
             for (int i = 0; i < resources.Length; i++)
             {
                 if (resources[i].Contains(filePath))
@@ -260,9 +260,9 @@ namespace Alexandria.CharacterAPI
                     data.junkanWinPic = tex;
                 if (name.Equals("win_pic"))
                     data.pastWinPic = tex;
-                if (name.Equals("alt_skin_obj_sprite_001"))
+                if (name.Equals("alt_skin_obj_sprite_001")) // swapper from original to alt skin
                     data.altObjSprite1 = tex;
-                if (name.Equals("alt_skin_obj_sprite_002"))
+                if (name.Equals("org_skin_obj_sprite_001") || name.Equals("alt_skin_obj_sprite_002")) // swapper from alt to original skin
                     data.altObjSprite2 = tex;
             }
 
@@ -273,10 +273,10 @@ namespace Alexandria.CharacterAPI
         public static CustomCharacterData ParseCharacterData(string[] lines)
         {
             CustomCharacterData data = new CustomCharacterData();
-            
+
             for (int i = 0; i < lines.Length; i++)
             {
-                
+
                 string line = lines[i].ToLower().Trim();
                 string lineCaseSensitive = lines[i].Trim();
 
@@ -317,7 +317,7 @@ namespace Alexandria.CharacterAPI
                     data.name = value;
                     continue;
                 }
-               
+
                 if (line.StartsWith("name short:"))
                 {
                     data.nameShort = value.Replace(" ", "_");
@@ -328,7 +328,7 @@ namespace Alexandria.CharacterAPI
                 {
                     data.nickname = value;
                     continue;
-                }               
+                }
                 if (line.StartsWith("armor:"))
                 {
                     float floatValue;
@@ -531,7 +531,7 @@ namespace Alexandria.CharacterAPI
 
                 if (args.Length > 1 && args[1].Contains("infinite"))
                 {
-                    
+
 
                     if (gun != null)
                     {

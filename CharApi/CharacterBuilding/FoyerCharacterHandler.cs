@@ -274,7 +274,7 @@ namespace Alexandria.CharacterAPI
 
             baseSwapper.transform.position = data.skinSwapperPos;
             altSwapper.transform.position = data.skinSwapperPos;
-            if (!data.hasPast)
+            if (!data.hasPast || data.skinSwapperAlwaysEnabled)
               sprite.gameObject.AddComponent<EnableSwapperForCharacterWithNoPast>();
 
             //BotsMod.BotsModule.Log($"{baseSwapper.name}: {baseSwapper.transform.position}");

@@ -47,8 +47,8 @@ namespace Alexandria.CharacterAPI
         public Vector3 foyerPos;
 
         public DungeonPrerequisite[] prerequisites = new DungeonPrerequisite[0];
-        
-        public tk2dSpriteAnimation libary;      
+
+        public tk2dSpriteAnimation libary;
         public tk2dSpriteAnimator animator;
         public tk2dSpriteCollectionData collection;
 
@@ -63,6 +63,7 @@ namespace Alexandria.CharacterAPI
         public List<Tuple<GameObject, Vector3>> randomFoyerBullshitNNAskedFor = new List<Tuple<GameObject, Vector3>>();
 
         public bool punchoutSpriteFixEnabled;
+        public bool skinSwapperAlwaysEnabled;
     }
 
     class CustomCharacterFoyerController : MonoBehaviour
@@ -82,7 +83,7 @@ namespace Alexandria.CharacterAPI
             this.emissiveColor = emissiveColor;
             this.emissiveColorPower = emissiveColorPower;
             this.emissivePower = emissivePower;
-            this.emissiveThresholdSensitivity = 0.5f;          
+            this.emissiveThresholdSensitivity = 0.5f;
         }
 
         public GlowMatDoer(Color emissiveColor, float emissiveColorPower, float emissivePower, float emissiveThresholdSensitivity)
@@ -104,12 +105,12 @@ namespace Alexandria.CharacterAPI
         private bool checkedGuns = false;
         public bool failedToFindData = false;
         private List<int> infiniteGunIDs = new List<int>();
-       
+
         public string past, overrideAnimation;
         public bool hasPast;
 
         public static Dictionary<string, int> punchoutBullShit = new Dictionary<string, int>();
-        
+
 
         void Start()
         {

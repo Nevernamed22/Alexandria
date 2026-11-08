@@ -64,6 +64,8 @@ namespace Alexandria.CharacterAPI
 
         public bool punchoutSpriteFixEnabled;
         public bool skinSwapperAlwaysEnabled;
+
+        public GameObject characterPrefab;
     }
 
     class CustomCharacterFoyerController : MonoBehaviour

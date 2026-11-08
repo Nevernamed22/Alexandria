@@ -11,7 +11,7 @@ using System.Reflection;
 namespace Alexandria.CharacterAPI
 {
     /*
-     * Creates a prefab for the custom character and applies 
+     * Creates a prefab for the custom character and applies
      * all the metadata to it
      */
     public static class CharacterBuilder
@@ -38,10 +38,10 @@ namespace Alexandria.CharacterAPI
             }
 
             PlayerController playerController;
-            GameObject gameObject = GameObject.Instantiate(basePrefab);
+            GameObject characterPrefab = GameObject.Instantiate(basePrefab);
 
-            playerController = gameObject.GetComponent<PlayerController>();
-            var customCharacter = gameObject.AddComponent<CustomCharacter>();
+            playerController = characterPrefab.GetComponent<PlayerController>();
+            var customCharacter = characterPrefab.AddComponent<CustomCharacter>();
 
             customCharacter.data = data;
             data.characterID = storedCharacters.Count;
@@ -54,7 +54,7 @@ namespace Alexandria.CharacterAPI
             playerController.altHandName = "hand_alt";
             playerController.SwapHandsOnAltCostume = true;
 
-            GameObject.DontDestroyOnLoad(gameObject);
+            GameObject.DontDestroyOnLoad(characterPrefab);
 
             if (isBundle)
                 CustomizeCharacterNoSprites(playerController, data, d1, SteveData1, d2, SteveData2, paradoxUsesSprites, assembly ?? Assembly.GetCallingAssembly());
@@ -104,7 +104,8 @@ namespace Alexandria.CharacterAPI
             data.normalMaterial = new Material(ShaderCache.Acquire("Brave/PlayerShader"));
 
             basePrefab = null;
-            storedCharacters.Add(data.nameInternal.ToLower(), new Tuple<CustomCharacterData, GameObject>(data, gameObject));
+            storedCharacters.Add(data.nameInternal.ToLower(), new Tuple<CustomCharacterData, GameObject>(data, characterPrefab));
+            data.characterPrefab = characterPrefab;
 
             customCharacter.past = customPast;
             customCharacter.hasPast = hasCustomPast;
@@ -114,8 +115,8 @@ namespace Alexandria.CharacterAPI
             //      are up to date by the time we actually start a punchout fight
             CharacterAPI.Hooks.RegisterCharacterForPunchout(customCharacter);
 
-            gameObject.SetActive(false);
-            FakePrefab.MarkAsFakePrefab(gameObject);
+            characterPrefab.SetActive(false);
+            FakePrefab.MarkAsFakePrefab(characterPrefab);
 
             ETGModConsole.Characters.Add(data.nameShort.ToLowerInvariant(), data.nameShort); //Adds characters to MTGAPIs character database
         }
@@ -179,7 +180,7 @@ namespace Alexandria.CharacterAPI
 
             CustomizeCharacterCommon(player, data, paradoxUsesSprites, assembly);
         }
-        
+
         public static void CustomizeCharacter(PlayerController player, CustomCharacterData data, bool paradoxUsesSprites, Assembly assembly = null)
         {
             assembly ??= Assembly.GetCallingAssembly();

@@ -428,7 +428,7 @@ namespace Alexandria.CharacterAPI
                     {
                         bool invalid = (i >= _ToCopyAppearAnimIds.Count || oDefs[_ToCopyAppearAnimIds[i]] == null);
                         var def = oDefs[appearAnimIds[i]];
-                        var defToCopy = oDefs[_ToCopyAppearAnimIds[invalid ? 9 : i]];
+                        var defToCopy = oDefs[_ToCopyAppearAnimIds[invalid ? 10 : i]];
                         def.position0 = defToCopy.position0;
                         def.position1 = defToCopy.position1;
                         def.position2 = defToCopy.position2;

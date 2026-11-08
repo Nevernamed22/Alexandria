@@ -254,6 +254,8 @@ namespace Alexandria.CharacterAPI
                     data.bossCard.Add(tex);
                 if (name.Equals("playersheet"))
                     data.playerSheet = tex;
+                if (name.Equals("playersheet_swap"))
+                    data.altPlayerSheet = tex;
                 if (name.Equals("facecard"))
                     data.faceCard = tex;
                 if (name.Equals("win_pic_junkan"))

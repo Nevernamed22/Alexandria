@@ -33,6 +33,11 @@ namespace Alexandria.DungeonAPI
 {
     public static class RoomFactory
     {
+
+        public static GameObject Minimap_Maintenance_Icon;
+        public static AssetBundle sharedAssets2;
+
+
         public static List<string> roomNames = new List<string>();
         public static Dictionary<string, RoomData> rooms = new Dictionary<string, RoomData>();
         public static bool FailSafeCheck;
@@ -42,6 +47,8 @@ namespace Alexandria.DungeonAPI
         internal static bool _AggregateMissingAssetErrors = false;
         internal static readonly Dictionary<string, int> _MissingAssetsByGuid = new Dictionary<string, int>();
         internal static readonly Dictionary<string, List<string>> _MissingAssetsByRoom = new Dictionary<string, List<string>>();
+
+        public static Func<string, GameObject, JObject, GameObject> OnCustomProperty;
 
         /// <summary>
         /// Loads all rooms in a given folder, similar to how Gun Sprites are setup (Example: LoadRoomsFromRoomDirectory("Alex", this.FolderPath() + "/newRooms");
@@ -108,7 +115,6 @@ namespace Alexandria.DungeonAPI
             _AggregateMissingAssetErrors = false;
             return loadedRooms;
         }
-
         private static RoomData BuildFromRoomFile(string roomPath)
         {
             var texture = ResourceExtractor.GetTextureFromFile(roomPath, ".room");
@@ -118,8 +124,6 @@ namespace Alexandria.DungeonAPI
 
             return roomData;
         }
-
-
         private static RoomData BuildFromRoomFileWithoutTexture(string roomPath)
         {
             //ETGModConsole.Log(roomPath);
@@ -130,7 +134,6 @@ namespace Alexandria.DungeonAPI
 
             return roomData;
         }
-
         /// <summary>
         /// 
         /// </summary>
@@ -151,7 +154,6 @@ namespace Alexandria.DungeonAPI
 
             return roomData;
         }
-
         public static RoomData BuildNewRoomFromResource(string roomPath, Assembly assembly = null)
         {
             RoomData roomData = ExtractRoomDataFromResource(roomPath, assembly ?? Assembly.GetCallingAssembly());
@@ -166,8 +168,6 @@ namespace Alexandria.DungeonAPI
             DungeonHandler.Register(roomData);
             return roomData;
         }
-
-
         public static PrototypeDungeonRoom Build(RoomData roomData)
         {
             try
@@ -186,7 +186,6 @@ namespace Alexandria.DungeonAPI
 
             return CreateEmptyRoom(12, 12);
         }
-
         public static void PostProcessCells(RoomData roomData)
         {
             if (roomData.tileInfo.Contains("X"))
@@ -233,7 +232,6 @@ namespace Alexandria.DungeonAPI
             }
 
         }
-
         public static PrototypeDungeonRoom Build(Texture2D texture, RoomData roomData)
         {
             try
@@ -251,10 +249,6 @@ namespace Alexandria.DungeonAPI
 
             return CreateEmptyRoom(12, 12);
         }
-        //public static GameObject MinimapIconPrefab;
-
-
-
         private static DungeonData.Direction DetermineDirectionType(string data, PrototypeRoomExit.ExitType exitType)
         {
             if (data.ToLower().Contains("west"))
@@ -276,7 +270,6 @@ namespace Alexandria.DungeonAPI
             Debug.LogError("[Alexandria] Somehow failed to get direction of EXIT??? Returning SOUTH and praying shit don't break");
             return DungeonData.Direction.SOUTH;
         }
-
         private static PrototypeRoomExit.ExitType DetermineExitType(string data)
         {
             if (data.ToLower().Contains("exitonly"))
@@ -289,9 +282,6 @@ namespace Alexandria.DungeonAPI
             }
             return PrototypeRoomExit.ExitType.NO_RESTRICTION;
         }
-
-
-
         public static void ApplyRoomData(PrototypeDungeonRoom room, RoomData roomData)
         {
 
@@ -474,54 +464,6 @@ namespace Alexandria.DungeonAPI
             }
         }
 
-        public static GameObject Minimap_Maintenance_Icon;
-        public static AssetBundle sharedAssets2;
-
-
-
-        public static RoomData ExtractRoomDataFromBytes(byte[] data)
-        {
-            string stringData = ResourceExtractor.BytesToString(data);
-            return ExtractRoomData(stringData);
-        }
-
-        public static RoomData ExtractRoomDataFromBytesWithoutHeadder(byte[] data)
-        {
-            string stringData = ResourceExtractor.BytesToString(data);
-            return ExtractRoomDataWithoutHeader(stringData);
-        }
-
-        public static RoomData ExtractRoomDataFromFile(string path)
-        {
-            byte[] data = File.ReadAllBytes(path);
-            return path.EndsWith(".newroom") ? ExtractRoomDataFromBytesWithoutHeadder(data) : ExtractRoomDataFromBytes(data);
-        }
-
-        public static RoomData ExtractRoomDataFromResource(string path, Assembly assembly = null)
-        {
-            byte[] data = ResourceExtractor.ExtractEmbeddedResource(path, assembly ?? Assembly.GetCallingAssembly());
-            return path.EndsWith(".newroom") ? ExtractRoomDataFromBytesWithoutHeadder(data) : ExtractRoomDataFromBytes(data);
-        }
-
-        public static RoomData ExtractRoomDataWithoutHeader(string data)
-        {
-            return JsonUtility.FromJson<RoomData>(data);
-        }
-
-
-        public static RoomData ExtractRoomData(string data)
-        {
-            int end = data.Length - dataHeader.Length - 1;
-            for (int i = end; i > 0; i--)
-            {
-                string sub = data.Substring(i, dataHeader.Length);
-                if (sub.Equals(dataHeader))
-                    return JsonUtility.FromJson<RoomData>(data.Substring(i + dataHeader.Length));
-            }
-            ShrineTools.Log($"No room data found at {data}");
-            return new RoomData();
-        }
-
         public static PrototypeDungeonRoom CreateRoomFromData(RoomData data)
         {
             
@@ -548,11 +490,6 @@ namespace Alexandria.DungeonAPI
             room.name = data.name;
             return room;
         }
-
-
-
-        
-
         public static PrototypeDungeonRoom CreateRoomFromTexture(Texture2D texture)
         {
             int width = texture.width;
@@ -571,156 +508,7 @@ namespace Alexandria.DungeonAPI
             room.name = texture.name;
             return room;
         }
-
-
-        private static CellType TypeFromNumber(string type)
-        {
-            switch (type)
-            {
-                case "1":
-                    return CellType.FLOOR;
-                case "2":
-                    return CellType.WALL;
-                case "3":
-                    return CellType.PIT;
-                case "4":
-                    return CellType.FLOOR;
-                case "5":
-                    return CellType.FLOOR;
-                case "X":
-                    return CellType.FLOOR;
-                case "G":
-                    return CellType.FLOOR;
-                default:
-                    return CellType.WALL;
-
-            }
-        }
-
-        public static PrototypeDungeonRoomCellData CellDataFromNumber(RoomData roomData, string type)
-        {
-            if (type == null) return null;
-
-            var data = new PrototypeDungeonRoomCellData();
-            data.state = TypeFromNumber(type);
-            //data.diagonalWallType = DiagonalWallTypeFromColor(color);
-            data.diagonalWallType = ReturnDiagonalType(data, roomData, type);
-            
-            data.appearance = new PrototypeDungeonRoomCellAppearance()
-            {
-                overrideDungeonMaterialIndex = -1,
-                OverrideFloorType = ReturnCellFloorType(data, type),
-                IsPhantomCarpet = false,
-                ForceDisallowGoop = false,
-                globalOverrideIndices = new PrototypeIndexOverrideData() { indices = new List<int>(0) },         
-            };
-            return data;
-        }
-
-
-
-        public static Dungeonator.DiagonalWallType ReturnDiagonalType(PrototypeDungeonRoomCellData tile, RoomData roomData, string type)
-        {
-            switch (type)
-            {
-                case "6":
-                    tile.breakable = false;
-                    tile.ForceTileNonDecorated = true;
-                    return DiagonalWallType.SOUTHWEST;
-                case "7":
-                    tile.breakable = false;
-                    tile.ForceTileNonDecorated = true;
-                    return DiagonalWallType.SOUTHEAST;
-                case "8":
-                    tile.breakable = false;
-                    tile.ForceTileNonDecorated = true;
-                    return DiagonalWallType.NORTHEAST;
-                case "9":
-                    tile.breakable = false;
-                    tile.ForceTileNonDecorated = true;
-                    return DiagonalWallType.NORTHWEST;
-                default:
-                    return DiagonalWallType.NONE;
-            }
-        }
-
-
-        public static CellVisualData.CellFloorType ReturnCellFloorType(PrototypeDungeonRoomCellData cell, string type)
-        {
-            switch (type)
-            {
-                case "1":
-                    return FloorType.Stone;
-                case "2":
-                    return FloorType.Stone;
-                case "3":
-                    return FloorType.Stone;
-                case "4":
-                    cell.ForceTileNonDecorated = true;
-                    return FloorType.Ice;
-                case "5":
-                    cell.ForceTileNonDecorated = true;
-                    cell.doesDamage = true;         
-                    cell.damageDefinition = new CellDamageDefinition()
-                    {
-                        damageTypes = CoreDamageTypes.Fire,
-                        damageToPlayersPerTick = 0.5f,
-                        damageToEnemiesPerTick = 0,
-                        tickFrequency = 1,
-                        respectsFlying = true,
-                        isPoison = false
-                    };
-                    return FloorType.ThickGoop;
-                case "G":
-                    cell.doesDamage = true;
-                    cell.appearance = new PrototypeDungeonRoomCellAppearance() { OverrideFloorType = FloorType.Grass };
-                    return FloorType.Grass;
-                default:
-                    return FloorType.Stone;
-
-            }
-        }
-
-
-
-        public static PrototypeDungeonRoomCellData CellDataFromColor(Color32 color)
-        {
-            if (color.Equals(Color.magenta)) return null;
-
-            var data = new PrototypeDungeonRoomCellData();
-            data.state = TypeFromColor(color);
-            data.diagonalWallType = DiagonalWallTypeFromColor(color);
-            data.appearance = new PrototypeDungeonRoomCellAppearance()
-            {
-                OverrideFloorType = FloorType.Stone
-            };
-            return data;
-        }
-
-        public static CellType TypeFromColor(Color color)
-        {
-            if (color == Color.black)
-                return CellType.PIT;
-            else if (color == Color.white)
-                return CellType.FLOOR;
-            else
-                return CellType.WALL;
-        }
-
-        public static DiagonalWallType DiagonalWallTypeFromColor(Color color)
-        {
-            if (color == Color.red)
-                return DiagonalWallType.NORTHEAST;
-            else if (color == Color.green)
-                return DiagonalWallType.SOUTHEAST;
-            else if (color == Color.blue)
-                return DiagonalWallType.SOUTHWEST;
-            else if (color == Color.yellow)
-                return DiagonalWallType.NORTHWEST;
-            else
-                return DiagonalWallType.NONE;
-        }
-
+        
         public static RoomData CreateEmptyRoomData(int width = 12, int height = 12)
         {
             RoomData data = new RoomData()
@@ -732,7 +520,6 @@ namespace Alexandria.DungeonAPI
 
             return data;
         }
-
         public static PrototypeDungeonRoom CreateEmptyRoom(int width = 12, int height = 12)
         {
             try
@@ -770,20 +557,6 @@ namespace Alexandria.DungeonAPI
                 return null;
             }
         }
-
-        /*public static int GetStyleValue(string dungeonName, string shrineID)
-        {
-            if (ShrineFactory.registeredShrines != null && ShrineFactory.registeredShrines.ContainsKey(shrineID))
-            {
-                var shrineData = ShrineFactory.registeredShrines[shrineID]?.GetComponent<CustomShrineController>();
-                if (shrineData != null && shrineData.roomStyles != null && shrineData.roomStyles.ContainsKey(dungeonName))
-                    return shrineData.roomStyles[dungeonName];
-            }
-            return -1;
-        }*/
-
-        public static Func<string, GameObject, JObject, GameObject> OnCustomProperty;
-
         public static void AddPlaceableToRoom(PrototypeDungeonRoom room, Vector2 location, string assetPath, string attributes, Dictionary<int, PrototypeEventTriggerArea> prototypeEventTriggerAreas)
         {
             try
@@ -1746,7 +1519,6 @@ namespace Alexandria.DungeonAPI
                 ShrineTools.PrintException(e, "FF0000");
             }
         }
-
         public static void AddPlaceableToRoomLegecy(PrototypeDungeonRoom room, Vector2 location, string assetPath)
         {
             try
@@ -1857,7 +1629,6 @@ namespace Alexandria.DungeonAPI
                 ShrineTools.PrintException(e);
             }
         }
-
         public static GameObject MaybeModifyAsset(string assetPath, JObject attributes, GameObject asset)
         {
             GameObject gameObject = asset;
@@ -1910,7 +1681,6 @@ namespace Alexandria.DungeonAPI
            
             return gameObject;
         }
-
         public static DungeonPlaceable GetPlaceableFromBundles(string assetPath)
         {
             DungeonPlaceable placeable = null;
@@ -1923,7 +1693,6 @@ namespace Alexandria.DungeonAPI
             }
             return placeable;
         }
-
         public static GameObject GetGameObjectFromStoredObjects(string assetPath)
         {
             GameObject asset = null;
@@ -1938,7 +1707,6 @@ namespace Alexandria.DungeonAPI
             }
             return asset;
         }
-
         public static DungeonPlaceable GetDungeonPlaceableFromStoredObjects(string assetPath)
         {
             DungeonPlaceable asset = null;
@@ -1953,7 +1721,6 @@ namespace Alexandria.DungeonAPI
             }
             return asset;
         }
-
         public static GameObject GetGameObjectFromBundles(string assetPath)
         {
             GameObject asset = null;
@@ -1965,8 +1732,6 @@ namespace Alexandria.DungeonAPI
             }
             return asset;
         }
-
-
         public static GameObject GetExoticGameObject(string assetPath)
         {
             GameObject result = null;
@@ -1977,7 +1742,6 @@ namespace Alexandria.DungeonAPI
             }
             return result;
         }
-
         public static GameObject GetCustomGameObject(string assetPath)
         {
             GameObject result = null;
@@ -1988,7 +1752,6 @@ namespace Alexandria.DungeonAPI
             }
             return result;
         }
-
         public static DungeonPlaceable GetCustomDungeonPlaceableObject(string assetPath)
         {
             DungeonPlaceable result = null;
@@ -1999,223 +1762,8 @@ namespace Alexandria.DungeonAPI
             }
             return result;
         }
-        public static void AddNodeToRoom(PrototypeDungeonRoom room, Vector2 location, string guid, int layer, SerializedPath.SerializedPathWrapMode wrapMode, bool modifyTilemap, float delay)
-        {
-            IntVector2 intLocation = location.ToIntVector2();
-            SerializedPath serializedPath = null;
 
-            if (room.paths == null) room.paths = new List<SerializedPath>();
-
-            if (room.paths.Count < layer + 1)
-            {
-                serializedPath = new SerializedPath(intLocation);
-
-                var node = new SerializedPathNode(intLocation);
-                node.placement = (SerializedPathNode.SerializedNodePlacement)Enum.Parse(typeof(SerializedPathNode.SerializedNodePlacement), guid);
-                //serializedPath.nodes[0] = node;
-                node.delayTime = delay;
-                serializedPath.nodes.Add(node);
-                room.paths.Add(serializedPath);
-                serializedPath.wrapMode = wrapMode;//SerializedPath.SerializedPathWrapMode.Loop;
-                serializedPath.tilesetPathGrid = modifyTilemap ? 0 : -1;
-
-            }
-            else
-            {
-                serializedPath = room.paths[layer];
-                var node = new SerializedPathNode(intLocation);
-                serializedPath.wrapMode = wrapMode;
-                node.placement = (SerializedPathNode.SerializedNodePlacement)Enum.Parse(typeof(SerializedPathNode.SerializedNodePlacement), guid);
-                node.delayTime = delay;
-                serializedPath.nodes.Add(node);
-                serializedPath.tilesetPathGrid = modifyTilemap ? 0 : -1;
-            }
-
-        }
-
-
-        public static RoomEventTriggerCondition ReturnTrigger(string s)
-        {
-            switch (s)
-            {
-                case "ON_ENEMIES_CLEARED":
-                    return RoomEventTriggerCondition.ON_ENEMIES_CLEARED;
-                case "ENEMY_BEHAVIOR":
-                    return RoomEventTriggerCondition.ENEMY_BEHAVIOR;
-                case "NPC_TRIGGER_A":
-                    return RoomEventTriggerCondition.NPC_TRIGGER_A;
-                case "ON_HALF_ENEMY_HP_DEPLETED":
-                    return RoomEventTriggerCondition.ON_HALF_ENEMY_HP_DEPLETED;
-                case "ON_ONE_QUARTER_ENEMY_HP_DEPLETED":
-                    return RoomEventTriggerCondition.ON_ONE_QUARTER_ENEMY_HP_DEPLETED;
-                case "ON_THREE_QUARTERS_ENEMY_HP_DEPLETED":
-                    return RoomEventTriggerCondition.ON_THREE_QUARTERS_ENEMY_HP_DEPLETED;
-                case "SEQUENTIAL_WAVE_TRIGGER":
-                    return RoomEventTriggerCondition.SEQUENTIAL_WAVE_TRIGGER;
-                case "SHRINE_WAVE_A":
-                    return RoomEventTriggerCondition.SHRINE_WAVE_A;
-                case "SHRINE_WAVE_B":
-                    return RoomEventTriggerCondition.SHRINE_WAVE_B;
-                case "SHRINE_WAVE_C":
-                    return RoomEventTriggerCondition.SHRINE_WAVE_C;
-                case "NPC_TRIGGER_B":
-                    return RoomEventTriggerCondition.NPC_TRIGGER_B;
-                case "NPC_TRIGGER_C":
-                    return RoomEventTriggerCondition.NPC_TRIGGER_C;
-                case "ON_ENTER":
-                    return RoomEventTriggerCondition.ON_ENTER;
-                case "ON_ENTER_WITH_ENEMIES":
-                    return RoomEventTriggerCondition.ON_ENTER_WITH_ENEMIES;
-                case "ON_EXIT":
-                    return RoomEventTriggerCondition.ON_EXIT;
-                case "ON_NINETY_PERCENT_ENEMY_HP_DEPLETED":
-                    return RoomEventTriggerCondition.ON_NINETY_PERCENT_ENEMY_HP_DEPLETED;
-                case "TIMER":
-                    return RoomEventTriggerCondition.TIMER;
-                default:
-                    return RoomEventTriggerCondition.ON_ENEMIES_CLEARED;
-
-            }
-        }
-
-        public static void AddEnemyToRoom(PrototypeDungeonRoom room, Vector2 location, string guid, string attributes, int layer, bool shuffle, RoomEventTriggerCondition reinforcementType)
-        {
-            DungeonPrerequisite[] array = new DungeonPrerequisite[0];
-
-            bool forceBlackPhantom = false;
-            if (!string.IsNullOrEmpty(attributes))
-            {
-                JObject jobject = JObject.Parse(attributes);
-                JToken value;
-                forceBlackPhantom = jobject.TryGetValue("j", out value) && (bool)value;
-            }
-
-            
-            DungeonPlaceable dungeonPlaceable = ScriptableObject.CreateInstance<DungeonPlaceable>();
-            dungeonPlaceable.width = 1;
-            dungeonPlaceable.height = 1;
-            dungeonPlaceable.respectsEncounterableDifferentiator = true;
-            dungeonPlaceable.variantTiers = new List<DungeonPlaceableVariant>
-            {
-                new DungeonPlaceableVariant
-                {
-                    percentChance = 1f,
-                    prerequisites = array,
-                    forceBlackPhantom = forceBlackPhantom,
-                    enemyPlaceableGuid = guid,
-                    
-                    materialRequirements = new DungeonPlaceableRoomMaterialRequirement[0]
-                }
-            };
-            PrototypePlacedObjectData prototypePlacedObjectData = new PrototypePlacedObjectData
-            {
-                contentsBasePosition = location,
-                fieldData = new List<PrototypePlacedObjectFieldData>(),
-                instancePrerequisites = array,
-                linkedTriggerAreaIDs = new List<int>(),
-                placeableContents = dungeonPlaceable
-            };
-            if (layer > 0)
-            {
-                //ETGModConsole.Log("Adding object to reinforcement layer " + layer, false);
-                RoomFactory.AddObjectDataToReinforcementLayer(room, prototypePlacedObjectData, layer - 1, location, shuffle, reinforcementType);
-            }
-            else
-            {
-                //ETGModConsole.Log("Adding object to standard layer.", false);
-                room.placedObjects.Add(prototypePlacedObjectData);
-                room.placedObjectPositions.Add(location);
-            }
-            if (!room.roomEvents.Contains(RoomFactory.sealOnEnterWithEnemies))
-            {
-                room.roomEvents.Add(RoomFactory.sealOnEnterWithEnemies);
-            }
-            if (!room.roomEvents.Contains(RoomFactory.unsealOnRoomClear))
-            {
-                room.roomEvents.Add(RoomFactory.unsealOnRoomClear);
-            }
-        }
-
-        public static void AddEnemyToRoomLegecy(PrototypeDungeonRoom room, Vector2 location, string guid, int layer, bool shuffle) //TO HERE==================================================
-        {
-            DungeonPrerequisite[] emptyReqs = new DungeonPrerequisite[0];
-            var placeableContents = ScriptableObject.CreateInstance<DungeonPlaceable>();
-            placeableContents.width = 1;
-            placeableContents.height = 1;
-            placeableContents.respectsEncounterableDifferentiator = true;
-            placeableContents.variantTiers = new List<DungeonPlaceableVariant>()
-            {
-                new DungeonPlaceableVariant()
-                {
-                    percentChance = 1,
-                    prerequisites = emptyReqs,
-                    enemyPlaceableGuid = guid,
-                    materialRequirements= new DungeonPlaceableRoomMaterialRequirement[0],
-                }
-            };
-
-            var objectData = new PrototypePlacedObjectData()
-            {
-                contentsBasePosition = location,
-                fieldData = new List<PrototypePlacedObjectFieldData>(),
-                instancePrerequisites = emptyReqs,
-                linkedTriggerAreaIDs = new List<int>(),
-                placeableContents = placeableContents,
-            };
-
-
-            if (layer > 0)
-                AddObjectDataToReinforcementLayer(room, objectData, layer - 1, location, shuffle, RoomEventTriggerCondition.ON_ENEMIES_CLEARED); //GOES FROM HERE
-            else
-            {
-                room.placedObjects.Add(objectData);
-                room.placedObjectPositions.Add(location);
-            }
-
-            if (!room.roomEvents.Contains(sealOnEnterWithEnemies))
-                room.roomEvents.Add(sealOnEnterWithEnemies);
-            if (!room.roomEvents.Contains(unsealOnRoomClear))
-                room.roomEvents.Add(unsealOnRoomClear);
-        }
-
-        public static void AddObjectDataToReinforcementLayer(PrototypeDungeonRoom room, PrototypePlacedObjectData objectData, int layer, Vector2 location, bool shuffle, RoomEventTriggerCondition reinforcementType) //TO HERE
-        {
-            if (room.additionalObjectLayers.Count <= layer)
-            {
-                for (int i = room.additionalObjectLayers.Count; i <= layer; i++)
-                {
-                    var newLayer = new PrototypeRoomObjectLayer()
-                    {
-                        layerIsReinforcementLayer = true,
-                        placedObjects = new List<PrototypePlacedObjectData>(),
-                        placedObjectBasePositions = new List<Vector2>(),
-                        shuffle = shuffle,
-                        reinforcementTriggerCondition = reinforcementType
-                    };
-                    room.additionalObjectLayers.Add(newLayer);
-
-                }
-            }
-            room.additionalObjectLayers[layer].placedObjects.Add(objectData);
-            room.additionalObjectLayers[layer].placedObjectBasePositions.Add(location);
-        }
-
-        public static void AddExit(PrototypeDungeonRoom room, Vector2 location, DungeonData.Direction direction, PrototypeRoomExit.ExitType exitType = PrototypeRoomExit.ExitType.NO_RESTRICTION)
-        {
-            if (room.exitData == null)
-                room.exitData = new PrototypeRoomExitData();
-            if (room.exitData.exits == null)
-                room.exitData.exits = new List<PrototypeRoomExit>();
-
-            PrototypeRoomExit exit = new PrototypeRoomExit(direction, location);
-            exit.exitType = exitType;
-            exit.containsDoor = true;
-
-            Vector2 margin = (direction == DungeonData.Direction.EAST || direction == DungeonData.Direction.WEST) ? new Vector2(0, 1) : new Vector2(1, 0);
-            exit.containedCells.Add(location + margin);
-            room.exitData.exits.Add(exit);
-        }
-
+        
         public static PrototypeDungeonRoom GetNewPrototypeDungeonRoom(int width = 12, int height = 12)
         {
             PrototypeDungeonRoom room = ScriptableObject.CreateInstance<PrototypeDungeonRoom>();
@@ -2239,7 +1787,6 @@ namespace Alexandria.DungeonAPI
             room.Height = height;
             return room;
         }
-
         public static void LogExampleRoomData()
         {
             Vector2[] vectorArray = new Vector2[]
@@ -2280,7 +1827,6 @@ namespace Alexandria.DungeonAPI
             };
             ShrineTools.Print("Data to JSON: " + JsonUtility.ToJson(rd));
         }
-
         public static void AddInjection(PrototypeDungeonRoom protoroom, string injectionAnnotation, List<ProceduralFlowModifierData.FlowModifierPlacementType> placementRules, float chanceToLock, List<DungeonPrerequisite> prerequisites,
            string injectorName, float selectionWeight = 1, float chanceToSpawn = 1, GameObject addSingularPlaceable = null, float XFromCenter = 0, float YFromCenter = 0)
         {
@@ -2362,7 +1908,6 @@ namespace Alexandria.DungeonAPI
             BaseInjection = baseInjection;
         }
         private static SharedInjectionData BaseInjection;
-
         public static void StraightLine()
         {
             try
@@ -2405,6 +1950,413 @@ namespace Alexandria.DungeonAPI
                 ShrineTools.PrintException(e);
             }
         }
+
+        //DATA EXTRACTION
+        //Methods and tools that extract room data from files.
+        #region DataExtraction
+        public static RoomData ExtractRoomDataFromBytes(byte[] data)
+        {
+            string stringData = ResourceExtractor.BytesToString(data);
+            return ExtractRoomData(stringData);
+        }
+        public static RoomData ExtractRoomDataFromBytesWithoutHeadder(byte[] data)
+        {
+            string stringData = ResourceExtractor.BytesToString(data);
+            return ExtractRoomDataWithoutHeader(stringData);
+        }
+        public static RoomData ExtractRoomDataFromFile(string path)
+        {
+            byte[] data = File.ReadAllBytes(path);
+            return path.EndsWith(".newroom") ? ExtractRoomDataFromBytesWithoutHeadder(data) : ExtractRoomDataFromBytes(data);
+        }
+        public static RoomData ExtractRoomDataFromResource(string path, Assembly assembly = null)
+        {
+            byte[] data = ResourceExtractor.ExtractEmbeddedResource(path, assembly ?? Assembly.GetCallingAssembly());
+            return path.EndsWith(".newroom") ? ExtractRoomDataFromBytesWithoutHeadder(data) : ExtractRoomDataFromBytes(data);
+        }
+        public static RoomData ExtractRoomDataWithoutHeader(string data)
+        {
+            return JsonUtility.FromJson<RoomData>(data);
+        }
+        public static RoomData ExtractRoomData(string data)
+        {
+            int end = data.Length - dataHeader.Length - 1;
+            for (int i = end; i > 0; i--)
+            {
+                string sub = data.Substring(i, dataHeader.Length);
+                if (sub.Equals(dataHeader))
+                    return JsonUtility.FromJson<RoomData>(data.Substring(i + dataHeader.Length));
+            }
+            ShrineTools.Log($"No room data found at {data}");
+            return new RoomData();
+        }
+        #endregion
+
+        //CELL TYPE TOOLS
+        //Methods and tools related to setting up and sorting out individual cells and cell types of a level/tilemap.
+        #region CellTypeTools
+        private static CellType TypeFromNumber(string type)
+        {
+            switch (type)
+            {
+                case "1":
+                    return CellType.FLOOR;
+                case "2":
+                    return CellType.WALL;
+                case "3":
+                    return CellType.PIT;
+                case "4":
+                    return CellType.FLOOR;
+                case "5":
+                    return CellType.FLOOR;
+                case "X":
+                    return CellType.FLOOR;
+                case "G":
+                    return CellType.FLOOR;
+                default:
+                    return CellType.WALL;
+
+            }
+        }
+        public static PrototypeDungeonRoomCellData CellDataFromNumber(RoomData roomData, string type)
+        {
+            if (type == null) return null;
+
+            var data = new PrototypeDungeonRoomCellData();
+            data.state = TypeFromNumber(type);
+            //data.diagonalWallType = DiagonalWallTypeFromColor(color);
+            data.diagonalWallType = ReturnDiagonalType(data, roomData, type);
+
+            data.appearance = new PrototypeDungeonRoomCellAppearance()
+            {
+                overrideDungeonMaterialIndex = -1,
+                OverrideFloorType = ReturnCellFloorType(data, type),
+                IsPhantomCarpet = false,
+                ForceDisallowGoop = false,
+                globalOverrideIndices = new PrototypeIndexOverrideData() { indices = new List<int>(0) },
+            };
+            return data;
+        }
+        public static Dungeonator.DiagonalWallType ReturnDiagonalType(PrototypeDungeonRoomCellData tile, RoomData roomData, string type)
+        {
+            switch (type)
+            {
+                case "6":
+                    tile.breakable = false;
+                    tile.ForceTileNonDecorated = true;
+                    return DiagonalWallType.SOUTHWEST;
+                case "7":
+                    tile.breakable = false;
+                    tile.ForceTileNonDecorated = true;
+                    return DiagonalWallType.SOUTHEAST;
+                case "8":
+                    tile.breakable = false;
+                    tile.ForceTileNonDecorated = true;
+                    return DiagonalWallType.NORTHEAST;
+                case "9":
+                    tile.breakable = false;
+                    tile.ForceTileNonDecorated = true;
+                    return DiagonalWallType.NORTHWEST;
+                default:
+                    return DiagonalWallType.NONE;
+            }
+        }
+        public static CellVisualData.CellFloorType ReturnCellFloorType(PrototypeDungeonRoomCellData cell, string type)
+        {
+            switch (type)
+            {
+                case "1":
+                    return FloorType.Stone;
+                case "2":
+                    return FloorType.Stone;
+                case "3":
+                    return FloorType.Stone;
+                case "4":
+                    cell.ForceTileNonDecorated = true;
+                    return FloorType.Ice;
+                case "5":
+                    cell.ForceTileNonDecorated = true;
+                    cell.doesDamage = true;
+                    cell.damageDefinition = new CellDamageDefinition()
+                    {
+                        damageTypes = CoreDamageTypes.Fire,
+                        damageToPlayersPerTick = 0.5f,
+                        damageToEnemiesPerTick = 0,
+                        tickFrequency = 1,
+                        respectsFlying = true,
+                        isPoison = false
+                    };
+                    return FloorType.ThickGoop;
+                case "G":
+                    cell.doesDamage = true;
+                    cell.appearance = new PrototypeDungeonRoomCellAppearance() { OverrideFloorType = FloorType.Grass };
+                    return FloorType.Grass;
+                default:
+                    return FloorType.Stone;
+
+            }
+        }
+        public static PrototypeDungeonRoomCellData CellDataFromColor(Color32 color)
+        {
+            if (color.Equals(Color.magenta)) return null;
+
+            var data = new PrototypeDungeonRoomCellData();
+            data.state = TypeFromColor(color);
+            data.diagonalWallType = DiagonalWallTypeFromColor(color);
+            data.appearance = new PrototypeDungeonRoomCellAppearance()
+            {
+                OverrideFloorType = FloorType.Stone
+            };
+            return data;
+        }
+        public static CellType TypeFromColor(Color color)
+        {
+            if (color == Color.black)
+                return CellType.PIT;
+            else if (color == Color.white)
+                return CellType.FLOOR;
+            else
+                return CellType.WALL;
+        }
+        public static DiagonalWallType DiagonalWallTypeFromColor(Color color)
+        {
+            if (color == Color.red)
+                return DiagonalWallType.NORTHEAST;
+            else if (color == Color.green)
+                return DiagonalWallType.SOUTHEAST;
+            else if (color == Color.blue)
+                return DiagonalWallType.SOUTHWEST;
+            else if (color == Color.yellow)
+                return DiagonalWallType.NORTHWEST;
+            else
+                return DiagonalWallType.NONE;
+        }
+        #endregion
+
+        //ENTRANCE AND EXIT SETUP
+        //Methods and tools related to setting up room access points, like entrances and exits.
+        #region EntranceSetup
+        public static void AddExit(PrototypeDungeonRoom room, Vector2 location, DungeonData.Direction direction, PrototypeRoomExit.ExitType exitType = PrototypeRoomExit.ExitType.NO_RESTRICTION)
+        {
+            if (room.exitData == null)
+                room.exitData = new PrototypeRoomExitData();
+            if (room.exitData.exits == null)
+                room.exitData.exits = new List<PrototypeRoomExit>();
+
+            PrototypeRoomExit exit = new PrototypeRoomExit(direction, location);
+            exit.exitType = exitType;
+            exit.containsDoor = true;
+
+            Vector2 margin = (direction == DungeonData.Direction.EAST || direction == DungeonData.Direction.WEST) ? new Vector2(0, 1) : new Vector2(1, 0);
+            exit.containedCells.Add(location + margin);
+            room.exitData.exits.Add(exit);
+        }
+        #endregion
+
+        //ENEMY SETUP
+        //Methods and tools related to adding enemies into rooms, as well as reinforcement layers and the triggers for those reinforcement layers.
+        #region RoomEnemySetup
+        public static RoomEventTriggerCondition ReturnTrigger(string s)
+        {
+            switch (s)
+            {
+                case "ON_ENEMIES_CLEARED":
+                    return RoomEventTriggerCondition.ON_ENEMIES_CLEARED;
+                case "ENEMY_BEHAVIOR":
+                    return RoomEventTriggerCondition.ENEMY_BEHAVIOR;
+                case "NPC_TRIGGER_A":
+                    return RoomEventTriggerCondition.NPC_TRIGGER_A;
+                case "ON_HALF_ENEMY_HP_DEPLETED":
+                    return RoomEventTriggerCondition.ON_HALF_ENEMY_HP_DEPLETED;
+                case "ON_ONE_QUARTER_ENEMY_HP_DEPLETED":
+                    return RoomEventTriggerCondition.ON_ONE_QUARTER_ENEMY_HP_DEPLETED;
+                case "ON_THREE_QUARTERS_ENEMY_HP_DEPLETED":
+                    return RoomEventTriggerCondition.ON_THREE_QUARTERS_ENEMY_HP_DEPLETED;
+                case "SEQUENTIAL_WAVE_TRIGGER":
+                    return RoomEventTriggerCondition.SEQUENTIAL_WAVE_TRIGGER;
+                case "SHRINE_WAVE_A":
+                    return RoomEventTriggerCondition.SHRINE_WAVE_A;
+                case "SHRINE_WAVE_B":
+                    return RoomEventTriggerCondition.SHRINE_WAVE_B;
+                case "SHRINE_WAVE_C":
+                    return RoomEventTriggerCondition.SHRINE_WAVE_C;
+                case "NPC_TRIGGER_B":
+                    return RoomEventTriggerCondition.NPC_TRIGGER_B;
+                case "NPC_TRIGGER_C":
+                    return RoomEventTriggerCondition.NPC_TRIGGER_C;
+                case "ON_ENTER":
+                    return RoomEventTriggerCondition.ON_ENTER;
+                case "ON_ENTER_WITH_ENEMIES":
+                    return RoomEventTriggerCondition.ON_ENTER_WITH_ENEMIES;
+                case "ON_EXIT":
+                    return RoomEventTriggerCondition.ON_EXIT;
+                case "ON_NINETY_PERCENT_ENEMY_HP_DEPLETED":
+                    return RoomEventTriggerCondition.ON_NINETY_PERCENT_ENEMY_HP_DEPLETED;
+                case "TIMER":
+                    return RoomEventTriggerCondition.TIMER;
+                default:
+                    return RoomEventTriggerCondition.ON_ENEMIES_CLEARED;
+
+            }
+        }
+        public static void AddEnemyToRoom(PrototypeDungeonRoom room, Vector2 location, string guid, string attributes, int layer, bool shuffle, RoomEventTriggerCondition reinforcementType)
+        {
+            DungeonPrerequisite[] array = new DungeonPrerequisite[0];
+
+            bool forceBlackPhantom = false;
+            if (!string.IsNullOrEmpty(attributes))
+            {
+                JObject jobject = JObject.Parse(attributes);
+                JToken value;
+                forceBlackPhantom = jobject.TryGetValue("j", out value) && (bool)value;
+            }
+
+
+            DungeonPlaceable dungeonPlaceable = ScriptableObject.CreateInstance<DungeonPlaceable>();
+            dungeonPlaceable.width = 1;
+            dungeonPlaceable.height = 1;
+            dungeonPlaceable.respectsEncounterableDifferentiator = true;
+            dungeonPlaceable.variantTiers = new List<DungeonPlaceableVariant>
+            {
+                new DungeonPlaceableVariant
+                {
+                    percentChance = 1f,
+                    prerequisites = array,
+                    forceBlackPhantom = forceBlackPhantom,
+                    enemyPlaceableGuid = guid,
+
+                    materialRequirements = new DungeonPlaceableRoomMaterialRequirement[0]
+                }
+            };
+            PrototypePlacedObjectData prototypePlacedObjectData = new PrototypePlacedObjectData
+            {
+                contentsBasePosition = location,
+                fieldData = new List<PrototypePlacedObjectFieldData>(),
+                instancePrerequisites = array,
+                linkedTriggerAreaIDs = new List<int>(),
+                placeableContents = dungeonPlaceable
+            };
+            if (layer > 0)
+            {
+                //ETGModConsole.Log("Adding object to reinforcement layer " + layer, false);
+                RoomFactory.AddObjectDataToReinforcementLayer(room, prototypePlacedObjectData, layer - 1, location, shuffle, reinforcementType);
+            }
+            else
+            {
+                //ETGModConsole.Log("Adding object to standard layer.", false);
+                room.placedObjects.Add(prototypePlacedObjectData);
+                room.placedObjectPositions.Add(location);
+            }
+            if (!room.roomEvents.Contains(RoomFactory.sealOnEnterWithEnemies))
+            {
+                room.roomEvents.Add(RoomFactory.sealOnEnterWithEnemies);
+            }
+            if (!room.roomEvents.Contains(RoomFactory.unsealOnRoomClear))
+            {
+                room.roomEvents.Add(RoomFactory.unsealOnRoomClear);
+            }
+        }
+        public static void AddEnemyToRoomLegecy(PrototypeDungeonRoom room, Vector2 location, string guid, int layer, bool shuffle) //TO HERE==================================================
+        {
+            DungeonPrerequisite[] emptyReqs = new DungeonPrerequisite[0];
+            var placeableContents = ScriptableObject.CreateInstance<DungeonPlaceable>();
+            placeableContents.width = 1;
+            placeableContents.height = 1;
+            placeableContents.respectsEncounterableDifferentiator = true;
+            placeableContents.variantTiers = new List<DungeonPlaceableVariant>()
+            {
+                new DungeonPlaceableVariant()
+                {
+                    percentChance = 1,
+                    prerequisites = emptyReqs,
+                    enemyPlaceableGuid = guid,
+                    materialRequirements= new DungeonPlaceableRoomMaterialRequirement[0],
+                }
+            };
+
+            var objectData = new PrototypePlacedObjectData()
+            {
+                contentsBasePosition = location,
+                fieldData = new List<PrototypePlacedObjectFieldData>(),
+                instancePrerequisites = emptyReqs,
+                linkedTriggerAreaIDs = new List<int>(),
+                placeableContents = placeableContents,
+            };
+
+
+            if (layer > 0)
+                AddObjectDataToReinforcementLayer(room, objectData, layer - 1, location, shuffle, RoomEventTriggerCondition.ON_ENEMIES_CLEARED); //GOES FROM HERE
+            else
+            {
+                room.placedObjects.Add(objectData);
+                room.placedObjectPositions.Add(location);
+            }
+
+            if (!room.roomEvents.Contains(sealOnEnterWithEnemies))
+                room.roomEvents.Add(sealOnEnterWithEnemies);
+            if (!room.roomEvents.Contains(unsealOnRoomClear))
+                room.roomEvents.Add(unsealOnRoomClear);
+        }
+        public static void AddObjectDataToReinforcementLayer(PrototypeDungeonRoom room, PrototypePlacedObjectData objectData, int layer, Vector2 location, bool shuffle, RoomEventTriggerCondition reinforcementType) //TO HERE
+        {
+            if (room.additionalObjectLayers.Count <= layer)
+            {
+                for (int i = room.additionalObjectLayers.Count; i <= layer; i++)
+                {
+                    var newLayer = new PrototypeRoomObjectLayer()
+                    {
+                        layerIsReinforcementLayer = true,
+                        placedObjects = new List<PrototypePlacedObjectData>(),
+                        placedObjectBasePositions = new List<Vector2>(),
+                        shuffle = shuffle,
+                        reinforcementTriggerCondition = reinforcementType
+                    };
+                    room.additionalObjectLayers.Add(newLayer);
+
+                }
+            }
+            room.additionalObjectLayers[layer].placedObjects.Add(objectData);
+            room.additionalObjectLayers[layer].placedObjectBasePositions.Add(location);
+        }
+        #endregion
+
+        //NODE SETUP
+        //Methods and tools related to setting up nodes for object node pathing within a room.
+        #region NodeSetup
+        public static void AddNodeToRoom(PrototypeDungeonRoom room, Vector2 location, string guid, int layer, SerializedPath.SerializedPathWrapMode wrapMode, bool modifyTilemap, float delay)
+        {
+            IntVector2 intLocation = location.ToIntVector2();
+            SerializedPath serializedPath = null;
+
+            if (room.paths == null) room.paths = new List<SerializedPath>();
+
+            if (room.paths.Count < layer + 1)
+            {
+                serializedPath = new SerializedPath(intLocation);
+
+                var node = new SerializedPathNode(intLocation);
+                node.placement = (SerializedPathNode.SerializedNodePlacement)Enum.Parse(typeof(SerializedPathNode.SerializedNodePlacement), guid);
+                //serializedPath.nodes[0] = node;
+                node.delayTime = delay;
+                serializedPath.nodes.Add(node);
+                room.paths.Add(serializedPath);
+                serializedPath.wrapMode = wrapMode;//SerializedPath.SerializedPathWrapMode.Loop;
+                serializedPath.tilesetPathGrid = modifyTilemap ? 0 : -1;
+
+            }
+            else
+            {
+                serializedPath = room.paths[layer];
+                var node = new SerializedPathNode(intLocation);
+                serializedPath.wrapMode = wrapMode;
+                node.placement = (SerializedPathNode.SerializedNodePlacement)Enum.Parse(typeof(SerializedPathNode.SerializedNodePlacement), guid);
+                node.delayTime = delay;
+                serializedPath.nodes.Add(node);
+                serializedPath.tilesetPathGrid = modifyTilemap ? 0 : -1;
+            }
+
+        }
+        #endregion
 
         public struct RoomData
         {

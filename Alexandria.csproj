@@ -50,6 +50,7 @@
     <Compile Include="Assetbundle\ProjectileBuilders.cs" />
     <Compile Include="DungeonAPI\BreachUtility.cs" />
     <Compile Include="DungeonAPI\DungeonFactory.cs" />
+    <Compile Include="DungeonAPI\TilesetBuilder.cs" />
     <Compile Include="EnemyAPI\HealthHaverExt.cs" />
     <Compile Include="Misc\BreakableAPIToolbox.cs" />
     <Compile Include="cAPI\Brimsly.cs" />

@@ -38,10 +38,11 @@ namespace Alexandria.DungeonAPI
 
         [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
         public static void OnLevelLoad() { }
-
         private static void OnLevelLoadInternal()
         {
             OnPostDungeonGeneration?.Invoke();
         }
+
+
     }
 }

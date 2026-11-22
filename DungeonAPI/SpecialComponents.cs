@@ -14,6 +14,8 @@ namespace Alexandria.DungeonAPI
 {
     public class SpecialComponents
     {
+        //This class contains several component classes for special objects used in RAT.
+
         public class NoPickup : MonoBehaviour
         {
             public List<Vector3> offsets  = new List<Vector3>();
@@ -123,7 +125,6 @@ namespace Alexandria.DungeonAPI
                 trans.transform.position = trans.transform.position.WithZ(20);
             }
         }
-
         public class AttackLeapPoint : MonoBehaviour { }
         public class ProjectileJammer : MonoBehaviour
         {
@@ -140,7 +141,6 @@ namespace Alexandria.DungeonAPI
                 }
             }
         }
-
         public class ProjectileWallUnfuckinator : MonoBehaviour
         {
             public void Start()
@@ -153,7 +153,6 @@ namespace Alexandria.DungeonAPI
                 }
             }
         }
-
         public class Glitched_Boss_Modifier : MonoBehaviour
         {
             public float TimeScale = 1;
@@ -194,8 +193,6 @@ namespace Alexandria.DungeonAPI
                 yield break;
             }
         }
-
-
         public class TurretCartReboot : MonoBehaviour
         {
             public IEnumerator Start()
@@ -212,7 +209,6 @@ namespace Alexandria.DungeonAPI
                 yield break;
             }
         }
-
         public class MineCart_Proximity_Grabber : MonoBehaviour
         {
             public bool DestroyAfterCopy = true;
@@ -284,7 +280,6 @@ namespace Alexandria.DungeonAPI
                 return bestTarget;
             }
         }
-
         public class Glitchinator : MonoBehaviour
         {
             public IEnumerator Start()
@@ -300,7 +295,6 @@ namespace Alexandria.DungeonAPI
             }
             
         }        
-
         public class Repositioner : MonoBehaviour
         {
             public Vector3 reposition = Vector3.zero;
@@ -359,8 +353,6 @@ namespace Alexandria.DungeonAPI
                 return bestTarget;
             }
         }
-
-
         public class WinchesterCameraHelper : MonoBehaviour
         {
             private ArtfulDodgerRoomController m_dodgerRoom;
@@ -406,7 +398,6 @@ namespace Alexandria.DungeonAPI
             }
         }
         public class WinchesterAlterer : MonoBehaviour { public Vector2 movement = new Vector2(0,0); public float goneTime = 1; }
-
         public class PedestalSetter : MonoBehaviour
         {
             public int Help =-1;

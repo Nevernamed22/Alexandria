@@ -16,8 +16,10 @@ namespace Alexandria.DungeonAPI
 {
     public class StaticInjections
     {
-        public static SharedInjectionData Keep_Injections_Sewer;
+        //Static references to vanilla Injection Data
 
+        //Level Based Injections
+        public static SharedInjectionData Keep_Injections_Sewer;
         public static SharedInjectionData Sewer_Injections;
         public static SharedInjectionData Proper_Injections;
         public static SharedInjectionData Abbey_Injections;
@@ -26,29 +28,45 @@ namespace Alexandria.DungeonAPI
         public static SharedInjectionData Forge_Injections;
         public static SharedInjectionData Hell_Injections;
 
-        public static DungeonFlow GlitchFlow;
-        public static DungeonFlowNode Node;
-
+        //Special Room Injections
         public static SharedInjectionData Shrine_injections;
         public static SharedInjectionData NPC_injections;
         public static SharedInjectionData Black_Market_injections;
         public static SharedInjectionData Miniboss_injections;
         public static SharedInjectionData Fallback_Subshop_Injections;
         public static SharedInjectionData Base_Shared_Injections;
+
+        //Glitch Level Flow for some reason???? Why is this here?
+        //Guess we can't remove it now.
+        public static DungeonFlow GlitchFlow;
+        public static DungeonFlowNode Node;
     }
 
     public static class StaticReferences
     {
-        public static List<string> GlitchBossNames = new List<string>();
-        public static Dictionary<string, AssetBundle> AssetBundles;
-        public static Dictionary<string, GenericRoomTable> RoomTables;
-        public static SharedInjectionData subShopTable;
+        //Static references to stuff related to Dungeon Generation
 
+        //------------------------------------------------------------------------------------------| ASSET BUNDLE STUFF
+        /// <summary>
+        /// A dictionary of vanilla Gungeon asset bundles.
+        /// Values are "shared_auto_001", "shared_auto_002", and "brave_resources_001"
+        /// </summary>
+        public static Dictionary<string, AssetBundle> AssetBundles;
+        /// <summary>An array of the names of all Vanilla Gungeon asset bundles.</summary>
+        public static string[] assetBundleNames = new string[]
+        {
+            "shared_auto_001",
+            "shared_auto_002",
+            "brave_resources_001",
+        };
+
+        //------------------------------------------------------------------------------------------| ROOM PLACEABLES
         public static Dictionary<string, GameObject> customObjects = new Dictionary<string, GameObject>();
         public static Dictionary<string, DungeonPlaceable> customPlaceables = new Dictionary<string, DungeonPlaceable>();
-        public static Dictionary<string, int> storedItemIDs = new Dictionary<string, int>();
 
-
+        //------------------------------------------------------------------------------------------| ROOM TABLES
+        public static Dictionary<string, GenericRoomTable> RoomTables;
+        public static SharedInjectionData subShopTable;
         public static Dictionary<string, string> roomTableMap = new Dictionary<string, string>()
         {
             { "castle", "Castle_RoomTable" },
@@ -63,7 +81,6 @@ namespace Alexandria.DungeonAPI
 
             //{ "unknown", "SecretHelpers_RoomTable" },
         };
-
         public static Dictionary<string, string> specialRoomTableMap = new Dictionary<string, string>()
         {
             { "special", "basic special rooms (shrines, etc)" },
@@ -71,9 +88,6 @@ namespace Alexandria.DungeonAPI
             { "secret", "secret_room_table_01" },
             { "winchester", "WinchesterRoomTable" },
         };
-
-
-        //=================== LIST OF BOSS ROOM POOLS 
         public static Dictionary<string, string> BossRoomTableMap = new Dictionary<string, string>()
         {
             //Floor 1
@@ -100,7 +114,6 @@ namespace Alexandria.DungeonAPI
             //Door Lord
             { "doorlord", "bosstable_xx_bossdoormimic"}
         };
-
         public static Dictionary<string, string> MiniBossRoomTableMap = new Dictionary<string, string>()
         {
             {"blockner", "BlocknerMiniboss_Table_01" },
@@ -108,16 +121,15 @@ namespace Alexandria.DungeonAPI
             //{"fuselier","fusebombroom01" }
         };
 
-
-        public static string[] assetBundleNames = new string[]
-        {
-            "shared_auto_001",
-            "shared_auto_002",
-            "brave_resources_001",
-        };
-
-
-
+        //------------------------------------------------------------------------------------------| OTHER
+        /// <summary>
+        /// Contains the names of all 'Glitched' style boss rooms, including custom ones. Should be added to automatically by the RoomFactory methods which load the glitched bossroom.
+        /// For most purposes, should only be used to check if a given room is a Glitched Boss Room.
+        /// DON'T add to this manually unless you know what you're doing!
+        /// </summary>
+        public static List<string> GlitchBossNames = new List<string>();
+        /// <summary>Used by the RoomFactory to put items on Pedestals. You dont need to add to this manually, and probably should not unless you know EXACTLY what you're doing.</summary>
+        public static Dictionary<string, int> storedItemIDs = new Dictionary<string, int>();
         public static string[] dungeonPrefabNames = new string[]
         {
             "base_gungeon",
@@ -130,6 +142,9 @@ namespace Alexandria.DungeonAPI
             "base_bullethell",
             "base_resourcefulrat"
         };
+
+        //Private
+        private static bool DebugSpawns = false;
 
 
         public static void Init()
@@ -380,8 +395,6 @@ namespace Alexandria.DungeonAPI
 
             ShrineTools.Print("Static references initialized.");
         }
-
-
         private static GenericRoomTable ConvertExactRoomIntoNewRoomTable(ProceduralFlowModifierData roomTableToAddTo, PrototypeDungeonRoom roomEntry)
         {
             if (DebugSpawns == true)
@@ -501,7 +514,6 @@ namespace Alexandria.DungeonAPI
             yield break;
         }
 
-        private static bool DebugSpawns = false;
 
         private static ProceduralFlowModifierData ProcessRoomTableThing(SharedInjectionData shared , ProceduralFlowModifierData data, float defaultWeight = 1, bool debug = false)
         {
@@ -563,10 +575,6 @@ namespace Alexandria.DungeonAPI
             shared.InjectionData.Add(modifierData);
             return modifierData;
         }
-
-
-
-
         public static void InitStaticRoomObjects()
         {
 
@@ -676,9 +684,6 @@ namespace Alexandria.DungeonAPI
             sewerDungeon = null;
            
         }
-
-
-
         public static GameObject DefineMinecartFromValues(string cartType, float maxSpeed, float timeToMaxSpeed, string storedBody, bool NearestInCart, bool forceActive)
         {
             GameObject asset = RoomFactory.GetExoticGameObject(cartType);
@@ -703,12 +708,6 @@ namespace Alexandria.DungeonAPI
             }
             return result;
         }
-
-      
-
-     
-
-
         public static GameObject DefineDeadBlowFromValues(bool followsPlayer, bool persistent, bool facesLeft, bool leaveGoop, bool fireBullets, string goopType, float initialDelay, float minDelay, float maxDelay)
         {
             GameObject asset = StaticReferences.GetAsset<GameObject>("Forge_Hammer");
@@ -744,7 +743,6 @@ namespace Alexandria.DungeonAPI
             }
             return result;
         }
-
         public static GameObject GenerateCustomBarrel(string baseBarrel, float rollSpeed, bool trailgoop, string trailGoopType, float goopTrailWidth, bool doGoopPuddle, string puddleGoopType, float goopPuddleWidth, bool destroyedByPlayerRoll)
         {
             GameObject gameObject = new GameObject();
@@ -810,7 +808,6 @@ namespace Alexandria.DungeonAPI
             }
             return gameObject;
         }
-
         public static GoopDefinition FetchGoopDefinitions(string desiredGoopType)
         {
             GoopDefinition goopDefinition = null;
@@ -879,17 +876,6 @@ namespace Alexandria.DungeonAPI
             }
             return goopDefinition;
         }
-
-        /// <summary>
-        /// LEGACY VERSION, use customObjects instead.
-        /// </summary>
-        public static Dictionary<string, GameObject> StoredRoomObjects = new Dictionary<string, GameObject>(){};
-        /// <summary>
-        /// LEGACY VERSION, use customPlaceables instead.
-        /// </summary>
-        public static Dictionary<string, DungeonPlaceable> StoredDungeonPlaceables = new Dictionary<string, DungeonPlaceable>() {};
-
-
         public static GenericRoomTable GetRoomTable(GlobalDungeonData.ValidTilesets tileset)
         {
             switch (tileset)
@@ -915,8 +901,7 @@ namespace Alexandria.DungeonAPI
                 default:
                     return RoomTables["gungeon"];
             }
-        }
-        
+        }      
         public static T GetAsset<T>(string assetName) where T : UnityEngine.Object
         {
             T item = null;
@@ -929,5 +914,11 @@ namespace Alexandria.DungeonAPI
             return item;
         }
 
+        #region Deprecated
+        [Obsolete("This dictionary is Deprecated. Use 'customObjects' instead.", false)]
+        public static Dictionary<string, GameObject> StoredRoomObjects = new Dictionary<string, GameObject>() { };
+        [Obsolete("This dictionary is Deprecated. Use 'customPlaceables' instead.", false)]
+        public static Dictionary<string, DungeonPlaceable> StoredDungeonPlaceables = new Dictionary<string, DungeonPlaceable>() { };
+        #endregion
     }
 }

@@ -61,12 +61,10 @@ namespace Alexandria.DungeonAPI
                     return true;
             return false;
         }
-
         public static void RegenerateMapTilemap(this Minimap self)
         {
             GameManager.Instance.StartCoroutine(DoLateRegeneration(self));
         }
-
         private static IEnumerator DoLateRegeneration(Minimap instance)
         {
             yield return null;

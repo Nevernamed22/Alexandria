@@ -10,16 +10,6 @@ using static Alexandria.DungeonAPI.SpecialComponents;
 
 namespace Alexandria.DungeonAPI
 {
-	public static class aa
-	{
-        public static void LogRoomSubtypes(this Dungeon self)
-        {
-			Debug.Log(self.DungeonShortName + " : " + self.roomMaterialDefinitions.Count());
-
-        }
-    }
-
-
 	public class SetupExoticObjects
 	{
 		public static GameObject assignedGameObject;
@@ -2634,4 +2624,17 @@ namespace Alexandria.DungeonAPI
 
         public static Dictionary<string, GameObject> objects = new Dictionary<string, GameObject>();
 	}
+
+    #region Deprecated
+    [Obsolete("This class is stupid and deprecated and exists for backwards compatability only.", true)]
+    public static class aa
+    {
+        [Obsolete("This method should never be called outside Alexandria and is public for backwards compatability only.", true)]
+        public static void LogRoomSubtypes(this Dungeon self)
+        {
+            Debug.Log(self.DungeonShortName + " : " + self.roomMaterialDefinitions.Count());
+
+        }
+    }
+    #endregion
 }

@@ -189,6 +189,207 @@ namespace Alexandria.DungeonAPI
 
             return indexGrid;
         }
+
+        /// <summary>
+        /// Creates a new TileIndexList with the sprite definition ID of the given tile name, and the given weight.
+        /// </summary>
+        /// <param name="tilename">The sprite name of the tile.</param>
+        /// <param name="weight">The weight value of the tile.</param>
+        /// <param name="collection">The sprite collection of the tile.</param>
+        public static TileIndexList NewTileIndex(string tilename, float weight, tk2dSpriteCollectionData collection)
+        {
+            if (string.IsNullOrEmpty(tilename))
+            {
+                return new TileIndexList { indexWeights = new List<float> { 0.1f }, indices = new List<int> { -1 } };
+            }
+            return new TileIndexList { indexWeights = new List<float> { weight }, indices = new List<int> { collection.GetSpriteIdByName(tilename) } };
+        }
+
+        /// <summary>
+        /// Creates a new TileIndexList with multiple possible sprites, with the given weights.
+        /// </summary>
+        /// /// <param name="tilenames">The sprite names of each tile.</param>
+        /// <param name="weights">The weights of each tile.</param>
+        /// <param name="collection">The sprite collection of the tile.</param>
+        public static TileIndexList NewTileIndex(List<string> tilenames, List<float> weights, tk2dSpriteCollectionData collection)
+        {
+            TileIndexList ind = new TileIndexList { indexWeights = weights, indices = new List<int> { } };
+            foreach (string str in tilenames) { ind.indices.Add(collection.GetSpriteIdByName(str)); }
+            return ind;
+        }
+        public static TileIndexGrid BuildCeilingBorder(string name, tk2dSpriteCollectionData collection,
+            //3+ Borders
+            string allSidesBorder = null,
+            string topCapBorders = null,
+            string leftCapBorders = null,
+            string rightCapBorders = null,
+            string bottomCapBorders = null,
+            //Double Borders
+            string topAndBottomBorder = null,
+            string leftAndRightBorder = null,
+            //Top Border
+            string topBorder = null,
+            string topBorderLeftNub = null,
+            string topBorderRightNub = null,
+            string topBorderBothNubs = null,
+            //Left Border
+            string leftBorder = null,
+            string leftBorderTopNub = null,
+            string leftBorderBottomNub = null,
+            string leftBorderBothNubs = null,
+            //Right Border
+            string rightBorder = null,
+            string rightBorderTopNub = null,
+            string rightBorderBottomNub = null,
+            string rightBorderBothNubs = null,
+            //Bottom Border
+            string bottomBorder = null,
+            string bottomBorderLeftNub = null,
+            string bottomBorderRightNub = null,
+            string bottomBorderBothNubs = null,
+            //Top Left
+            string topLeftBorder = null,
+            string topLeftBorderWithNub = null,
+            //Top Right
+            string topRightBorder = null,
+            string topRightBorderWithNub = null,
+            //Bottom Left
+            string bottomLeftBorder = null,
+            string bottomLeftBorderWithNub = null,
+            //Bottom Right
+            string bottomRightBorder = null,
+            string bottomRightBorderWithNub = null,
+            //Single Nub
+            string nubNW = null,
+            string nubNE = null,
+            string nubSW = null,
+            string nubSE = null,
+            //Double Nubs
+            string nubsNWNE = null,
+            string nubsSWSE = null,
+            string nubsNWSW = null,
+            string nubsNESE = null,
+            string nubsNWSE = null,
+            string nubsNESW = null,
+            //Quadruple Nubs
+            string nubsALL = null,
+            //Diagonals
+            string diagonalBorderNE = null,
+            string diagonalBorderNW = null,
+            string diagonalBorderSE = null,
+            string diagonalBorderSW = null,
+            string diagonalVoidNE = null,
+            string diagonalVoidNW = null,
+            string diagonalVoidSE = null,
+            string diagonalVoidSW = null,
+            //Other
+            string voidTile = null
+            )
+        {
+            TileIndexGrid ceilingBorder = ScriptableObject.CreateInstance<TileIndexGrid>();
+            ceilingBorder.name = name;
+            TileIndexList emptyIndex = new TileIndexList { indexWeights = new List<float> { 0.1f }, indices = new List<int> { -1 } };
+
+            ceilingBorder.CeilingBorderUsesDistancedCenters = false;
+            ceilingBorder.CenterCheckerboard = false;
+            ceilingBorder.CheckerboardDimension = 1;
+            ceilingBorder.CenterIndicesAreStrata = false;
+            ceilingBorder.extendedSet = false;
+            ceilingBorder.PitBorderIsInternal = false;
+            ceilingBorder.PitBorderOverridesFloorTile = false;
+            ceilingBorder.roomTypeRestriction = -1;
+            ceilingBorder.UsesRatChunkBorders = false;
+
+            //  SET UP TILES
+            //3+ Borders
+            ceilingBorder.allSidesIndices = NewTileIndex(allSidesBorder, 1, collection);
+            ceilingBorder.topCapIndices = NewTileIndex(topCapBorders, 1, collection);
+            ceilingBorder.leftCapIndices = NewTileIndex(leftCapBorders, 1, collection);
+            ceilingBorder.rightCapIndices = NewTileIndex(rightCapBorders, 1, collection);
+            ceilingBorder.bottomCapIndices = NewTileIndex(bottomCapBorders, 1, collection);
+            //Double Borders
+            ceilingBorder.horizontalIndices = NewTileIndex(topAndBottomBorder, 1, collection);
+            ceilingBorder.verticalIndices = NewTileIndex(leftAndRightBorder, 1, collection);
+            //Top Border
+            ceilingBorder.topIndices = NewTileIndex(topBorder, 1, collection);
+            ceilingBorder.borderTopNubLeftIndices = NewTileIndex(topBorderLeftNub, 1, collection);
+            ceilingBorder.borderTopNubRightIndices = NewTileIndex(topBorderRightNub, 1, collection);
+            ceilingBorder.borderTopNubBothIndices = NewTileIndex(topBorderBothNubs, 1, collection);
+            //Left Border
+            ceilingBorder.leftIndices = NewTileIndex(leftBorder, 1, collection);
+            ceilingBorder.borderLeftNubTopIndices = NewTileIndex(leftBorderTopNub, 1, collection);
+            ceilingBorder.borderLeftNubBottomIndices = NewTileIndex(leftBorderBottomNub, 1, collection);
+            ceilingBorder.borderLeftNubBothIndices = NewTileIndex(leftBorderBothNubs, 1, collection);
+            //Right Border
+            ceilingBorder.rightIndices = NewTileIndex(rightBorder, 1, collection);
+            ceilingBorder.borderRightNubTopIndices = NewTileIndex(rightBorderTopNub, 1, collection);
+            ceilingBorder.borderRightNubBottomIndices = NewTileIndex(rightBorderBottomNub, 1, collection);
+            ceilingBorder.borderRightNubBothIndices = NewTileIndex(rightBorderBothNubs, 1, collection);
+            //Bottom Border
+            ceilingBorder.bottomIndices = NewTileIndex(bottomBorder, 1, collection);
+            ceilingBorder.borderBottomNubLeftIndices = NewTileIndex(bottomBorderLeftNub, 1, collection);
+            ceilingBorder.borderBottomNubRightIndices = NewTileIndex(bottomBorderRightNub, 1, collection);
+            ceilingBorder.borderBottomNubBothIndices = NewTileIndex(bottomBorderBothNubs, 1, collection);
+            //Top Left
+            ceilingBorder.topLeftIndices = NewTileIndex(topLeftBorder, 1, collection);
+            ceilingBorder.topLeftWithNub = NewTileIndex(topLeftBorderWithNub, 1, collection);
+            //Top Right
+            ceilingBorder.topRightIndices = NewTileIndex(topRightBorder, 1, collection);
+            ceilingBorder.topRightWithNub = NewTileIndex(topRightBorderWithNub, 1, collection);
+            //Bottom Left
+            ceilingBorder.bottomLeftIndices = NewTileIndex(bottomLeftBorder, 1, collection);
+            ceilingBorder.bottomLeftWithNub = NewTileIndex(bottomLeftBorderWithNub, 1, collection);
+            //Bottom Right
+            ceilingBorder.bottomRightIndices = NewTileIndex(bottomRightBorder, 1, collection);
+            ceilingBorder.bottomRightWithNub = NewTileIndex(bottomRightBorderWithNub, 1, collection);
+            //Single Nub
+            ceilingBorder.topLeftNubIndices = NewTileIndex(nubNW, 1, collection);
+            ceilingBorder.topRightNubIndices = NewTileIndex(nubNE, 1, collection);
+            ceilingBorder.bottomLeftNubIndices = NewTileIndex(nubSW, 1, collection);
+            ceilingBorder.bottomRightNubIndices = NewTileIndex(nubSE, 1, collection);
+            //Double Nubs
+            ceilingBorder.doubleNubsTop = NewTileIndex(nubsNWNE, 1, collection);
+            ceilingBorder.doubleNubsBottom = NewTileIndex(nubsSWSE, 1, collection);
+            ceilingBorder.doubleNubsLeft = NewTileIndex(nubsNWSW, 1, collection);
+            ceilingBorder.doubleNubsRight = NewTileIndex(nubsNESE, 1, collection);
+            ceilingBorder.diagonalNubsTopLeftBottomRight = NewTileIndex(nubsNWSE, 1, collection);
+            ceilingBorder.diagonalNubsTopRightBottomLeft = NewTileIndex(nubsNESW, 1, collection);
+            //Quadruple Nubs
+            ceilingBorder.quadNubs = NewTileIndex(nubsALL, 1, collection);
+            //Diagonals
+            ceilingBorder.diagonalBorderNE = NewTileIndex(diagonalBorderNE, 1, collection);
+            ceilingBorder.diagonalBorderNW = NewTileIndex(diagonalBorderNW, 1, collection);
+            ceilingBorder.diagonalBorderSE = NewTileIndex(diagonalBorderSE, 1, collection);
+            ceilingBorder.diagonalBorderSW = NewTileIndex(diagonalBorderSW, 1, collection);
+            ceilingBorder.diagonalCeilingNE = NewTileIndex(diagonalVoidNE, 1, collection);
+            ceilingBorder.diagonalCeilingNW = NewTileIndex(diagonalVoidNW, 1, collection);
+            ceilingBorder.diagonalCeilingSE = NewTileIndex(diagonalVoidSE, 1, collection);
+            ceilingBorder.diagonalCeilingSW = NewTileIndex(diagonalVoidSW, 1, collection);
+            //Void
+            ceilingBorder.centerIndices = NewTileIndex(voidTile, 1, collection);
+
+            //Unused Tiles
+            ceilingBorder.internalBottomCenterIndices = emptyIndex;
+            ceilingBorder.internalBottomLeftCenterIndices = emptyIndex;
+            ceilingBorder.internalBottomRightCenterIndices = emptyIndex;
+            ceilingBorder.PathPitPosts = emptyIndex;
+            ceilingBorder.PathPitPostsBL = emptyIndex;
+            ceilingBorder.PathPitPostsBR = emptyIndex;
+            ceilingBorder.thirdTopRowCenterIndices = emptyIndex;
+            ceilingBorder.thirdTopRowLeftIndices = emptyIndex;
+            ceilingBorder.thirdTopRowRightIndices = emptyIndex;
+            ceilingBorder.topCenterIndices = emptyIndex;
+            ceilingBorder.topCenterLeftIndices = emptyIndex;
+            ceilingBorder.topCenterRightIndices = emptyIndex;
+            ceilingBorder.PathPitPostsBR = emptyIndex;
+            ceilingBorder.PathPitPostsBR = emptyIndex;
+            ceilingBorder.PathPitPostsBR = emptyIndex;
+            ceilingBorder.PathPitPostsBR = emptyIndex;
+
+            return ceilingBorder;
+        }
+
+
         public enum TileSetupType
         {
             HIGH_FACEWALL,

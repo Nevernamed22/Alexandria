@@ -11,18 +11,33 @@ namespace Alexandria.DungeonAPI
 {
     public static class DungeonFactory
     {
-        private static Dictionary<string, DungeonData> CustomRegisteredDungeons = new Dictionary<string, DungeonData>();
+        private static Dictionary<string, DungeonFactoryData> CustomRegisteredDungeons = new Dictionary<string, DungeonFactoryData>();
 
         /// <summary>
         /// Registers a new Dungeon level with Alexandria with the given DungeonData specification.
         /// </summary>
-        public static DungeonData RegisterCustomDungeon(DungeonData newDungeon)
+        public static DungeonFactoryData RegisterCustomDungeon(DungeonFactoryData newDungeon)
         {
+            if (string.IsNullOrEmpty(newDungeon.dungeonPrefabTemplate))
+                newDungeon.dungeonPrefabTemplate = "Base_Gungeon";
+            GameManager.Instance.customFloors.Add(newDungeon.levelDefinition); // TODO: unsure if this is necessary, figure out later
             CustomRegisteredDungeons.Add(newDungeon.dungeonKey, newDungeon);
             return newDungeon;
         }
 
-        public class DungeonData
+        public struct WeightedDungeonMaterial
+        {
+          public DungeonMaterial material;
+          public float weight;
+
+          public WeightedDungeonMaterial(DungeonMaterial material, float weight)
+          {
+              this.material = material;
+              this.weight = weight;
+          }
+        }
+
+        public class DungeonFactoryData
         {
             /// <summary>
             /// The key used to load the Dungeon.
@@ -43,25 +58,30 @@ namespace Alexandria.DungeonAPI
             public string musicEventName;
 
             //Decoration
-            public Dictionary<DungeonMaterial, int> dungeonMaterials;
-            public bool generateLights;
+            public List<WeightedDungeonMaterial> dungeonMaterials;
+            public bool generateLights = true;
             public Color? ambientLightColor;
             public Color? ambientLightColorTwo;
             public DustUpVFX customDustups;
 
             //Tileset
-            public GlobalDungeonData.ValidTilesets tilesetID;
+            public GlobalDungeonData.ValidTilesets? tilesetID;
             public tk2dSpriteCollectionData tilesetSpriteCollection;
 
             //Dungeon Flows
             public List<DungeonFlow> flows;
 
             //Other
-            public int masterRoundID;
+            public int masterRoundID = -1;
             public bool stripPlayerOnArrival;
 
             public GameLevelDefinition levelDefinition;
             public string dungeonPrefabTemplate;
+
+            /// <summary>
+            /// A custom function for postprocessing the Dungeon returned by BuildLoadCustomDungeon().
+            /// </summary>
+            public Action<DungeonFactoryData, Dungeon> dungeonPostProcessor;
 
             /// <summary>
             /// Creates a new DungeonData object. The constructor processes required fields directly, but additional fields can added via
@@ -71,37 +91,50 @@ namespace Alexandria.DungeonAPI
             /// <param name="floorName"><inheritdoc cref="floorName" path="/summary"/></param>
             /// <param name="floorNameShort"><inheritdoc cref="floorNameShort" path="/summary"/></param>
             /// <param name="levelSubtitle"><inheritdoc cref="levelSubtitle" path="/summary"/></param>
+            /// <param name="flows"><inheritdoc cref="flows" path="/summary"/></param>
+            /// <param name="priceMultiplier">The floor's price multiplier for shop items.</param>
+            /// <param name="enemyHealthMultiplier">The floor's health multiplier for enemies.</param>
+            /// <param name="bossDpsCap">The floor's DPS cap for bosses.</param>
             /// <param name="tilesetID"><inheritdoc cref="tilesetID" path="/summary"/></param>
             /// <param name="tilesetSpriteCollection"><inheritdoc cref="tilesetSpriteCollection" path="/summary"/></param>
-            /// <param name="dungeonMaterials"><inheritdoc cref="dungeonMaterials" path="/summary"/></param>
-            /// <param name="flows"><inheritdoc cref="flows" path="/summary"/></param>
-            /// <param name="levelDefinition"><inheritdoc cref="levelDefinition" path="/summary"/></param>
             /// <param name="dungeonPrefabTemplate"><inheritdoc cref="dungeonPrefabTemplate" path="/summary"/></param>
-            public DungeonData(
+            public DungeonFactoryData(
               string dungeonKey,
               string floorName,
               string floorNameShort,
               string levelSubtitle,
-              GlobalDungeonData.ValidTilesets tilesetID,
-              tk2dSpriteCollectionData tilesetSpriteCollection,
-              Dictionary<DungeonMaterial, int> dungeonMaterials,
               List<DungeonFlow> flows,
-              GameLevelDefinition levelDefinition,
+              float priceMultiplier,
+              float enemyHealthMultiplier,
+              float bossDpsCap,
+              GlobalDungeonData.ValidTilesets? tilesetID = null,
+              tk2dSpriteCollectionData tilesetSpriteCollection = null,
               string dungeonPrefabTemplate = "Base_Gungeon")
             {
               this.dungeonKey              = dungeonKey;
               this.floorName               = floorName;
               this.floorNameShort          = floorNameShort;
               this.levelSubtitle           = levelSubtitle;
+              this.flows                   = flows;
               this.tilesetID               = tilesetID;
               this.tilesetSpriteCollection = tilesetSpriteCollection;
-              this.dungeonMaterials        = dungeonMaterials;
-              this.flows                   = flows;
-              this.levelDefinition         = levelDefinition;
               this.dungeonPrefabTemplate   = dungeonPrefabTemplate;
+
+              this.levelDefinition         = new GameLevelDefinition()
+              {
+                  dungeonSceneName           = dungeonKey, //this is the name we will use whenever we want to load our dungeons scene
+                  dungeonPrefabPath          = dungeonKey, //this is what we will use when we want to acess our dungeon prefab
+                  priceMultiplier            = priceMultiplier, //multiplies how much things cost in the shop
+                  secretDoorHealthMultiplier = 1, //multiplies how much health secret room doors have, aka how many shots you will need to expose them
+                  enemyHealthMultiplier      = enemyHealthMultiplier, //multiplies how much health enemies have
+                  damageCap                  = 300, // damage cap for regular enemies
+                  bossDpsCap                 = bossDpsCap, // damage cap for bosses
+                  flowEntries                = new List<DungeonFlowLevelEntry>(0),
+                  predefinedSeeds            = new List<int>(0)
+              };
             }
         }
-        private static Dungeon BuildLoadCustomDungeon(DungeonData data, Dungeon templateDungeon)
+        private static Dungeon BuildLoadCustomDungeon(DungeonFactoryData data, Dungeon templateDungeon)
         {
             Dungeon MinesDungeonPrefab = GetOrLoadByName_Orig("Base_Mines");
 
@@ -133,36 +166,42 @@ namespace Alexandria.DungeonAPI
             templateDungeon.LevelOverrideType = data.isPast ? GameManager.LevelOverrideState.CHARACTER_PAST : GameManager.LevelOverrideState.NONE;
 
             TilemapDecoSettings deco = templateDungeon.decoSettings;
-            deco.ambientLightColor = data.ambientLightColor ?? new Color(0.5f, 0.5f, 0.5f);
-            deco.ambientLightColorTwo = data.ambientLightColorTwo ?? new Color(0.5f, 0.5f, 0.5f);
+            deco.ambientLightColor = data.ambientLightColor ?? deco.ambientLightColor;
+            deco.ambientLightColorTwo = data.ambientLightColorTwo ?? deco.ambientLightColorTwo;
             deco.generateLights = data.generateLights;
 
             //Dungeon Materials
-            List<DungeonMaterial> registeredMaterials = new List<DungeonMaterial>();
-            List<WeightedInt> materialWeights = new List<WeightedInt>();
-            int matIndex = 0;
-            foreach(DungeonMaterial mat in data.dungeonMaterials.Keys)
+            if (data.dungeonMaterials != null && data.dungeonMaterials.Count > 0)
             {
-                materialWeights.Add(new WeightedInt()
+                List<DungeonMaterial> registeredMaterials = new List<DungeonMaterial>();
+                List<WeightedInt> materialWeights = new List<WeightedInt>();
+                int matIndex = 0;
+                foreach(var weightedMat in data.dungeonMaterials)
                 {
-                    value = matIndex,
-                    weight = data.dungeonMaterials.ElementAt(matIndex).Value,
-                    annotation = $"{data.floorNameShort} Level Dungeon Material {matIndex}"
-                });
-                registeredMaterials.Add(mat);
-                matIndex++;
+                    materialWeights.Add(new WeightedInt()
+                    {
+                        value = matIndex,
+                        weight = weightedMat.weight,
+                        annotation = $"{data.floorNameShort} Level Dungeon Material {matIndex}",
+                        additionalPrerequisites = []
+                    });
+                    registeredMaterials.Add(weightedMat.material);
+                    matIndex++;
+                }
+                templateDungeon.roomMaterialDefinitions = registeredMaterials.ToArray();
+                WeightedIntCollection materialIntCollection = new WeightedIntCollection();
+                materialIntCollection.elements = materialWeights/*.Where(m => m.weight > 0)*/.ToArray();
+                deco.standardRoomVisualSubtypes = materialIntCollection;
             }
-            templateDungeon.roomMaterialDefinitions = registeredMaterials.ToArray();
-            WeightedIntCollection materialIntCollection = new WeightedIntCollection();
-            materialIntCollection.elements = materialWeights.ToArray();
-            deco.standardRoomVisualSubtypes = materialIntCollection;
 
+            TileIndices templateIndices = templateDungeon.tileIndices;
             templateDungeon.tileIndices = new TileIndices()
             {
-                tilesetId = data.tilesetID,
-                dungeonCollection = data.tilesetSpriteCollection,
+                tilesetId = data.tilesetID ?? templateIndices.tilesetId,
+                dungeonCollection = data.tilesetSpriteCollection ?? templateIndices.dungeonCollection,
                 dungeonCollectionSupportsDiagonalWalls = false,
-                aoTileIndices = MinesDungeonPrefab.tileIndices.aoTileIndices,
+                aoTileIndices = templateIndices.aoTileIndices,
+                patternIndexGrid = templateIndices.patternIndexGrid,
                 placeBorders = true,
                 placePits = false,
 
@@ -207,7 +246,6 @@ namespace Alexandria.DungeonAPI
                 mandatoryExtraRooms = new List<ExtraIncludedRoomData>(0),
                 optionalExtraRooms = new List<ExtraIncludedRoomData>(0),
                 MAX_GENERATION_ATTEMPTS = 5,
-
                 DEBUG_RENDER_CANVASES_SEPARATELY = false
             };
 
@@ -215,8 +253,31 @@ namespace Alexandria.DungeonAPI
 
             //Other
             templateDungeon.StripPlayerOnArrival = data.stripPlayerOnArrival;
-            templateDungeon.musicEventName = data.musicEventName;
             templateDungeon.BossMasteryTokenItemId = data.masterRoundID;
+            templateDungeon.musicEventName = data.musicEventName;
+            templateDungeon.SuppressEmergencyCrates = false;
+            templateDungeon.SetTutorialFlag = false;
+            templateDungeon.UsesOverrideTertiaryBossSets = false;
+            templateDungeon.PlaceDoors = true;
+            templateDungeon.UsesWallWarpWingDoors = false;
+            templateDungeon.NormalRatGUID = string.Empty;
+            templateDungeon.PlayerIsLight = false;
+            templateDungeon.PlayerLightColor = Color.white;
+            templateDungeon.PlayerLightIntensity = 4;
+            templateDungeon.PlayerLightRadius = 4;
+            templateDungeon.PrefabsToAutoSpawn = new GameObject[0];
+
+            // Even more stuff we can set that hasn't been documented / used yet.
+            // templateDungeon.doorObjects
+            // templateDungeon.oneWayDoorObjects
+            // templateDungeon.oneWayDoorPressurePlate
+            // templateDungeon.phantomBlockerDoorObjects
+            // templateDungeon.damageTypeEffectMatrix
+            // templateDungeon.SecretRoomSimpleTriggersFacewall
+            // templateDungeon.SecretRoomSimpleTriggersSidewall
+            // templateDungeon.SecretRoomDoorSparkVFX
+            // templateDungeon.SecretRoomHorizontalPoofVFX
+            // templateDungeon.SecretRoomVerticalPoofVFX
 
             //Floor Idea Stuff
             // No idea what this does or why we need to set it, especially since we're telling the floor to not use it- but it surely can't hurt to get all our ducks in a row, even ducks we're not using - NN
@@ -239,11 +300,14 @@ namespace Alexandria.DungeonAPI
                 CanIncludePits = false
             };
 
-            //Weird niche settings
+            //Weird niche settings, copied from the Mines for convenience
             templateDungeon.damageTypeEffectMatrix = MinesDungeonPrefab.damageTypeEffectMatrix; //Defines special wall impact VFX for specific projectile damage types.
             templateDungeon.pathGridDefinitions = new List<TileIndexGrid>() { MinesDungeonPrefab.pathGridDefinitions[0] };
             templateDungeon.dungeonWingDefinitions = new DungeonWingDefinition[0];
             templateDungeon.baseChestContents = MinesDungeonPrefab.baseChestContents;
+            templateDungeon.defaultPlayerPrefab = MinesDungeonPrefab.defaultPlayerPrefab;
+            templateDungeon.OverrideTertiaryRewardSets = new List<TertiaryBossRewardSet>(0);
+            templateDungeon.SecretRoomComplexTriggers = new List<ComplexSecretRoomTrigger>(0);
 
             MinesDungeonPrefab = null;
 
@@ -256,6 +320,22 @@ namespace Alexandria.DungeonAPI
             return assetBundle.LoadAsset<GameObject>(name).GetComponent<Dungeon>();
         }
 
+        /// <summary>Fixes a bug where returning to the breach deletes the floor, thanks Bunny!</summary>
+        [HarmonyPatch(typeof(GameManager), nameof(GameManager.LoadCustomLevel))]
+        private class ReregisterOurCustomLevelIfNecessaryPatch
+        {
+            static void Prefix(GameManager __instance, string custom)
+            {
+                if (!CustomRegisteredDungeons.TryGetValue(custom, out DungeonFactoryData dat))
+                    return;  // not trying to load one of our custom flows, so not our problem
+                if (dat.levelDefinition == null || GameManager.Instance.customFloors.Contains(dat.levelDefinition))
+                    return;
+
+                Debug.Log($"ALEXANDRIA - regenerating floor {custom}");
+                GameManager.Instance.customFloors.Add(dat.levelDefinition);
+            }
+        }
+
         //Patches the vanilla GetOrLoadByName method to return our custom registered dungeon.
         [HarmonyPatch(typeof(DungeonDatabase), nameof(DungeonDatabase.GetOrLoadByName))]
         private class GetOrLoadCustomDungeonPatch
@@ -266,7 +346,7 @@ namespace Alexandria.DungeonAPI
                 if (CustomRegisteredDungeons.ContainsKey(name))
                 {
                     Debug.Log($"ALEXANDRIA - DungeonFactory: Dungeon '{name}' corresponds to a custom dungeon registered with Alexandria.");
-                    DungeonData dat = CustomRegisteredDungeons[name];
+                    DungeonFactoryData dat = CustomRegisteredDungeons[name];
 
                     // fixes a bug where returning to the breach deletes the floor, thanks Bunny!
                     if (dat.levelDefinition != null && !GameManager.Instance.customFloors.Contains(dat.levelDefinition))
@@ -277,7 +357,9 @@ namespace Alexandria.DungeonAPI
                     Dungeon dungeon = null;
                     try
                     {
-                        dungeon = BuildLoadCustomDungeon(dat, GetOrLoadByName_Orig(dat.dungeonPrefabTemplate ?? "Base_Gungeon"));
+                        dungeon = BuildLoadCustomDungeon(dat, GetOrLoadByName_Orig(dat.dungeonPrefabTemplate));
+                        if (dat.dungeonPostProcessor != null)
+                          dat.dungeonPostProcessor(dat, dungeon);
                     }
                     catch (Exception e)
                     {
